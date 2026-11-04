@@ -104,6 +104,9 @@ export function placeLabels(camera, show) {
   labelLayer.style.display = show ? "" : "none";
   if (!show) return;
   for (const l of labels) {
+    let shown = true;
+    for (let o = l.obj; o; o = o.parent) shown &&= o.visible; // no label for hidden equipment
+    if (!shown) { l.el.style.display = "none"; continue; }
     l.obj.getWorldPosition(tmp);
     tmp.add(l.offset);
     const d = tmp.distanceTo(camera.position);

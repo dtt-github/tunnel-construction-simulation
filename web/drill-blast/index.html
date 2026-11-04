@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Drill and Blast Heading</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="../style.css">
+<!-- shared console widgets (views, labels, bars, legends, flags) -->
+<link rel="stylesheet" href="../epb/epb.css">
+<style>
+  #faceSvg svg { width: 100%; height: auto; display: block; margin: 4px 0; }
+</style>
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.182.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.182.0/examples/jsm/"
+  }
+}
+</script>
+</head>
+<body>
+<canvas id="view"></canvas>
+<div id="labels"></div>
+<div id="views">
+  <!-- view buttons are added by the scene -->
+  <label class="chk"><input type="checkbox" id="showLabels" checked> Labels</label>
+</div>
+
+<aside id="console">
+  <header>
+    <h1>Drill &amp; blast road tunnel · T10.5</h1>
+    <span id="fidelity" title="Which physics drives the numbers">Analytical (browser)</span>
+  </header>
+
+  <section>
+    <h2>Operator</h2>
+    <label>Start at
+      <select id="start">
+        <option value="0">Chainage 0 m: gneiss, class I</option>
+        <option value="95">Chainage 95 m: weakness zone ahead</option>
+        <option value="128">Chainage 128 m: clay-bearing fault, class IV, near the house</option>
+      </select>
+    </label>
+    <label>Drilling pattern
+      <select id="design">
+        <option value="norwegian">Norwegian practice (calibrated to published hole counts)</option>
+        <option value="textbook">Textbook rules (Olofsson burden, contour at 0.7 m)</option>
+      </select>
+    </label>
+    <label>Hole depth <output id="depthOut"></output><input id="depth" type="range" min="3.2" max="5.8" step="0.1" value="5.2"></label>
+    <label>Firing
+      <select id="firing">
+        <option value="single">One hole per delay (electronic detonators)</option>
+        <option value="row">One delay per row (contour row fired together)</option>
+      </select>
+    </label>
+    <label>Overbreak <output id="obOut"></output><input id="ob" type="range" min="5" max="30" step="1" value="12"></label>
+    <label>Time scale <output id="tsOut"></output><input id="ts" type="range" min="60" max="3600" step="60" value="600"></label>
+    <div class="buttons"><button id="pause">Pause</button><button id="reset">Reset</button></div>
+    <p class="note">Pattern, depth and overbreak changes take effect from the next round.</p>
+  </section>
+
+  <section>
+    <h2>Alarms</h2>
+    <div id="alarms"></div>
+  </section>
+
+  <section>
+    <h2>Round cycle</h2>
+    <div id="cycle"></div>
+  </section>
+
+  <section>
+    <h2>Drilling pattern</h2>
+    <div id="faceSvg"></div>
+    <dl id="round"></dl>
+  </section>
+
+  <section>
+    <h2>Rock support</h2>
+    <dl id="support"></dl>
+  </section>
+
+  <section>
+    <h2>Vibration at the house</h2>
+    <dl id="vibration"></dl>
+  </section>
+
+  <section>
+    <h2>Model limits</h2>
+    <ul class="limits">
+      <li>The T10.5 profile is drawn as vertical walls with a semicircular roof of the same theoretical area (74.6 m²); the real profile is flatter.</li>
+      <li>The "Norwegian practice" pattern uses a contour spacing of 0.47 m and 0.75 of the Olofsson burden, fitted to published hole counts; it is not a design rule. Charges per hole follow the textbook rules.</li>
+      <li>Activities run one after another; on site some overlap (for example sprayed concrete during a standstill), so advance can reach 75 m/week. Charging time, hole positioning and the reinforced ribs time are assumed.</li>
+      <li>Vibration uses one published site fit (Stockholm Northern Link) and the building factors of one published Swedish risk analysis; the house and its distance are illustrative. Geology is illustrative.</li>
+    </ul>
+  </section>
+
+  <footer>
+    Models: Holmberg cut and pull, Olofsson burden and charges (Yilmaz 2023), smooth contour (Dyno Nobel), Norwegian support classes (NFF; NGI Q-system), cycle rates (NFF Publications 14, 26, 28), scaled-distance vibration (Bahrekazemi et al. 2011) and SS 460 48 66 guide values. Method card in the <a href="https://github.com/dtt-github/tunnel-construction-simulation/blob/main/docs/research/methods-reference.md">methods reference</a>.
+  </footer>
+</aside>
+
+<script type="module" src="main.js"></script>
+</body>
+</html>
