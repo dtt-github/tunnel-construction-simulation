@@ -8,6 +8,7 @@
 // faults): the telescope stays closed, the auxiliary cylinders push off the last ring, and boring and ring building
 // alternate (Herrenknecht double shield product page; Maggio 2020).
 
+import { shieldFriction, SKIN_FRICTION_ROCK } from "../../models/js/index.js";
 import { THREE, CUT, mat, steel, dark, yellow, cyl, box, label, buildCutterhead, buildBackup, createMuck } from "./common.js";
 
 export const M = {
@@ -21,6 +22,9 @@ export const M = {
   ringBuildMin: 30, // min per ring, assumed (no open source; Follo's 14-20 rings a day bounds the whole cycle)
   segThick: 0.32, // m, Guadarrama value from a search snippet (unverified)
   doubleModeMinRmr: 50, // below: single-shield mode (as in the support-downtime model)
+  shieldLength: 13.7, // m, sum of the Brenner shield lengths
+  overcut: 0.10, // m radial gap between bore and shield, assumed (Ramoni & Anagnostou's example uses 5-15 cm)
+  thrustInstalled: 150, // MN, low end of "up to 150-200 MN" for ~10 m shielded TBMs (Ramoni & Anagnostou, VSS 1341)
   utilMachine: () => "double",
   limits: [
     "Machine diameter, torque, power and ring width are the Follo values (verified); shield lengths and cutter layout come from the 10.65 m Brenner machines. Thrust, gripper force and strokes for a 10 m machine are not published; the stroke is taken equal to the ring width.",
@@ -28,7 +32,9 @@ export const M = {
   ],
 };
 const R = M.D / 2, W = M.stroke;
-const OD = M.D - 0.24, ID = OD - 2 * M.segThick;
+// Shields sit inside the bore by the overcut; the ring leaves a ~0.18 m annulus to the bore (Guadarrama: 9.51 m bore,
+// 8.5 m ring inner diameter, 320 mm segments).
+const GAP = M.overcut, OD = M.D - 0.37, ID = OD - 2 * M.segThick;
 
 export const VIEWS = {
   machine: { title: "Machine", pos: [-24, 7, -6], target: [0, -0.5, 12] },
@@ -58,11 +64,11 @@ export function build(machine, world) {
 
   const shieldMat = mat(0xc89200, { side: THREE.DoubleSide, clippingPlanes: [CUT] });
   const tube = (r, len, m = shieldMat) => new THREE.Mesh(new THREE.CylinderGeometry(r, r, len, 72, 1, true).rotateX(Math.PI / 2), m);
-  const front = tube(R - 0.02, Z_FRONT1 - Z_FRONT0);
+  const front = tube(R - GAP, Z_FRONT1 - Z_FRONT0);
   front.position.z = (Z_FRONT0 + Z_FRONT1) / 2;
   machine.add(front);
   label("Front shield", front, [0, R + 0.4, 0]);
-  const inner = tube(R - 0.12, Z_INNER1 - Z_FRONT1, mat(0xb07d00, { side: THREE.DoubleSide, clippingPlanes: [CUT] }));
+  const inner = tube(R - GAP - 0.1, Z_INNER1 - Z_FRONT1, mat(0xb07d00, { side: THREE.DoubleSide, clippingPlanes: [CUT] }));
   inner.position.z = (Z_FRONT1 + Z_INNER1) / 2;
   machine.add(inner);
   label("Inner telescopic shield", inner, [0, R + 0.2, 0.6]);
@@ -70,13 +76,13 @@ export function build(machine, world) {
   // gripper shield group: moves back relative to the head while boring (it is braced on the rock), forward on regrip
   const gs = new THREE.Group();
   machine.add(gs);
-  const outer = tube(R - 0.02, 2.93);
+  const outer = tube(R - GAP, 2.93);
   outer.position.z = -2.93 / 2;
   gs.add(outer);
-  const gripShield = tube(R - 0.06, L_GRIP);
+  const gripShield = tube(R - GAP - 0.02, L_GRIP);
   gripShield.position.z = L_GRIP / 2;
   gs.add(gripShield);
-  const tail = tube(R - 0.08, L_TAIL, mat(0xa87700, { side: THREE.DoubleSide, clippingPlanes: [CUT] }));
+  const tail = tube(R - GAP - 0.04, L_TAIL, mat(0xa87700, { side: THREE.DoubleSide, clippingPlanes: [CUT] }));
   tail.position.z = L_GRIP + L_TAIL / 2;
   gs.add(tail);
   label("Outer telescopic shield", outer, [0, R + 0.4, 0]);
@@ -190,8 +196,32 @@ export function build(machine, world) {
   const doubleMode = (zone) => zone.rmr >= M.doubleModeMinRmr;
   const buildPer = (M.ringBuildMin * 60) / 7;
 
+  // Skin friction of the closing rock on the shield (screening estimate after Ramoni & Anagnostou), sliding and at restart
+  const frictionCache = new Map();
+  const friction = (zone, g) => {
+    if (!frictionCache.has(zone)) {
+      const args = [g.R, M.shieldLength, M.overcut, g.p0, g.mc.e_rm, g.nu, g.mc.phi_deg, g.mc.c];
+      frictionCache.set(zone, { sliding: shieldFriction(...args, SKIN_FRICTION_ROCK.sliding), restart: shieldFriction(...args, SKIN_FRICTION_ROCK.static) });
+    }
+    return frictionCache.get(zone);
+  };
+
   return {
     muck,
+    // the shield and then the lining stop the rock at the overcut gap
+    closureLimit() { return M.overcut; },
+    groundRows(zone, g) {
+      const f = friction(zone, g);
+      const contact = f.sliding.contact_from === null ? "no contact with the shield" : `rock reaches the shield ${f.sliding.contact_from.toFixed(1)} m behind the face`;
+      return [["Rock on the shield (overcut 10 cm)", contact],
+        ["Shield skin friction", `${f.sliding.friction_force.toFixed(0)} MN sliding, ${f.restart.friction_force.toFixed(0)} MN to restart, vs about ${M.thrustInstalled} MN installed`]];
+    },
+    groundAlarms(zone, g) {
+      const f = friction(zone, g);
+      if (f.sliding.friction_force > M.thrustInstalled) return [`Shield jammed: skin friction ${f.sliding.friction_force.toFixed(0)} MN exceeds the installed thrust; free the shield (by-pass, overcut, lubrication)`];
+      if (f.restart.friction_force > M.thrustInstalled) return [`Jamming risk after any standstill: ${f.restart.friction_force.toFixed(0)} MN needed to restart vs ${M.thrustInstalled} MN installed. Keep advancing; avoid stops in this zone`];
+      return [];
+    },
     reset(S) {
       for (const r of rings) world.remove(r.g);
       rings.length = 0;
@@ -260,7 +290,7 @@ export function build(machine, world) {
       head.rotation.z -= ((S.mode === "BORING" ? S.rpm : 0) / 60) * 2 * Math.PI * dtReal;
       gs.position.z = Z_GRIP0 + S.sMain;
       const gripping = S.dbl && (S.mode === "BORING" || S.mode === "WAIT RING");
-      for (const g of grips) g.shoe.position.x = g.side * (R - (gripping ? 0.12 : 0.35));
+      for (const g of grips) g.shoe.position.x = g.side * (R - (gripping ? 0.2 : 0.4)); // shoes reach the rock through the windows
       for (const c of mains) c.scale.z = Math.max(gs.position.z - c.position.z - 0.1, 0.3);
       // auxiliary cylinders: from the rear of the gripper shield to the front face of the newest complete ring
       const last = [...rings].reverse().find((r) => r.placed >= 7);

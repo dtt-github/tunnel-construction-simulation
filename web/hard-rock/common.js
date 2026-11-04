@@ -184,18 +184,32 @@ export function buildCutterhead(parent, { R, centre = 4, gauge = 8, total = 62, 
 }
 
 // ---------------------------------------------------------------- rock along the drive
+/** Rock tube and the translucent rock ahead of the face. Zones flagged `closes` are built from 1 m rings whose radius
+ * the caller shrinks with the computed closure; returns those rings as [{ mesh, ch }]. */
 export function buildRock(world, zones, R) {
+  const rings = [];
   for (const z of zones) {
     const len = z.to - z.from;
-    const tube = new THREE.Mesh(alongZ(new THREE.CylinderGeometry(R, R, len, 64, 1, true)),
-      new THREE.MeshStandardMaterial({ color: z.color, roughness: 1, side: THREE.DoubleSide, clippingPlanes: [CUT, BEHIND_FACE] }));
-    tube.position.z = -(z.from + len / 2);
-    world.add(tube);
+    const rockMat = new THREE.MeshStandardMaterial({ color: z.color, roughness: 1, side: THREE.DoubleSide, clippingPlanes: [CUT, BEHIND_FACE] });
+    if (z.closes) {
+      const geo = alongZ(new THREE.CylinderGeometry(R, R, 1.0, 64, 1, true));
+      for (let ch = z.from; ch < z.to; ch += 1) {
+        const ring = new THREE.Mesh(geo, rockMat);
+        ring.position.z = -(ch + 0.5);
+        world.add(ring);
+        rings.push({ mesh: ring, ch: ch + 0.5 });
+      }
+    } else {
+      const tube = new THREE.Mesh(alongZ(new THREE.CylinderGeometry(R, R, len, 64, 1, true)), rockMat);
+      tube.position.z = -(z.from + len / 2);
+      world.add(tube);
+    }
     const ahead = box(14, 14, len, new THREE.MeshStandardMaterial({ color: z.color, roughness: 1, transparent: true, opacity: 0.22, depthWrite: false,
       clippingPlanes: [AHEAD_OF_FACE, CUT] }));
     ahead.position.z = -(z.from + len / 2);
     world.add(ahead);
   }
+  return rings;
 }
 
 // ---------------------------------------------------------------- backup

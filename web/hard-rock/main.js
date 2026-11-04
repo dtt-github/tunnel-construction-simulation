@@ -3,7 +3,7 @@
 
 import {
   tbmPerformance, maxRpm, PRACTICAL_MAX_PENETRATION_MM, DEFAULT_CUTTER, hardRockUtilisation, rmrClass, cuttersPerKm,
-  cutterChangeHPerKm, recordCheck,
+  cutterChangeHPerKm, recordCheck, equivalentMohrCoulomb, groundReaction, ldp, squeezingStrain, squeezingClass,
 } from "../../models/js/index.js";
 import { THREE, createScene, buildRock, placeLabels, fmt, dl } from "./common.js";
 import * as gripperDef from "./gripper.js";
@@ -14,15 +14,32 @@ const DEF = KIND === "double" ? doubleDef : gripperDef;
 const M = DEF.M;
 const RPM_MAX = maxRpm(M.D);
 
-// Illustrative alignment; strengths, CAI, quartz and RMR typical for the rock types (not a project).
+// Illustrative alignment under 300 m of cover; strengths, CAI, quartz, RMR, mi and intact modulus typical for the rock
+// types (not a project). GSI = RMR - 5 (Hoek, valid for RMR > 23; used as a rough value in the fault zone).
+const COVER = 300, UNIT_WEIGHT = 0.027; // m, MN/m^3
+const P0 = COVER * UNIT_WEIGHT; // in-situ stress, MPa (hydrostatic)
+const NU = 0.25;
 const ZONES = [
-  { name: "Gneiss", from: -80, to: 90, ucs: 150, bts: 10, cai: 3.5, quartz: 25, rmr: 70, color: 0x8a8f94 },
-  { name: "Granite", from: 90, to: 170, ucs: 180, bts: 12, cai: 4.5, quartz: 30, rmr: 76, color: 0xa39488 },
-  { name: "Fault zone (crushed, blocky)", from: 170, to: 215, ucs: 40, bts: 4, cai: 2.5, quartz: 15, rmr: 22, color: 0x6b5848 },
-  { name: "Mica schist", from: 215, to: 330, ucs: 90, bts: 7, cai: 2.5, quartz: 15, rmr: 50, color: 0x7d8466 },
-  { name: "Gneiss", from: 330, to: 700, ucs: 150, bts: 10, cai: 3.5, quartz: 25, rmr: 68, color: 0x8a8f94 },
+  { name: "Gneiss", from: -80, to: 90, ucs: 150, bts: 10, cai: 3.5, quartz: 25, rmr: 70, mi: 28, ei: 60000, color: 0x8a8f94 },
+  { name: "Granite", from: 90, to: 170, ucs: 180, bts: 12, cai: 4.5, quartz: 30, rmr: 76, mi: 32, ei: 60000, color: 0xa39488 },
+  { name: "Fault zone (crushed, blocky)", from: 170, to: 215, ucs: 40, bts: 4, cai: 2.5, quartz: 15, rmr: 22, mi: 10, ei: 15000, color: 0x6b5848, closes: true },
+  { name: "Mica schist", from: 215, to: 330, ucs: 90, bts: 7, cai: 2.5, quartz: 15, rmr: 50, mi: 12, ei: 30000, color: 0x7d8466 },
+  { name: "Gneiss", from: 330, to: 700, ucs: 150, bts: 10, cai: 3.5, quartz: 25, rmr: 68, mi: 28, ei: 60000, color: 0x8a8f94 },
 ];
 const zoneAt = (ch) => ZONES.find((z) => ch >= z.from && ch < z.to) ?? ZONES.at(-1);
+// Ground response per zone: equivalent Mohr-Coulomb, unsupported ground reaction, squeezing (models/js/ground_response.js)
+const groundCache = new Map();
+function groundAt(zone) {
+  if (!groundCache.has(zone)) {
+    const R = M.D / 2;
+    const mc = equivalentMohrCoulomb(zone.rmr - 5, zone.mi, zone.ucs, zone.ei, P0);
+    const free = groundReaction(P0, 0, R, mc.e_rm, NU, mc.phi_deg, mc.c);
+    const strain = squeezingStrain(mc.sigma_cm, P0);
+    groundCache.set(zone, { R, p0: P0, nu: NU, mc, free, u0: free.u * ldp(0, R, free.r_p), strain, squeeze: squeezingClass(strain),
+      closureSinceFace: (x) => (x <= 0 ? 0 : free.u * (ldp(x, R, free.r_p) - ldp(0, R, free.r_p))) });
+  }
+  return groundCache.get(zone);
+}
 
 // ---------------------------------------------------------------- scene
 document.title = KIND === "double" ? "Hard-Rock Double Shield TBM" : "Hard-Rock Gripper TBM";
@@ -33,7 +50,7 @@ const machine = new THREE.Group();
 scene.add(machine);
 const world = new THREE.Group();
 scene.add(world);
-buildRock(world, ZONES, M.D / 2);
+const rockRings = buildRock(world, ZONES, M.D / 2);
 const parts = DEF.build(machine, world);
 
 // ---------------------------------------------------------------- UI and state
@@ -112,6 +129,12 @@ function step(dtReal) {
     while (dt > 1e-9) { const h = Math.min(dt, 2); substep(h); dt -= h; }
   }
   parts.afterStep(S, zoneAt);
+  // closing rock: radius shrinks by the closure since excavation, limited by what the machine or its support allows
+  for (const r of rockRings) {
+    const zone = zoneAt(r.ch), x = S.chainage - r.ch, g = groundAt(zone);
+    const close = x > 0 ? Math.min(g.closureSinceFace(x), parts.closureLimit(x, g, zone)) : 0;
+    r.mesh.scale.x = r.mesh.scale.y = 1 - close / g.R;
+  }
 }
 
 // ---------------------------------------------------------------- console
@@ -147,6 +170,11 @@ function hud() {
     ["CAI, quartz", `${zone.cai}, ${zone.quartz} %`],
     ["RMR, class", `${zone.rmr}, ${cls.class} (${cls.name})`],
     ...parts.supportRows(zone),
+    ["In-situ stress (300 m cover)", `${fmt(P0, 1)} MPa`],
+    ["Rock-mass strength σcm, E", `${fmt(groundAt(zone).mc.sigma_cm, 1)} MPa, ${fmt(groundAt(zone).mc.e_rm / 1000, 1)} GPa`],
+    ["Squeezing (Hoek & Marinos)", `${fmt(groundAt(zone).strain, 2)} %, class ${groundAt(zone).squeeze[0]}: ${groundAt(zone).squeeze[1]}`],
+    ["Unsupported closure (Duncan Fama)", `${fmt(groundAt(zone).free.u * 1000, 0)} mm, plastic zone ${fmt(groundAt(zone).free.r_p / groundAt(zone).R, 2)} R`],
+    ...parts.groundRows(zone, groundAt(zone)),
     ["Next zone", (() => { const n = ZONES.find((z) => z.from > S.chainage); return n ? `${n.name} in ${fmt(n.from - S.chainage, 0)} m` : "—"; })()],
   ]);
   const alarms = [];
@@ -155,6 +183,9 @@ function hud() {
   if (p.limited_by === "torque" || p.limited_by === "power") alarms.push(`Cutterhead at its ${p.limited_by} limit: more thrust does not cut faster`);
   if (val("rpm") > RPM_MAX) alarms.push(`Speed held at ${fmt(RPM_MAX, 2)} rpm (gauge-cutter speed limit)`);
   alarms.push(...parts.alarms(zone));
+  const g = groundAt(zone);
+  if (g.strain >= 2.5) alarms.push(`Squeezing class ${g.squeeze[0]} (${fmt(g.strain, 1)} %): ${g.squeeze[2]}`);
+  alarms.push(...parts.groundAlarms(zone, g));
   ui.alarms.innerHTML = alarms.length ? alarms.map((a) => `<div>${a}</div>`).join("") : `<div class="ok">Within limits</div>`;
 
   const u = S.util;
