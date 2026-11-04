@@ -145,3 +145,20 @@ def test_twin_superposition_and_interaction():
 def test_burland():
     assert burland_category(0.01) == (0, "Negligible")
     assert burland_category(0.2)[0] == 3
+
+
+def test_tbm_drive_and_penetration_limits():
+    # weak rock: thrust alone would push penetration to the solver bound; the cap holds it and reports unused thrust
+    free = tbm_performance(11000, 6, 50, 7.0, 40, 4)
+    capped = tbm_performance(11000, 6, 50, 7.0, 40, 4, max_penetration_mm=12.0)
+    assert free.penetration_mm_rev > 12
+    assert capped.penetration_mm_rev == pytest.approx(12.0) and capped.limited_by == "penetration"
+    assert capped.thrust_used_kn < 11000
+    assert capped.normal_per_cutter_kn * 50 == pytest.approx(capped.thrust_used_kn)
+    # constant power above the base speed: available torque = P / omega
+    fast = tbm_performance(15000, 9, 50, 7.0, 140, 10, max_torque_knm=4200, max_power_kw=2500)
+    assert fast.torque_available_knm == pytest.approx(2500 * 60 / (2 * math.pi * 9))
+    assert fast.limited_by == "power"
+    assert fast.cutterhead_power_kw == pytest.approx(2500, rel=1e-6)
+    slow = tbm_performance(15000, 4, 50, 7.0, 140, 10, max_torque_knm=4200, max_power_kw=2500)
+    assert slow.torque_available_knm == 4200  # below the base speed the installed torque governs

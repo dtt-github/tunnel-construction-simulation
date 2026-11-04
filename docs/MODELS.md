@@ -12,6 +12,7 @@ Every model exists twice: a Python reference in [`models/py/tunnelsim_models/`](
 | [Face support pressure](#face-support-pressure) | `face_support.py` | `face_support.js` | Hand-checked; seepage not yet modelled |
 | [EPB chamber and screw conveyor](#epb-chamber-and-screw-conveyor) | `epb_chamber.py` | `epb_chamber.js` | Hand-checked; screw simplified |
 | [Thrust and torque](#thrust-and-torque) | `thrust_torque.py` | `thrust_torque.js` | Hand-checked; friction coefficients illustrative |
+| [Hard-rock drive](#hard-rock-drive) | `hard_rock.py` | `hard_rock.js` | Reproduces Farrokh's worked example within 3 %; support curve digitised |
 | [Utilisation and downtime](#utilisation-and-downtime) | `utilisation.py` | `utilisation.js` | Deterministic limits hand-checked; default EPB inside a 40-EPB survey; one-project distributions |
 
 Also: [machine class presets](#machine-class-presets) and [where default parameters come from](#default-parameter-sources).
@@ -24,10 +25,12 @@ Disc-cutter forces, penetration from thrust, rate of penetration, cutterhead tor
 
 - **References:** Rostami & Ozdemir (1993); Rostami (1997).
 - **Validated against:** a hand calculation for a 19″ disc (p = 5 mm, UCS 150 MPa, BTS 10 MPa → F_t ≈ 201 kN, RC ≈ 0.10).
-- **Limits:**
-  - Penetration is bounded only by the solver at 30 mm/rev; a muck-capacity limit is planned.
-  - No constant-power region in the drive.
-  - Field validation against the Yinsong dataset is pending.
+- **Drive and speed limits:**
+  - Available torque is the installed torque up to the speed where it meets the installed power, then power / angular speed. The two Niagara torque points (18,800 kNm at 2.4 rpm, 9,025 kNm at 5 rpm) both give 4,725 kW.
+  - Speed limit from the gauge-cutter linear speed: rpm = V_L / (π D), with V_L = 165 m/min for 17″ and 200 m/min for 19″ discs (Rostami & Chang 2017, [doi:10.1016/j.eng.2017.12.009](https://doi.org/10.1016/j.eng.2017.12.009)).
+  - Optional penetration cap. The practical maximum is 15 mm/rev, the lower end of the 15–20 mm/rev "brief maximum before the conveyor overloads" (Macias & Barton 2022).
+  - The limit that binds is reported (thrust, penetration, torque or power), together with the thrust actually carried by the cutters.
+- **Limits:** field validation against the Yinsong dataset is pending.
 
 ## Hoek–Brown rock mass
 
@@ -154,6 +157,42 @@ The ground stress on the shield is effective or total vertical stress, with a wa
 
 - friction coefficients are illustrative;
 - the Krause α·D³ band was dropped because modern EPBs exceed it.
+
+## Hard-rock drive
+
+Cutter wear and changes, rock support by class, and utilisation as downtime per kilometre for open, single- and double-shield TBMs.
+
+- **Cutter wear:**
+  - cutter life CL = 1026 / CAI m³ per cutter (Frenzel 2011, via Zhang et al. 2025, [doi:10.1007/s40789-025-00787-0](https://doi.org/10.1007/s40789-025-00787-0));
+  - cutters consumed per km = excavated volume / CL;
+  - 66 min per change (Farrokh 2013);
+  - Farrokh's fits of cutter downtime by quartz content as a cross-check.
+- **Support:**
+  - Bieniawski (1989) RMR classes with their bolts, shotcrete and ribs;
+  - RMR from GSI (GSI = RMR89′ − 5);
+  - support downtime per km by RMR, diameter and machine type, digitised from Farrokh (2018) Fig. 12 (about ±20 h/km);
+  - a double shield below RMR 50 is assumed to fall back to single-shield mode.
+- **Utilisation:** Farrokh (2018), [doi:10.22044/jme.2018.6815.1509](https://doi.org/10.22044/jme.2018.6815.1509), with downtime terms in h/km:
+  - boring, 1000 / PR;
+  - regrip, 1000 t_r / (60 L_s) plus a curve term; zero for a double shield, which regrips while boring;
+  - TBM breakdown (fits by rock strength) and backup (fits for rail or conveyor);
+  - cutters and support;
+  - maintenance and transport classes;
+  - utilities, survey and other.
+
+  U = T_boring / ΣT, and the advance rate is 24000 / ΣT m/day.
+
+**Validated against:**
+
+- Farrokh's worked example (open TBM, 3.9 m, PR 4.7 m/h): 1,036 against 1,021 h/km, U 20.5 % against 21 %, 23.2 against 23.5 m/day;
+- the wear model gives 25.6 h/km against Farrokh's 30 h/km for low-quartz rock at CAI 2.
+
+**Limits:**
+
+- the support curve is digitised from a figure;
+- the CAI wear model excludes chipping and bearing failures, so it is a lower bound;
+- the NTNU cutter-life model (CLI) is not implemented, because its charts are not available in closed form;
+- there are no per-bolt or per-ring-beam installation times (no open source found).
 
 ## Utilisation and downtime
 

@@ -23,6 +23,19 @@ from dataclasses import dataclass
 
 C_DEFAULT = 2.12
 
+# Gauge-cutter linear speed limits (m/min) by disc diameter, Rostami & Chang (2017), Engineering 3(6) 892-904,
+# doi:10.1016/j.eng.2017.12.009: rpm_max = V_L / (pi D).
+GAUGE_SPEED_LIMIT_M_MIN = {432: 165.0, 483: 200.0}
+# Brief maximum penetration before the muck conveyor overloads: 15-20 mm/rev (Macias & Barton 2022, Bergmekanikkdagen,
+# https://www.rmteceng.com/wp-content/uploads/2024/01/MaciasandBarton_2022_Bergmekanikkdag.pdf). The lower bound is used.
+PRACTICAL_MAX_PENETRATION_MM = 15.0
+
+
+def max_rpm(head_diameter_m: float, cutter_diameter_mm: float = 482.6) -> float:
+    """Cutterhead speed limit from the gauge-cutter linear speed (17-inch: 165 m/min; 19-inch and larger: 200 m/min)."""
+    v = GAUGE_SPEED_LIMIT_M_MIN[432] if cutter_diameter_mm <= 440 else GAUGE_SPEED_LIMIT_M_MIN[483]
+    return v / (math.pi * head_diameter_m)
+
 
 @dataclass(frozen=True)
 class Cutter:
@@ -83,7 +96,9 @@ class TbmPerformance:
     cutterhead_torque_knm: float
     cutterhead_power_kw: float
     cutter_overloaded: bool
-    limited_by: str  # "thrust" or "torque"
+    limited_by: str  # "thrust", "penetration", "torque" or "power"
+    thrust_used_kn: float  # thrust the cutters actually carry at this penetration (excess thrust above a limit is not used)
+    torque_available_knm: float | None  # drive limit at this speed: min(installed torque, power / angular speed)
 
 
 def tbm_performance(
@@ -96,6 +111,8 @@ def tbm_performance(
     cutter: Cutter = Cutter(),
     torque_radius_factor: float = 0.3,
     max_torque_knm: float | None = None,
+    max_power_kw: float | None = None,
+    max_penetration_mm: float | None = None,
 ) -> TbmPerformance:
     """Steady-state penetration, ROP, torque and power for a given cutting thrust.
 
@@ -103,22 +120,36 @@ def tbm_performance(
     backup drag etc.). Torque uses the Rostami-Ozdemir approximation T = k * D * N * Fr with k ~= 0.3.
     If max_torque_knm is given and the thrust-limited penetration would exceed it (typical in weak
     rock), penetration is reduced until torque equals the installed limit.
+
+    Drive characteristic: the available torque is the installed torque up to the speed where torque x speed reaches
+    the installed power, and power / angular speed above it (constant-torque then constant-power drive).
+    max_penetration_mm caps penetration per revolution (muck handling and block loading in practice); the thrust
+    above what that penetration needs is reported as unused (thrust_used_kn < thrust_kn).
     """
     k = torque_radius_factor * head_diameter_m * n_cutters / 1000
 
     def torque_at(pen: float) -> float:
         return k * cutter_forces(pen, ucs_mpa, bts_mpa, cutter).rolling_n
 
+    t_avail = max_torque_knm
+    by_power = False
+    if max_power_kw is not None and rpm > 0:
+        t_power = max_power_kw * 60 / (2 * math.pi * rpm)
+        if t_avail is None or t_power < t_avail:
+            t_avail, by_power = t_power, True
+
     fn = thrust_kn * 1000 / n_cutters
     p = penetration_for_normal_force(fn, ucs_mpa, bts_mpa, cutter)
     limited_by = "thrust"
-    if max_torque_knm is not None and torque_at(p) > max_torque_knm:
+    if max_penetration_mm is not None and p > max_penetration_mm:
+        p, limited_by = max_penetration_mm, "penetration"
+    if t_avail is not None and torque_at(p) > t_avail:
         lo, hi = 0.0, p
         for _ in range(80):
             mid = 0.5 * (lo + hi)
-            lo, hi = (mid, hi) if torque_at(mid) < max_torque_knm else (lo, mid)
+            lo, hi = (mid, hi) if torque_at(mid) < t_avail else (lo, mid)
         p = 0.5 * (lo + hi)
-        limited_by = "torque"
+        limited_by = "power" if by_power else "torque"
     f = cutter_forces(p, ucs_mpa, bts_mpa, cutter)
     torque_knm = k * f.rolling_n
     power_kw = torque_knm * 2 * math.pi * rpm / 60
@@ -131,4 +162,6 @@ def tbm_performance(
         cutterhead_power_kw=power_kw,
         cutter_overloaded=f.normal_n / 1000 > cutter.max_load_kn,
         limited_by=limited_by,
+        thrust_used_kn=f.normal_n * n_cutters / 1000,
+        torque_available_knm=t_avail,
     )

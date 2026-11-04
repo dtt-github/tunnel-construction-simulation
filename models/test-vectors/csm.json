@@ -94,7 +94,9 @@
     "head_diameter_m": 7.0,
     "ucs_mpa": 150,
     "bts_mpa": 10,
-    "max_torque_knm": null
+    "max_torque_knm": null,
+    "max_power_kw": null,
+    "max_penetration_mm": null
    },
    "out": {
     "penetration_mm_rev": 8.744277756413325,
@@ -104,7 +106,9 @@
     "cutterhead_torque_knm": 3423.2565528041814,
     "cutterhead_power_kw": 2150.895527528547,
     "cutter_overloaded": false,
-    "limited_by": "thrust"
+    "limited_by": "thrust",
+    "thrust_used_kn": 12000.000000000004,
+    "torque_available_knm": null
    }
   },
   {
@@ -115,7 +119,9 @@
     "head_diameter_m": 9.5,
     "ucs_mpa": 220,
     "bts_mpa": 14,
-    "max_torque_knm": 8000
+    "max_torque_knm": 8000,
+    "max_power_kw": null,
+    "max_penetration_mm": null
    },
    "out": {
     "penetration_mm_rev": 3.5258836788076593,
@@ -125,7 +131,9 @@
     "cutterhead_torque_knm": 4400.986149558195,
     "cutterhead_power_kw": 2304.3509593337426,
     "cutter_overloaded": false,
-    "limited_by": "thrust"
+    "limited_by": "thrust",
+    "thrust_used_kn": 17999.999999999964,
+    "torque_available_knm": 8000
    }
   },
   {
@@ -136,7 +144,9 @@
     "head_diameter_m": 5.5,
     "ucs_mpa": 60,
     "bts_mpa": 5,
-    "max_torque_knm": 1500
+    "max_torque_knm": 1500,
+    "max_power_kw": null,
+    "max_penetration_mm": null
    },
    "out": {
     "penetration_mm_rev": 15.545799832400846,
@@ -146,7 +156,84 @@
     "cutterhead_torque_knm": 1500.000000000002,
     "cutterhead_power_kw": 1256.637061435919,
     "cutter_overloaded": false,
-    "limited_by": "torque"
+    "limited_by": "torque",
+    "thrust_used_kn": 4982.925799059946,
+    "torque_available_knm": 1500
+   }
+  },
+  {
+   "in": {
+    "thrust_kn": 11000,
+    "rpm": 6,
+    "n_cutters": 50,
+    "head_diameter_m": 7.0,
+    "ucs_mpa": 40,
+    "bts_mpa": 4,
+    "max_torque_knm": 4200,
+    "max_power_kw": 2500,
+    "max_penetration_mm": 12.0
+   },
+   "out": {
+    "penetration_mm_rev": 12.0,
+    "rop_m_h": 4.32,
+    "normal_per_cutter_kn": 81.19509984824516,
+    "rolling_per_cutter_kn": 12.965655610041892,
+    "cutterhead_torque_knm": 1361.3938390543988,
+    "cutterhead_power_kw": 855.388976683141,
+    "cutter_overloaded": false,
+    "limited_by": "penetration",
+    "thrust_used_kn": 4059.7549924122586,
+    "torque_available_knm": 3978.8735772973837
+   }
+  },
+  {
+   "in": {
+    "thrust_kn": 15000,
+    "rpm": 9,
+    "n_cutters": 50,
+    "head_diameter_m": 7.0,
+    "ucs_mpa": 140,
+    "bts_mpa": 10,
+    "max_torque_knm": 4200,
+    "max_power_kw": 2500,
+    "max_penetration_mm": 12.0
+   },
+   "out": {
+    "penetration_mm_rev": 6.807771679743368,
+    "rop_m_h": 3.6761967070614188,
+    "normal_per_cutter_kn": 211.19603632481162,
+    "rolling_per_cutter_kn": 25.262689379666,
+    "cutterhead_torque_knm": 2652.58238486493,
+    "cutterhead_power_kw": 2500.0000000000073,
+    "cutter_overloaded": false,
+    "limited_by": "power",
+    "thrust_used_kn": 10559.80181624058,
+    "torque_available_knm": 2652.5823848649225
+   }
+  },
+  {
+   "in": {
+    "thrust_kn": 20000,
+    "rpm": 4,
+    "n_cutters": 62,
+    "head_diameter_m": 9.5,
+    "ucs_mpa": 180,
+    "bts_mpa": 12,
+    "max_torque_knm": 9000,
+    "max_power_kw": 3500,
+    "max_penetration_mm": 10.0
+   },
+   "out": {
+    "penetration_mm_rev": 10.0,
+    "rop_m_h": 2.4,
+    "normal_per_cutter_kn": 300.8631581934859,
+    "rolling_per_cutter_kn": 43.76451816621255,
+    "cutterhead_torque_knm": 7733.190359969758,
+    "cutterhead_power_kw": 3239.2712031589863,
+    "cutter_overloaded": false,
+    "limited_by": "penetration",
+    "thrust_used_kn": 18653.51580799613,
+    "torque_available_knm": 8355.634512324505
    }
   }
  ]

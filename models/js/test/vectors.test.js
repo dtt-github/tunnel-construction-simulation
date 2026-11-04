@@ -3,7 +3,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { cutterForces, tbmPerformance, hoekBrown, gaussianTrough, presetTrough, twinTroughs, burlandCategory, wedgeSilo, daubWindow, siloStress, chamber, screw, crownPressure, shieldThrust, cutterheadTorque, verticalStress, referenceInstalled, Rng, normalInv, sample as sampleDist, DIST, simulateDrive, recordCheck } from "../index.js";
+import { cutterForces, tbmPerformance, hoekBrown, gaussianTrough, presetTrough, twinTroughs, burlandCategory, wedgeSilo, daubWindow, siloStress, chamber, screw, crownPressure, shieldThrust, cutterheadTorque, verticalStress, referenceInstalled, Rng, normalInv, sample as sampleDist, DIST, simulateDrive, recordCheck, maxRpm, cutterChangeHPerKm, supportDowntime, rmrClass, hardRockUtilisation } from "../index.js";
 
 const vec = (name) => JSON.parse(readFileSync(new URL(`../../test-vectors/${name}.json`, import.meta.url)));
 
@@ -127,5 +127,17 @@ test("utilisation model matches python", () => {
   for (const { in: i, out } of v.drives) {
     const r = simulateDrive({ shift_pattern: i.shift_pattern, haulage: i.haulage, boring_min: i.boring_min, interventions: i.interventions }, i.days, i.seed);
     close({ ...r, check: recordCheck(7.08, r.best_day, r.best_week, r.best_month) }, out, `drive ${i.shift_pattern} seed ${i.seed}`, 1e-6);
+  }
+});
+
+test("hard-rock models match python", () => {
+  const v = vec("hard_rock");
+  for (const [d, c, out] of v.max_rpm) close(maxRpm(d, c), out, `maxRpm ${d} ${c}`);
+  for (const [d, cai, out] of v.cutters) close(cutterChangeHPerKm(d, cai), out, `cutters ${d} ${cai}`);
+  for (const [rmr, d, m, out] of v.support) close(supportDowntime(rmr, d, m), out, `support ${rmr} ${d} ${m}`);
+  for (const [rmr, cls] of v.classes) assert.equal(rmrClass(rmr).class, cls);
+  for (const { in: i, out } of v.utilisation) {
+    const { pr, d, ...kw } = i;
+    close(hardRockUtilisation(pr, d, kw), out, `utilisation ${pr} ${d}`);
   }
 });

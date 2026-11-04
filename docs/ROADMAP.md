@@ -79,9 +79,9 @@ A slice is not done until its realism checklist passes.
 ### Model library (Python reference + JS twin + shared vectors)
 
 1. [x] CSM disc-cutter forces, penetration, ROP, torque, power, torque limit
-   - [ ] Cap penetration from muck capacity and block loading (≈ 12–15 mm/rev), not the solver bound.
-   - [ ] Add a power limit and a constant-power region to the drive.
-2. [ ] Cutter wear and change events (CAI, NTNU CLI); change time ≈ 66 min per cutter
+   - [x] Cap penetration (practical maximum 15 mm/rev, Macias & Barton 2022), not the solver bound.
+   - [x] Add a power limit and a constant-power region to the drive; speed limit from gauge-cutter speed.
+2. [~] Cutter wear and change events (CAI model and 66 min per change done, [MODELS](MODELS.md#hard-rock-drive); NTNU CLI open)
 3. [~] Face support (wedge-silo and DAUB window done). Still open:
    - seepage forces;
    - checking the DAUB partial factors against the document.
@@ -94,7 +94,7 @@ A slice is not done until its realism checklist passes.
 8. [ ] Squeezing (Hoek & Marinos) and shield jamming (Ramoni & Anagnostou)
 9. [x] Settlement trough and Burland categories
 10. [ ] Segment lining: Muir Wood / Duddeck–Erdmann, jack loads, universal-ring key position, annulus fill volume and pressure
-11. [ ] Rock support: rock-mass classes → support class (bolts, mesh, ribs, shotcrete thickness), installation time per metre
+11. [~] Rock support: RMR classes → support pattern and support downtime per km by machine type done; per-bolt and per-ring-beam installation times open
 12. [~] Utilisation / activity-time model (discrete events) (EPB done: ring build, general activities, train delays, per-cycle maintenance, maintenance shift, cutting-tool interventions, record-rate check, [MODELS](MODELS.md#utilisation-and-downtime); open: hard-rock stroke/regrip/support/cutter-change terms, locomotive travel time, breakdowns by subsystem)
 13. [ ] Drill & blast: round design (Holmberg / Langefors), Kuz-Ram fragmentation, PPV limits, cycle times
 14. [ ] SEM: excavation sequence and ring-closure distance, shotcrete ageing E(t)

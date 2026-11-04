@@ -26,9 +26,12 @@ csm = []
 for p, ucs, bts in [(2, 80, 6), (5, 150, 10), (8, 200, 12), (12, 50, 4)]:
     csm.append({"in": {"penetration_mm": p, "ucs_mpa": ucs, "bts_mpa": bts, "cutter": asdict(Cutter())}, "out": asdict(cutter_forces(p, ucs, bts))})
 perf = []
-for thrust, rpm, n, d, ucs, bts, tmax in [(12000, 6, 50, 7.0, 150, 10, None), (18000, 5, 70, 9.5, 220, 14, 8000), (6000, 8, 40, 5.5, 60, 5, 1500)]:
-    perf.append({"in": {"thrust_kn": thrust, "rpm": rpm, "n_cutters": n, "head_diameter_m": d, "ucs_mpa": ucs, "bts_mpa": bts, "max_torque_knm": tmax},
-                 "out": asdict(tbm_performance(thrust, rpm, n, d, ucs, bts, max_torque_knm=tmax))})
+for thrust, rpm, n, d, ucs, bts, tmax, pmax, pen in [(12000, 6, 50, 7.0, 150, 10, None, None, None), (18000, 5, 70, 9.5, 220, 14, 8000, None, None),
+                                                    (6000, 8, 40, 5.5, 60, 5, 1500, None, None), (11000, 6, 50, 7.0, 40, 4, 4200, 2500, 12.0),
+                                                    (15000, 9, 50, 7.0, 140, 10, 4200, 2500, 12.0), (20000, 4, 62, 9.5, 180, 12, 9000, 3500, 10.0)]:
+    perf.append({"in": {"thrust_kn": thrust, "rpm": rpm, "n_cutters": n, "head_diameter_m": d, "ucs_mpa": ucs, "bts_mpa": bts, "max_torque_knm": tmax,
+                        "max_power_kw": pmax, "max_penetration_mm": pen},
+                 "out": asdict(tbm_performance(thrust, rpm, n, d, ucs, bts, max_torque_knm=tmax, max_power_kw=pmax, max_penetration_mm=pen))})
 write("csm", {"cutter_forces": csm, "tbm_performance": perf})
 
 st = []
@@ -142,4 +145,17 @@ for sp, hl, bore, iv, days, seed in [("2x10h_plus_4h_maintenance", "conveyor", N
     util["drives"].append({"in": {"shift_pattern": sp, "haulage": hl, "boring_min": bore, "interventions": iv, "days": days, "seed": seed},
                            "out": asdict(r) | {"check": record_check(7.08, r.best_day, r.best_week, r.best_month)}})
 write("utilisation", util)
+from tunnelsim_models import max_rpm  # noqa: E402
+from tunnelsim_models.hard_rock import cutter_change_h_per_km, hard_rock_utilisation, rmr_class, support_downtime  # noqa: E402
+
+hr = {"max_rpm": [[d, c, max_rpm(d, c)] for d, c in [(7.0, 482.6), (10.0, 482.6), (7.0, 432.0), (14.4, 508.0)]],
+      "cutters": [[d, cai, cutter_change_h_per_km(d, cai)] for d, cai in [(3.9, 2), (7.0, 3.5), (10.0, 5)]],
+      "support": [[rmr, d, m, support_downtime(rmr, d, m)] for rmr in (15, 35, 50, 65, 85) for d, m in [(4, "open"), (7, "open"), (10, "open"), (10, "single"), (10, "double")]],
+      "classes": [[rmr, rmr_class(rmr)["class"]] for rmr in (95, 70, 45, 25, 5)], "utilisation": []}
+for pr, d, kw in [(4.7, 3.9, {"stroke_m": 1.25, "ucs_mpa": 90, "rmr": 45, "haulage": "rail", "quartz_percent": 3, "maintenance": "good", "transport": "normal", "survey": 0, "other": 0}),
+                  (3.0, 9.5, {"rmr": 65, "ucs_mpa": 180, "quartz_percent": 25, "curve_radius_m": 600.0}),
+                  (2.2, 10.0, {"rmr": 35, "machine": "double", "ucs_mpa": 120, "cutter_h_per_km": 80.0, "maintenance": "poor", "transport": "very_good"})]:
+    r = hard_rock_utilisation(pr, d, **kw)
+    hr["utilisation"].append({"in": {"pr": pr, "d": d, **kw}, "out": asdict(r)})
+write("hard_rock", hr)
 print("wrote", sorted(p.name for p in OUT.glob("*.json")))

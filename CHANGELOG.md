@@ -13,6 +13,12 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
   - thrust and torque breakdown;
   - surface settlement with Burland categories for buildings.
   - Assumptions and gaps are listed in its [realism checklist](docs/realism/epb-slice-a.md).
+- **Hard-rock models:**
+  - CSM drive with constant torque, then constant power;
+  - gauge-cutter speed limit and penetration cap;
+  - cutter wear from CAI, with cutter-change downtime;
+  - RMR support classes;
+  - utilisation as downtime per km (Farrokh 2018), reproducing the paper's worked example within 3 %.
 - **Utilisation and downtime model** (Python + JavaScript, seeded and bit-identical random stream):
   - ring build, general activities, train delays and per-cycle maintenance from distributions fitted on a 6.88 m metro EPB (Moosazadeh et al. 2018);
   - published shift patterns and cutting-tool interventions;
