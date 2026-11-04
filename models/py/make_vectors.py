@@ -112,7 +112,7 @@ for d, ds, pitch, length, eta, lam, rpm in [(0.9, 0.3, 0.7, 12, 0.6, 3, 10), (1.
     screws.append({"in": {"diameter": d, "shaftDiameter": ds, "pitch": pitch, "length": length, "efficiency": eta, "decayLength": lam, "rpm": rpm},
                    "out": {"q_th": sc.theoretical_flow(rpm), "q": sc.discharge(rpm), "outlet": sc.outlet_pressure(250), "mid": sc.pressure_along(length / 2, 250)}})
 write("epb_chamber", {"chamber": epb, "screw": screws})
-from tunnelsim_models.thrust_torque import cutterhead_torque, sanity_bands, shield_thrust, vertical_stress  # noqa: E402
+from tunnelsim_models.thrust_torque import cutterhead_torque, reference_installed, shield_thrust, vertical_stress  # noqa: E402
 
 tt = []
 # (D, L, axis depth, gamma, p_axis, water, k0, mu_s, shield W, tools, tail, backup W, opening, n arms, arm A, arm r, tool T, seals)
@@ -127,6 +127,7 @@ for row in [(7, 9, 18, 20, 200, 3, 0.5, 0.3, 4000, 1000, 500, 6000, 0.3, 4, 0.5,
     tt.append({"in": dict(zip("d ln z g p hw k0 mus ws tools tail wb xi na aa ar ttool seals".split(), row)),
                "out": {"sv_eff": vertical_stress(z, g, **wkw), "sv_total": vertical_stress(z, g, effective=False, **wkw),
                        "thrust": asdict(th) | {"total": th.total}, "sigma_n": sn, "torque": asdict(tq) | {"total": tq.total},
-                       "bands": sanity_bands(d)}})
+                       "reference": {t: reference_installed(t, d) for t in ("epb", "slurry", "gripper")},
+                       "reference_all": {t: reference_installed(t, d, include_unverified=True) for t in ("epb", "slurry", "gripper")}}})
 write("thrust_torque", tt)
 print("wrote", sorted(p.name for p in OUT.glob("*.json")))

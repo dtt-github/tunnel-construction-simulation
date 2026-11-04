@@ -1,11 +1,17 @@
-// Shield thrust and cutterhead torque as sums of components (Shi et al. 2011; Krause 1987 sanity bands).
+// Shield thrust and cutterhead torque as sums of components (Shi et al. 2011), checked against built machines.
 // Twin of models/py/tunnelsim_models/thrust_torque.py, which documents the equations. m, kPa, kN, kNm.
 
 const GAMMA_W = 10;
 
-// Ranges vary by source and are not checked against the originals.
-export const KRAUSE_ALPHA = Object.freeze([9, 23]); // kNm/m^3
-export const THRUST_BETA = Object.freeze([500, 1200]); // kN/m^2
+// Built machines: installed (or stated working) torque and thrust, each with its source (same table as Python).
+export const REFERENCE_MACHINES = Object.freeze([
+  Object.freeze({"project": "Crossrail, London", "type": "epb", "diameter": 7.08, "torque_knm": 9800.0, "thrust_kn": null, "power_kw": 1920.0, "torque_kind": "installed", "verified": true, "source": "https://herrenknecht.com/en/references/referencesdetail/crossrail-london"}),
+  Object.freeze({"project": "Mixed-face EPB (RETC 2019)", "type": "epb", "diameter": 6.6, "torque_knm": 7038.0, "thrust_kn": 45000.0, "power_kw": null, "torque_kind": "working", "verified": true, "source": "https://www.robbinstbm.com/wp-content/uploads/2019/07/RETC2019-14-05_Tunneling-in-Mixed-Face-Conditions.pdf"}),
+  Object.freeze({"project": "Crossrail, London", "type": "slurry", "diameter": 7.08, "torque_knm": 3709.0, "thrust_kn": null, "power_kw": 1120.0, "torque_kind": "installed", "verified": true, "source": "https://herrenknecht.com/en/references/referencesdetail/crossrail-london"}),
+  Object.freeze({"project": "Tuen Mun-Chek Lap Kok, Hong Kong", "type": "slurry", "diameter": 17.63, "torque_knm": 27722.0, "thrust_kn": null, "power_kw": 5600.0, "torque_kind": "installed", "verified": false, "source": "https://herrenknecht.com/en/references/referencesdetail/hong-kong-tuen-mun-chek-lap-kok-link"}),
+  Object.freeze({"project": "Niagara Tunnel", "type": "gripper", "diameter": 14.4, "torque_knm": 18670.0, "thrust_kn": 18462.0, "power_kw": null, "torque_kind": "installed", "verified": false, "source": "https://www.robbinstbm.com/projects/niagara-tunnel-project/"}),
+  Object.freeze({"project": "Gotthard Base Tunnel", "type": "gripper", "diameter": 9.33, "torque_knm": 5290.0, "thrust_kn": 27488.0, "power_kw": 3500.0, "torque_kind": "installed", "verified": false, "source": "trade press via search (Tunnelbuilder)"}),
+]);
 
 /** Vertical stress at `depth` (kPa); effective by default. */
 export function verticalStress(depth, gamma, { gammaSub = null, waterDepth = Infinity, q = 0, effective = true } = {}) {
@@ -58,8 +64,14 @@ export function cutterheadTorque(diameter, pAxis, sigmaN, {
   return t;
 }
 
-/** Empirical installed-torque (kNm) and thrust (kN) bands for this diameter. */
-export const sanityBands = (d) => ({
-  torque: [KRAUSE_ALPHA[0] * d ** 3, KRAUSE_ALPHA[1] * d ** 3],
-  thrust: [THRUST_BETA[0] * d ** 2, THRUST_BETA[1] * d ** 2],
-});
+/** Reference machines of one type scaled to `diameter` (torque by D^3, thrust by D^2), in kNm and kN. */
+export function referenceInstalled(machineType, diameter, { includeUnverified = false } = {}) {
+  const refs = REFERENCE_MACHINES.filter((m) => m.type === machineType && (includeUnverified || m.verified));
+  const tq = refs.map((m) => m.torque_knm * (diameter / m.diameter) ** 3);
+  const th = refs.filter((m) => m.thrust_kn !== null).map((m) => m.thrust_kn * (diameter / m.diameter) ** 2);
+  return {
+    torque: tq.length ? [Math.min(...tq), Math.max(...tq)] : null,
+    thrust: th.length ? [Math.min(...th), Math.max(...th)] : null,
+    machines: refs.map((m) => m.project),
+  };
+}

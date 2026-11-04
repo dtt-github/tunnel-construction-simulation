@@ -41,15 +41,77 @@
     "seals": 300,
     "total": 5886.294748334731
    },
-   "bands": {
-    "torque": [
-     3087.0,
-     7889.0
-    ],
-    "thrust": [
-     24500.0,
-     58800.0
-    ]
+   "reference": {
+    "epb": {
+     "torque": [
+      8396.756824442775,
+      9471.536182519292
+     ],
+     "thrust": [
+      50619.834710743795,
+      50619.834710743795
+     ],
+     "machines": [
+      "Crossrail, London",
+      "Mixed-face EPB (RETC 2019)"
+     ]
+    },
+    "slurry": {
+     "torque": [
+      3584.6865000983726,
+      3584.6865000983726
+     ],
+     "thrust": null,
+     "machines": [
+      "Crossrail, London"
+     ]
+    },
+    "gripper": {
+     "torque": null,
+     "thrust": null,
+     "machines": []
+    }
+   },
+   "reference_all": {
+    "epb": {
+     "torque": [
+      8396.756824442775,
+      9471.536182519292
+     ],
+     "thrust": [
+      50619.834710743795,
+      50619.834710743795
+     ],
+     "machines": [
+      "Crossrail, London",
+      "Mixed-face EPB (RETC 2019)"
+     ]
+    },
+    "slurry": {
+     "torque": [
+      1735.2487584120788,
+      3584.6865000983726
+     ],
+     "thrust": null,
+     "machines": [
+      "Crossrail, London",
+      "Tuen Mun-Chek Lap Kok, Hong Kong"
+     ]
+    },
+    "gripper": {
+     "torque": [
+      2144.6230120456103,
+      2234.1115861973467
+     ],
+     "thrust": [
+      4362.644675925925,
+      15473.050205114596
+     ],
+     "machines": [
+      "Niagara Tunnel",
+      "Gotthard Base Tunnel"
+     ]
+    }
    }
   }
  },
@@ -95,15 +157,77 @@
     "seals": 800,
     "total": 38196.99042235689
    },
-   "bands": {
-    "torque": [
-     15552.0,
-     39744.0
-    ],
-    "thrust": [
-     72000.0,
-     172800.0
-    ]
+   "reference": {
+    "epb": {
+     "torque": [
+      42302.028549962444,
+      47716.660418056366
+     ],
+     "thrust": [
+      148760.33057851242,
+      148760.33057851242
+     ],
+     "machines": [
+      "Crossrail, London",
+      "Mixed-face EPB (RETC 2019)"
+     ]
+    },
+    "slurry": {
+     "torque": [
+      18059.295254139903,
+      18059.295254139903
+     ],
+     "thrust": null,
+     "machines": [
+      "Crossrail, London"
+     ]
+    },
+    "gripper": {
+     "torque": null,
+     "thrust": null,
+     "machines": []
+    }
+   },
+   "reference_all": {
+    "epb": {
+     "torque": [
+      42302.028549962444,
+      47716.660418056366
+     ],
+     "thrust": [
+      148760.33057851242,
+      148760.33057851242
+     ],
+     "machines": [
+      "Crossrail, London",
+      "Mixed-face EPB (RETC 2019)"
+     ]
+    },
+    "slurry": {
+     "torque": [
+      8742.0112377145,
+      18059.295254139903
+     ],
+     "thrust": null,
+     "machines": [
+      "Crossrail, London",
+      "Tuen Mun-Chek Lap Kok, Hong Kong"
+     ]
+    },
+    "gripper": {
+     "torque": [
+      10804.398148148144,
+      11255.23271413707
+     ],
+     "thrust": [
+      12820.83333333333,
+      45471.82101094902
+     ],
+     "machines": [
+      "Niagara Tunnel",
+      "Gotthard Base Tunnel"
+     ]
+    }
    }
   }
  },
@@ -149,15 +273,77 @@
     "seals": 50,
     "total": 657.0335835662237
    },
-   "bands": {
-    "torque": [
-     576.0,
-     1472.0
-    ],
-    "thrust": [
-     8000.0,
-     19200.0
-    ]
+   "reference": {
+    "epb": {
+     "torque": [
+      1566.741798146757,
+      1767.2837191872734
+     ],
+     "thrust": [
+      16528.92561983471,
+      16528.92561983471
+     ],
+     "machines": [
+      "Crossrail, London",
+      "Mixed-face EPB (RETC 2019)"
+     ]
+    },
+    "slurry": {
+     "torque": [
+      668.862787190367,
+      668.862787190367
+     ],
+     "thrust": null,
+     "machines": [
+      "Crossrail, London"
+     ]
+    },
+    "gripper": {
+     "torque": null,
+     "thrust": null,
+     "machines": []
+    }
+   },
+   "reference_all": {
+    "epb": {
+     "torque": [
+      1566.741798146757,
+      1767.2837191872734
+     ],
+     "thrust": [
+      16528.92561983471,
+      16528.92561983471
+     ],
+     "machines": [
+      "Crossrail, London",
+      "Mixed-face EPB (RETC 2019)"
+     ]
+    },
+    "slurry": {
+     "torque": [
+      323.7781939894258,
+      668.862787190367
+     ],
+     "thrust": null,
+     "machines": [
+      "Crossrail, London",
+      "Tuen Mun-Chek Lap Kok, Hong Kong"
+     ]
+    },
+    "gripper": {
+     "torque": [
+      400.16289437585743,
+      416.86047089396556
+     ],
+     "thrust": [
+      1424.5370370370372,
+      5052.424556772114
+     ],
+     "machines": [
+      "Niagara Tunnel",
+      "Gotthard Base Tunnel"
+     ]
+    }
    }
   }
  }

@@ -1,0 +1,137 @@
+{
+  "about": "Class presets for scenarios, named by class, never by brand. Every field is {value, unit, source, verified}: verified = read on the cited page or document during the research pass of 4 Nov 2026; false = search snippet, secondary source or unconfirmed. A null value means no source yet: set it per project, never invent it. See docs/research/methods-reference.md.",
+  "sources": {
+    "HK-CROSSRAIL": "https://herrenknecht.com/en/references/referencesdetail/crossrail-london",
+    "HK-EPB": "https://herrenknecht.com/en/products/productdetail/epb-shield",
+    "HK-MIXSHIELD": "https://herrenknecht.com/en/products/productdetail/mixshield",
+    "HK-DS": "https://herrenknecht.com/en/products/productdetail/double-shield-tbm",
+    "HK-GRIPPER": "https://herrenknecht.com/en/products/productdetail/gripper-tbm",
+    "HK-FOLLO": "https://herrenknecht.com/en/newsroom/pressreleasedetail/rock-solid-tunnelling-double-breakthrough-on-the-follo-line",
+    "HK-GUADARRAMA": "https://herrenknecht.com/en/references/referencesdetail/guadarrama",
+    "TT-GUADARRAMA": "https://tunneltalk.com/Spain-Nov2005-hard-rock-TBM-marathon.php",
+    "TT-GOTTHARD": "https://tunneltalk.com/Gotthard-TBM-safely-across-the-Piora-Mulda.php",
+    "TB-GOTTHARD": "https://tunnelbuilder.com/News/Herrenknecht-TBM-Tackles-Gotthard-Base-Tunnel-from-North.aspx",
+    "ROBBINS-RETC2019": "https://www.robbinstbm.com/wp-content/uploads/2019/07/RETC2019-14-05_Tunneling-in-Mixed-Face-Conditions.pdf",
+    "TNT-MOSCOW": "https://tunnelsandtunnelling.com/?p=5953",
+    "METROLINK-A5.14": "https://www.pleanala.ie/publicaccess/EIAR-NIS/314724/5_EIAR/Volume%205%20Appendices/Chapter%2005%20MetroLink%20Construction%20Phase/A5.14%20TBM%20Consumables.pdf",
+    "DAUB-SELECTION-2025": "https://www.daub-ita.de/fileadmin/documents/daub/gtcrec1/2025-08_Selection_of_Tunnel_Borng_Machines.pdf",
+    "DAUB-SEGMENTS-2024": "https://www.daub-ita.de/fileadmin/documents/daub/gtcrec2/2024-12_Tuebbingdesign_EN_final_web.pdf",
+    "ROSTAMI-CHANG-2017": "https://www.engineering.org.cn/engi/EN/1159834608697140017",
+    "FHWA-2009": "https://www.fhwa.dot.gov/bridge/tunnel/pubs/nhi09010/tunnel_manual.pdf",
+    "NTNU-DB-2023": "https://link.springer.com/10.1007/s00603-023-03585-9",
+    "GH-JUMBO": "https://www.globalhighways.com/wh10/feature/sandviks-dt1131i-jumbo-and-isure-software-iceland-and-norway",
+    "TOL-DB": "https://tunnelingonline.com/advancements-in-tunneling-and-underground-excavation-by-drill-blast/"
+  },
+  "presets": [
+    {
+      "id": "urban-epb-7m",
+      "class": "7 m urban EPB",
+      "method": "epb",
+      "basis": "Crossrail-class EPB",
+      "fields": {
+        "diameter": {"value": 7.08, "unit": "m", "source": "HK-CROSSRAIL", "verified": true},
+        "cutterhead_torque": {"value": 9800, "unit": "kNm", "source": "HK-CROSSRAIL", "verified": true},
+        "cutterhead_power": {"value": 1920, "unit": "kW", "source": "HK-CROSSRAIL", "verified": true},
+        "cutterhead_rpm_max": {"value": 3.19, "unit": "rpm", "source": "TunnelTalk Crossrail article, Dec 2011", "verified": false},
+        "thrust_max": {"value": null, "unit": "kN", "source": null, "verified": false, "note": "not on the reference page; a 6.6 m mixed-face EPB has 45,000 kN (ROBBINS-RETC2019)"},
+        "screw_rpm_max": {"value": 22, "unit": "rpm", "source": "ROBBINS-RETC2019", "verified": true, "note": "6.6 m mixed-face EPB"},
+        "face_pressure_range": {"value": [1, 4], "unit": "bar", "source": "DAUB-SELECTION-2025", "verified": true, "note": "main range of application"},
+        "ring_width": {"value": 1.2, "unit": "m", "source": "TNT-MOSCOW", "verified": true},
+        "segments_per_ring": {"value": "6 + key", "unit": null, "source": "TNT-MOSCOW", "verified": true},
+        "push_time": {"value": 16, "unit": "min", "source": "TNT-MOSCOW", "verified": true},
+        "ring_build_time": {"value": 35, "unit": "min", "source": "TNT-MOSCOW", "verified": true},
+        "lining": {"value": "precast segments, universal ring with tapered key", "unit": null, "source": "DAUB-SEGMENTS-2024", "verified": true},
+        "annulus_fill": {"value": "two-component grout through the tailskin during the shove", "unit": null, "source": "METROLINK-A5.14", "verified": true},
+        "tail_seal": {"value": "3-4 rows of wire brushes, grease 35-40 kg per metre", "unit": null, "source": "METROLINK-A5.14", "verified": true},
+        "muck_path": {"value": "screw conveyor to belt conveyor or muck cars", "unit": null, "source": "HK-EPB", "verified": true},
+        "fir_range": {"value": [0.35, 0.6], "unit": "fraction", "source": "Rome Metro C laboratory study (Politecnico di Torino)", "verified": false},
+        "fer_range": {"value": [8, 15], "unit": "-", "source": "Politecnico di Torino study", "verified": false}
+      }
+    },
+    {
+      "id": "urban-mixshield-7m",
+      "class": "7 m urban slurry (Mixshield)",
+      "method": "slurry",
+      "basis": "Crossrail-class Mixshield",
+      "fields": {
+        "diameter": {"value": 7.08, "unit": "m", "source": "HK-CROSSRAIL", "verified": true},
+        "cutterhead_torque": {"value": 3709, "unit": "kNm", "source": "HK-CROSSRAIL", "verified": true},
+        "cutterhead_power": {"value": 1120, "unit": "kW", "source": "HK-CROSSRAIL", "verified": true},
+        "face_support": {"value": "bentonite slurry; air cushion behind a submerged wall", "unit": null, "source": "HK-MIXSHIELD", "verified": true},
+        "muck_path": {"value": "crusher, feed and return pipes, separation plant at the portal", "unit": null, "source": "HK-MIXSHIELD", "verified": true},
+        "lining": {"value": "precast segments", "unit": null, "source": "HK-CROSSRAIL", "verified": true},
+        "ring_width": {"value": null, "unit": "m", "source": null, "verified": false}
+      }
+    },
+    {
+      "id": "hard-rock-double-shield-10m",
+      "class": "10 m hard-rock double shield",
+      "method": "double_shield",
+      "basis": "Follo-class (4 machines, gneiss up to 300 MPa); Guadarrama for lining and rates",
+      "fields": {
+        "diameter": {"value": 9.96, "unit": "m", "source": "HK-FOLLO", "verified": false},
+        "rock_ucs_max": {"value": 300, "unit": "MPa", "source": "HK-FOLLO", "verified": false},
+        "cutterhead_rpm_max": {"value": 6.4, "unit": "rpm", "source": "ROSTAMI-CHANG-2017", "verified": true, "note": "gauge speed limit 200 m/min for 19-inch discs: 200 / (pi * 9.96)"},
+        "cutterhead_torque": {"value": null, "unit": "kNm", "source": null, "verified": false},
+        "thrust_max": {"value": null, "unit": "kN", "source": null, "verified": false},
+        "lining": {"value": "precast segments (optional in ideal rock), built while boring", "unit": null, "source": "HK-DS", "verified": true},
+        "segment_thickness": {"value": 0.32, "unit": "m", "source": "TT-GUADARRAMA", "verified": false, "note": "Guadarrama, 9.51 m bore"},
+        "annulus_fill": {"value": "pea gravel and grout", "unit": null, "source": "HK-DS", "verified": false},
+        "muck_path": {"value": "buckets to centre belt, backup conveyor", "unit": null, "source": "HK-DS", "verified": true},
+        "best_week": {"value": 155, "unit": "m", "source": "HK-FOLLO", "verified": false},
+        "average_per_production_day": {"value": 16.8, "unit": "m", "source": "TT-GUADARRAMA", "verified": false, "note": "Guadarrama"}
+      }
+    },
+    {
+      "id": "hard-rock-main-beam-9.5m",
+      "class": "9.5 m hard-rock open gripper (main beam)",
+      "method": "gripper",
+      "basis": "Gotthard-class gripper TBM",
+      "fields": {
+        "diameter": {"value": 9.58, "unit": "m", "source": "TT-GOTTHARD", "verified": false},
+        "cutterhead_rpm_max": {"value": 6.6, "unit": "rpm", "source": "ROSTAMI-CHANG-2017", "verified": true, "note": "gauge speed limit 200 m/min for 19-inch discs: 200 / (pi * 9.58)"},
+        "cutterhead_torque": {"value": 5290, "unit": "kNm", "source": "TB-GOTTHARD", "verified": false},
+        "cutterhead_power": {"value": 3500, "unit": "kW", "source": "TB-GOTTHARD", "verified": false},
+        "thrust_max": {"value": 27488, "unit": "kN", "source": "TB-GOTTHARD", "verified": false},
+        "support_l1": {"value": "rock bolts, mesh, steel ring beams; probe drilling", "unit": null, "source": "HK-GRIPPER", "verified": true},
+        "support_l2": {"value": "shotcrete; often precast invert segments", "unit": null, "source": "HK-GRIPPER", "verified": true},
+        "support_fault_zone": {"value": "steel ribs at 1 m centres behind the head, immediate shotcrete seal", "unit": null, "source": "TT-GOTTHARD", "verified": true},
+        "final_lining": {"value": "cast-in-place concrete with membrane", "unit": null, "source": "TT-GOTTHARD", "verified": true},
+        "muck_path": {"value": "buckets, chutes and muck ring to the machine belt, backup conveyor", "unit": null, "source": "HK-GRIPPER", "verified": true},
+        "stroke": {"value": null, "unit": "m", "source": null, "verified": false, "note": "1.2-1.8 m reported only on a practitioner forum"}
+      }
+    },
+    {
+      "id": "sem-stiff-soil",
+      "class": "SEM / NATM heading in stiff soil",
+      "method": "sem",
+      "basis": "FHWA (2009) chapter 9",
+      "fields": {
+        "cross_section": {"value": null, "unit": "m2", "source": null, "verified": false, "note": "set per project"},
+        "round_length_top_heading": {"value": 1.0, "unit": "m", "source": "FHWA-2009", "verified": true, "note": "Fort Canning example"},
+        "round_length_bench_invert": {"value": 2.0, "unit": "m", "source": "FHWA-2009", "verified": true, "note": "Fort Canning example"},
+        "primary_shotcrete": {"value": [150, 400], "unit": "mm", "source": "FHWA-2009", "verified": true, "note": "Table 9-2, with mesh or fibres"},
+        "lattice_girders": {"value": "when shotcrete is thicker than about 150 mm", "unit": null, "source": "FHWA-2009", "verified": true},
+        "ring_closure_distance": {"value": "within about one diameter of the face, less below the water table", "unit": null, "source": "FHWA-2009", "verified": true},
+        "waterproofing": {"value": "PVC membrane, compartmented", "unit": null, "source": "FHWA-2009", "verified": true},
+        "final_lining": {"value": 300, "unit": "mm cast-in-place", "source": "FHWA-2009", "verified": true},
+        "final_lining_trigger": {"value": "convergence below 1 mm per month", "unit": null, "source": "FHWA-2009", "verified": true}
+      }
+    },
+    {
+      "id": "drill-blast-road",
+      "class": "Drill & blast road tunnel in medium to hard rock",
+      "method": "drill_blast",
+      "basis": "FHWA (2009) table 6-9; Nordic practice",
+      "fields": {
+        "cross_section": {"value": null, "unit": "m2", "source": null, "verified": false, "note": "set per project"},
+        "hole_length": {"value": 5.0, "unit": "m", "source": "NTNU-DB-2023", "verified": true, "note": "NTNU model standard"},
+        "cycle_time_per_round": {"value": 7, "unit": "h", "source": "GH-JUMBO", "verified": true, "note": "3-boom jumbo, about 5 m rounds"},
+        "planned_advance_per_week": {"value": 80, "unit": "m", "source": "GH-JUMBO", "verified": true},
+        "support_by_rmr": {"value": "FHWA table 6-9: spot bolts (I) to heavy ribs, forepoling and closed invert (V)", "unit": null, "source": "FHWA-2009", "verified": true},
+        "final_lining": {"value": "shotcrete (Nordic) or membrane + cast-in-place (Alpine)", "unit": null, "source": "TOL-DB", "verified": true},
+        "pull_fraction": {"value": [0.9, 0.95], "unit": "fraction", "source": null, "verified": false, "note": "search snippets only"}
+      }
+    }
+  ]
+}

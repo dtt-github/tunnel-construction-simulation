@@ -4,8 +4,8 @@ References
 - Shi, H., Yang, H., Gong, G., Wang, L. (2011). Determination of the cutterhead torque for EPB shield tunneling machine.
   Automation in Construction 20(8), 1087-1095, doi:10.1016/j.autcon.2011.04.010. (Torque = cutting tools + front-face
   friction + rim friction + back-face friction + mixing arms + seals; opening ratio and earth pressure dominate.)
-- Krause, T. (1987). Schildvortrieb mit flüssigkeits- und erdgestützter Ortsbrust. Dissertation, TU Braunschweig.
-  (Empirical installed torque M = alpha D^3, used here only as a sanity band.)
+- Installed torque and thrust of built machines (REFERENCE_MACHINES, each with its source) for the plausibility check.
+  The empirical band M = alpha D^3 (Krause 1987) is not used: modern EPB machines exceed it.
 
 Thrust (kN):
     F_face   = p_axis * pi D^2 / 4                       chamber (support) pressure on the bulkhead and cutterhead
@@ -35,10 +35,41 @@ from dataclasses import dataclass
 
 GAMMA_W = 10.0
 
-# Empirical sanity bands, ranges vary by source and are not checked against the originals:
-# installed torque alpha D^3 and thrust beta D^2.
-KRAUSE_ALPHA = (9.0, 23.0)  # kNm/m^3
-THRUST_BETA = (500.0, 1200.0)  # kN/m^2
+# Built machines: installed (or stated working) cutterhead torque and thrust. "verified": figures read on the source
+# page; False for figures from search snippets or secondary sources only.
+REFERENCE_MACHINES = (
+    {"project": "Crossrail, London", "type": "epb", "diameter": 7.08, "torque_knm": 9800.0, "thrust_kn": None,
+     "power_kw": 1920.0, "torque_kind": "installed", "verified": True,
+     "source": "https://herrenknecht.com/en/references/referencesdetail/crossrail-london"},
+    {"project": "Mixed-face EPB (RETC 2019)", "type": "epb", "diameter": 6.6, "torque_knm": 7038.0, "thrust_kn": 45000.0,
+     "power_kw": None, "torque_kind": "working", "verified": True,
+     "source": "https://www.robbinstbm.com/wp-content/uploads/2019/07/RETC2019-14-05_Tunneling-in-Mixed-Face-Conditions.pdf"},
+    {"project": "Crossrail, London", "type": "slurry", "diameter": 7.08, "torque_knm": 3709.0, "thrust_kn": None,
+     "power_kw": 1120.0, "torque_kind": "installed", "verified": True,
+     "source": "https://herrenknecht.com/en/references/referencesdetail/crossrail-london"},
+    {"project": "Tuen Mun-Chek Lap Kok, Hong Kong", "type": "slurry", "diameter": 17.63, "torque_knm": 27722.0,
+     "thrust_kn": None, "power_kw": 5600.0, "torque_kind": "installed", "verified": False,
+     "source": "https://herrenknecht.com/en/references/referencesdetail/hong-kong-tuen-mun-chek-lap-kok-link"},
+    {"project": "Niagara Tunnel", "type": "gripper", "diameter": 14.4, "torque_knm": 18670.0, "thrust_kn": 18462.0,
+     "power_kw": None, "torque_kind": "installed", "verified": False,
+     "source": "https://www.robbinstbm.com/projects/niagara-tunnel-project/"},
+    {"project": "Gotthard Base Tunnel", "type": "gripper", "diameter": 9.33, "torque_knm": 5290.0, "thrust_kn": 27488.0,
+     "power_kw": 3500.0, "torque_kind": "installed", "verified": False,
+     "source": "trade press via search (Tunnelbuilder)"},
+)
+
+
+def reference_installed(machine_type: str, diameter: float, *, include_unverified: bool = False) -> dict:
+    """Reference machines of one type, scaled to `diameter` (torque by D^3, thrust by D^2).
+
+    Returns {"torque": (lo, hi) | None, "thrust": (lo, hi) | None, "machines": [...]} in kNm and kN. A required
+    torque or thrust above the scaled range exceeds every built reference machine of that type.
+    """
+    refs = [m for m in REFERENCE_MACHINES if m["type"] == machine_type and (include_unverified or m["verified"])]
+    tq = [m["torque_knm"] * (diameter / m["diameter"]) ** 3 for m in refs]
+    th = [m["thrust_kn"] * (diameter / m["diameter"]) ** 2 for m in refs if m["thrust_kn"] is not None]
+    return {"torque": (min(tq), max(tq)) if tq else None, "thrust": (min(th), max(th)) if th else None,
+            "machines": [m["project"] for m in refs]}
 
 
 def vertical_stress(depth: float, gamma: float, *, gamma_sub: float | None = None, water_depth: float = math.inf,
@@ -117,10 +148,3 @@ def cutterhead_torque(diameter: float, p_axis: float, sigma_n: float, *, opening
         arms=n_arms * mu_chamber * p_axis * arm_area * arm_radius,
         seals=seals,
     )
-
-
-def sanity_bands(diameter: float) -> dict[str, tuple[float, float]]:
-    """Empirical installed-torque (kNm) and thrust (kN) bands for this diameter."""
-    d = diameter
-    return {"torque": (KRAUSE_ALPHA[0] * d**3, KRAUSE_ALPHA[1] * d**3),
-            "thrust": (THRUST_BETA[0] * d**2, THRUST_BETA[1] * d**2)}

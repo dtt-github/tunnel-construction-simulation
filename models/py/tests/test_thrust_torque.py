@@ -3,7 +3,7 @@ import math
 
 import pytest
 
-from tunnelsim_models.thrust_torque import cutterhead_torque, sanity_bands, shield_thrust, tool_torque, vertical_stress
+from tunnelsim_models.thrust_torque import REFERENCE_MACHINES, cutterhead_torque, reference_installed, shield_thrust, tool_torque, vertical_stress
 
 
 def test_vertical_stress():
@@ -20,10 +20,10 @@ def test_thrust_hand():
     assert t.shield == pytest.approx(0.3 * (math.pi * 7 * 9 * 210 * 0.75 + 4000))
     assert t.backup == pytest.approx(600)
     assert t.total == pytest.approx(t.face + t.shield + 1000 + 500 + 600)
-    # shield friction dominates for a long shield in soft ground, and the total stays below the installed band
+    # shield friction dominates for a long shield in soft ground, and the total stays below built 7 m EPBs
     assert t.shield > t.face
-    lo, hi = sanity_bands(7)["thrust"]
-    assert t.total < hi
+    lo, hi = reference_installed("epb", 7)["thrust"]
+    assert t.total < lo
 
 
 def test_torque_hand():
@@ -36,8 +36,8 @@ def test_torque_hand():
     assert q.rim == pytest.approx(2 * math.pi * r * r * 0.5 * 0.3 * 157.5)
     assert q.arms == pytest.approx(4 * 0.1 * 200 * 0.5 * 2.5)
     assert q.tools == pytest.approx(60 * 5 * 0.5 * r)
-    lo, hi = sanity_bands(7)["torque"]
-    assert lo < q.total < hi
+    lo, hi = reference_installed("epb", 7)["torque"]
+    assert q.total < lo  # required torque below what built 7 m EPBs carry
 
 
 def test_torque_trends():
@@ -51,3 +51,18 @@ def test_torque_trends():
     assert b.face / a.face == pytest.approx(8)
     with pytest.raises(ValueError):
         cutterhead_torque(7, 200, 150, opening_ratio=1.0)
+
+
+def test_reference_machines():
+    ref = reference_installed("epb", 7.08)
+    assert ref["torque"][1] == pytest.approx(9800)  # Crossrail at its own diameter
+    assert reference_installed("epb", 6.6)["thrust"] == pytest.approx((45000, 45000))
+    # scaling: torque with D^3, thrust with D^2
+    half = reference_installed("epb", 3.54)
+    assert half["torque"][1] == pytest.approx(9800 / 8)
+    assert reference_installed("epb", 3.3)["thrust"][1] == pytest.approx(45000 / 4)
+    # unverified entries only with the flag
+    assert reference_installed("gripper", 9)["torque"] is None
+    assert reference_installed("gripper", 9, include_unverified=True)["torque"] is not None
+    for m in REFERENCE_MACHINES:
+        assert m["source"] and m["type"] in ("epb", "slurry", "gripper")

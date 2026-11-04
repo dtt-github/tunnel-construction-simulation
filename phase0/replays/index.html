@@ -147,7 +147,7 @@ dl.facts dd { margin: 0; font-family: var(--font-mono); font-variant-numeric: ta
         <div id="what"></div>
       </div>
       <div class="card">
-        <h2>Live readouts</h2>
+        <h2>Recorded readouts</h2>
         <div class="readouts" id="readouts"></div>
       </div>
       <div class="card chart-card">
@@ -292,7 +292,7 @@ const RUNS = {
       const r = meta.scene.result;
       return `<p>A ${meta.scene.diameter} m shield in dry sand (φ ≈ 37°, cover = 1 D). The face plate is held for 1 s, then pulled back into the shield at ${meta.scene.speed * 1000} mm/s.</p>
         <p>As the plate retreats, the support pressure drops and a failure zone forms ahead of the face and runs up towards the surface. Brighter particles have moved further.</p>
-        <p>Limit pressure here: <b>${r.p_limit_kPa} kPa</b>, against <b>${r.p_vermeer_kPa} kPa</b> from Vermeer et al. (2002) (ratio ${r.ratio_sim_over_vermeer}). At this real-time grid, MPM under-predicts; a grid twice as fine reaches 0.79.</p>`;
+        <p>Limit pressure here: <b>${r.p_limit_kPa} kPa</b>, against <b>${r.p_vermeer_kPa} kPa</b> from Vermeer et al. (2002) (ratio ${r.ratio_sim_over_vermeer}). At this real-time grid MPM under-predicts the limit by about half; a grid twice as fine reaches 0.79 of the reference. Dry sand, a 2 m model shield and a plate retracting at a fixed speed: a benchmark of the method, not a full-scale machine.</p>`;
     },
     chart: { title: "Support pressure on the face plate", series: [["pressure_kPa", "Plate pressure", "--series-1"]], unit: "kPa", ref: (m) => [m.scene.result.p_vermeer_kPa, "Vermeer et al. (2002)"] },
     note: "Dashed: Vermeer, Ruse & Marcher (2002), p_f = γ D (1 / (9 tan φ) − 0.05). Click the chart to jump.",
@@ -354,15 +354,16 @@ const RUNS = {
     update(i, sc) { this.head.rotation.x = sc.cutter_angle[i]; this.spin.rotation.x = sc.screw_angle[i]; },
     readouts: [
       ["t", "Time", "s", 2],
-      ["cutter_torque_kNm", "Cutterhead torque", "kNm", 0],
+      ["cutter_torque_kNm", "Cutterhead torque (mixing only)", "kNm", 0],
       ["screw_torque_kNm", "Screw torque", "kNm", 1],
       ["p_axis_kPa", "Bulkhead, axis", "kPa", 1],
     ],
     what(meta) {
       const r = meta.scene.result;
-      return `<p>A 6 m EPB excavation chamber full of conditioned soil (μ = 0.35, 2 kPa cohesion). Spokes and mixing arms turn at ${meta.scene.cutter.rpm} rpm; the screw conveyor at the invert turns at ${meta.scene.screw.rpm} rpm and lifts soil out behind the bulkhead.</p>
+      return `<p>A 6 m EPB excavation chamber full of conditioned soil (μ = 0.35, 2 kPa cohesion). Spokes and mixing arms turn at ${meta.scene.cutter.rpm} rpm; the screw conveyor at the invert turns at ${meta.scene.screw.rpm} rpm.</p>
         <p>The cut-away shows the half y < 0. Brighter particles move faster: the soil stirred by the arms and the plug travelling up the screw.</p>
-        <p>Pressure on the bulkhead rises with depth (top ${r.p_top_kPa}, axis ${r.p_axis_kPa}, bottom ${r.p_bottom_kPa} kPa). This 0.2 m grid is visual grade for the screw, whose discharge is not yet calibrated.</p>`;
+        <p>Pressure on the bulkhead rises with depth (top ${r.p_top_kPa}, axis ${r.p_axis_kPa}, bottom ${r.p_bottom_kPa} kPa). It comes from gravity only: the piston advances at the real rate with no pressure control, so the level is far below the 1–4 bar of an operating EPB.</p>
+        <p><b>Limits of this run.</b> The cutterhead torque is from stirring the chamber soil; there is no cutting at the face. The screw is starved at this grid and its discharge is not credible yet. Phase 0 tested speed and stability, not machine performance.</p>`;
     },
     chart: { title: "Bulkhead pressure by height", series: [["p_top_kPa", "Top", "--series-1"], ["p_axis_kPa", "Axis", "--series-2"], ["p_bottom_kPa", "Bottom", "--series-3"]], unit: "kPa", ref: null },
     note: "Sensor bands at 0.5 R above the axis, at the axis and 0.5 R below, clear of the screw opening. Click the chart to jump.",

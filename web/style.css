@@ -35,3 +35,5 @@ footer a { color: var(--accent); }
 @media (max-width: 640px) {
   #console { top: auto; bottom: 0; right: 0; left: 0; width: auto; max-height: 45%; border-radius: 8px 8px 0 0; }
 }
+
+.rebuild { margin: 8px 0 0; padding: 8px 10px; border-left: 3px solid #e0a24a; background: rgba(224, 162, 74, 0.12); font-size: 12px; line-height: 1.45; }

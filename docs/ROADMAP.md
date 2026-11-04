@@ -46,20 +46,20 @@ Sources:
 ## Phase R: realism reset (now, before any new demo work)
 
 - [x] Sourced reference card per method ([methods-reference](research/methods-reference.md))
-- [ ] Public site:
-  - take the hard-rock demo off the landing page, or label it "being rebuilt", until slice B is done;
-  - correct the replay viewer text:
+- [x] Public site:
+  - [x] label the hard-rock demo "being rebuilt" on the landing page and on the demo itself, until slice B is done;
+  - [x] correct the replay viewer text:
     - "Live readouts" → "Recorded readouts";
     - EPB torque comes from chamber mixing only, with no cutting;
     - the screw is starved and not credible yet;
     - the chamber pressure is gravity-only, with no pressure control.
-- [ ] Replace the Krause α·D³ torque band with a table of reference machines. Modern EPBs exceed it: Crossrail 7.08 m has 9.8 MNm.
-- [ ] Class presets as data (JSON, with a citation on every field), built from the reference projects in the method cards:
+- [x] Replace the Krause α·D³ torque band with a table of reference machines. Modern EPBs exceed it: Crossrail 7.08 m has 9.8 MNm.
+- [x] Class presets as data ([machine-classes.json](../models/presets/machine-classes.json), a source and a verified flag on every field; unsourced fields left empty), built from the reference projects in the method cards:
   - 7 m urban EPB;
   - 10 m double shield;
   - 9.5 m main beam;
   - 7 m Mixshield;
-  - SEM station cavern;
+  - SEM heading in stiff soil;
   - drill & blast road tunnel.
 - [ ] Realism checklist template, used by every demo PR
 

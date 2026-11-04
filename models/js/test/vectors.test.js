@@ -3,7 +3,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { cutterForces, tbmPerformance, hoekBrown, gaussianTrough, presetTrough, twinTroughs, burlandCategory, wedgeSilo, daubWindow, siloStress, chamber, screw, crownPressure, shieldThrust, cutterheadTorque, verticalStress, sanityBands } from "../index.js";
+import { cutterForces, tbmPerformance, hoekBrown, gaussianTrough, presetTrough, twinTroughs, burlandCategory, wedgeSilo, daubWindow, siloStress, chamber, screw, crownPressure, shieldThrust, cutterheadTorque, verticalStress, referenceInstalled } from "../index.js";
 
 const vec = (name) => JSON.parse(readFileSync(new URL(`../../test-vectors/${name}.json`, import.meta.url)));
 
@@ -112,6 +112,8 @@ test("thrust and torque match python", () => {
     const th = shieldThrust(i.d, i.ln, i.z, i.g, i.p, { k0: i.k0, muShield: i.mus, shieldWeight: i.ws, tools: i.tools, tailSeal: i.tail, backupWeight: i.wb, ...water });
     const sn = (verticalStress(i.z, i.g, water) * (1 + i.k0)) / 2;
     const tq = cutterheadTorque(i.d, i.p, sn, { openingRatio: i.xi, nArms: i.na, armArea: i.aa, armRadius: i.ar, tools: i.ttool, seals: i.seals });
-    close({ sv_eff: verticalStress(i.z, i.g, water), sv_total: verticalStress(i.z, i.g, { ...water, effective: false }), thrust: th, sigma_n: sn, torque: tq, bands: sanityBands(i.d) }, out, `D=${i.d}`);
+    close({ sv_eff: verticalStress(i.z, i.g, water), sv_total: verticalStress(i.z, i.g, { ...water, effective: false }), thrust: th, sigma_n: sn, torque: tq,
+      reference: Object.fromEntries(["epb", "slurry", "gripper"].map((t) => [t, referenceInstalled(t, i.d)])),
+      reference_all: Object.fromEntries(["epb", "slurry", "gripper"].map((t) => [t, referenceInstalled(t, i.d, { includeUnverified: true })])) }, out, `D=${i.d}`);
   }
 });
