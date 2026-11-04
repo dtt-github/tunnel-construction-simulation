@@ -32,4 +32,5 @@ These values are in `web/epb/main.js`:
 
 - [x] Downtime and utilisation model (roadmap model 12), so that advance per day is realistic.
 - [x] Record-rate check of best day, week and month for the diameter class.
+- [ ] Thrust and torque bars: on open field data (Changsha Metro Line 4, 281 rings) the default coefficients over-predict thrust ×1.43 and torque ×1.70 ([validation](../validation/epb-open-data.md)). Recalibrate the shield and rim terms after a third dataset with published site parameters.
 - [ ] Volume loss responding to face-pressure deficit and grout filling. This needs a published relation; until then volume loss stays a labelled scenario input.

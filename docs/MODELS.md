@@ -12,7 +12,7 @@ Every model exists twice: a Python reference in [`models/py/tunnelsim_models/`](
 | [Face support pressure](#face-support-pressure) | `face_support.py` | `face_support.js` | Hand-checked; seepage not yet modelled |
 | [EPB chamber and screw conveyor](#epb-chamber-and-screw-conveyor) | `epb_chamber.py` | `epb_chamber.js` | Hand-checked; screw simplified |
 | [Slurry shield (Mixshield)](#slurry-shield-mixshield) | `slurry.py` | `slurry.js` | Reproduces the DAUB worked example; air cushion is this project's derivation |
-| [Thrust and torque](#thrust-and-torque) | `thrust_torque.py` | `thrust_torque.js` | Hand-checked; friction coefficients illustrative |
+| [Thrust and torque](#thrust-and-torque) | `thrust_torque.py` | `thrust_torque.js` | Hand-checked; against open field data the defaults over-predict thrust ×1.4 and torque ×1.7 ([validation](validation/epb-open-data.md)) |
 | [Hard-rock drive](#hard-rock-drive) | `hard_rock.py` | `hard_rock.js` | Reproduces Farrokh's worked example within 3 %; support curve digitised |
 | [Ground response and squeezing](#ground-response-and-squeezing) | `ground_response.py` | `ground_response.js` | Reproduces Hoek's and Hoek & Marinos's worked examples; shield friction a screening estimate |
 | [SEM / NATM sprayed concrete lining](#sem--natm-sprayed-concrete-lining) | `sem.py` | `sem.js` | Checked against Brenner shotcrete data and Oreste's trends; Sulem parameters from one site |
@@ -196,6 +196,8 @@ The ground stress on the shield is effective or total vertical stress, with a wa
 
 - friction coefficients are illustrative;
 - the Krause α·D³ band was dropped because modern EPBs exceed it.
+
+**Against open field data** ([validation](validation/epb-open-data.md)): on 281 Changsha Metro Line 4 rings the defaults give a median 1.43× the measured thrust and 1.70× the measured torque. Shield skin friction and rim friction are the excess. The data fit a shield friction near 0.17 and a much smaller rim term. Ring-to-ring scatter is not reproduced (correlation ≈ 0). The defaults are unchanged until a third dataset with published site parameters is checked.
 
 ## Hard-rock drive
 

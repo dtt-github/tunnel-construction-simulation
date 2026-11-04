@@ -28,3 +28,6 @@ phase0/replays/*.b64.txt
 
 # Local outreach drafts (never published)
 outreach/
+
+# Downloaded validation data (open licences; fetched by the scripts)
+models/py/validation/.cache/
