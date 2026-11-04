@@ -13,6 +13,12 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
   - thrust and torque breakdown;
   - surface settlement with Burland categories for buildings.
   - Assumptions and gaps are listed in its [realism checklist](docs/realism/epb-slice-a.md).
+- **Urban slurry shield (Mixshield)** (Slice C, `web/slurry/`):
+  - a 7.08 m Crossrail-class Mixshield built from the EPB page: submerged wall, air cushion over the working-chamber slurry, pressure bulkhead, jaw crusher at the suction, DN300 feed and discharge lines, ring of 7 segments + key;
+  - support pressure held by the air regulator within ±10 kPa; discharge pump on level control or manual, with pump interlocks; circuit in bypass between pushes;
+  - filter cake or penetration at the face from the bentonite yield point and the ground's d₁₀, with the share of support transferred;
+  - discharge density, dry-mass balance against the theoretical, pipe velocities against the deposit limit.
+  - New `slurry` model (Python + JavaScript); its realism checklist is [here](docs/realism/slurry-mixshield.md).
 - **SEM / NATM heading** (Slice D, `web/sem/`):
   - top heading, bench and invert by FHWA ground class;
   - lattice girders, pipe canopies and a temporary invert in the fault zone, with ring closure within one diameter;

@@ -3,7 +3,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { cutterForces, tbmPerformance, hoekBrown, gaussianTrough, presetTrough, twinTroughs, burlandCategory, wedgeSilo, daubWindow, siloStress, chamber, screw, crownPressure, shieldThrust, cutterheadTorque, verticalStress, referenceInstalled, Rng, normalInv, sample as sampleDist, DIST, simulateDrive, recordCheck, maxRpm, cutterChangeHPerKm, supportDowntime, rmrClass, hardRockUtilisation, equivalentMohrCoulomb, groundReaction, pressureForDisplacement, ldp, squeezingStrain, squeezingClass, ringSupport, steelSetSupport, boltSupport, combine, supportEquilibrium, shieldFriction, shotcreteModulus, shotcreteStrength, mc90Modulus, earlyStrengthClass, fictitiousPressure, liningInteraction, sulemConvergence, triggerLevel } from "../index.js";
+import { cutterForces, tbmPerformance, hoekBrown, gaussianTrough, presetTrough, twinTroughs, burlandCategory, wedgeSilo, daubWindow, siloStress, chamber, screw, crownPressure, shieldThrust, cutterheadTorque, verticalStress, referenceInstalled, Rng, normalInv, sample as sampleDist, DIST, simulateDrive, recordCheck, maxRpm, cutterChangeHPerKm, supportDowntime, rmrClass, hardRockUtilisation, equivalentMohrCoulomb, groundReaction, pressureForDisplacement, ldp, squeezingStrain, squeezingClass, ringSupport, steelSetSupport, boltSupport, combine, supportEquilibrium, shieldFriction, shotcreteModulus, shotcreteStrength, mc90Modulus, earlyStrengthClass, fictitiousPressure, liningInteraction, sulemConvergence, triggerLevel, infiltration as slurryInfiltration, cushion, dischargeDensity, drySolidsFlow, theoreticalDryFlow, durandVelocity, pipeVelocity, excessPorePressure } from "../index.js";
 
 const vec = (name) => JSON.parse(readFileSync(new URL(`../../test-vectors/${name}.json`, import.meta.url)));
 
@@ -168,4 +168,16 @@ test("sem models match python", () => {
   }
   for (const [x, t, c] of v.sulem) close(sulemConvergence(x, t, 20, 4.6, 6, 5.7, 0.3), c, `sulem ${x} ${t}`);
   for (const [m, lvl] of v.triggers) assert.equal(triggerLevel(m, 10), lvl);
+});
+
+test("slurry models match python", () => {
+  const v = vec("slurry");
+  for (const { in: a, out } of v.inf) close(slurryInfiltration(...a), out, `infiltration ${a}`);
+  const c = cushion(12);
+  let st = { p_air: 200, level: 0.5, air_volume: 20 };
+  v.cushion.forEach((exp, i) => { st = c.step(st, 1, 0.25, i < 15 ? 0.04 : 0, i < 20 ? 0.25 : 0.3, 200); close(st, exp, `cushion ${i}`); });
+  const area = (Math.PI * 7.08 ** 2) / 4, adv = 0.04 / 60;
+  const [qd, rd] = dischargeDensity(0.25, 1.05, area, adv, 2.0);
+  close({ qd, rd, dry: drySolidsFlow(0.25, 1.05, qd, rd), theo: theoreticalDryFlow(area, adv, 2.0), durand: durandVelocity(0.3), vpipe: pipeVelocity(1000 / 3600, 0.3),
+    pore: excessPorePressure(5, 30, 1e-4, 10, 1e6) }, v.circuit, "circuit");
 });

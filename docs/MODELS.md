@@ -11,6 +11,7 @@ Every model exists twice: a Python reference in [`models/py/tunnelsim_models/`](
 | [Settlement and building damage](#settlement-and-building-damage) | `settlement.py` | `settlement.js` | Hand-checked; checked privately against published case histories |
 | [Face support pressure](#face-support-pressure) | `face_support.py` | `face_support.js` | Hand-checked; seepage not yet modelled |
 | [EPB chamber and screw conveyor](#epb-chamber-and-screw-conveyor) | `epb_chamber.py` | `epb_chamber.js` | Hand-checked; screw simplified |
+| [Slurry shield (Mixshield)](#slurry-shield-mixshield) | `slurry.py` | `slurry.js` | Reproduces the DAUB worked example; air cushion is this project's derivation |
 | [Thrust and torque](#thrust-and-torque) | `thrust_torque.py` | `thrust_torque.js` | Hand-checked; friction coefficients illustrative |
 | [Hard-rock drive](#hard-rock-drive) | `hard_rock.py` | `hard_rock.js` | Reproduces Farrokh's worked example within 3 %; support curve digitised |
 | [Ground response and squeezing](#ground-response-and-squeezing) | `ground_response.py` | `ground_response.js` | Reproduces Hoek's and Hoek & Marinos's worked examples; shield friction a screening estimate |
@@ -121,7 +122,41 @@ What it computes:
 **Limits:**
 
 - screw efficiency and decay length are illustrative defaults;
-- no slurry branch yet.
+- the slurry branch is a separate model: [slurry shield](#slurry-shield-mixshield).
+
+## Slurry shield (Mixshield)
+
+What it computes:
+
+- the stagnation gradient f_s0 = 3.5 τ_f / d₁₀ and whether a filter cake (membrane) forms, at f_s0 ≥ 200 kN/m³ (DIN 4126);
+- the slurry penetration e_max = Δp d₁₀ / (α τ_f), with α = 3.5 by default (2–4 in the literature), and its growth in time e(t) = e_max t / (a + t) (Krause);
+- the share of the support force transferred to the sliding wedge, approximated as 1 − e / L over the wedge length L;
+- the excess pore pressure ahead of the face, Δp(x) = Δp_p exp(−x / λ), λ = √(k H c);
+- the air cushion: the working-chamber level from feed, excavated and discharge flows; the air compressed or expanded isothermally (Boyle); a first-order regulator that adds or vents air towards the setpoint;
+- the support pressure at any height from the air pressure and the slurry column;
+- the slurry circuit: discharge flow and density, dry solids measured from the feed and discharge flows and densities against the theoretical dry solids, pipe velocity and the Durand limit deposit velocity;
+- the control tolerances: ±10 kPa with an air cushion, ±30 kPa for EPB.
+
+**References:**
+
+- [DAUB / ITA-AITES (2016)](https://www.daub-ita.de/fileadmin/documents/daub/gtcrec1/2016-10_DAUB_Recommendations_for_Face_Support_Pressure_Calculations_for_Shield_Tunnelling_in_Soft_Ground.pdf), recommendations for face support pressure calculations: eqs (1)–(2), section 7.1 tolerances, section 8.1 worked example;
+- [Broere & van Tol (2000)](https://repository.tudelft.nl/file/File_9dc608e8-3df5-4344-8d2a-b6e420392119), infiltration and groundwater flow at the face: eqs (8)–(13);
+- [Shomee et al. (2022)](https://penerbit.uthm.edu.my/periodicals/index.php/peat/article/download/7927/3148/55023), dry-mass balance;
+- [Miedema, Slurry Transport, 6.27](https://eng.libretexts.org/Bookshelves/Civil_Engineering/Slurry_Transport_(Miedema)/06%3A_Slurry_Transport_a_Historical_Overview/6.27%3A_The_Limit_Deposit_Velocity_(LDV)), Durand limit deposit velocity;
+- [Herrenknecht Mixshield](https://herrenknecht.com/en/products/productdetail/mixshield): DN300 lines at 1000 m³/h.
+
+**Validated against:**
+
+- the DAUB section 8.1 example: e_max 0.464, 0.541 and 0.617 m, within 0.002 m;
+- a circuit hand calculation: 994.5 m³/h discharge at 1.14 t/m³ carrying 57.3 m³/h of dry solids;
+- Durand: 4.18 m/s in DN300 with F_L 1.34; 1000 m³/h in DN300 is 3.93 m/s;
+- the air cushion: a flow surplus raises the level and, briefly, the air pressure, which the regulator returns to the setpoint; balanced flows keep the state.
+
+**Limits:**
+
+- the air-cushion dynamics are this project's own derivation: no open source with the equations was found;
+- the support transfer 1 − e / L approximates DAUB's reduction of the wedge (AA/BB);
+- the deposit velocity uses a single coefficient for the whole grading; fines, clay and the separation plant are not modelled.
 
 ## Thrust and torque
 

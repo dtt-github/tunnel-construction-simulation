@@ -85,9 +85,9 @@ A slice is not done until its realism checklist passes.
 3. [~] Face support (wedge-silo and DAUB window done). Still open:
    - seepage forces;
    - checking the DAUB partial factors against the document.
-4. [~] EPB chamber (volume balance, foam, simplified screw done). Still open:
-   - slurry with air cushion and filter cake (DIN 4126);
-   - the full Merritt & Mair screw model.
+4. [~] EPB chamber (volume balance, foam, simplified screw done) and slurry (air cushion, filter cake per DIN 4126, circuit mass balance and deposit velocity done, [MODELS](MODELS.md#slurry-shield-mixshield)). Still open:
+   - the full Merritt & Mair screw model;
+   - separation-plant capacity and fines.
 5. [x] Thrust and torque components
 6. [x] Hoek–Brown / GSI, rock-mass modulus
 7. [x] Convergence–confinement: GRC, support curves (bolts, shotcrete, ribs), LDP ([MODELS](MODELS.md#ground-response-and-squeezing))
@@ -156,8 +156,11 @@ Demo: [web/epb/](../web/epb/) ([live](https://dtt-github.github.io/tunnel-constr
 
 ### Slice C: slurry / Mixshield
 
-- [ ] Submerged wall and air cushion, crusher, feed and return pipes with booster pumps, separation plant at the portal; no belt.
-- [ ] Filter cake and pressure transfer (DIN 4126); lower torque than EPB.
+Demo: [web/slurry/](../web/slurry/) ([live](https://dtt-github.github.io/tunnel-construction-simulation/web/slurry/)). Realism checklist: [realism/slurry-mixshield.md](realism/slurry-mixshield.md).
+
+- [x] Submerged wall and air cushion, crusher, feed and discharge lines, slurry pumps, separation plant at the portal (labelled); no screw and no belt.
+- [x] Filter cake and pressure transfer (DIN 4126); lower torque than EPB.
+- [ ] Booster pumps and pipe extensions drawn; separation-plant stops in the downtime model.
 
 ### Slice D: SEM / NATM
 

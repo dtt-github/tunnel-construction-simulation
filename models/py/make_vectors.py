@@ -4,6 +4,7 @@ Run: uv run --project models/py python models/py/make_vectors.py
 The JS tests (node --test models/js/test) must reproduce these values to 1e-9 relative.
 """
 import json
+import math
 import pathlib
 from dataclasses import asdict
 
@@ -187,4 +188,21 @@ for gsi, mi, sci, ei, p0, th, xi, v in [(22, 8, 15, 3000, 2.7, 0.35, 1.0, 0.125)
 semv["sulem"] = [[x, t, sem.sulem_convergence(x, t, 20, 4.6, 6, 5.7, 0.3)] for x, t in ((0, 1), (2, 0.5), (10, 5), (50, 60))]
 semv["triggers"] = [[m_, sem.trigger_level(m_, 10)] for m_ in (5, 8, 11, 16)]
 write("sem", semv)
+from tunnelsim_models import slurry as sl  # noqa: E402
+
+slv = {"inf": [], "cushion": [], "circuit": []}
+for dp, tau, d10, L, t, a in [(70.8, 0.03, 0.8e-3, 6.8, None, None), (70.8, 0.03, 0.15e-3, 6.0, None, None), (50, 0.02, 1.2e-3, 5.0, 10, 8), (120, 0.05, 2e-3, 7.0, 20, 5)]:
+    slv["inf"].append({"in": [dp, tau, d10, L, 3.5, t, a], "out": asdict(sl.infiltration(dp, tau, d10, L, 3.5, t, a))})
+c = sl.Cushion(12.0)
+st = sl.CushionState(200.0, 0.5, 20.0)
+trace = []
+for i in range(30):
+    st = c.step(st, 1.0, 0.25, 0.04 if i < 15 else 0.0, 0.25 if i < 20 else 0.3, 200.0)
+    trace.append(asdict(st))
+slv["cushion"] = trace
+area, v = math.pi * 7.08**2 / 4, 0.040 / 60
+qd, rd = sl.discharge_density(0.25, 1.05, area, v, 2.0)
+slv["circuit"] = {"qd": qd, "rd": rd, "dry": sl.dry_solids_flow(0.25, 1.05, qd, rd), "theo": sl.theoretical_dry_flow(area, v, 2.0),
+                  "durand": sl.durand_velocity(0.3), "vpipe": sl.pipe_velocity(1000 / 3600, 0.3), "pore": sl.excess_pore_pressure(5, 30, 1e-4, 10, 1e6)}
+write("slurry", slv)
 print("wrote", sorted(p.name for p in OUT.glob("*.json")))
