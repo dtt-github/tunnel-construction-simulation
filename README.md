@@ -15,6 +15,7 @@ It runs in the browser, with no install and no GPU needed.
 |---|---|---|
 | [Recorded GPU runs](https://dtt-github.github.io/tunnel-construction-simulation/phase0/replays/) | Soil simulated with the material-point method on an NVIDIA DGX Spark, then replayed: a tunnel face collapsing as its support retracts, and an EPB chamber stirred by a rotating cutterhead | Phase 0 benchmark. Tests speed and stability, not calibrated performance |
 | [Hard-rock open gripper TBM](https://dtt-github.github.io/tunnel-construction-simulation/web/hard-rock/) | A 9.58 m main-beam TBM: disc cutterhead with buckets, grippers and regrip cycle, rock bolts, mesh and ring beams at L1 and shotcrete at L2 by rock class, fault zone, downtime per km | Slice B ([realism checklist](docs/realism/hard-rock-gripper.md)) |
+| [Drill & blast road tunnel](https://dtt-github.github.io/tunnel-construction-simulation/web/drill-blast/) | A Norwegian T10.5 road tunnel round by round: the drilling pattern from published rules, a three-boom jumbo, charging, blast, ventilation, scaling, loader and trucks, bolts and sprayed concrete by support class, half-barrels, vibration at a house above | Slice E ([realism checklist](docs/realism/drill-blast-heading.md)) |
 | [Urban slurry shield (Mixshield)](https://dtt-github.github.io/tunnel-construction-simulation/web/slurry/) | A 7.08 m Crossrail-class Mixshield in saturated sand and gravel: submerged wall and air cushion, feed and discharge lines with a crusher at the suction, filter cake or slurry penetration at the face, dry-mass balance and deposit velocity in the circuit | Slice C ([realism checklist](docs/realism/slurry-mixshield.md)) |
 | [SEM / NATM heading](https://dtt-github.github.io/tunnel-construction-simulation/web/sem/) | A 10 m sprayed-concrete heading in weak rock: top heading, bench and invert by ground class, lattice girders, pipe canopies and ring closure in a fault zone, shotcrete stiffening with age, convergence monitoring with trigger levels | Slice D ([realism checklist](docs/realism/sem-heading.md)) |
 | [Hard-rock double shield TBM](https://dtt-github.github.io/tunnel-construction-simulation/web/hard-rock/?machine=double) | A 9.9 m Follo-class double shield: telescopic shields, gripper shield, main and auxiliary thrust cylinders, segment rings built while boring with pea gravel and grout, single-shield mode in the fault zone | Slice B ([realism checklist](docs/realism/hard-rock-double-shield.md)) |
@@ -103,7 +104,7 @@ npm run test:py
    - B: hard rock (open gripper and double shield live)
    - C: slurry / Mixshield (demo live)
    - D: SEM/NATM (heading live; final lining stage next)
-   - E: drill & blast
+   - E: drill & blast (demo live)
 4. **Phase 2:** GPU ground physics coupled to the machine.
 5. **Phase 3:** further methods.
 6. **Phase 4:** validation against case histories.

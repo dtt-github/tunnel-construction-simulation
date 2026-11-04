@@ -3,7 +3,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { cutterForces, tbmPerformance, hoekBrown, gaussianTrough, presetTrough, twinTroughs, burlandCategory, wedgeSilo, daubWindow, siloStress, chamber, screw, crownPressure, shieldThrust, cutterheadTorque, verticalStress, referenceInstalled, Rng, normalInv, sample as sampleDist, DIST, simulateDrive, recordCheck, maxRpm, cutterChangeHPerKm, supportDowntime, rmrClass, hardRockUtilisation, equivalentMohrCoulomb, groundReaction, pressureForDisplacement, ldp, squeezingStrain, squeezingClass, ringSupport, steelSetSupport, boltSupport, combine, supportEquilibrium, shieldFriction, shotcreteModulus, shotcreteStrength, mc90Modulus, earlyStrengthClass, fictitiousPressure, liningInteraction, sulemConvergence, triggerLevel, infiltration as slurryInfiltration, cushion, dischargeDensity, drySolidsFlow, theoreticalDryFlow, durandVelocity, pipeVelocity, excessPorePressure } from "../index.js";
+import { cutterForces, tbmPerformance, hoekBrown, gaussianTrough, presetTrough, twinTroughs, burlandCategory, wedgeSilo, daubWindow, siloStress, chamber, screw, crownPressure, shieldThrust, cutterheadTorque, verticalStress, referenceInstalled, Rng, normalInv, sample as sampleDist, DIST, simulateDrive, recordCheck, maxRpm, cutterChangeHPerKm, supportDowntime, rmrClass, hardRockUtilisation, equivalentMohrCoulomb, groundReaction, pressureForDisplacement, ldp, squeezingStrain, squeezingClass, ringSupport, steelSetSupport, boltSupport, combine, supportEquilibrium, shieldFriction, shotcreteModulus, shotcreteStrength, mc90Modulus, earlyStrengthClass, fictitiousPressure, liningInteraction, sulemConvergence, triggerLevel, infiltration as slurryInfiltration, cushion, dischargeDensity, drySolidsFlow, theoreticalDryFlow, durandVelocity, pipeVelocity, excessPorePressure, designRound, roundCycle, bottomCharge, burden, firstCutBurden, holeDepth, cutSections, kuzRamX50, uniformityIndex, ppv, maxChargePerDelay, ss4604866Limit, SUPPORT_CLASSES } from "../index.js";
 
 const vec = (name) => JSON.parse(readFileSync(new URL(`../../test-vectors/${name}.json`, import.meta.url)));
 
@@ -180,4 +180,26 @@ test("slurry models match python", () => {
   const [qd, rd] = dischargeDensity(0.25, 1.05, area, adv, 2.0);
   close({ qd, rd, dry: drySolidsFlow(0.25, 1.05, qd, rd), theo: theoreticalDryFlow(area, adv, 2.0), durand: durandVelocity(0.3), vpipe: pipeVelocity(1000 / 3600, 0.3),
     pore: excessPorePressure(5, 30, 1e-4, 10, 1e6) }, v.circuit, "circuit");
+});
+
+test("drill and blast models match python", () => {
+  const v = vec("drill_blast");
+  const rounds = v.rounds.map(({ in: [w, h, d, design], out }) => {
+    const rd = designRound(w, h, d, { design });
+    assert.equal(rd.holes.length, out.holes.length, `holes ${w} ${design}`);
+    rd.holes.forEach((x, i) => { close([x.x, x.y, x.delay], [out.holes[i][0], out.holes[i][1], out.holes[i][3]], `hole ${i}`); assert.equal(x.kind, out.holes[i][2]); });
+    close({ n_charged: rd.n_charged, explosive: rd.explosive, specific_charge: rd.specific_charge, max_charge_per_delay: rd.max_charge_per_delay, pull: rd.pull, area: rd.area },
+      { n_charged: out.n_charged, explosive: out.explosive, specific_charge: out.specific_charge, max_charge_per_delay: out.max_charge_per_delay, pull: out.pull, area: out.area }, "round");
+    return [rd, w, h];
+  });
+  for (const { in: [i, cls], out } of v.cycles) {
+    const [rd, w, h] = rounds[i];
+    const cy = roundCycle(rd, w, h, cls);
+    close({ steps: cy.steps.map((s) => s[1]), total_h: cy.total_h, m_per_week: cy.m_per_week, muck_m3: cy.muck_m3 }, out, `cycle ${i} ${cls}`);
+  }
+  const b = v.basic;
+  close({ qb: bottomCharge(38, 1.5, 0.8), b: burden(38, 1.36), b1: firstCutBurden(0.115, 2.85, 0.02, 0.02), h: holeDepth(0.204), cut: cutSections(0.204, 5.2),
+    x50: kuzRamX50(7, 0.6, 34.79), n: uniformityIndex(2.5, 2.44, 89, 0.1, 8, 9.5), ppv: ppv(40, 8), qmax: maxChargePerDelay(50, 20),
+    ss: [15, 60, 500].flatMap((d) => ["rock", "sand_gravel", "clay"].map((g) => ss4604866Limit(d, { groundPath: g }))) }, b, "basic");
+  assert.deepEqual(Object.keys(SUPPORT_CLASSES), ["I", "II", "III", "IV"]);
 });

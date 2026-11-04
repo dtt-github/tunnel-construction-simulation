@@ -96,7 +96,7 @@ A slice is not done until its realism checklist passes.
 10. [ ] Segment lining: Muir Wood / Duddeck–Erdmann, jack loads, universal-ring key position, annulus fill volume and pressure
 11. [~] Rock support: RMR classes → support pattern and support downtime per km by machine type done; per-bolt and per-ring-beam installation times open
 12. [~] Utilisation / activity-time model (discrete events) (EPB done: ring build, general activities, train delays, per-cycle maintenance, maintenance shift, cutting-tool interventions, record-rate check, [MODELS](MODELS.md#utilisation-and-downtime); open: hard-rock stroke/regrip/support/cutter-change terms, locomotive travel time, breakdowns by subsystem)
-13. [ ] Drill & blast: round design (Holmberg / Langefors), Kuz-Ram fragmentation, PPV limits, cycle times
+13. [x] Drill & blast: round design (Holmberg cut, Olofsson burden), Kuz-Ram fragmentation, PPV limits, cycle times ([MODELS](MODELS.md#drill--blast)); Langefors' burden formula and the NTNU advance model open (no open copy)
 14. [x] SEM: excavation sequence and ring-closure distance, shotcrete ageing E(t) ([MODELS](MODELS.md#sem--natm-sprayed-concrete-lining))
 
 ### Slice A: urban EPB, 7 m class (first; most models already exist)
@@ -171,8 +171,11 @@ Demo: [web/sem/](../web/sem/) ([live](https://dtt-github.github.io/tunnel-constr
 
 ### Slice E: drill & blast
 
-- [ ] Jumbo drilling pattern, charging, blast, ventilation, scaling, loader and trucks
-- [ ] Bolts and shotcrete by rock class, rough perimeter with half-barrels
+Demo: [web/drill-blast/](../web/drill-blast/) ([live](https://dtt-github.github.io/tunnel-construction-simulation/web/drill-blast/)). Realism checklist: [realism/drill-blast-heading.md](realism/drill-blast-heading.md).
+
+- [x] Jumbo drilling pattern, charging, blast, ventilation, scaling, loader and trucks
+- [x] Bolts and shotcrete by rock class, rough perimeter with half-barrels
+- [ ] Probe drilling and pre-grouting; overlap of support work with the next round; waterproofing and inner lining
 
 ### Cross-cutting client work
 

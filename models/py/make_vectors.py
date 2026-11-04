@@ -205,4 +205,21 @@ qd, rd = sl.discharge_density(0.25, 1.05, area, v, 2.0)
 slv["circuit"] = {"qd": qd, "rd": rd, "dry": sl.dry_solids_flow(0.25, 1.05, qd, rd), "theo": sl.theoretical_dry_flow(area, v, 2.0),
                   "durand": sl.durand_velocity(0.3), "vpipe": sl.pipe_velocity(1000 / 3600, 0.3), "pore": sl.excess_pore_pressure(5, 30, 1e-4, 10, 1e6)}
 write("slurry", slv)
+from tunnelsim_models import drill_blast as db  # noqa: E402
+
+dbv = {"rounds": [], "cycles": [], "basic": {}}
+for w, h, d, design in [(10.6, 2.9, 5.2, "norwegian"), (10.6, 2.9, 5.2, "textbook"), (9.6, 2.55, 4.0, "norwegian"), (12.0, 3.6, 5.5, "norwegian")]:
+    rd = db.design_round(w, h, d, design=design)
+    dbv["rounds"].append({"in": [w, h, d, design], "out": {"holes": [[x.x, x.y, x.kind, x.delay] for x in rd.holes], "n_charged": rd.n_charged,
+                          "explosive": rd.explosive, "specific_charge": rd.specific_charge, "max_charge_per_delay": rd.max_charge_per_delay,
+                          "pull": rd.pull, "area": rd.area}})
+    for cls in db.SUPPORT_CLASSES:
+        cy = db.round_cycle(rd, w, h, cls)
+        dbv["cycles"].append({"in": [len(dbv["rounds"]) - 1, cls], "out": {"steps": [x[1] for x in cy.steps], "total_h": cy.total_h, "m_per_week": cy.m_per_week,
+                              "muck_m3": cy.muck_m3}})
+dbv["basic"] = {"qb": db.bottom_charge(38, 1.5, 0.8), "b": db.burden(38, 1.36), "b1": db.first_cut_burden(0.115, 2.85, 0.02, 0.02),
+                "h": db.hole_depth(0.204), "cut": db.cut_sections(0.204, 5.2), "x50": db.kuz_ram_x50(7, 0.6, 34.79),
+                "n": db.uniformity_index(2.5, 2.44, 89, 0.1, 8, 9.5), "ppv": db.ppv(40, 8), "qmax": db.max_charge_per_delay(50, 20),
+                "ss": [db.ss4604866_limit(d_, "rock", g) for d_ in (15, 60, 500) for g in ("rock", "sand_gravel", "clay")]}
+write("drill_blast", dbv)
 print("wrote", sorted(p.name for p in OUT.glob("*.json")))

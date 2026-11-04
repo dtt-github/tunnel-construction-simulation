@@ -22,6 +22,7 @@ Start with the [project README](../README.md) for the live demo and quick start.
 | [ARCHITECTURE.md](ARCHITECTURE.md) | Physics by scale (alignment, machine, face and chamber, cutter); browser and GPU-server split; the model library contract |
 | [ROADMAP.md](ROADMAP.md) | Realism rules for every demo; Phase 0 to 5; the method-by-method slices of Phase 1 |
 | [MODELS.md](MODELS.md) | One section per implemented model: what it computes, files, references, validation, known limits |
+| [realism/drill-blast-heading.md](realism/drill-blast-heading.md) | Realism checklist for the drill & blast road tunnel demo |
 | [realism/slurry-mixshield.md](realism/slurry-mixshield.md) | Realism checklist for the urban slurry shield (Mixshield) demo |
 | [realism/sem-heading.md](realism/sem-heading.md) | Realism checklist for the SEM/NATM heading demo |
 | [realism/hard-rock-gripper.md](realism/hard-rock-gripper.md) | Realism checklist for the hard-rock open gripper demo |

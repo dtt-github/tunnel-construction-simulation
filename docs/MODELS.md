@@ -16,6 +16,7 @@ Every model exists twice: a Python reference in [`models/py/tunnelsim_models/`](
 | [Hard-rock drive](#hard-rock-drive) | `hard_rock.py` | `hard_rock.js` | Reproduces Farrokh's worked example within 3 %; support curve digitised |
 | [Ground response and squeezing](#ground-response-and-squeezing) | `ground_response.py` | `ground_response.js` | Reproduces Hoek's and Hoek & Marinos's worked examples; shield friction a screening estimate |
 | [SEM / NATM sprayed concrete lining](#sem--natm-sprayed-concrete-lining) | `sem.py` | `sem.js` | Checked against Brenner shotcrete data and Oreste's trends; Sulem parameters from one site |
+| [Drill & blast](#drill--blast) | `drill_blast.py` | `drill_blast.js` | Reproduces Yilmaz's worked example, SS 460 48 66 tables and NFF cycle figures; Norwegian pattern fitted to published hole counts |
 | [Utilisation and downtime](#utilisation-and-downtime) | `utilisation.py` | `utilisation.js` | Deterministic limits hand-checked; default EPB inside a 40-EPB survey; one-project distributions |
 
 Also: [machine class presets](#machine-class-presets) and [where default parameters come from](#default-parameter-sources).
@@ -294,6 +295,46 @@ Shotcrete ageing, the interaction of an ageing lining with the ground during adv
 - Oreste's method assumes a closed ring.
 - The Sulem time parameters come from one claystone site.
 - Weber, Pöttler and Chang originals were not available; the forms used are as cited by Oreste.
+
+## Drill & blast
+
+What it computes:
+
+- the pull of a parallel cut from the empty-hole diameter, H = 0.15 + 34.1 Ø − 39.4 Ø² and advance 0.95 H (Holmberg), with several reamed holes acting as one of diameter d√n, and the number of 102 mm empty holes a round depth needs;
+- the four-section cut: first burden 1.5 Ø (or 1.7 Ø minus the drilling deviation), squares growing by 1.5√2 until the opening approaches √pull;
+- the bottom-charge concentration q_b = π d²/4 ρ AWS and burden B = 30 q_b / d, with Olofsson's spacing, charge-length and stemming rules for stoping, roof, wall and floor holes;
+- smooth contour holes at 15 d (at most 0.7 m apart, NFF) and a helper row at most 0.9 m apart;
+- a full face pattern and charges for a horseshoe profile, with two settings: textbook rules, and "Norwegian practice" (contour 0.47 m, stoping burden 0.75 B) fitted to the hole counts of current Norwegian road-tunnel rounds;
+- explosive per round, specific charge, specific drilling, charge per delay;
+- Kuz-Ram mean fragment size, uniformity index and Rosin–Rammler passing;
+- peak particle velocity v = A (R/√Q)^B (Stockholm Northern Link fit) and the largest charge per delay for a vibration limit; SS 460 48 66 guide values with the distance factor per ground;
+- Norwegian road-tunnel support classes I–IV (bolt spacing, sprayed concrete, reinforced ribs) and the bolts and sprayed concrete per round;
+- the round cycle activity by activity and the advance per week.
+
+**References:**
+
+- [Yilmaz (2023)](https://doi.org/10.1038/s41598-023-29803-6), Holmberg pull, four-section cut, Olofsson burden and Table 2, worked example;
+- [Dyno Nobel (2010)](https://www.leg.mn.gov/docs/2015/other/150681/PFEISref_1/Dyno%20Nobel%202010.pdf), smooth blasting, cut tables, scaled distance;
+- [Cunningham (2005)](https://www.wits.ac.za/media/wits-university/conferences/misgsa/documents/The%20Kuz-Ram%20fragmentation%20model%20%C3%A2%C2%80%C2%93%2020%20years%20on.pdf), Kuz-Ram;
+- [Bahrekazemi, Johansson & Bodare (2011)](https://www.issmge.org/uploads/publications/59/67/10.3.GVRBA.pdf), ground vibration from tunnel blasting in Stockholm;
+- SS 460 48 66 as applied in a [published Solna risk analysis](https://www.Solna.se/download/18.76f8a05e16faf0319722153d/1580131008510/Riskanalys%20vibrationer.pdf);
+- [NFF publications](https://tunnel.no/english-publications/) 14, 23, 26, 27 and 28: cycle rates, weekly advance, support classes, safety;
+- [Jakobsen et al. (2024), summary in Tunnels & Tunnelling](https://www.tunnelsandtunnelling.com/?p=23436): holes and contour holes in current Norwegian rounds.
+
+**Validated against:**
+
+- Yilmaz's example: q_b 1.36 kg/m, B 1.07 m, first cut burdens 0.052 and 0.1185 m; the V-cut example q_b 0.495 kg/m, B 0.46 m;
+- the Dyno Nobel cut table (first square 210 mm for a 102 mm hole);
+- SS 460 48 66 guide values 51 / 43 / 26 mm/s at 20 / 30 / 100 m on rock;
+- the Northern Link fit: 14.2 kg per delay at 50 m for 20 mm/s;
+- a T10.5 round: 134 charged holes and 45 contour holes (published 126–158 and 45–50);
+- the cycle: drill, charge and blast 4–5 h, about 11 h per round and 40–80 m per week in class I (NFF).
+
+**Limits:**
+
+- the Norwegian pattern factors are fitted, not a design rule;
+- charging, positioning, reamer and RRS times are assumed; activities do not overlap;
+- one vibration fit; Langefors' burden formula and the NTNU advance-rate model are not used (no open copy).
 
 ## Utilisation and downtime
 

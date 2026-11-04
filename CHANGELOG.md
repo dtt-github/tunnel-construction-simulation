@@ -13,6 +13,13 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
   - thrust and torque breakdown;
   - surface settlement with Burland categories for buildings.
   - Assumptions and gaps are listed in its [realism checklist](docs/realism/epb-slice-a.md).
+- **Drill & blast road tunnel** (Slice E, `web/drill-blast/`):
+  - a Norwegian T10.5 road tunnel driven round by round: survey, drilling with a three-boom jumbo, charging, blast, ventilation, scaling, mucking with a loader and trucks, bolting and sprayed concrete;
+  - the face pattern and charges from published rules (Holmberg cut, Olofsson burden, smooth contour), with a "Norwegian practice" setting fitted to published hole counts;
+  - support classes I–IV with reinforced ribs of sprayed concrete in the fault; half-barrels on unsprayed walls;
+  - vibration at a house above against the SS 460 48 66 guide value, firing one hole or one row per delay;
+  - New `drill_blast` model (Python + JavaScript); its realism checklist is [here](docs/realism/drill-blast-heading.md).
+- Labels of hidden equipment are no longer shown in the hard-rock, SEM and drill & blast demos.
 - **Urban slurry shield (Mixshield)** (Slice C, `web/slurry/`):
   - a 7.08 m Crossrail-class Mixshield built from the EPB page: submerged wall, air cushion over the working-chamber slurry, pressure bulkhead, jaw crusher at the suction, DN300 feed and discharge lines, ring of 7 segments + key;
   - support pressure held by the air regulator within ±10 kPa; discharge pump on level control or manual, with pump interlocks; circuit in bypass between pushes;
