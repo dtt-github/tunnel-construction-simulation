@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tunnel Construction Simulation</title>
+<style>
+  :root { --bg: #f6f4f0; --ink: #1d1b18; --muted: #6b655c; --card: #ffffff; --line: #e2ddd4; --accent: #c9862a; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #171614; --ink: #ece8e1; --muted: #a39d93; --card: #211f1c; --line: #34312c; --accent: #e0a24a; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  main { max-width: 760px; margin: 0 auto; padding: 56px 16px 64px; }
+  h1 { font-size: 30px; line-height: 1.2; margin: 0 0 8px; }
+  .lede { color: var(--muted); margin: 0 0 36px; }
+  .cards { display: grid; gap: 16px; }
+  a.card { display: block; padding: 20px 22px; background: var(--card); border: 1px solid var(--line); border-radius: 10px;
+           color: inherit; text-decoration: none; transition: border-color .15s; }
+  a.card:hover, a.card:focus-visible { border-color: var(--accent); outline: none; }
+  .card h2 { font-size: 18px; margin: 0 0 4px; }
+  .card h2::after { content: " →"; color: var(--accent); }
+  .card p { margin: 0; color: var(--muted); font-size: 15px; }
+  footer { margin-top: 40px; font-size: 14px; color: var(--muted); }
+  footer a { color: inherit; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Tunnel Construction Simulation</h1>
+  <p class="lede">An open simulator for mechanised tunnelling: published analytical models in the browser, GPU ground physics on the server.</p>
+  <div class="cards">
+    <a class="card" href="phase0/replays/">
+      <h2>Recorded GPU runs</h2>
+      <p>Material-point simulations recorded on the GPU server and replayed in the browser: a tunnel face collapsing as its support retracts, and an EPB chamber with a rotating cutterhead and screw conveyor. Includes live pressure and torque charts.</p>
+    </a>
+    <a class="card" href="web/">
+      <h2>Hard-rock TBM demo</h2>
+      <p>A single-shield machine driven by the CSM disc-cutter model: thrust, penetration, torque, the boring and ring-build cycle, and alarms.</p>
+    </a>
+  </div>
+  <footer>Source and model references: <a href="https://github.com/dtt-github/tunnel-construction-simulation">github.com/dtt-github/tunnel-construction-simulation</a></footer>
+</main>
+</body>
+</html>
