@@ -7,7 +7,7 @@ import json
 import pathlib
 from dataclasses import asdict
 
-from tunnelsim_models import Cutter, cutter_forces, gaussian_trough, hoek_brown, tbm_performance
+from tunnelsim_models import Cutter, daub_window, silo_stress, wedge_silo, cutter_forces, gaussian_trough, hoek_brown, preset_trough, tbm_performance, twin_troughs
 
 OUT = pathlib.Path(__file__).resolve().parents[1] / "test-vectors"
 
@@ -40,5 +40,49 @@ for dia, z0, vl, k in [(6.0, 20.0, 0.01, 0.5), (12.0, 25.0, 0.005, 0.5), (4.0, 1
         "out": {"i": t.i, "volume_m3_per_m": t.volume_m3_per_m, "s_max": t.s_max,
                 "samples": [{"x": x, "s": t.settlement(x), "u": t.horizontal(x), "s3d_at_face": t.settlement_3d(x, 0.0)} for x in xs]},
     })
-write("settlement", st)
+
+def trough_out(t, xs, ys):
+    return {"i": t.i, "volume_m3_per_m": t.volume_m3_per_m, "s_max": t.s_max, "fraction_at_face": t.fraction_at_face,
+            "samples": [{"x": x, "s": t.settlement(x), "u": t.horizontal(x), "slope": t.slope(x)} for x in xs],
+            "longitudinal": [{"y": y, "f": t.longitudinal_fraction(y), "s3d": t.settlement_3d(xs[1], y)} for y in ys]}
+
+
+ys = [-20.0, -5.0, 0.0, 4.0, 9.0, 30.0]
+asym = []
+for dia, z0, vl, k, kl, kr, comps in [
+    (6.0, 20.0, 0.01, 0.5, 0.7, 0.5, None),
+    (5.0, 19.5, 0.006, 0.5, None, 0.35, [(0.2, 0.0), (0.3, 4.0), (0.5, 8.0)]),
+    (8.0, 15.0, 0.012, 0.4, 0.45, 0.6, [(0.5, 0.0), (0.5, 6.0)]),
+]:
+    t = gaussian_trough(dia, z0, vl, k, k_left=kl, k_right=kr, components=comps)
+    asym.append({"in": {"diameter_m": dia, "axis_depth_m": z0, "volume_loss": vl, "k": k, "k_left": kl, "k_right": kr, "components": comps},
+                 "out": trough_out(t, [-2 * t.i, -5.0, 0.0, 5.0, t.i, 2 * t.i], ys)})
+
+presets = []
+for method, dia, z0, length in [("open_face_stiff_clay", 4.85, 20.0, None), ("closed_face_clay", 6.0, 18.0, 9.0), ("closed_face_sand", 10.0, 25.0, 12.0), ("scl_stiff_clay", 7.0, 22.0, None)]:
+    t = preset_trough(method, dia, z0, shield_length_m=length)
+    presets.append({"in": {"method": method, "diameter_m": dia, "axis_depth_m": z0, "shield_length_m": length},
+                    "out": trough_out(t, [0.0, 5.0, t.i], ys)})
+
+twins = []
+for dia, z0, sp, vl1, vl2, k, f, kin in [(5.0, 19.5, 26.0, 0.006, None, 0.5, 1.0, None), (5.0, 19.5, 26.0, 0.006, 0.006, 0.5, 1.3, 0.8), (6.0, 20.0, -15.0, 0.01, 0.008, 0.45, 1.1, 0.6)]:
+    tw = twin_troughs(dia, z0, sp, vl1, vl2, k, second_vl_factor=f, second_inner_k=kin)
+    xs = [-30.0, -10.0, 0.0, sp / 2, sp, sp + 10.0]
+    twins.append({"in": {"diameter_m": dia, "axis_depth_m": z0, "spacing_m": sp, "volume_loss_first": vl1, "volume_loss_second": vl2, "k": k,
+                         "second_vl_factor": f, "second_inner_k": kin},
+                  "out": {"samples": [{"x": x, "s": tw.settlement(x), "u": tw.horizontal(x)} for x in xs]}})
+
+write("settlement", {"symmetric": st, "asymmetric": asym, "presets": presets, "twin": twins})
+face = []
+# (D, cover, gamma, phi, c, water_depth, q, k_wedge)
+for dia, cov, g, phi, c, hw, q, kw in [(10, 15, 20, 30, 0, None, 0, None), (8, 12, 20, 30, 0, 3, 0, None), (6, 9, 19, 25, 8, 0, 10, 0.4),
+                                       (12, 20, 21, 35, 2, 5, 20, None), (8, 12, 20, 0, 40, None, 0, None)]:
+    kw_args = {"q": q, "k_wedge": kw} | ({} if hw is None else {"water_depth": hw})
+    fs = wedge_silo(dia, cov, g, phi, c, **kw_args)
+    win = daub_window(fs, dia, cov, g, q=q, **({} if hw is None else {"water_depth": hw}))
+    face.append({"in": {"diameter": dia, "cover": cov, "gamma": g, "phi_deg": phi, "c": c, "water_depth": hw, "q": q, "k_wedge": kw},
+                 "out": {"support": asdict(fs), "window": asdict(win) | {"feasible": win.feasible}}})
+silo = [{"in": [d, b, l, g, c, phi, k, q], "out": silo_stress(d, b, l, g, c, phi, k, q)}
+        for d, b, l, g, c, phi, k, q in [(10, 5, 3, 20, 0, 30, 0.8, 0), (25, 7, 4, 10, 5, 28, 0.8, 50), (4, 6, 6, 18, 0, 0, 0.8, 10)]]
+write("face_support", {"wedge_silo": face, "silo": silo})
 print("wrote", sorted(p.name for p in OUT.glob("*.json")))

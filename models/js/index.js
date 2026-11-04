@@ -2,3 +2,4 @@
 export * from "./csm.js";
 export * from "./hoek_brown.js";
 export * from "./settlement.js";
+export * from "./face_support.js";

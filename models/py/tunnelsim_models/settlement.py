@@ -4,25 +4,57 @@ References
 - Peck, R.B. (1969). Deep excavations and tunnelling in soft ground. Proc. 7th ICSMFE, Mexico, State-of-the-art vol., 225-290.
 - O'Reilly, M.P., New, B.M. (1982). Settlements above tunnels in the United Kingdom - their magnitude and prediction.
   Tunnelling '82, IMM, London, 173-181.
+- Attewell, P.B., Woodman, J.P. (1982). Predicting the dynamics of ground settlement and its derivatives caused by
+  tunnelling in soil. Ground Engineering 15(8), 13-22.
 - Mair, R.J., Taylor, R.N., Bracegirdle, A. (1993). Subsurface settlement profiles above tunnels in clays. Geotechnique 43(2).
+- Mair, R.J., Taylor, R.N. (1997). Bored tunnelling in the urban environment. Proc. 14th ICSMFE, Hamburg, 4, 2353-2385.
+  (Volume-loss components: face, shield passage, tail void, lining deformation and grout behind the tail;
+  typical VL by method and ground.)
+- Addenbrooke, T.I., Potts, D.M. (2001). Twin tunnel interaction: surface and subsurface effects. Int. J. Geomechanics
+  1(2), 249-271, doi:10.1061/(ASCE)1532-3641(2001)1:2(249). (Second-tunnel trough larger and shifted towards the first.)
 - Burland, J.B. (1995). Assessment of risk of damage to buildings due to tunnelling and excavation. Proc. 1st IC Earthquake Geotech. Eng.
 
-    i      = K * z0                       trough width (inflection point)
+    i      = K * z0                       trough width (inflection point); i_left / i_right for an asymmetric trough
     V_s    = VL * pi * D^2 / 4            settlement volume per metre of tunnel (m^3/m)
-    S_max  = V_s / (sqrt(2 pi) * i)
-    S(x)   = S_max * exp(-x^2 / (2 i^2))
+    S_max  = 2 V_s / (sqrt(2 pi) (i_left + i_right))      (= V_s / (sqrt(2 pi) i) when symmetric)
+    S(x)   = S_max * exp(-x^2 / (2 i_side^2)),  i_side = i_left for x < 0, i_right for x >= 0
     u(x)   = -(x / z0) * S(x)             horizontal displacement (radial-flow assumption, O'Reilly & New)
-    Longitudinal: S(x, y) = S(x) * Phi(-(y - y_face) / i)   (Attewell & Woodman 1982 cumulative-normal)
+
+Longitudinal profile (Attewell & Woodman 1982 cumulative normal, generalised to volume-loss components):
+the volume loss is split into components k with fraction w_k, each generated at a distance y_k behind the face
+(face loss at 0, shield passage over the shield, tail void at the shield tail, and loss behind the tail from
+lining deformation and grout shrinkage; Mair & Taylor 1997):
+
+    S(x, y) = S(x) * sum_k w_k * Phi((y - y_k) / i)          y = distance behind the face
+
+A single component at y = 0 gives the classic profile with half the final settlement above the face. Closed-face
+machines with good face control put most of the volume loss at and behind the tail, which shifts the profile back and
+reduces the fraction that has occurred when the face passes. With the longitudinal width equal to the transverse i,
+a loss at the tail alone still leaves Phi(-L/i) (about 0.2 for L = 8 m, i = 9 m) at the face, so a lower fraction at
+the face needs loss further back; the "behind" component sits one shield length behind the tail by default.
 
 Units: metres; VL as a fraction (0.01 = 1 %). Settlement positive downward.
 """
 from __future__ import annotations
 
 import math
+from collections.abc import Sequence
 from dataclasses import dataclass
 
 # Typical trough-width parameter K (O'Reilly & New 1982; Mair & Taylor 1997)
 K_TYPICAL = {"stiff_clay": 0.5, "soft_clay": 0.6, "sand_gravel": 0.35}
+
+# Excavation-method presets (classes, not brands). Volume loss and its range are the typical values summarised by
+# Mair & Taylor (1997). The component split (face, shield, tail, behind) is an illustrative default following their
+# decomposition; calibrate it per project. Split positions: face at 0, shield at L/2, tail at L, behind the tail at
+# 2 L (L = shield length). Closed-face splits keep the face and shield shares small, so that only about 0.1-0.2 of
+# the final trough has formed when the face passes.
+METHOD_PRESETS = {
+    "open_face_stiff_clay": {"volume_loss": 0.015, "range": (0.01, 0.02), "k": 0.5, "split": (0.6, 0.3, 0.1, 0.0)},
+    "scl_stiff_clay": {"volume_loss": 0.01, "range": (0.005, 0.015), "k": 0.5, "split": (0.8, 0.2, 0.0, 0.0)},
+    "closed_face_clay": {"volume_loss": 0.01, "range": (0.005, 0.02), "k": 0.5, "split": (0.05, 0.15, 0.4, 0.4)},
+    "closed_face_sand": {"volume_loss": 0.005, "range": (0.002, 0.01), "k": 0.35, "split": (0.05, 0.15, 0.4, 0.4)},
+}
 
 # Burland (1995) damage categories by limiting tensile strain (%)
 BURLAND_CATEGORIES = [
@@ -34,33 +66,146 @@ BURLAND_CATEGORIES = [
 ]
 
 
+def _phi(z: float) -> float:
+    return 0.5 * (1 + math.erf(z / math.sqrt(2)))
+
+
 @dataclass(frozen=True)
 class Trough:
-    i: float
+    i: float  # mean width (i_left + i_right) / 2, also used for the longitudinal profile
     volume_m3_per_m: float
     s_max: float
     z0: float
+    i_left: float | None = None
+    i_right: float | None = None
+    components: tuple[tuple[float, float], ...] = ((1.0, 0.0),)  # (fraction of VL, distance behind face m)
+
+    def _i_side(self, x: float) -> float:
+        if x < 0:
+            return self.i_left if self.i_left is not None else self.i
+        return self.i_right if self.i_right is not None else self.i
 
     def settlement(self, x: float) -> float:
-        return self.s_max * math.exp(-(x * x) / (2 * self.i * self.i))
+        i = self._i_side(x)
+        return self.s_max * math.exp(-(x * x) / (2 * i * i))
 
     def horizontal(self, x: float) -> float:
         return -(x / self.z0) * self.settlement(x)
 
     def slope(self, x: float) -> float:
-        return -(x / (self.i * self.i)) * self.settlement(x)
+        i = self._i_side(x)
+        return -(x / (i * i)) * self.settlement(x)
+
+    def longitudinal_fraction(self, y_behind_face: float) -> float:
+        """Fraction of the final transverse trough developed at y (y > 0: behind the face)."""
+        return sum(w * _phi((y_behind_face - yk) / self.i) for w, yk in self.components)
+
+    @property
+    def fraction_at_face(self) -> float:
+        return self.longitudinal_fraction(0.0)
 
     def settlement_3d(self, x: float, y_behind_face: float) -> float:
         """y_behind_face > 0 means the point is behind (already passed by) the face."""
-        return self.settlement(x) * 0.5 * (1 + math.erf(y_behind_face / (self.i * math.sqrt(2))))
+        return self.settlement(x) * self.longitudinal_fraction(y_behind_face)
 
 
-def gaussian_trough(diameter_m: float, axis_depth_m: float, volume_loss: float, k: float = 0.5) -> Trough:
+def gaussian_trough(
+    diameter_m: float,
+    axis_depth_m: float,
+    volume_loss: float,
+    k: float = 0.5,
+    *,
+    k_left: float | None = None,
+    k_right: float | None = None,
+    components: Sequence[tuple[float, float]] | None = None,
+) -> Trough:
+    """Gaussian trough. k_left / k_right override k on either side; components = [(fraction, y_behind_face_m)]."""
     if axis_depth_m <= diameter_m / 2:
         raise ValueError("axis depth must exceed the tunnel radius")
-    i = k * axis_depth_m
+    il = (k if k_left is None else k_left) * axis_depth_m
+    ir = (k if k_right is None else k_right) * axis_depth_m
+    comps = tuple((float(w), float(y)) for w, y in (components or [(1.0, 0.0)]))
+    if abs(sum(w for w, _ in comps) - 1) > 1e-9 or any(w < 0 for w, _ in comps):
+        raise ValueError("component fractions must be non-negative and sum to 1")
     vs = volume_loss * math.pi * diameter_m**2 / 4
-    return Trough(i=i, volume_m3_per_m=vs, s_max=vs / (math.sqrt(2 * math.pi) * i), z0=axis_depth_m)
+    asym = k_left is not None or k_right is not None
+    return Trough(
+        i=(il + ir) / 2,
+        volume_m3_per_m=vs,
+        s_max=2 * vs / (math.sqrt(2 * math.pi) * (il + ir)),
+        z0=axis_depth_m,
+        i_left=il if asym else None,
+        i_right=ir if asym else None,
+        components=comps,
+    )
+
+
+def volume_loss_components(face: float, shield: float, tail: float, shield_length_m: float, behind: float = 0.0,
+                           behind_offset_m: float | None = None) -> list[tuple[float, float]]:
+    """Split of the volume loss into face (y = 0), shield passage (y = L/2), tail void (y = L) and behind-the-tail
+    (y = L + behind_offset_m, default 2 L) components. Zero-weight components are dropped."""
+    total = face + shield + tail + behind
+    if total <= 0 or min(face, shield, tail, behind) < 0:
+        raise ValueError("split must be non-negative with a positive sum")
+    offset = shield_length_m if behind_offset_m is None else behind_offset_m
+    comps = [(face, 0.0), (shield, shield_length_m / 2), (tail, shield_length_m), (behind, shield_length_m + offset)]
+    return [(w / total, y) for w, y in comps if w > 0]
+
+
+def preset_trough(method: str, diameter_m: float, axis_depth_m: float, *, shield_length_m: float | None = None,
+                  volume_loss: float | None = None, k: float | None = None) -> Trough:
+    """Trough from METHOD_PRESETS; shield length defaults to 1.5 D (set it from the machine preset)."""
+    p = METHOD_PRESETS[method]
+    length = 1.5 * diameter_m if shield_length_m is None else shield_length_m
+    return gaussian_trough(
+        diameter_m,
+        axis_depth_m,
+        p["volume_loss"] if volume_loss is None else volume_loss,
+        p["k"] if k is None else k,
+        components=volume_loss_components(*p["split"][:3], length, *p["split"][3:]),
+    )
+
+
+@dataclass(frozen=True)
+class TwinTroughs:
+    first: Trough  # centred at x = 0
+    second: Trough  # centred at x = spacing
+    spacing: float
+
+    def settlement(self, x: float) -> float:
+        return self.first.settlement(x) + self.second.settlement(x - self.spacing)
+
+    def horizontal(self, x: float) -> float:
+        return self.first.horizontal(x) + self.second.horizontal(x - self.spacing)
+
+
+def twin_troughs(
+    diameter_m: float,
+    axis_depth_m: float,
+    spacing_m: float,
+    volume_loss_first: float,
+    volume_loss_second: float | None = None,
+    k: float = 0.5,
+    *,
+    second_vl_factor: float = 1.0,
+    second_inner_k: float | None = None,
+) -> TwinTroughs:
+    """Two parallel tunnels, the second at x = spacing (either sign), driven after the first.
+
+    With the defaults this is plain superposition. Addenbrooke & Potts (2001) found the second tunnel's trough is
+    larger and shifted towards the first tunnel, because it passes through ground already disturbed by the first.
+    second_vl_factor scales the second tunnel's volume loss; second_inner_k widens the arm of its trough that faces
+    the first tunnel (the volume is kept, so the trough's centroid moves towards the first tunnel).
+    """
+    vl2 = (volume_loss_first if volume_loss_second is None else volume_loss_second) * second_vl_factor
+    first = gaussian_trough(diameter_m, axis_depth_m, volume_loss_first, k)
+    if second_inner_k is None:
+        second = gaussian_trough(diameter_m, axis_depth_m, vl2, k)
+    elif spacing_m >= 0:  # first tunnel lies to the left of the second
+        second = gaussian_trough(diameter_m, axis_depth_m, vl2, k, k_left=second_inner_k, k_right=k)
+    else:
+        second = gaussian_trough(diameter_m, axis_depth_m, vl2, k, k_left=k, k_right=second_inner_k)
+    return TwinTroughs(first=first, second=second, spacing=spacing_m)
 
 
 def burland_category(tensile_strain_percent: float) -> tuple[int, str]:

@@ -1,0 +1,200 @@
+{
+ "wedge_silo": [
+  {
+   "in": {
+    "diameter": 10,
+    "cover": 15,
+    "gamma": 20,
+    "phi_deg": 30,
+    "c": 0,
+    "water_depth": null,
+    "q": 0,
+    "k_wedge": null
+   },
+   "out": {
+    "support": {
+     "s_eff": 31.836090071875212,
+     "theta_deg": 63.305053893750895,
+     "wedge_length": 4.456277670147506,
+     "silo_stress": 63.599474293119464,
+     "u_crown": 0.0,
+     "u_axis": 0.0,
+     "side": 8.862269254527579
+    },
+    "window": {
+     "p_min_axis": 47.754135107812814,
+     "p_max_axis": 330.0,
+     "p_min_crown": 0.0,
+     "p_max_crown": 270.0,
+     "overburden_crown": 300.0,
+     "feasible": true
+    }
+   }
+  },
+  {
+   "in": {
+    "diameter": 8,
+    "cover": 12,
+    "gamma": 20,
+    "phi_deg": 30,
+    "c": 0,
+    "water_depth": 3,
+    "q": 0,
+    "k_wedge": null
+   },
+   "out": {
+    "support": {
+     "s_eff": 12.831177047075396,
+     "theta_deg": 63.08574544291636,
+     "wedge_length": 3.5990867809688596,
+     "silo_stress": 26.139154065869278,
+     "u_crown": 90.0,
+     "u_axis": 130.0,
+     "side": 7.0898154036220635
+    },
+    "window": {
+     "p_min_axis": 155.7467655706131,
+     "p_max_axis": 264.0,
+     "p_min_crown": 107.74676557061309,
+     "p_max_crown": 216.0,
+     "overburden_crown": 240.0,
+     "feasible": true
+    }
+   }
+  },
+  {
+   "in": {
+    "diameter": 6,
+    "cover": 9,
+    "gamma": 19,
+    "phi_deg": 25,
+    "c": 8,
+    "water_depth": 0,
+    "q": 10,
+    "k_wedge": 0.4
+   },
+   "out": {
+    "support": {
+     "s_eff": -6.897836941834364,
+     "theta_deg": 59.25716037079307,
+     "wedge_length": 3.1625980281312023,
+     "silo_stress": 2.7314778940618756,
+     "u_crown": 90.0,
+     "u_axis": 120.0,
+     "side": 5.317361552716548
+    },
+    "window": {
+     "p_min_axis": 126.0,
+     "p_max_axis": 198.9,
+     "p_min_crown": 90.0,
+     "p_max_crown": 162.9,
+     "overburden_crown": 181.0,
+     "feasible": true
+    }
+   }
+  },
+  {
+   "in": {
+    "diameter": 12,
+    "cover": 20,
+    "gamma": 21,
+    "phi_deg": 35,
+    "c": 2,
+    "water_depth": 5,
+    "q": 20,
+    "k_wedge": null
+   },
+   "out": {
+    "support": {
+     "s_eff": 11.78834754984885,
+     "theta_deg": 66.25317821450133,
+     "wedge_length": 4.678686053028344,
+     "silo_stress": 28.458844709733537,
+     "u_crown": 150.0,
+     "u_axis": 210.0,
+     "side": 10.634723105433096
+    },
+    "window": {
+     "p_min_axis": 238.1825213247733,
+     "p_max_axis": 468.0,
+     "p_min_crown": 166.1825213247733,
+     "p_max_crown": 396.0,
+     "overburden_crown": 440.0,
+     "feasible": true
+    }
+   }
+  },
+  {
+   "in": {
+    "diameter": 8,
+    "cover": 12,
+    "gamma": 20,
+    "phi_deg": 0,
+    "c": 40,
+    "water_depth": null,
+    "q": 0,
+    "k_wedge": null
+   },
+   "out": {
+    "support": {
+     "s_eff": -62.309473035201826,
+     "theta_deg": 51.82729192998448,
+     "wedge_length": 5.573668236299866,
+     "silo_stress": 0.0,
+     "u_crown": 0.0,
+     "u_axis": 0.0,
+     "side": 7.0898154036220635
+    },
+    "window": {
+     "p_min_axis": 0.0,
+     "p_max_axis": 264.0,
+     "p_min_crown": 0.0,
+     "p_max_crown": 216.0,
+     "overburden_crown": 240.0,
+     "feasible": true
+    }
+   }
+  }
+ ],
+ "silo": [
+  {
+   "in": [
+    10,
+    5,
+    3,
+    20,
+    0,
+    30,
+    0.8,
+    0
+   ],
+   "out": 40.30061820672733
+  },
+  {
+   "in": [
+    25,
+    7,
+    4,
+    10,
+    5,
+    28,
+    0.8,
+    50
+   ],
+   "out": 18.173592543492582
+  },
+  {
+   "in": [
+    4,
+    6,
+    6,
+    18,
+    0,
+    0,
+    0.8,
+    10
+   ],
+   "out": 82.0
+  }
+ ]
+}

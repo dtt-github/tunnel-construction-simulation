@@ -3,7 +3,18 @@ import math
 
 import pytest
 
-from tunnelsim_models import Cutter, burland_category, cutter_forces, gaussian_trough, hoek_brown, tbm_performance
+from tunnelsim_models import (
+    METHOD_PRESETS,
+    Cutter,
+    burland_category,
+    cutter_forces,
+    gaussian_trough,
+    hoek_brown,
+    preset_trough,
+    tbm_performance,
+    twin_troughs,
+    volume_loss_components,
+)
 
 
 def test_hoek_brown_gsi50():
@@ -56,6 +67,72 @@ def test_peck_trough():
     assert vol == pytest.approx(t.volume_m3_per_m, rel=1e-4)
     # Half the final settlement directly above the face (Attewell & Woodman)
     assert t.settlement_3d(0, 0) == pytest.approx(t.s_max / 2)
+
+
+def _integrate(f, lo=-150.0, hi=150.0, dx=0.01):
+    n = int((hi - lo) / dx)
+    return sum(f(lo + k * dx) for k in range(n + 1)) * dx
+
+
+def test_asymmetric_trough_keeps_volume():
+    t = gaussian_trough(6, 20, 0.01, 0.5, k_left=0.8, k_right=0.4)
+    assert (t.i_left, t.i_right) == (16, 8)
+    assert t.i == 12
+    assert _integrate(t.settlement) == pytest.approx(t.volume_m3_per_m, rel=1e-4)
+    # continuous at the axis, and the wider arm carries more of the volume
+    assert t.settlement(-1e-9) == pytest.approx(t.settlement(0))
+    assert _integrate(t.settlement, -150, 0) > _integrate(t.settlement, 0, 150)
+
+
+def test_longitudinal_components():
+    # single component at the face: Attewell & Woodman, half the final settlement above the face
+    assert gaussian_trough(6, 20, 0.01).fraction_at_face == pytest.approx(0.5)
+    # tail-void-only loss L behind the face: Phi(-L / i)
+    t = gaussian_trough(6, 20, 0.01, components=[(1.0, 9.0)])
+    assert t.fraction_at_face == pytest.approx(0.5 * (1 + math.erf(-9 / 10 / math.sqrt(2))))
+    assert t.longitudinal_fraction(9.0) == pytest.approx(0.5)
+    assert t.longitudinal_fraction(200) == pytest.approx(1.0)
+    comps = volume_loss_components(1, 1, 2, 8.0)
+    assert comps == [(0.25, 0.0), (0.25, 4.0), (0.5, 8.0)]
+    # behind-the-tail component: default one shield length behind the tail
+    assert volume_loss_components(0, 0, 1, 8.0, behind=1) == [(0.5, 8.0), (0.5, 16.0)]
+    assert volume_loss_components(1, 0, 0, 8.0, behind=1, behind_offset_m=4.0) == [(0.5, 0.0), (0.5, 12.0)]
+    with pytest.raises(ValueError):
+        volume_loss_components(1, 1, 1, 8.0, behind=-0.5)
+    with pytest.raises(ValueError):
+        gaussian_trough(6, 20, 0.01, components=[(0.5, 0.0), (0.4, 5.0)])
+
+
+def test_presets_order_fraction_at_face():
+    # moving volume loss from the face to the tail lowers the fraction developed when the face passes
+    open_face = preset_trough("open_face_stiff_clay", 5, 20, shield_length_m=7)
+    closed = preset_trough("closed_face_clay", 5, 20, shield_length_m=7)
+    assert closed.fraction_at_face < open_face.fraction_at_face < 0.5
+    # closed face: only a small part of the final trough has formed when the face passes
+    epb = preset_trough("closed_face_clay", 6, 20, shield_length_m=9)
+    assert 0.1 < epb.fraction_at_face < 0.2
+    assert open_face.volume_m3_per_m == pytest.approx(METHOD_PRESETS["open_face_stiff_clay"]["volume_loss"] * math.pi * 25 / 4)
+    for p in METHOD_PRESETS.values():
+        lo, hi = p["range"]
+        assert lo <= p["volume_loss"] <= hi
+
+
+def test_twin_superposition_and_interaction():
+    plain = twin_troughs(5, 19.5, 26, 0.006)
+    a = gaussian_trough(5, 19.5, 0.006)
+    for x in (-20.0, 0.0, 13.0, 26.0, 40.0):
+        assert plain.settlement(x) == pytest.approx(a.settlement(x) + a.settlement(x - 26))
+    # widening the inner arm keeps the second tunnel's volume and moves its centroid towards the first tunnel
+    for sp in (26.0, -26.0):
+        tw = twin_troughs(5, 19.5, sp, 0.006, second_inner_k=0.9)
+        s2 = lambda x: tw.second.settlement(x - sp)  # noqa: E731
+        vol = _integrate(s2)
+        assert vol == pytest.approx(tw.second.volume_m3_per_m, rel=1e-4)
+        centroid = _integrate(lambda x: x * s2(x)) / vol
+        assert abs(centroid) < abs(sp)
+        assert tw.settlement(sp / 2) > plain.settlement(sp / 2) if sp > 0 else True
+    more = twin_troughs(5, 19.5, 26, 0.006, second_vl_factor=1.3)
+    assert more.second.volume_m3_per_m == pytest.approx(1.3 * a.volume_m3_per_m)
 
 
 def test_burland():
