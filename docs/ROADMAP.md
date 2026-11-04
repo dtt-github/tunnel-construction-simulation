@@ -4,9 +4,9 @@ Status: [x] done · [ ] planned. Sources for each model: [research/research-surv
 
 ## Phase 0: platform (DGX Spark)
 
-- [ ] Reuse the sister project's Spark setup (Newton 1.7, Warp 1.19, CUDA 13, uv)
-- [ ] Benchmark Newton implicit MPM: (a) EPB chamber with rotating cutterhead and screw conveyor, (b) face slice under support pressure. Record particles, real-time factor and stability
-- [ ] WebSocket streaming of 100k–300k quantized particles at 20–30 Hz; choose the binary protocol
+- [x] Reuse the sister project's Spark setup (Newton 1.7, Warp 1.19, CUDA 13, uv)
+- [x] Benchmark Newton implicit MPM: (a) EPB chamber with rotating cutterhead and screw conveyor, (b) face slice under support pressure. Record particles, real-time factor and stability ([results](../phase0/RESULTS.md); screw discharge still needs pressure control and a resolved inlet)
+- [x] WebSocket streaming of 100k–300k quantized particles at 20–30 Hz; choose the binary protocol (TSP0, u16)
 - [ ] WebGPU Drucker–Prager MLS-MPM patch on Apple GPU and on Chrome/Linux ARM
 
 ## Phase 1: analytical simulator, browser only

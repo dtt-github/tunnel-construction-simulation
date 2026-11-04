@@ -1,0 +1,502 @@
+[
+  {
+    "server": {
+      "particles": 100000,
+      "encoding": "f32",
+      "deflate": false,
+      "target_hz": 20.0,
+      "frames_sent": 160,
+      "bytes_per_frame": 1200048,
+      "encode_ms_mean": 1.91,
+      "encode_ms_p95": 4.337,
+      "send_ms_mean": 0.423,
+      "send_ms_p95": 0.522
+    },
+    "client": {
+      "frames": 160,
+      "dropped": 0,
+      "fps": 20.01,
+      "MB_per_s": 24.2,
+      "latency_ms_mean": 0.65,
+      "latency_ms_p95": 1.522705078125,
+      "frame_gap_ms_p95": 53.16,
+      "decode_ms_mean": 0.057,
+      "decode_ms_p95": 0.097
+    }
+  },
+  {
+    "server": {
+      "particles": 100000,
+      "encoding": "u16",
+      "deflate": false,
+      "target_hz": 20.0,
+      "frames_sent": 160,
+      "bytes_per_frame": 600048,
+      "encode_ms_mean": 1.153,
+      "encode_ms_p95": 2.398,
+      "send_ms_mean": 0.227,
+      "send_ms_p95": 0.302
+    },
+    "client": {
+      "frames": 160,
+      "dropped": 0,
+      "fps": 20.01,
+      "MB_per_s": 12.1,
+      "latency_ms_mean": 0.22,
+      "latency_ms_p95": 1.00927734375,
+      "frame_gap_ms_p95": 51.93,
+      "decode_ms_mean": 0.217,
+      "decode_ms_p95": 0.198
+    }
+  },
+  {
+    "server": {
+      "particles": 100000,
+      "encoding": "u16a",
+      "deflate": false,
+      "target_hz": 20.0,
+      "frames_sent": 356,
+      "bytes_per_frame": 700048,
+      "encode_ms_mean": 1.132,
+      "encode_ms_p95": 2.433,
+      "send_ms_mean": 0.233,
+      "send_ms_p95": 0.313
+    },
+    "client": {
+      "frames": 160,
+      "dropped": 0,
+      "fps": 20.01,
+      "MB_per_s": 14.1,
+      "latency_ms_mean": 0.47,
+      "latency_ms_p95": 1.2060546875,
+      "frame_gap_ms_p95": 52.06,
+      "decode_ms_mean": 0.299,
+      "decode_ms_p95": 0.452
+    }
+  },
+  {
+    "server": {
+      "particles": 100000,
+      "encoding": "f32",
+      "deflate": false,
+      "target_hz": 30.0,
+      "frames_sent": 679,
+      "bytes_per_frame": 1200048,
+      "encode_ms_mean": 1.229,
+      "encode_ms_p95": 2.568,
+      "send_ms_mean": 0.416,
+      "send_ms_p95": 0.525
+    },
+    "client": {
+      "frames": 240,
+      "dropped": 0,
+      "fps": 30.02,
+      "MB_per_s": 36.2,
+      "latency_ms_mean": 0.46,
+      "latency_ms_p95": 1.135986328125,
+      "frame_gap_ms_p95": 35.74,
+      "decode_ms_mean": 0.057,
+      "decode_ms_p95": 0.082
+    }
+  },
+  {
+    "server": {
+      "particles": 100000,
+      "encoding": "u16",
+      "deflate": false,
+      "target_hz": 30.0,
+      "frames_sent": 648,
+      "bytes_per_frame": 600048,
+      "encode_ms_mean": 1.075,
+      "encode_ms_p95": 2.379,
+      "send_ms_mean": 0.203,
+      "send_ms_p95": 0.315
+    },
+    "client": {
+      "frames": 240,
+      "dropped": 0,
+      "fps": 30.01,
+      "MB_per_s": 18.1,
+      "latency_ms_mean": 0.19,
+      "latency_ms_p95": 0.83837890625,
+      "frame_gap_ms_p95": 35.5,
+      "decode_ms_mean": 0.211,
+      "decode_ms_p95": 0.216
+    }
+  },
+  {
+    "server": {
+      "particles": 100000,
+      "encoding": "u16a",
+      "deflate": false,
+      "target_hz": 30.0,
+      "frames_sent": 676,
+      "bytes_per_frame": 700048,
+      "encode_ms_mean": 1.113,
+      "encode_ms_p95": 2.485,
+      "send_ms_mean": 0.232,
+      "send_ms_p95": 0.311
+    },
+    "client": {
+      "frames": 240,
+      "dropped": 0,
+      "fps": 30.01,
+      "MB_per_s": 21.1,
+      "latency_ms_mean": 0.27,
+      "latency_ms_p95": 0.944091796875,
+      "frame_gap_ms_p95": 35.77,
+      "decode_ms_mean": 0.246,
+      "decode_ms_p95": 0.413
+    }
+  },
+  {
+    "server": {
+      "particles": 200000,
+      "encoding": "f32",
+      "deflate": false,
+      "target_hz": 20.0,
+      "frames_sent": 426,
+      "bytes_per_frame": 2400048,
+      "encode_ms_mean": 1.346,
+      "encode_ms_p95": 2.608,
+      "send_ms_mean": 0.669,
+      "send_ms_p95": 0.867
+    },
+    "client": {
+      "frames": 160,
+      "dropped": 0,
+      "fps": 20.01,
+      "MB_per_s": 48.3,
+      "latency_ms_mean": 1.41,
+      "latency_ms_p95": 3.123779296875,
+      "frame_gap_ms_p95": 52.86,
+      "decode_ms_mean": 0.157,
+      "decode_ms_p95": 0.154
+    }
+  },
+  {
+    "server": {
+      "particles": 200000,
+      "encoding": "u16",
+      "deflate": false,
+      "target_hz": 20.0,
+      "frames_sent": 442,
+      "bytes_per_frame": 1200048,
+      "encode_ms_mean": 1.17,
+      "encode_ms_p95": 2.548,
+      "send_ms_mean": 0.418,
+      "send_ms_p95": 0.522
+    },
+    "client": {
+      "frames": 160,
+      "dropped": 0,
+      "fps": 19.99,
+      "MB_per_s": 24.1,
+      "latency_ms_mean": 0.51,
+      "latency_ms_p95": 1.27880859375,
+      "frame_gap_ms_p95": 52.18,
+      "decode_ms_mean": 0.619,
+      "decode_ms_p95": 0.812
+    }
+  },
+  {
+    "server": {
+      "particles": 200000,
+      "encoding": "u16a",
+      "deflate": false,
+      "target_hz": 20.0,
+      "frames_sent": 420,
+      "bytes_per_frame": 1400048,
+      "encode_ms_mean": 1.335,
+      "encode_ms_p95": 2.778,
+      "send_ms_mean": 0.52,
+      "send_ms_p95": 0.663
+    },
+    "client": {
+      "frames": 160,
+      "dropped": 0,
+      "fps": 20,
+      "MB_per_s": 28.2,
+      "latency_ms_mean": 0.58,
+      "latency_ms_p95": 1.62841796875,
+      "frame_gap_ms_p95": 52.11,
+      "decode_ms_mean": 0.402,
+      "decode_ms_p95": 0.422
+    }
+  },
+  {
+    "server": {
+      "particles": 200000,
+      "encoding": "f32",
+      "deflate": false,
+      "target_hz": 30.0,
+      "frames_sent": 652,
+      "bytes_per_frame": 2400048,
+      "encode_ms_mean": 1.3,
+      "encode_ms_p95": 2.779,
+      "send_ms_mean": 0.763,
+      "send_ms_p95": 0.991
+    },
+    "client": {
+      "frames": 240,
+      "dropped": 0,
+      "fps": 30.02,
+      "MB_per_s": 72.3,
+      "latency_ms_mean": 1.18,
+      "latency_ms_p95": 2.79052734375,
+      "frame_gap_ms_p95": 35.71,
+      "decode_ms_mean": 0.116,
+      "decode_ms_p95": 0.174
+    }
+  },
+  {
+    "server": {
+      "particles": 200000,
+      "encoding": "u16",
+      "deflate": false,
+      "target_hz": 30.0,
+      "frames_sent": 680,
+      "bytes_per_frame": 1200048,
+      "encode_ms_mean": 1.263,
+      "encode_ms_p95": 2.557,
+      "send_ms_mean": 0.391,
+      "send_ms_p95": 0.512
+    },
+    "client": {
+      "frames": 240,
+      "dropped": 0,
+      "fps": 30.01,
+      "MB_per_s": 36.2,
+      "latency_ms_mean": 0.54,
+      "latency_ms_p95": 1.522216796875,
+      "frame_gap_ms_p95": 35.4,
+      "decode_ms_mean": 0.59,
+      "decode_ms_p95": 0.788
+    }
+  },
+  {
+    "server": {
+      "particles": 200000,
+      "encoding": "u16a",
+      "deflate": false,
+      "target_hz": 30.0,
+      "frames_sent": 647,
+      "bytes_per_frame": 1400048,
+      "encode_ms_mean": 1.479,
+      "encode_ms_p95": 2.752,
+      "send_ms_mean": 0.506,
+      "send_ms_p95": 0.662
+    },
+    "client": {
+      "frames": 240,
+      "dropped": 0,
+      "fps": 30.01,
+      "MB_per_s": 42.2,
+      "latency_ms_mean": 0.66,
+      "latency_ms_p95": 1.670166015625,
+      "frame_gap_ms_p95": 35.68,
+      "decode_ms_mean": 0.38,
+      "decode_ms_p95": 0.4
+    }
+  },
+  {
+    "server": {
+      "particles": 300000,
+      "encoding": "f32",
+      "deflate": false,
+      "target_hz": 20.0,
+      "frames_sent": 450,
+      "bytes_per_frame": 3600048,
+      "encode_ms_mean": 1.914,
+      "encode_ms_p95": 3.751,
+      "send_ms_mean": 1.092,
+      "send_ms_p95": 1.444
+    },
+    "client": {
+      "frames": 160,
+      "dropped": 0,
+      "fps": 20.01,
+      "MB_per_s": 72.5,
+      "latency_ms_mean": 2.26,
+      "latency_ms_p95": 3.830810546875,
+      "frame_gap_ms_p95": 53.36,
+      "decode_ms_mean": 0.176,
+      "decode_ms_p95": 0.293
+    }
+  },
+  {
+    "server": {
+      "particles": 300000,
+      "encoding": "u16",
+      "deflate": false,
+      "target_hz": 20.0,
+      "frames_sent": 429,
+      "bytes_per_frame": 1800048,
+      "encode_ms_mean": 1.339,
+      "encode_ms_p95": 2.496,
+      "send_ms_mean": 0.602,
+      "send_ms_p95": 0.77
+    },
+    "client": {
+      "frames": 160,
+      "dropped": 0,
+      "fps": 20,
+      "MB_per_s": 36.2,
+      "latency_ms_mean": 0.66,
+      "latency_ms_p95": 1.818115234375,
+      "frame_gap_ms_p95": 52.91,
+      "decode_ms_mean": 0.849,
+      "decode_ms_p95": 1.202
+    }
+  },
+  {
+    "server": {
+      "particles": 300000,
+      "encoding": "u16a",
+      "deflate": false,
+      "target_hz": 20.0,
+      "frames_sent": 452,
+      "bytes_per_frame": 2100048,
+      "encode_ms_mean": 1.555,
+      "encode_ms_p95": 2.946,
+      "send_ms_mean": 0.738,
+      "send_ms_p95": 0.967
+    },
+    "client": {
+      "frames": 160,
+      "dropped": 0,
+      "fps": 20.01,
+      "MB_per_s": 42.3,
+      "latency_ms_mean": 0.99,
+      "latency_ms_p95": 2.17041015625,
+      "frame_gap_ms_p95": 52.12,
+      "decode_ms_mean": 0.721,
+      "decode_ms_p95": 1.15
+    }
+  },
+  {
+    "server": {
+      "particles": 300000,
+      "encoding": "f32",
+      "deflate": false,
+      "target_hz": 30.0,
+      "frames_sent": 647,
+      "bytes_per_frame": 3600048,
+      "encode_ms_mean": 1.513,
+      "encode_ms_p95": 2.869,
+      "send_ms_mean": 0.936,
+      "send_ms_p95": 1.212
+    },
+    "client": {
+      "frames": 240,
+      "dropped": 0,
+      "fps": 30.01,
+      "MB_per_s": 108.5,
+      "latency_ms_mean": 1.32,
+      "latency_ms_p95": 2.282470703125,
+      "frame_gap_ms_p95": 35.67,
+      "decode_ms_mean": 0.167,
+      "decode_ms_p95": 0.209
+    }
+  },
+  {
+    "server": {
+      "particles": 300000,
+      "encoding": "u16",
+      "deflate": false,
+      "target_hz": 30.0,
+      "frames_sent": 606,
+      "bytes_per_frame": 1800048,
+      "encode_ms_mean": 1.273,
+      "encode_ms_p95": 2.562,
+      "send_ms_mean": 0.558,
+      "send_ms_p95": 0.738
+    },
+    "client": {
+      "frames": 240,
+      "dropped": 0,
+      "fps": 30.01,
+      "MB_per_s": 54.2,
+      "latency_ms_mean": 0.75,
+      "latency_ms_p95": 1.71923828125,
+      "frame_gap_ms_p95": 35.46,
+      "decode_ms_mean": 0.904,
+      "decode_ms_p95": 1.323
+    }
+  },
+  {
+    "server": {
+      "particles": 300000,
+      "encoding": "u16a",
+      "deflate": false,
+      "target_hz": 30.0,
+      "frames_sent": 640,
+      "bytes_per_frame": 2100048,
+      "encode_ms_mean": 1.456,
+      "encode_ms_p95": 2.954,
+      "send_ms_mean": 0.593,
+      "send_ms_p95": 0.763
+    },
+    "client": {
+      "frames": 240,
+      "dropped": 0,
+      "fps": 30.01,
+      "MB_per_s": 63.3,
+      "latency_ms_mean": 0.9,
+      "latency_ms_p95": 2.39013671875,
+      "frame_gap_ms_p95": 35.77,
+      "decode_ms_mean": 1.072,
+      "decode_ms_p95": 1.202
+    }
+  },
+  {
+    "server": {
+      "particles": 300000,
+      "encoding": "u16",
+      "deflate": true,
+      "target_hz": 30.0,
+      "frames_sent": 232,
+      "bytes_per_frame": 1800048,
+      "encode_ms_mean": 1.19,
+      "encode_ms_p95": 2.435,
+      "send_ms_mean": 36.985,
+      "send_ms_p95": 37.474
+    },
+    "client": {
+      "frames": 92,
+      "dropped": 0,
+      "fps": 11.41,
+      "MB_per_s": 20.8,
+      "latency_ms_mean": 49.09,
+      "latency_ms_p95": 59.075439453125,
+      "frame_gap_ms_p95": 123.49,
+      "decode_ms_mean": 1.046,
+      "decode_ms_p95": 1.172
+    }
+  },
+  {
+    "server": {
+      "particles": 1000000,
+      "encoding": "u16",
+      "deflate": false,
+      "target_hz": 30.0,
+      "frames_sent": 616,
+      "bytes_per_frame": 6000048,
+      "encode_ms_mean": 2.173,
+      "encode_ms_p95": 3.562,
+      "send_ms_mean": 22.137,
+      "send_ms_p95": 114.299
+    },
+    "client": {
+      "frames": 240,
+      "dropped": 0,
+      "fps": 30.02,
+      "MB_per_s": 180.9,
+      "latency_ms_mean": 3.58,
+      "latency_ms_p95": 7.54296875,
+      "frame_gap_ms_p95": 40.21,
+      "decode_ms_mean": 3.485,
+      "decode_ms_p95": 3.777
+    }
+  }
+]

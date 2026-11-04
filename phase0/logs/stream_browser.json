@@ -1,0 +1,122 @@
+[
+  {
+    "ok": true,
+    "renderer": "ANGLE (NVIDIA, Vulkan 1.4.312 (NVIDIA NVIDIA GB10 (0x00002E12)), NVIDIA)",
+    "particles": 100000,
+    "frames": 240,
+    "recv_fps": 30.04,
+    "render_fps": 58.8,
+    "MB_per_s": 18.1,
+    "latency_ms_mean": 2.97,
+    "latency_ms_p95": 4.100341796875,
+    "decode_ms_mean": 0.359,
+    "upload_ms_mean": 0.091,
+    "server": {
+      "particles": 100000,
+      "encoding": "u16",
+      "deflate": false,
+      "target_hz": 30.0,
+      "frames_sent": 240,
+      "bytes_per_frame": 600048,
+      "encode_ms_mean": 1.258,
+      "encode_ms_p95": 2.61,
+      "send_ms_mean": 0.216,
+      "send_ms_p95": 0.271
+    },
+    "case": {
+      "particles": 100000,
+      "hz": 30,
+      "encoding": "u16"
+    }
+  },
+  {
+    "ok": true,
+    "renderer": "ANGLE (NVIDIA, Vulkan 1.4.312 (NVIDIA NVIDIA GB10 (0x00002E12)), NVIDIA)",
+    "particles": 300000,
+    "frames": 240,
+    "recv_fps": 30.06,
+    "render_fps": 58.4,
+    "MB_per_s": 54.3,
+    "latency_ms_mean": 7.41,
+    "latency_ms_p95": 9.35009765625,
+    "decode_ms_mean": 1.03,
+    "upload_ms_mean": 0.215,
+    "server": {
+      "particles": 300000,
+      "encoding": "u16",
+      "deflate": false,
+      "target_hz": 30.0,
+      "frames_sent": 240,
+      "bytes_per_frame": 1800048,
+      "encode_ms_mean": 1.564,
+      "encode_ms_p95": 3.178,
+      "send_ms_mean": 0.671,
+      "send_ms_p95": 0.814
+    },
+    "case": {
+      "particles": 300000,
+      "hz": 30,
+      "encoding": "u16"
+    }
+  },
+  {
+    "ok": true,
+    "renderer": "ANGLE (NVIDIA, Vulkan 1.4.312 (NVIDIA NVIDIA GB10 (0x00002E12)), NVIDIA)",
+    "particles": 300000,
+    "frames": 240,
+    "recv_fps": 30.04,
+    "render_fps": 58.6,
+    "MB_per_s": 108.6,
+    "latency_ms_mean": 11.78,
+    "latency_ms_p95": 15.031005859375,
+    "decode_ms_mean": 0.176,
+    "upload_ms_mean": 0.257,
+    "server": {
+      "particles": 300000,
+      "encoding": "f32",
+      "deflate": false,
+      "target_hz": 30.0,
+      "frames_sent": 240,
+      "bytes_per_frame": 3600048,
+      "encode_ms_mean": 1.694,
+      "encode_ms_p95": 3.148,
+      "send_ms_mean": 1.229,
+      "send_ms_p95": 1.627
+    },
+    "case": {
+      "particles": 300000,
+      "hz": 30,
+      "encoding": "f32"
+    }
+  },
+  {
+    "ok": true,
+    "renderer": "ANGLE (NVIDIA, Vulkan 1.4.312 (NVIDIA NVIDIA GB10 (0x00002E12)), NVIDIA)",
+    "particles": 1000000,
+    "frames": 200,
+    "recv_fps": 24.68,
+    "render_fps": 53.7,
+    "MB_per_s": 148.8,
+    "latency_ms_mean": 130.41,
+    "latency_ms_p95": 178.863525390625,
+    "decode_ms_mean": 1.874,
+    "upload_ms_mean": 0.847,
+    "server": {
+      "particles": 1000000,
+      "encoding": "u16",
+      "deflate": false,
+      "target_hz": 30.0,
+      "frames_sent": 200,
+      "bytes_per_frame": 6000048,
+      "encode_ms_mean": 2.798,
+      "encode_ms_p95": 4.597,
+      "send_ms_mean": 35.272,
+      "send_ms_p95": 116.638
+    },
+    "case": {
+      "particles": 1000000,
+      "hz": 30,
+      "encoding": "u16"
+    }
+  }
+]

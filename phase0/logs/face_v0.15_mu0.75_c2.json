@@ -1,0 +1,22 @@
+{
+  "diameter_m": 2.0,
+  "cover_over_D": 2.0,
+  "voxel_m": 0.15,
+  "ppc_per_axis": 2,
+  "particles": 681794,
+  "iterations": 50,
+  "frame_dt_s": 0.016666666666666666,
+  "ms_per_frame": 90.64,
+  "realtime_factor": 0.184,
+  "particle_steps_per_s_millions": 7.52,
+  "p_settled_kPa": 18.72,
+  "p_at_rest_axis_kPa": 31.39,
+  "p_limit_kPa": 2.0,
+  "p_min_kPa": -0.02,
+  "p_vermeer_kPa": 3.08,
+  "vermeer_N_gamma": 0.0981,
+  "sim_N_gamma": 0.0637,
+  "ratio_sim_over_vermeer": 0.649,
+  "retraction_m": 0.2,
+  "speed_m_s": 0.05
+}

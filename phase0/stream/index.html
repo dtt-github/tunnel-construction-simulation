@@ -1,0 +1,100 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>TSP0 stream test</title>
+<style>html,body{margin:0;background:#111;color:#ddd;font:12px monospace}canvas{width:100vw;height:100vh;display:block}#hud{position:fixed;top:4px;left:6px}</style>
+</head>
+<body>
+<canvas id="c"></canvas><div id="hud">connecting…</div>
+<script type="module">
+// Browser side of the streaming benchmark: decode each TSP0 frame, upload it to a WebGL2 point
+// buffer and draw it. Reports received fps, render fps, latency and decode/upload time.
+import { decodeFrame } from "./tsp0.mjs";
+
+const params = new URLSearchParams(location.search);
+const url = params.get("ws") ?? "ws://127.0.0.1:8790";
+const canvas = document.getElementById("c");
+const hud = document.getElementById("hud");
+canvas.width = 1280; canvas.height = 720;
+const gl = canvas.getContext("webgl2");
+
+const vs = `#version 300 es
+in vec3 p; uniform vec3 lo; uniform vec3 hi;
+void main(){ vec3 n=(p-lo)/(hi-lo); gl_Position=vec4(n.x*1.8-0.9, n.z*1.8-0.9 + n.y*0.2, n.y, 1.0); gl_PointSize=1.5; }`;
+const fs = `#version 300 es
+precision mediump float; out vec4 o; void main(){ o=vec4(0.8,0.65,0.4,1.0); }`;
+function sh(t, s) { const x = gl.createShader(t); gl.shaderSource(x, s); gl.compileShader(x); return x; }
+const prog = gl.createProgram();
+gl.attachShader(prog, sh(gl.VERTEX_SHADER, vs)); gl.attachShader(prog, sh(gl.FRAGMENT_SHADER, fs));
+gl.linkProgram(prog); gl.useProgram(prog);
+const vbo = gl.createBuffer();
+gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
+gl.enableVertexAttribArray(0); gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 0, 0);
+
+let latest = null, positions = null, count = 0, lo = [0, 0, 0], hi = [1, 1, 1];
+const recv = [], lat = [], dec = [], up = [], renders = [];
+let bytes = 0;
+
+const ws = new WebSocket(url);
+ws.binaryType = "arraybuffer";
+ws.onmessage = (ev) => {
+  const t0 = performance.now();
+  const f = decodeFrame(ev.data, positions);
+  positions = f.positions;
+  dec.push(performance.now() - t0);
+  lat.push(Date.now() - f.sendTimeMs);
+  recv.push(t0);
+  bytes += ev.data.byteLength;
+  latest = f;
+};
+
+function draw(now) {
+  renders.push(now);
+  if (latest) {
+    const t0 = performance.now();
+    if (latest.n !== count) {
+      count = latest.n;
+      gl.bufferData(gl.ARRAY_BUFFER, latest.positions.byteLength, gl.DYNAMIC_DRAW);
+      lo = [Infinity, Infinity, Infinity]; hi = [-Infinity, -Infinity, -Infinity];
+      for (let i = 0; i < latest.positions.length; i += 3) for (let k = 0; k < 3; k++) {
+        lo[k] = Math.min(lo[k], latest.positions[i + k]); hi[k] = Math.max(hi[k], latest.positions[i + k]);
+      }
+    }
+    gl.bufferSubData(gl.ARRAY_BUFFER, 0, latest.positions);
+    up.push(performance.now() - t0);
+    latest = null;
+  }
+  gl.viewport(0, 0, canvas.width, canvas.height);
+  gl.clearColor(0.07, 0.07, 0.07, 1); gl.clear(gl.COLOR_BUFFER_BIT);
+  gl.uniform3fv(gl.getUniformLocation(prog, "lo"), lo);
+  gl.uniform3fv(gl.getUniformLocation(prog, "hi"), hi);
+  gl.drawArrays(gl.POINTS, 0, count);
+  if (recv.length % 15 === 1) hud.textContent = `${count} particles, frame ${recv.length}`;
+  requestAnimationFrame(draw);
+}
+requestAnimationFrame(draw);
+
+const mean = (a) => a.reduce((s, x) => s + x, 0) / Math.max(1, a.length);
+const pct = (a, p) => [...a].sort((x, y) => x - y)[Math.min(a.length - 1, Math.floor((p / 100) * a.length))];
+ws.onclose = () => {
+  const span = (recv.at(-1) - recv[0]) / 1000;
+  const r = renders.filter((t) => t >= recv[0] && t <= recv.at(-1));
+  window.__result = {
+    ok: recv.length > 0,
+    renderer: gl.getParameter(gl.getExtension("WEBGL_debug_renderer_info")?.UNMASKED_RENDERER_WEBGL ?? gl.RENDERER),
+    particles: count,
+    frames: recv.length,
+    recv_fps: +((recv.length - 1) / span).toFixed(2),
+    render_fps: +((r.length - 1) / span).toFixed(1),
+    MB_per_s: +(bytes / 1e6 / span).toFixed(1),
+    latency_ms_mean: +mean(lat).toFixed(2),
+    latency_ms_p95: pct(lat, 95),
+    decode_ms_mean: +mean(dec).toFixed(3),
+    upload_ms_mean: +mean(up).toFixed(3),
+  };
+  document.title = "DONE";
+};
+</script>
+</body>
+</html>
