@@ -27,4 +27,4 @@ Reviewed 4 Nov 2026. Status: ✅ meets the rule · ⚠️ partly, gap listed · 
 
 - [ ] Verify the Gotthard-class torque, power and thrust on a primary source, or switch to a verified machine.
 - [ ] Per-bolt and per-ring-beam installation times, when an open source is found.
-- [ ] Gripper bearing pressure against the wall strength (gripper slip in weak rock).
+- [x] Gripper bearing pressure against the rock-mass strength (our own simple check), with steel-set equilibrium and closure in the fault zone.

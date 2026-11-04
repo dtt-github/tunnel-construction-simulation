@@ -2,14 +2,15 @@
 // L1 rock bolts, mesh and ring beams and L2 shotcrete by RMR class; invert segments. Method card: open gripper in
 // docs/research/methods-reference.md; preset "hard-rock-main-beam-9.5m" (models/presets/machine-classes.json).
 
-import { rmrClass } from "../../models/js/index.js";
+import { rmrClass, supportEquilibrium, steelSetSupport, gripperPressure } from "../../models/js/index.js";
 import { THREE, CUT, mat, steel, dark, yellow, cyl, box, polar, shell, label, buildCutterhead, buildBackup, createMuck } from "./common.js";
 
 export const M = {
   kind: "gripper",
   title: "Hard-rock open gripper TBM · Ø 9.58 m",
   D: 9.58, // m, Gotthard-class main beam (preset, trade press, unverified)
-  torque: 5290, power: 3500, // kNm, kW (preset, unverified)
+  torque: 5290, power: 3500, thrustInstalled: 27.5, // kNm, kW, MN (preset, unverified)
+  shoeArea: 2 * 2.6 * 3.2, // m^2, two gripper shoes as drawn (assumed)
   nCutters: 62, // assumed: ~85 mm spacing over the face, plus centre and gauge cutters
   stroke: 1.8, // m, assumed (1.2-1.8 m reported only informally)
   regripMin: 4, // min, Farrokh (2018): 2-6 min per regrip
@@ -232,8 +233,41 @@ export function build(machine, world) {
     for (const im of [bolts, plates, beamsI, invI]) im.instanceMatrix.needsUpdate = true;
   }
 
+  // Steel sets at L1 (where the class needs ribs): full-circle, unblocked I 152x203x52 (A = 0.0066 m^2) at the class
+  // spacing, installed at the closure reached at L1. An upper bound: the drawn ribs are 270 degree arcs.
+  const eqCache = new Map();
+  const ribEquilibrium = (zone, g) => {
+    const p = PATTERN[rmrClass(zone.rmr).class];
+    if (!p.beams) return null;
+    if (!eqCache.has(zone)) {
+      const uInstall = g.u0 + g.closureSinceFace(Z_L1);
+      eqCache.set(zone, supportEquilibrium(g.p0, g.R, g.mc.e_rm, g.nu, g.mc.phi_deg, g.mc.c, steelSetSupport(g.R, p.beams, 0.0066), uInstall));
+    }
+    return eqCache.get(zone);
+  };
+  const shoePressure = gripperPressure(M.thrustInstalled, M.shoeArea);
+
   return {
     muck,
+    // behind L1 the steel sets (where the class has them) hold the wall at their equilibrium closure
+    closureLimit(x, g, zone) {
+      const eq = x >= Z_L1 ? ribEquilibrium(zone, g) : null;
+      return eq && !eq.fails ? Math.max(eq.u - g.u0, 0) : Infinity;
+    },
+    groundRows(zone, g) {
+      const eq = ribEquilibrium(zone, g);
+      const rows = [["Closure at L1 (since excavation)", `${(g.closureSinceFace(Z_L1) * 1000).toFixed(0)} mm`],
+        ["Gripper shoe pressure", `${shoePressure.toFixed(1)} MPa (2 × installed thrust over the shoes) vs σcm ${g.mc.sigma_cm.toFixed(1)} MPa`]];
+      if (eq) rows.push(["Steel sets at L1", eq.fails ? "yield: closure continues" : `hold at ${(eq.pressure).toFixed(2)} MPa, ${(eq.support_used * 100).toFixed(0)} % of capacity, final closure ${((eq.u - g.u0) * 1000).toFixed(0)} mm`]);
+      return rows;
+    },
+    groundAlarms(zone, g) {
+      const out = [];
+      if (shoePressure > g.mc.sigma_cm) out.push(`Gripper shoe pressure ${shoePressure.toFixed(1)} MPa above the rock-mass strength ${g.mc.sigma_cm.toFixed(1)} MPa: grippers may slip or crush the wall; reduce gripper pressure and thrust`);
+      const eq = ribEquilibrium(zone, g);
+      if (eq?.fails) out.push("Steel sets yield: closure continues; add shotcrete early or close the ring");
+      return out;
+    },
     reset(S, zoneAt) {
       for (const p of pieces) world.remove(p);
       pieces.length = 0;

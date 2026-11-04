@@ -8,6 +8,7 @@ from .epb_chamber import P_ATM, Chamber, ChamberState, Screw, crown_pressure, fo
 from .thrust_torque import REFERENCE_MACHINES, Thrust, Torque, cutterhead_torque, reference_installed, shield_thrust, tool_torque, vertical_stress
 from .utilisation import DriveResult, DriveSettings, record_check, simulate_drive
 from .hard_rock import RMR_CLASSES, HardRockUtilisation, cutter_change_h_per_km, hard_rock_utilisation, rmr_class, support_downtime
+from .ground_response import RockMass, Support, equivalent_mohr_coulomb, ground_reaction, ldp, shield_friction, squeezing_class, squeezing_strain, support_equilibrium
 from .face_support import DAUB_DEFAULTS, FaceSupport, SupportWindow, daub_window, silo_stress, vermeer_limit, wedge_silo
 from .hoek_brown import hoek_brown, sigma1_at_failure
 from .settlement import (
@@ -71,4 +72,13 @@ __all__ = [
     "support_downtime",
     "rmr_class",
     "RMR_CLASSES",
+    "equivalent_mohr_coulomb",
+    "ground_reaction",
+    "ldp",
+    "squeezing_strain",
+    "squeezing_class",
+    "support_equilibrium",
+    "shield_friction",
+    "RockMass",
+    "Support",
 ]

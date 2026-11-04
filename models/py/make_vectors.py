@@ -158,4 +158,19 @@ for pr, d, kw in [(4.7, 3.9, {"stroke_m": 1.25, "ucs_mpa": 90, "rmr": 45, "haula
     r = hard_rock_utilisation(pr, d, **kw)
     hr["utilisation"].append({"in": {"pr": pr, "d": d, **kw}, "out": asdict(r)})
 write("hard_rock", hr)
+from tunnelsim_models import ground_response as gr  # noqa: E402
+
+grv = {"mc": [], "grc": [], "ldp": [], "squeeze": [], "support": [], "shield": []}
+for gsi, mi, sci, ei, p0 in [(25, 10, 10, 10000, 2.0), (65, 28, 150, 60000, 8.1), (17, 10, 40, 15000, 8.1), (45, 12, 90, 30000, 16.2)]:
+    grv["mc"].append({"in": [gsi, mi, sci, ei, p0], "out": asdict(gr.equivalent_mohr_coulomb(gsi, mi, sci, ei, p0))})
+for args in [(2, 0, 3, 749.9, 0.3, 24.72, 0.22), (2, 0.5, 3, 749.9, 0.3, 24.72, 0.22), (2, 1.5, 3, 749.9, 0.3, 24.72, 0.22), (8.1, 0, 4.95, 595, 0.25, 22.9, 0.78)]:
+    grv["grc"].append({"in": list(args), "out": asdict(gr.ground_reaction(*args)), "p_inv": gr.pressure_for_displacement(gr.ground_reaction(*args).u * 1.1, *args[:1], *args[2:])})
+grv["ldp"] = [[x, r0, rp, gr.ldp(x, r0, rp)] for x in (-10, -2, 0, 3, 10, 40) for r0, rp in ((5, 5), (5, 12.9))]
+grv["squeeze"] = [[scm, p0, pi, gr.squeezing_strain(scm, p0, pi), gr.squeezing_class(gr.squeezing_strain(scm, p0, pi))[0]] for scm, p0, pi in ((1.01, 2.6, 0), (2.9, 8.1, 0), (2.9, 8.1, 1.0), (30, 8.1, 0))]
+ring, sets, bolts = gr.ring_support(3.0, 0.2, 30000, 0.15, 35), gr.steel_set_support(3.0, 1.0, 0.0125), gr.bolt_support(3.0, 12, 1.0, 3.0, 0.025, 0.18)
+grv["support"] = {"ring": asdict(ring), "sets": asdict(sets), "bolts": asdict(bolts), "combined": asdict(gr.combine(ring, sets)),
+                  "eq": asdict(gr.support_equilibrium(2, 3, 749.9, 0.3, 24.72, 0.22, gr.combine(ring, sets), 0.005))}
+for args in [(5, 10, 0.05, 10, 1000, 0.25, 25, 0.9564, 0.30), (4.95, 13.7, 0.10, 8.1, 595, 0.25, 22.9, 0.78, 0.275), (4.79, 4.0, 0.05, 8.1, 595, 0.25, 22.9, 0.78, 0.425)]:
+    grv["shield"].append({"in": list(args), "out": asdict(gr.shield_friction(*args))})
+write("ground_response", grv)
 print("wrote", sorted(p.name for p in OUT.glob("*.json")))

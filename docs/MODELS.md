@@ -13,6 +13,7 @@ Every model exists twice: a Python reference in [`models/py/tunnelsim_models/`](
 | [EPB chamber and screw conveyor](#epb-chamber-and-screw-conveyor) | `epb_chamber.py` | `epb_chamber.js` | Hand-checked; screw simplified |
 | [Thrust and torque](#thrust-and-torque) | `thrust_torque.py` | `thrust_torque.js` | Hand-checked; friction coefficients illustrative |
 | [Hard-rock drive](#hard-rock-drive) | `hard_rock.py` | `hard_rock.js` | Reproduces Farrokh's worked example within 3 %; support curve digitised |
+| [Ground response and squeezing](#ground-response-and-squeezing) | `ground_response.py` | `ground_response.js` | Reproduces Hoek's and Hoek & Marinos's worked examples; shield friction a screening estimate |
 | [Utilisation and downtime](#utilisation-and-downtime) | `utilisation.py` | `utilisation.js` | Deterministic limits hand-checked; default EPB inside a 40-EPB survey; one-project distributions |
 
 Also: [machine class presets](#machine-class-presets) and [where default parameters come from](#default-parameter-sources).
@@ -193,6 +194,35 @@ Cutter wear and changes, rock support by class, and utilisation as downtime per 
 - the CAI wear model excludes chipping and bearing failures, so it is a lower bound;
 - the NTNU cutter-life model (CLI) is not implemented, because its charts are not available in closed form;
 - there are no per-bolt or per-ring-beam installation times (no open source found).
+
+## Ground response and squeezing
+
+Convergence–confinement around a circular tunnel, squeezing classes, and two machine checks for hard-rock TBMs.
+
+- **Rock mass:** equivalent Mohr–Coulomb φ′ and c′ from Hoek–Brown, for the stress range of a deep tunnel (σ′3max). Source: Hoek, Carranza-Torres & Corkum 2002, eqs 12–18.
+- **Ground reaction curve:** closure and plastic radius against support pressure, for an elastic–perfectly plastic Mohr–Coulomb rock mass (Duncan Fama 1993, as given in Hoek, *Practical Rock Engineering*, "Tunnels in weak rock", eqs 1–7). Includes the inverse, the pressure needed to hold a given closure.
+- **Longitudinal displacement profile:** closure ahead of and behind the face (Vlachopoulos & Diederichs 2009, [doi:10.1007/s00603-009-0176-4](https://doi.org/10.1007/s00603-009-0176-4)).
+- **Squeezing:** strain and classes A–E (Hoek & Marinos 2000).
+- **Support curves and equilibrium:**
+  - closed shotcrete or concrete ring, from thick-walled cylinder elasticity;
+  - full steel sets (unblocked) and mechanically anchored bolts, after Carranza-Torres & Fairhurst 2000, as given by Dang et al. 2022;
+  - combined supports, and the equilibrium point with the ground reaction curve.
+- **Shield friction (screening estimate):** F_f = μ·2πR·∫p dy (Ramoni & Anagnostou 2010, [doi:10.1016/j.tust.2010.02.008](https://doi.org/10.1016/j.tust.2010.02.008)). The rock contacts the shield where its closure since the face exceeds the overcut, and then presses with the pressure that holds it at the gap. Friction coefficients come from their Table 2.3 for rock.
+- **Gripper bearing:** total gripper force 2.0–3.5 × installed thrust (VSS 1341), spread over the shoe area. Comparing that pressure with the rock-mass strength is our own simple check.
+
+**Validated against:**
+
+- Hoek's worked example (φ 24.72°, c 0.22 MPa, E 750 MPa, r0 3 m, p0 2 MPa): p_cr 0.96 MPa, r_p 6.47 m against 6.43 m, u 30.9 mm against 30.6 mm;
+- the Hoek & Marinos example: 1.33 %, class B;
+- the equivalent Mohr–Coulomb parameters, checked by hand;
+- the LDP limits and the continuity of the ground reaction curve at p_cr.
+- Shield friction against Ramoni & Anagnostou's worked example (D 10 m, σ0 10 MPa): normalised thrust 0.23 / 0.04 / 0 against 0.26 / 0.08 / 0 for overcuts of 5 / 10 / 15 cm.
+
+**Limits:**
+
+- **Shield friction** can under-predict by up to about 2×, ignores creep and standstill time, and is not a design method.
+- **Ground reaction curve:** the closed form has no dilation, so it is severe for very weak rock. In the demo fault zone it gives 7.9 % strain, against 1.55 % from Hoek & Marinos's empirical fit; both are shown.
+- **Gripper bearing check:** not a published rule.
 
 ## Utilisation and downtime
 

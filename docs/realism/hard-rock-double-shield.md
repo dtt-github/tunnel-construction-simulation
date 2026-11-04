@@ -21,4 +21,4 @@ Reviewed 4 Nov 2026. Status: ✅ meets the rule · ⚠️ partly, gap listed · 
 
 - [ ] Ring-build time and segment thickness for a 10 m double shield from a primary source.
 - [ ] Main thrust, auxiliary thrust and gripper force for a 10 m machine.
-- [ ] Shield jamming check in squeezing ground (roadmap model 8). The 6.85 m Brenner exploratory machine was stuck for 32 and 46 days in fault zones.
+- [~] Shield jamming check in squeezing ground (roadmap model 8): screening estimate done. At 300 m cover the fault zone needs about 148 MN sliding and 229 MN to restart, against about 150 MN installed. Creep and standstill time are still open. The 6.85 m Brenner exploratory machine was stuck for 32 and 46 days in fault zones.

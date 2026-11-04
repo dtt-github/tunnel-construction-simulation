@@ -13,6 +13,16 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
   - thrust and torque breakdown;
   - surface settlement with Burland categories for buildings.
   - Assumptions and gaps are listed in its [realism checklist](docs/realism/epb-slice-a.md).
+- **Ground response model** (Python + JavaScript):
+  - equivalent Mohr–Coulomb parameters, ground reaction curve and longitudinal displacement profile;
+  - squeezing classes;
+  - support curves and equilibrium;
+  - shield friction (screening estimate) and gripper bearing.
+  - It reproduces the published worked examples.
+  - In the hard-rock demos:
+    - the fault zone now closes in;
+    - the double shield reports skin friction against its installed thrust, with a jamming-risk alarm;
+    - the gripper checks shoe pressure against rock-mass strength and steel-set equilibrium.
 - **Hard-rock double shield TBM** in the same page (`?machine=double`):
   - Follo-class 9.9 m machine with telescopic, gripper and tail shields;
   - main and auxiliary thrust cylinders, segment rings built while boring, pea gravel and grout;

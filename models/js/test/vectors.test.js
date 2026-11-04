@@ -3,7 +3,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { cutterForces, tbmPerformance, hoekBrown, gaussianTrough, presetTrough, twinTroughs, burlandCategory, wedgeSilo, daubWindow, siloStress, chamber, screw, crownPressure, shieldThrust, cutterheadTorque, verticalStress, referenceInstalled, Rng, normalInv, sample as sampleDist, DIST, simulateDrive, recordCheck, maxRpm, cutterChangeHPerKm, supportDowntime, rmrClass, hardRockUtilisation } from "../index.js";
+import { cutterForces, tbmPerformance, hoekBrown, gaussianTrough, presetTrough, twinTroughs, burlandCategory, wedgeSilo, daubWindow, siloStress, chamber, screw, crownPressure, shieldThrust, cutterheadTorque, verticalStress, referenceInstalled, Rng, normalInv, sample as sampleDist, DIST, simulateDrive, recordCheck, maxRpm, cutterChangeHPerKm, supportDowntime, rmrClass, hardRockUtilisation, equivalentMohrCoulomb, groundReaction, pressureForDisplacement, ldp, squeezingStrain, squeezingClass, ringSupport, steelSetSupport, boltSupport, combine, supportEquilibrium, shieldFriction } from "../index.js";
 
 const vec = (name) => JSON.parse(readFileSync(new URL(`../../test-vectors/${name}.json`, import.meta.url)));
 
@@ -140,4 +140,19 @@ test("hard-rock models match python", () => {
     const { pr, d, ...kw } = i;
     close(hardRockUtilisation(pr, d, kw), out, `utilisation ${pr} ${d}`);
   }
+});
+
+test("ground response matches python", () => {
+  const v = vec("ground_response");
+  for (const { in: a, out } of v.mc) close(equivalentMohrCoulomb(...a), out, `mc ${a}`);
+  for (const { in: a, out, p_inv } of v.grc) {
+    close(groundReaction(...a), out, `grc ${a}`);
+    close(pressureForDisplacement(groundReaction(...a).u * 1.1, a[0], ...a.slice(2)), p_inv, `inverse ${a}`, 1e-7);
+  }
+  for (const [x, r0, rp, out] of v.ldp) close(ldp(x, r0, rp), out, `ldp ${x}`);
+  for (const [scm, p0, pi, eps, cls] of v.squeeze) { close(squeezingStrain(scm, p0, pi), eps, "squeeze"); assert.equal(squeezingClass(eps)[0], cls); }
+  const ring = ringSupport(3.0, 0.2, 30000, 0.15, 35), sets = steelSetSupport(3.0, 1.0, 0.0125), bolts = boltSupport(3.0, 12, 1.0, 3.0, 0.025, 0.18);
+  close({ ring, sets, bolts, combined: combine(ring, sets) }, { ring: v.support.ring, sets: v.support.sets, bolts: v.support.bolts, combined: v.support.combined }, "supports");
+  close(supportEquilibrium(2, 3, 749.9, 0.3, 24.72, 0.22, combine(ring, sets), 0.005), v.support.eq, "equilibrium", 1e-7);
+  for (const { in: a, out } of v.shield) close(shieldFriction(...a), out, `shield ${a}`, 1e-7);
 });

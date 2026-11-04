@@ -90,8 +90,8 @@ A slice is not done until its realism checklist passes.
    - the full Merritt & Mair screw model.
 5. [x] Thrust and torque components
 6. [x] Hoek–Brown / GSI, rock-mass modulus
-7. [ ] Convergence–confinement: GRC, support curves (bolts, shotcrete, ribs), LDP
-8. [ ] Squeezing (Hoek & Marinos) and shield jamming (Ramoni & Anagnostou)
+7. [x] Convergence–confinement: GRC, support curves (bolts, shotcrete, ribs), LDP ([MODELS](MODELS.md#ground-response-and-squeezing))
+8. [~] Squeezing (Hoek & Marinos) and shield jamming (Ramoni & Anagnostou) (squeezing done; jamming as a screening estimate; time-dependent creep and standstills open)
 9. [x] Settlement trough and Burland categories
 10. [ ] Segment lining: Muir Wood / Duddeck–Erdmann, jack loads, universal-ring key position, annulus fill volume and pressure
 11. [~] Rock support: RMR classes → support pattern and support downtime per km by machine type done; per-bolt and per-ring-beam installation times open
