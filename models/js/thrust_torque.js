@@ -23,7 +23,7 @@ export function verticalStress(depth, gamma, { gammaSub = null, waterDepth = Inf
 
 /** Thrust components (kN). pAxis: support pressure at the axis (kPa); weights in kN. */
 export function shieldThrust(diameter, shieldLength, axisDepth, gamma, pAxis, {
-  gammaSub = null, waterDepth = Infinity, q = 0, k0 = 0.5, muShield = 0.3, contact = 1, shieldWeight = 0,
+  gammaSub = null, waterDepth = Infinity, q = 0, k0 = 0.5, muShield = 0.17, contact = 1, shieldWeight = 0,
   tools = 0, tailSeal = 0, backupWeight = 0, muBackup = 0.1,
 } = {}) {
   if (diameter <= 0 || shieldLength <= 0 || axisDepth <= diameter / 2) {
@@ -46,7 +46,7 @@ export const toolTorque = (nTools, tangentialForce, radius, radiusFactor = 0.5) 
 
 /** Cutterhead torque components (kNm). sigmaN: radial ground stress on the rim (kPa). */
 export function cutterheadTorque(diameter, pAxis, sigmaN, {
-  openingRatio = 0.3, mu = 0.15, muRim = 0.3, muChamber = 0.1, rimWidth = 0.5, nArms = 0, armArea = 0, armRadius = 0,
+  openingRatio = 0.3, mu = 0.15, muRim = 0.07, muChamber = 0.1, rimWidth = 0.5, nArms = 0, armArea = 0, armRadius = 0,
   tools = 0, seals = 0,
 } = {}) {
   if (!(openingRatio >= 0 && openingRatio < 1)) throw new RangeError("opening ratio must be in [0, 1)");

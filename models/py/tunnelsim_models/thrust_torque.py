@@ -22,9 +22,13 @@ Torque (kNm), cutterhead radius R, opening ratio xi:
     T_seals: given
 
 sigma_v is the effective vertical stress at the axis by default (friction on effective contact stress), with the
-water table splitting dry and submerged unit weights. The friction coefficients are illustrative defaults:
-steel on natural ground about 0.2-0.4 (shield, rim), lower for conditioned soil at the face and in the chamber
-(conditioning reduces torque, Shi et al. 2011); calibrate them per project.
+water table splitting dry and submerged unit weights. The shield and rim coefficients are effective values fitted on
+open field data (docs/validation/epb-open-data.md): mu_shield 0.17 brings the median thrust of 281 Changsha Metro
+Line 4 rings to the measured one and is within -13 / +28 % at Mashhad Line 3 (high pressure) and Sofia Line 3;
+mu_rim 0.07 does the same for torque at Changsha and Mashhad. They lump overcut, conditioning and partial contact,
+so they are lower than steel-on-soil friction (about 0.2-0.4). Face and chamber coefficients stay illustrative
+(conditioning reduces torque, Shi et al. 2011); in conditioned clays (Sofia) torque is still over-predicted about
+2.6x. Calibrate per project where data exist.
 
 Units: m, kPa, kN, kNm.
 """
@@ -96,7 +100,7 @@ class Thrust:
 
 def shield_thrust(diameter: float, shield_length: float, axis_depth: float, gamma: float, p_axis: float, *,
                   gamma_sub: float | None = None, water_depth: float = math.inf, q: float = 0.0, k0: float = 0.5,
-                  mu_shield: float = 0.3, contact: float = 1.0, shield_weight: float = 0.0, tools: float = 0.0,
+                  mu_shield: float = 0.17, contact: float = 1.0, shield_weight: float = 0.0, tools: float = 0.0,
                   tail_seal: float = 0.0, backup_weight: float = 0.0, mu_backup: float = 0.1) -> Thrust:
     """Thrust components (kN). p_axis: support pressure at the axis (kPa); weights in kN."""
     if diameter <= 0 or shield_length <= 0 or axis_depth <= diameter / 2:
@@ -132,7 +136,7 @@ def tool_torque(n_tools: int, tangential_force: float, radius: float, radius_fac
 
 
 def cutterhead_torque(diameter: float, p_axis: float, sigma_n: float, *, opening_ratio: float = 0.3,
-                      mu: float = 0.15, mu_rim: float = 0.3, mu_chamber: float = 0.1, rim_width: float = 0.5, n_arms: int = 0,
+                      mu: float = 0.15, mu_rim: float = 0.07, mu_chamber: float = 0.1, rim_width: float = 0.5, n_arms: int = 0,
                       arm_area: float = 0.0, arm_radius: float = 0.0, tools: float = 0.0,
                       seals: float = 0.0) -> Torque:
     """Cutterhead torque components (kNm). sigma_n: radial ground stress on the rim (kPa); arm_area in m^2."""

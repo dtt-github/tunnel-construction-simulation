@@ -12,7 +12,7 @@ Every model exists twice: a Python reference in [`models/py/tunnelsim_models/`](
 | [Face support pressure](#face-support-pressure) | `face_support.py` | `face_support.js` | Hand-checked; seepage not yet modelled |
 | [EPB chamber and screw conveyor](#epb-chamber-and-screw-conveyor) | `epb_chamber.py` | `epb_chamber.js` | Hand-checked; screw simplified |
 | [Slurry shield (Mixshield)](#slurry-shield-mixshield) | `slurry.py` | `slurry.js` | Reproduces the DAUB worked example; air cushion is this project's derivation |
-| [Thrust and torque](#thrust-and-torque) | `thrust_torque.py` | `thrust_torque.js` | Hand-checked; against open field data the defaults over-predict thrust ×1.4 and torque ×1.7 ([validation](validation/epb-open-data.md)) |
+| [Thrust and torque](#thrust-and-torque) | `thrust_torque.py` | `thrust_torque.js` | Shield and rim friction fitted on open field data; thrust within about ±25 % on three EPB projects, torque high in conditioned clays ([validation](validation/epb-open-data.md)) |
 | [Hard-rock drive](#hard-rock-drive) | `hard_rock.py` | `hard_rock.js` | Reproduces Farrokh's worked example within 3 %; support curve digitised |
 | [Ground response and squeezing](#ground-response-and-squeezing) | `ground_response.py` | `ground_response.js` | Reproduces Hoek's and Hoek & Marinos's worked examples; shield friction a screening estimate |
 | [SEM / NATM sprayed concrete lining](#sem--natm-sprayed-concrete-lining) | `sem.py` | `sem.js` | Checked against Brenner shotcrete data and Oreste's trends; Sulem parameters from one site |
@@ -194,10 +194,17 @@ The ground stress on the shield is effective or total vertical stress, with a wa
 
 **Limits:**
 
-- friction coefficients are illustrative;
+- face and chamber friction coefficients are illustrative; shield and rim are effective values fitted on open data;
 - the Krause α·D³ band was dropped because modern EPBs exceed it.
 
-**Against open field data** ([validation](validation/epb-open-data.md)): on 281 Changsha Metro Line 4 rings the defaults give a median 1.43× the measured thrust and 1.70× the measured torque. Shield skin friction and rim friction are the excess. The data fit a shield friction near 0.17 and a much smaller rim term. Ring-to-ring scatter is not reproduced (correlation ≈ 0). The defaults are unchanged until a third dataset with published site parameters is checked.
+**Against open field data** ([validation](validation/epb-open-data.md)): the old defaults (shield and rim friction 0.3) gave 1.43× the measured thrust and 1.70× the measured torque on 281 Changsha Metro Line 4 rings. The defaults are now effective values fitted there: shield 0.17, rim 0.07.
+
+Checked on two other projects:
+
+- **Mashhad Line 3:** at 1.3 bar, thrust comes out at 0.89× and torque at 1.06× the measured values.
+- **Sofia Line 3, 14 means:** thrust 1.02× with groundwater, 1.28× dry. Torque is still 2.7× over in foam-conditioned clays and sands.
+- **Low face pressure in dense, dry ground:** about 2× over.
+- **Ring-to-ring scatter:** not reproduced.
 
 ## Hard-rock drive
 
