@@ -639,10 +639,11 @@ function substep(dt) {
   const p = axisPressure();
   S.cutRpm = S.mode === "PUSH" ? val("rpm") : 0;
   const sv = verticalStress(Z0, zone.gamma, { waterDepth: WATER });
-  // torque at the current pressure: the slurry lubricates the face, the back of the head and the rim gap, so the
-  // friction coefficients are lower than for the EPB paste (assumed); above the installed limit the head stalls
+  // torque at the current pressure: the slurry lubricates the face and the back of the head, so those friction
+  // coefficients are lower than for the EPB paste (assumed); the rim uses the effective value fitted on open EPB data.
+  // Above the installed limit the head stalls
   S.tq = S.cutRpm > 0 ? cutterheadTorque(M.D, p, (sv * (1 + zone.k0)) / 2, {
-    openingRatio: drawnOpening, mu: 0.05, muRim: 0.15, muChamber: 0.02, nArms: 4, armArea: 0.5, armRadius: 2.3, tools: toolTorque(M.nTools, M.toolForce, R), seals: 300,
+    openingRatio: drawnOpening, mu: 0.05, muChamber: 0.02, nArms: 4, armArea: 0.5, armRadius: 2.3, tools: toolTorque(M.nTools, M.toolForce, R), seals: 300,
   }) : null;
   S.torque = S.tq ? S.tq.total : 0;
   S.stalled = S.torque > M.torqueLimit;
