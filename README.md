@@ -14,7 +14,7 @@ It runs in the browser, with no install and no GPU needed.
 | Demo | What it shows | Status |
 |---|---|---|
 | [Recorded GPU runs](https://dtt-github.github.io/tunnel-construction-simulation/phase0/replays/) | Soil simulated with the material-point method on an NVIDIA DGX Spark, then replayed: a tunnel face collapsing as its support retracts, and an EPB chamber stirred by a rotating cutterhead | Phase 0 benchmark. Tests speed and stability, not calibrated performance |
-| [Hard-rock TBM prototype](https://dtt-github.github.io/tunnel-construction-simulation/web/) | Early prototype driven by the CSM disc-cutter model | **Being rebuilt** to match real machines ([why](docs/research/methods-reference.md#corrections-to-our-own-material)) |
+| [Hard-rock open gripper TBM](https://dtt-github.github.io/tunnel-construction-simulation/web/hard-rock/) | A 9.58 m main-beam TBM: disc cutterhead with buckets, grippers and regrip cycle, rock bolts, mesh and ring beams at L1 and shotcrete at L2 by rock class, fault zone, downtime per km | Slice B. Double-shield variant next ([realism checklist](docs/realism/hard-rock-gripper.md)) |
 | [Urban EPB shield](https://dtt-github.github.io/tunnel-construction-simulation/web/epb/) | A 7 m EPB laid out front to back. Chamber pressure inside the DAUB window, automatic or manual screw control, foam conditioning, thrust and torque breakdown, the push and ring-build cycle with a universal 6 + key ring, and surface settlement over buildings | Slice A, with shift pattern, downtime and a 90-day advance forecast checked against record rates ([realism checklist](docs/realism/epb-slice-a.md)) |
 
 [![Urban EPB shield: cut-away from the cutterhead to the backup, with the operator console](docs/images/epb-machine.png)](https://dtt-github.github.io/tunnel-construction-simulation/web/epb/)
@@ -43,7 +43,7 @@ Tunnelling simulators today are either closed training products or research code
 | **Model library** (Python + JavaScript, shared test vectors) | 7 models: CSM disc cutter, Hoek–Brown, settlement (troughs, longitudinal profile, method presets, twin tunnels, Burland), face support (wedge-silo + DAUB window), EPB chamber and screw, thrust and torque, utilisation and downtime with a record-rate check. [Details →](docs/MODELS.md) |
 | **Machine class presets** | Six classes (urban EPB, Mixshield, double shield, main beam, SEM, drill & blast). Every field carries its source and a verified flag. [Presets →](models/presets/machine-classes.json) |
 | **GPU physics (Phase 0)** | NVIDIA Newton implicit MPM on a DGX Spark: face stability and EPB chamber benchmarks, particle streaming, record and replay. [Results →](phase0/RESULTS.md) |
-| **Browser client** | [Urban EPB shield](https://dtt-github.github.io/tunnel-construction-simulation/web/epb/) and [replay viewer](https://dtt-github.github.io/tunnel-construction-simulation/phase0/replays/) live. Hard-rock machine being rebuilt |
+| **Browser client** | [Urban EPB shield](https://dtt-github.github.io/tunnel-construction-simulation/web/epb/) and [replay viewer](https://dtt-github.github.io/tunnel-construction-simulation/phase0/replays/) live, with the [hard-rock open gripper TBM](https://dtt-github.github.io/tunnel-construction-simulation/web/hard-rock/) |
 
 ## Quick start
 
@@ -97,7 +97,7 @@ npm run test:py
 2. **Phase R, realism reset:** done. Sourced method cards, corrected demo labels, cited presets.
 3. **Phase 1, browser simulator:** one complete method at a time.
    - A: urban EPB (demo live, with downtime and record-rate check)
-   - B: hard rock (open gripper, double shield)
+   - B: hard rock (open gripper live; double shield next)
    - C: slurry
    - D: SEM/NATM
    - E: drill & blast

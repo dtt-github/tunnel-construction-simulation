@@ -13,6 +13,11 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
   - thrust and torque breakdown;
   - surface settlement with Burland categories for buildings.
   - Assumptions and gaps are listed in its [realism checklist](docs/realism/epb-slice-a.md).
+- **Hard-rock open gripper TBM demo** (Slice B, `web/hard-rock/`), replacing the early prototype at `web/`:
+  - flat disc cutterhead with buckets, muck ring and belt;
+  - roof shield, main beam, grippers with propel cylinders and the regrip cycle;
+  - rock bolts, mesh and ring beams at L1 and shotcrete at L2 by RMR class, with invert segments;
+  - geology with a fault zone, cutting limits and downtime per stroke from the per-km model.
 - **Hard-rock models:**
   - CSM drive with constant torque, then constant power;
   - gauge-cutter speed limit and penetration cap;

@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hard-Rock Gripper TBM</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="../style.css">
+<!-- shared console widgets (views, labels, bars, legends, flags) -->
+<link rel="stylesheet" href="../epb/epb.css">
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.182.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.182.0/examples/jsm/"
+  }
+}
+</script>
+</head>
+<body>
+<canvas id="view"></canvas>
+<div id="labels"></div>
+<div id="views">
+  <button data-view="machine" class="on">Machine</button>
+  <button data-view="face">Cutterhead</button>
+  <button data-view="l1">L1 support</button>
+  <button data-view="gripper">Grippers</button>
+  <button data-view="l2">Backup (L2)</button>
+  <label class="chk"><input type="checkbox" id="showLabels" checked> Labels</label>
+</div>
+
+<aside id="console">
+  <header>
+    <h1 id="title">Hard-rock open gripper TBM · Ø 9.58 m</h1>
+    <span id="fidelity" title="Which physics drives the numbers">Analytical (browser)</span>
+  </header>
+
+  <section>
+    <h2>Operator</h2>
+    <label>Start at
+      <select id="start">
+        <option value="0">Chainage 0 m: gneiss (RMR 70)</option>
+        <option value="80">Chainage 80 m: granite ahead (RMR 76)</option>
+        <option value="200">Chainage 200 m: inside the fault zone (RMR 22)</option>
+        <option value="210">Chainage 210 m: mica schist ahead (RMR 50)</option>
+      </select>
+    </label>
+    <label>Cutterhead thrust <output id="thrustOut"></output><input id="thrust" type="range" min="4000" max="27000" step="250" value="18000"></label>
+    <label>Cutterhead speed <output id="rpmOut"></output><input id="rpm" type="range" min="0.5" max="6.6" step="0.1" value="5.5"></label>
+    <label>Muck haulage
+      <select id="haulage"><option value="conveyor">Continuous conveyor</option><option value="rail">Muck trains</option></select>
+    </label>
+    <label>Site organisation
+      <select id="org"><option value="normal">Normal (maintenance and transport: normal)</option><option value="good">Good</option><option value="poor">Poor</option></select>
+    </label>
+    <label>Time scale <output id="tsOut"></output><input id="ts" type="range" min="1" max="600" step="1" value="60"></label>
+    <div class="buttons"><button id="pause">Pause</button><button id="skip" disabled>Skip stoppage</button><button id="reset">Reset</button></div>
+  </section>
+
+  <section>
+    <h2>Alarms</h2>
+    <div id="alarms"></div>
+  </section>
+
+  <section>
+    <h2>Cutting</h2>
+    <dl id="cutting"></dl>
+  </section>
+
+  <section>
+    <h2>Cycle</h2>
+    <dl id="cycle"></dl>
+  </section>
+
+  <section>
+    <h2>Rock and support</h2>
+    <dl id="rock"></dl>
+  </section>
+
+  <section>
+    <h2>Advance with downtime</h2>
+    <div id="forecast"></div>
+  </section>
+
+  <section>
+    <h2>Model limits</h2>
+    <ul class="limits">
+      <li>Geology along the drive is illustrative; rock strengths, CAI and RMR are typical values for the rock types, not a project.</li>
+      <li>Machine torque, power and thrust are the Gotthard-class preset values, which come from trade press and are not yet verified. The number of cutters (62) and the stroke (1.8 m) are assumptions.</li>
+      <li>Downtime per km follows Farrokh (2018). Support downtime is digitised from a figure (±20 h/km); per-bolt installation times are not modelled. Cutter wear excludes chipping and bearing failures.</li>
+      <li>The final cast-in-place lining is placed after or behind the drive and is not shown.</li>
+    </ul>
+  </section>
+
+  <footer>
+    Models: CSM disc cutters with drive and speed limits (Rostami &amp; Ozdemir; Rostami &amp; Chang 2017), cutter wear (Frenzel 2011), RMR support classes (Bieniawski 1989), downtime per km (Farrokh 2018). Machine layout from the <a href="https://github.com/dtt-github/tunnel-construction-simulation/blob/main/docs/research/methods-reference.md#hard-rock-tbms">methods reference</a>.
+  </footer>
+</aside>
+
+<script type="module" src="main.js"></script>
+</body>
+</html>

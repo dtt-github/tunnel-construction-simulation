@@ -129,13 +129,13 @@ Demo: [web/epb/](../web/epb/) ([live](https://dtt-github.github.io/tunnel-constr
 
 ### Slice B: hard rock, open gripper and double shield
 
-- [ ] Hard-rock cutterhead:
+- [x] Hard-rock cutterhead ([web/hard-rock/](../web/hard-rock/), [realism checklist](realism/hard-rock-gripper.md)):
   - flat face with curved gauge and tilted gauge cutters;
   - 17″ or 19″ discs at 75–100 mm spacing, with a centre cluster;
   - 6–8 buckets with grill bars;
   - muck ring and centre belt.
   - Speed limited by gauge-cutter speed.
-- [ ] Open gripper TBM:
+- [x] Open gripper TBM (final lining stated as a later stage, not drawn):
   - roof and side shields with invert shoe, main beam, grippers and propel cylinders, rear legs;
   - L1: roof drills, ring-beam erector, mesh, probe drill;
   - L2: shotcrete robot, invert segments;
@@ -148,7 +148,7 @@ Demo: [web/epb/](../web/epb/) ([live](https://dtt-github.github.io/tunnel-constr
   - concurrent boring and ring build;
   - falls back to single-shield mode in faults.
 - [ ] Single shield as a further variant: sequential bore and ring build, with segments and pea gravel or grout.
-- [ ] Geology:
+- [~] Geology (fault zone done: slower drive, heavy support; jamming risk open):
   - fault zones cut penetration and utilisation;
   - they need heavy support (ribs at 1 m, shotcrete);
   - they raise the jamming risk (model 8).
