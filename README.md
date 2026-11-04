@@ -15,9 +15,9 @@ It runs in the browser, with no install and no GPU needed.
 |---|---|---|
 | [Recorded GPU runs](https://dtt-github.github.io/tunnel-construction-simulation/phase0/replays/) | Soil simulated with the material-point method on an NVIDIA DGX Spark, then replayed: a tunnel face collapsing as its support retracts, and an EPB chamber stirred by a rotating cutterhead | Phase 0 benchmark. Tests speed and stability, not calibrated performance |
 | [Hard-rock TBM prototype](https://dtt-github.github.io/tunnel-construction-simulation/web/) | Early prototype driven by the CSM disc-cutter model | **Being rebuilt** to match real machines ([why](docs/research/methods-reference.md#corrections-to-our-own-material)) |
-| Urban EPB shield | Chamber pressure inside the DAUB window, screw control, foam conditioning, thrust and torque breakdown, ring build, surface settlement over buildings | In development ([Slice A](docs/ROADMAP.md#slice-a-urban-epb-7-m-class-first-most-models-already-exist)) |
+| [Urban EPB shield](https://dtt-github.github.io/tunnel-construction-simulation/web/epb/) | A 7 m EPB laid out front to back. Chamber pressure inside the DAUB window, automatic or manual screw control, foam conditioning, thrust and torque breakdown, the push and ring-build cycle with a universal 6 + key ring, and surface settlement over buildings | Slice A, with shift pattern, downtime and a 90-day advance forecast checked against record rates ([realism checklist](docs/realism/epb-slice-a.md)) |
 
-[![Tunnel face replay: soil failing ahead of a retracting support plate](docs/images/replay-face.png)](https://dtt-github.github.io/tunnel-construction-simulation/phase0/replays/)
+[![Urban EPB shield: cut-away from the cutterhead to the backup, with the operator console](docs/images/epb-machine.png)](https://dtt-github.github.io/tunnel-construction-simulation/web/epb/)
 
 ---
 
@@ -40,10 +40,10 @@ Tunnelling simulators today are either closed training products or research code
 
 | Area | Status |
 |---|---|
-| **Model library** (Python + JavaScript, shared test vectors) | 7 models: CSM disc cutter, Hoek–Brown, settlement (troughs, longitudinal profile, method presets, twin tunnels, Burland), face support (wedge-silo + DAUB window), EPB chamber and screw, thrust and torque. [Details →](docs/MODELS.md) |
+| **Model library** (Python + JavaScript, shared test vectors) | 7 models: CSM disc cutter, Hoek–Brown, settlement (troughs, longitudinal profile, method presets, twin tunnels, Burland), face support (wedge-silo + DAUB window), EPB chamber and screw, thrust and torque, utilisation and downtime with a record-rate check. [Details →](docs/MODELS.md) |
 | **Machine class presets** | Six classes (urban EPB, Mixshield, double shield, main beam, SEM, drill & blast). Every field carries its source and a verified flag. [Presets →](models/presets/machine-classes.json) |
 | **GPU physics (Phase 0)** | NVIDIA Newton implicit MPM on a DGX Spark: face stability and EPB chamber benchmarks, particle streaming, record and replay. [Results →](phase0/RESULTS.md) |
-| **Browser client** | Replay viewer live. Urban EPB in development. Hard-rock machine being rebuilt |
+| **Browser client** | [Urban EPB shield](https://dtt-github.github.io/tunnel-construction-simulation/web/epb/) and [replay viewer](https://dtt-github.github.io/tunnel-construction-simulation/phase0/replays/) live. Hard-rock machine being rebuilt |
 
 ## Quick start
 
@@ -75,7 +75,7 @@ npm run test:py
 | [`web/`](web) | Browser client: plain ES modules, three.js and Jolt from a CDN, no build step |
 | [`phase0/`](phase0) | GPU platform benchmarks, particle streaming, record and replay ([results](phase0/RESULTS.md)) |
 | [`server/`](server) | Newton/Warp simulation server (Phase 2) |
-| [`docs/`](docs) | Architecture, roadmap, model catalogue, research ([index](docs/README.md)) |
+| [`docs/`](docs) | Architecture, roadmap, model catalogue, realism checklists, research ([index](docs/README.md)) |
 | [`knowledge/`](knowledge) | Local workspace for books and notes, never committed except its README |
 
 ## Documentation
@@ -96,7 +96,7 @@ npm run test:py
 1. **Phase 0, platform:** done. GPU benchmarks, streaming, record and replay.
 2. **Phase R, realism reset:** done. Sourced method cards, corrected demo labels, cited presets.
 3. **Phase 1, browser simulator:** one complete method at a time.
-   - A: urban EPB (in progress)
+   - A: urban EPB (demo live, with downtime and record-rate check)
    - B: hard rock (open gripper, double shield)
    - C: slurry
    - D: SEM/NATM

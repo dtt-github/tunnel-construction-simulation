@@ -22,6 +22,7 @@ Start with the [project README](../README.md) for the live demo and quick start.
 | [ARCHITECTURE.md](ARCHITECTURE.md) | Physics by scale (alignment, machine, face and chamber, cutter); browser and GPU-server split; the model library contract |
 | [ROADMAP.md](ROADMAP.md) | Realism rules for every demo; Phase 0 to 5; the method-by-method slices of Phase 1 |
 | [MODELS.md](MODELS.md) | One section per implemented model: what it computes, files, references, validation, known limits |
+| [realism/epb-slice-a.md](realism/epb-slice-a.md) | Realism checklist for the urban EPB demo: each rule, evidence, known gaps, assumed values |
 | [research/methods-reference.md](research/methods-reference.md) | Sourced cards per method: layout front to back, support and lining, cycle, typical numbers, ground pairing |
 | [research/research-survey.md](research/research-survey.md) | Literature review behind the models and architecture, with verification tags |
 | [research/industry-survey.md](research/industry-survey.md) | Manufacturers, published specifications, reference projects, world-record advance rates |

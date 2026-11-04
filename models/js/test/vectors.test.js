@@ -3,7 +3,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { cutterForces, tbmPerformance, hoekBrown, gaussianTrough, presetTrough, twinTroughs, burlandCategory, wedgeSilo, daubWindow, siloStress, chamber, screw, crownPressure, shieldThrust, cutterheadTorque, verticalStress, referenceInstalled } from "../index.js";
+import { cutterForces, tbmPerformance, hoekBrown, gaussianTrough, presetTrough, twinTroughs, burlandCategory, wedgeSilo, daubWindow, siloStress, chamber, screw, crownPressure, shieldThrust, cutterheadTorque, verticalStress, referenceInstalled, Rng, normalInv, sample as sampleDist, DIST, simulateDrive, recordCheck } from "../index.js";
 
 const vec = (name) => JSON.parse(readFileSync(new URL(`../../test-vectors/${name}.json`, import.meta.url)));
 
@@ -115,5 +115,17 @@ test("thrust and torque match python", () => {
     close({ sv_eff: verticalStress(i.z, i.g, water), sv_total: verticalStress(i.z, i.g, { ...water, effective: false }), thrust: th, sigma_n: sn, torque: tq,
       reference: Object.fromEntries(["epb", "slurry", "gripper"].map((t) => [t, referenceInstalled(t, i.d)])),
       reference_all: Object.fromEntries(["epb", "slurry", "gripper"].map((t) => [t, referenceInstalled(t, i.d, { includeUnverified: true })])) }, out, `D=${i.d}`);
+  }
+});
+
+test("utilisation model matches python", () => {
+  const v = vec("utilisation");
+  const rng = new Rng(42);
+  assert.deepEqual(v.uniform_seed42.map(() => rng.uniform()), v.uniform_seed42); // bit-identical stream
+  for (const [p, z] of v.normal_inv) close(normalInv(p), z, `normalInv(${p})`);
+  for (const [k, xs] of Object.entries(v.samples)) [0.05, 0.3, 0.5, 0.7, 0.95].forEach((u, i) => close(sampleDist(DIST[k], u), xs[i], `${k}@${u}`));
+  for (const { in: i, out } of v.drives) {
+    const r = simulateDrive({ shift_pattern: i.shift_pattern, haulage: i.haulage, boring_min: i.boring_min, interventions: i.interventions }, i.days, i.seed);
+    close({ ...r, check: recordCheck(7.08, r.best_day, r.best_week, r.best_month) }, out, `drive ${i.shift_pattern} seed ${i.seed}`, 1e-6);
   }
 });

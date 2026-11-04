@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Urban EPB Shield</title>
+<link rel="icon" href="data:,">
 <link rel="stylesheet" href="../style.css">
 <link rel="stylesheet" href="epb.css">
 <script type="importmap">
@@ -44,8 +45,19 @@
     <label>Foam injection ratio FIR <output id="firOut"></output><input id="fir" type="range" min="0" max="80" step="1" value="40"></label>
     <label>Foam expansion ratio FER <output id="ferOut"></output><input id="fer" type="range" min="8" max="15" step="0.5" value="10"></label>
     <label>Volume loss (scenario input) <output id="vlOut"></output><input id="vl" type="range" min="0.3" max="2" step="0.05" value="1.0"></label>
+    <label>Shift pattern
+      <select id="shift">
+        <option value="2x10h_plus_4h_maintenance">2 × 10 h production + 4 h maintenance shift</option>
+        <option value="2x12h_maintenance_per_cycle">2 × 12 h, maintenance in every cycle</option>
+        <option value="idealised_24h">Idealised 24 h, no maintenance (upper bound)</option>
+      </select>
+    </label>
+    <label>Muck haulage
+      <select id="haulage"><option value="conveyor">Belt conveyor to the portal</option><option value="rail">Muck trains (train delays every cycle)</option></select>
+    </label>
+    <label class="chk2"><input type="checkbox" id="interventions" checked> Cutting-tool interventions (hyperbaric)</label>
     <label>Time scale <output id="tsOut"></output><input id="ts" type="range" min="1" max="300" step="1" value="60"></label>
-    <div class="buttons"><button id="pause">Pause</button><button id="reset">Reset</button></div>
+    <div class="buttons"><button id="pause">Pause</button><button id="skip" disabled>Skip stoppage</button><button id="reset">Reset</button></div>
   </section>
 
   <section>
@@ -65,6 +77,11 @@
   </section>
 
   <section>
+    <h2>Advance with downtime</h2>
+    <div id="forecast"></div>
+  </section>
+
+  <section>
     <h2>Thrust and torque</h2>
     <div id="bars"></div>
   </section>
@@ -79,13 +96,13 @@
     <ul class="limits">
       <li>Volume loss is a scenario input; it does not yet respond to face pressure or grouting.</li>
       <li>Building categories use greenfield horizontal strain only (no deflection ratio, no building stiffness).</li>
-      <li>Advance per day counts the push and ring-build cycle only; downtime (logistics, maintenance, tool changes) is not modelled yet.</li>
+      <li>Downtime uses distributions fitted on one 6.88 m metro EPB (Tabriz; Moosazadeh et al. 2018) and a published shift pattern; they are illustrative for other projects. Locomotive travel time, learning curve and ground-related stops other than tool interventions are not modelled.</li>
       <li>Chamber volume, screw efficiency, friction coefficients and machine weights are illustrative assumptions.</li>
     </ul>
   </section>
 
   <footer>
-    Models: wedge-silo face support and DAUB window, chamber volume balance with foam, simplified screw (Merritt &amp; Mair), thrust and torque components (Shi et al. 2011), Gaussian settlement (Peck; O'Reilly &amp; New; Mair &amp; Taylor). Machine class from <a href="https://github.com/dtt-github/tunnel-construction-simulation/blob/main/docs/research/methods-reference.md">published references</a>.
+    Models: wedge-silo face support and DAUB window, chamber volume balance with foam, simplified screw (Merritt &amp; Mair), thrust and torque components (Shi et al. 2011), Gaussian settlement (Peck; O'Reilly &amp; New; Mair &amp; Taylor), utilisation and downtime (Moosazadeh et al. 2018; record rates with sources). Machine class from <a href="https://github.com/dtt-github/tunnel-construction-simulation/blob/main/docs/research/methods-reference.md">published references</a>.
   </footer>
 </aside>
 

@@ -95,13 +95,15 @@ A slice is not done until its realism checklist passes.
 9. [x] Settlement trough and Burland categories
 10. [ ] Segment lining: Muir Wood / Duddeck–Erdmann, jack loads, universal-ring key position, annulus fill volume and pressure
 11. [ ] Rock support: rock-mass classes → support class (bolts, mesh, ribs, shotcrete thickness), installation time per metre
-12. [ ] Utilisation / activity-time model (discrete events): stroke, regrip, ring build, support, cutter change, logistics, breakdowns, bad ground
+12. [~] Utilisation / activity-time model (discrete events) (EPB done: ring build, general activities, train delays, per-cycle maintenance, maintenance shift, cutting-tool interventions, record-rate check, [MODELS](MODELS.md#utilisation-and-downtime); open: hard-rock stroke/regrip/support/cutter-change terms, locomotive travel time, breakdowns by subsystem)
 13. [ ] Drill & blast: round design (Holmberg / Langefors), Kuz-Ram fragmentation, PPV limits, cycle times
 14. [ ] SEM: excavation sequence and ring-closure distance, shotcrete ageing E(t)
 
 ### Slice A: urban EPB, 7 m class (first; most models already exist)
 
-- [ ] Machine, front to back:
+Demo: [web/epb/](../web/epb/) ([live](https://dtt-github.github.io/tunnel-construction-simulation/web/epb/)). Realism checklist: [realism/epb-slice-a.md](realism/epb-slice-a.md).
+
+- [x] Machine, front to back:
   - cutterhead with soft-ground tools and ≈ 35 % opening, plus mixing arms;
   - pressure bulkhead with earth-pressure cells;
   - screw with outlet gate;
@@ -112,18 +114,18 @@ A slice is not done until its realism checklist passes.
   - erector and segment feeder;
   - two-component grout through the tailskin;
   - backup with foam plant and belt or muck cars.
-- [ ] Cycle:
+- [~] Cycle (done except key-position selection driven by steering; keys follow a fixed alternating pattern):
   - push one ring (≈ 1.4–1.5 m), then build a universal ring of 6 + 1 segments with key-position selection;
   - grout during the push;
   - rates: ≈ 15–20 min push, ≈ 35 min build, ≈ 12–20 m/day.
-- [ ] Console:
+- [~] Console (done except grout pressure):
   - chamber pressure gauges by height inside the DAUB window;
   - screw speed and FIR/FER;
   - cutterhead at ≈ 1.5–3 rpm;
   - thrust and torque breakdown;
   - grout volume and pressure.
-- [ ] Surface: settlement heatmap with buildings and Burland categories, and volume loss from the face pressure and grout.
-- [ ] Check against reference machine numbers (Crossrail, Moscow) and the urban EPB record table.
+- [~] Surface: settlement heatmap with buildings and Burland categories (done); volume loss from the face pressure and grout (open: needs a published relation).
+- [x] Check against reference machine numbers (Crossrail, Moscow) and the published EPB rates (40-EPB survey, best day and month references, world record by diameter class).
 
 ### Slice B: hard rock, open gripper and double shield
 

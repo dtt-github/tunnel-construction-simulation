@@ -130,4 +130,16 @@ for row in [(7, 9, 18, 20, 200, 3, 0.5, 0.3, 4000, 1000, 500, 6000, 0.3, 4, 0.5,
                        "reference": {t: reference_installed(t, d) for t in ("epb", "slurry", "gripper")},
                        "reference_all": {t: reference_installed(t, d, include_unverified=True) for t in ("epb", "slurry", "gripper")}}})
 write("thrust_torque", tt)
+from tunnelsim_models.utilisation import DIST, DriveSettings, Rng, normal_inv, record_check, sample, simulate_drive  # noqa: E402
+
+rng = Rng(42)
+uni = [rng.uniform() for _ in range(20)]
+util = {"uniform_seed42": uni, "normal_inv": [[p, normal_inv(p)] for p in (0.001, 0.01, 0.2, 0.5, 0.8, 0.99, 0.999)],
+        "samples": {k: [sample(d, u) for u in (0.05, 0.3, 0.5, 0.7, 0.95)] for k, d in DIST.items()}, "drives": []}
+for sp, hl, bore, iv, days, seed in [("2x10h_plus_4h_maintenance", "conveyor", None, True, 90, 1), ("2x12h_maintenance_per_cycle", "rail", None, True, 60, 7),
+                                     ("2x10h_plus_4h_maintenance", "conveyor", 20.0, False, 30, 3), ("idealised_24h", "conveyor", 25.0, True, 120, 11)]:
+    r = simulate_drive(DriveSettings(shift_pattern=sp, haulage=hl, boring_min=bore, interventions=iv), days=days, seed=seed)
+    util["drives"].append({"in": {"shift_pattern": sp, "haulage": hl, "boring_min": bore, "interventions": iv, "days": days, "seed": seed},
+                           "out": asdict(r) | {"check": record_check(7.08, r.best_day, r.best_week, r.best_month)}})
+write("utilisation", util)
 print("wrote", sorted(p.name for p in OUT.glob("*.json")))

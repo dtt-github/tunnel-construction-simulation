@@ -6,6 +6,7 @@ shared vectors in models/test-vectors/ so the browser and the GPU server always 
 from .csm import Cutter, cutter_forces, penetration_for_normal_force, tbm_performance
 from .epb_chamber import P_ATM, Chamber, ChamberState, Screw, crown_pressure, foam_split
 from .thrust_torque import REFERENCE_MACHINES, Thrust, Torque, cutterhead_torque, reference_installed, shield_thrust, tool_torque, vertical_stress
+from .utilisation import DriveResult, DriveSettings, record_check, simulate_drive
 from .face_support import DAUB_DEFAULTS, FaceSupport, SupportWindow, daub_window, silo_stress, vermeer_limit, wedge_silo
 from .hoek_brown import hoek_brown, sigma1_at_failure
 from .settlement import (
@@ -57,4 +58,8 @@ __all__ = [
     "Thrust",
     "Torque",
     "REFERENCE_MACHINES",
+    "simulate_drive",
+    "record_check",
+    "DriveSettings",
+    "DriveResult",
 ]

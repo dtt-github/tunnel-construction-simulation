@@ -12,6 +12,7 @@ Every model exists twice: a Python reference in [`models/py/tunnelsim_models/`](
 | [Face support pressure](#face-support-pressure) | `face_support.py` | `face_support.js` | Hand-checked; seepage not yet modelled |
 | [EPB chamber and screw conveyor](#epb-chamber-and-screw-conveyor) | `epb_chamber.py` | `epb_chamber.js` | Hand-checked; screw simplified |
 | [Thrust and torque](#thrust-and-torque) | `thrust_torque.py` | `thrust_torque.js` | Hand-checked; friction coefficients illustrative |
+| [Utilisation and downtime](#utilisation-and-downtime) | `utilisation.py` | `utilisation.js` | Deterministic limits hand-checked; default EPB inside a 40-EPB survey; one-project distributions |
 
 Also: [machine class presets](#machine-class-presets) and [where default parameters come from](#default-parameter-sources).
 
@@ -153,6 +154,49 @@ The ground stress on the shield is effective or total vertical stress, with a wa
 
 - friction coefficients are illustrative;
 - the Krause α·D³ band was dropped because modern EPBs exceed it.
+
+## Utilisation and downtime
+
+An activity-time model of the drive, run ring by ring over calendar days. It covers:
+
+- boring (fixed from the advance speed, or a fitted distribution);
+- ring build;
+- general tunnelling activities;
+- train delays (rail haulage only);
+- per-cycle maintenance;
+- a shift pattern with a maintenance shift;
+- cutting-tool interventions that stop the drive round the clock.
+
+Outputs: utilisation (boring time / calendar time); mean advance per day and week; best day, week and month; the share of time per activity; and a check of the best values against published EPB rates and the world record of the diameter class. A seeded mulberry32 generator makes runs reproducible and bit-identical in Python and JavaScript.
+
+**References:**
+
+- Moosazadeh, Aghababaie, Hoseinie & Rostami (2018), [doi:10.22044/jme.2017.5707.1384](https://doi.org/10.22044/jme.2017.5707.1384). Fitted distributions from a 6.88 m metro EPB:
+  - ring build: lognormal;
+  - boring and general activities: log-logistic;
+  - train delay: triangular;
+  - rings between tool stops: Weibull;
+  - stop duration: log-logistic;
+  - maintenance per cycle.
+- Shift pattern of 2 × 10 h + 4 h maintenance: Johnson (2014), San Francisco Central Subway, NAT 2014.
+- Utilisation definition: McMillan et al. (2022), TAC.
+- Weekly advance of 40 EPBs: Roby & Willis (2014), NAT 2014.
+- Best published EPB rates and the record table by diameter class: sources in `EPB_REFERENCES` and `WORLD_RECORDS`.
+
+**Validated against:**
+
+- 20 min boring + 30 min build with no downtime gives exactly 43.2 m/day and 40 % utilisation;
+- a 4 h maintenance shift removes a sixth of production;
+- interventions and rail haulage slow the drive;
+- default urban EPB settings give about 15–29 % utilisation and a weekly mean within two standard deviations of the survey (85 ± 36 m/week);
+- best day and month stay below the published references.
+
+**Limits:**
+
+- the distributions come from one project;
+- locomotive travel time growing with tunnel length is not modelled: on the source project's own settings the model gives about 19 % utilisation against the paper's 14 %;
+- no learning curve, breakdowns by subsystem or ground-related stops besides tool interventions;
+- hard-rock terms (stroke, regrip, rock support, cutter changes per cutter) are still to come.
 
 ---
 

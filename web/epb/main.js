@@ -9,6 +9,7 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import {
   wedgeSilo, daubWindow, chamber as makeChamber, screw as makeScrew, shieldThrust, cutterheadTorque, toolTorque,
   verticalStress, presetTrough, burlandCategory, referenceInstalled, erf,
+  Rng, sample as sampleDist, DIST, SHIFT_PATTERNS, PER_CYCLE_MAINTENANCE_MIN, simulateDrive, recordCheck, EPB_WEEKLY_SURVEY,
 } from "../../models/js/index.js";
 
 // ---------------------------------------------------------------- machine and scenario
@@ -493,7 +494,7 @@ label("Face position", faceMarker, [0, 1.8, 0], true);
 
 // ---------------------------------------------------------------- UI
 const ids = ["adv", "rpm", "screwMode", "target", "screw", "fir", "fer", "vl", "ts", "advOut", "rpmOut", "targetOut", "screwOut", "firOut", "ferOut", "vlOut", "tsOut",
-  "pause", "reset", "gauge", "chamber", "alarms", "cycle", "bars", "ground", "showLabels"];
+  "pause", "reset", "gauge", "chamber", "alarms", "cycle", "bars", "ground", "showLabels", "shift", "haulage", "interventions", "skip", "forecast"];
 const ui = Object.fromEntries(ids.map((id) => [id, document.getElementById(id)]));
 const val = (id) => +ui[id].value;
 
@@ -522,7 +523,10 @@ function reset() {
     chainage: 0, stroke: 0, mode: "PUSH", ring: 0, pieces: null, piece: 0, pieceT: 0, simTime: 0, paused: false,
     st: CH.steadyState(qe || 1e-3, q, fir, val("fer")), screwRpm: SCREW.rpmForFlow(q), cutRpm: val("rpm"),
     pushTime: 0, lastPush: null, lastBuild: null, grout: 0, excavated: 0, muckDebt: 0, torque: 0, thrust: null, tq: null, stalled: false,
+    // downtime (utilisation model): activities after each ring, maintenance shifts, tool interventions
+    rng: new Rng(1), actLeft: 0, actText: "", stopLeft: 0, stops: 0, boringTime: 0,
   };
+  S.nextStop = sampleDist(DIST.rings_between_stops, S.rng.uniform());
   for (const c of cylinders) c.z = c.target = ZR;
   world.position.z = 0;
   pieceMesh && machine.remove(pieceMesh);
@@ -539,7 +543,49 @@ function pasteUnitWeight() {
   return 18 * (1 - CH.airFraction(S.st)); // soil-water paste ~18 kN/m^3, lightened by foam air
 }
 
+const pattern = () => SHIFT_PATTERNS[ui.shift.value];
+const inProduction = () => S.simTime % 86400 < pattern().production_h * 3600;
+
+// After a ring is built: general tunnelling activities, train delay (rail haulage) and per-cycle maintenance.
+function startActivities() {
+  const parts = [];
+  let min = sampleDist(DIST.general, S.rng.uniform());
+  parts.push(`general activities ${Math.round(min)} min`);
+  if (ui.haulage.value === "rail") { const d = sampleDist(DIST.train_delay, S.rng.uniform()); min += d; parts.push(`train delay ${Math.round(d)} min`); }
+  if (pattern().per_cycle_maintenance) { min += PER_CYCLE_MAINTENANCE_MIN; parts.push(`maintenance ${PER_CYCLE_MAINTENANCE_MIN} min`); }
+  S.mode = "ACTIVITIES";
+  S.actLeft = min * 60;
+  S.actText = parts.join(", ");
+}
+
 function substep(dt) {
+  // Tool interventions run round the clock; everything else only in production hours.
+  if (S.mode === "INTERVENTION") {
+    S.cutRpm = S.screwRpm = 0; S.tq = S.thrust = null; S.torque = 0;
+    const d = Math.min(dt, S.stopLeft);
+    S.stopLeft -= d; S.simTime += d;
+    if (S.stopLeft <= 1e-6) S.mode = "PUSH";
+    return;
+  }
+  if (!inProduction()) {
+    S.cutRpm = S.screwRpm = 0; S.tq = S.thrust = null; S.torque = 0;
+    S.simTime += dt;
+    return;
+  }
+  if (S.mode === "ACTIVITIES") {
+    S.cutRpm = S.screwRpm = 0; S.tq = S.thrust = null; S.torque = 0;
+    const d = Math.min(dt, S.actLeft);
+    S.actLeft -= d; S.simTime += d;
+    if (S.actLeft <= 1e-6) {
+      if (ui.interventions.checked && S.ring >= S.nextStop) {
+        S.mode = "INTERVENTION";
+        S.stopLeft = sampleDist(DIST.stop_hours, S.rng.uniform()) * 3600;
+        S.stops++;
+        S.nextStop = S.ring + sampleDist(DIST.rings_between_stops, S.rng.uniform());
+      } else S.mode = "PUSH";
+    }
+    return;
+  }
   const fir = val("fir") / 100, fer = val("fer"), target = val("target");
   const zone = zoneAt(S.chainage);
   const p = CH.pressure(S.st);
@@ -570,6 +616,7 @@ function substep(dt) {
     S.stroke += adv;
     S.chainage += adv;
     S.pushTime += dt;
+    if (v > 0) S.boringTime += dt;
     S.excavated += AREA * adv;
     S.grout += Math.PI * (R * R - (M.ringOD / 2) ** 2) * adv; // theoretical annulus, filled during the shove
     S.muckDebt += SCREW.discharge(S.screwRpm) * dt;
@@ -594,10 +641,10 @@ function substep(dt) {
         buildGroup.clear();
         addRing(S.ring, ZR - S.chainage);
         S.ring++;
-        S.mode = "PUSH";
         S.stroke = 0;
         S.pushTime = 0;
         S.lastBuild = S.buildTime;
+        startActivities();
       }
     }
   }
@@ -805,20 +852,33 @@ function hud() {
   if (S.stalled) alarms.push(`Torque ${fmt(S.torque, 0)} kNm above the installed ${M.torqueLimit} kNm: cutterhead stalled`);
   if (val("fir") === 0) alarms.push("No foam: unconditioned soil makes the chamber stiff and pressure hard to control");
   if (S.screwRpm >= 21.9) alarms.push("Screw at maximum speed");
+  if (S.mode === "INTERVENTION") alarms.push("Cutting-tool intervention: drive stopped, chamber held under compressed air");
   for (const b of BUILDINGS) if (b.cat >= 2) alarms.push(`${b.name}: Burland category ${b.cat} (${b.catName})`);
   ui.alarms.innerHTML = alarms.length ? alarms.map((a) => `<div>${a}</div>`).join("") : `<div class="ok">Within limits</div>`;
 
   const v = val("adv") / 60000;
   const pushMin = v > 0 ? W / v / 60 : Infinity;
   const cycleDay = Number.isFinite(pushMin) ? (W * 24 * 60) / (pushMin + M.buildMin) : 0;
+  const tod = S.simTime % 86400;
+  const clock = `Day ${Math.floor(S.simTime / 86400) + 1}, ${String(Math.floor(tod / 3600)).padStart(2, "0")}:${String(Math.floor((tod % 3600) / 60)).padStart(2, "0")}`;
+  const modeText = S.mode === "INTERVENTION" ? `TOOL INTERVENTION (hyperbaric), ${fmt(S.stopLeft / 3600, 1)} h left`
+    : !inProduction() ? `MAINTENANCE SHIFT (production resumes at 00:00)`
+      : S.mode === "ACTIVITIES" ? `BETWEEN RINGS: ${S.actText} (${fmt(S.actLeft / 60, 0)} min left)`
+        : S.mode === "PUSH" ? (S.stalled ? "PUSH (stalled)" : "PUSH (excavating one ring width)")
+          : `RING BUILD (piece ${Math.min(S.piece + 1, 7)} of 7${S.pieces?.[S.piece]?.key ? ", key" : ""})`;
+  ui.skip.disabled = !(S.mode === "INTERVENTION" || !inProduction() || S.mode === "ACTIVITIES");
+  const days = S.simTime / 86400;
   dl(ui.cycle, [
-    ["Mode", S.mode === "PUSH" ? (S.stalled ? "PUSH (stalled)" : "PUSH (excavating one ring width)") : `RING BUILD (piece ${Math.min(S.piece + 1, 7)} of 7${S.pieces?.[S.piece]?.key ? ", key" : ""})`],
+    ["Mode", modeText],
+    ["Clock", clock],
     ["Chainage", `${fmt(S.chainage, 2)} m`],
     ["Rings built", S.ring],
     ["Stroke", `${fmt(S.stroke * 1000, 0)} / ${W * 1000} mm`],
     ["Push time per ring", Number.isFinite(pushMin) ? `${fmt(pushMin, 0)} min` : "—"],
     ["Ring build time", `${M.buildMin} min (6 + key)`],
     ["Cycle-only advance", `${fmt(cycleDay, 1)} m/day (no downtime)`],
+    ["Achieved so far", days > 0.05 ? `${fmt(S.chainage / days, 1)} m/day · utilisation ${fmt((S.boringTime / S.simTime) * 100, 0)} %` : "—"],
+    ["Next tool intervention", ui.interventions.checked ? `after ring ${Math.ceil(S.nextStop)}` : "off"],
     ["Excavated", `${fmt(S.excavated, 0)} m³ in situ`],
     ["Annulus grout", `${fmt(S.grout, 1)} m³ (${fmt(Math.PI * (R * R - (M.ringOD / 2) ** 2), 2)} m³/m)`],
     ["Simulated time", hms(S.simTime)],
@@ -836,6 +896,8 @@ function hud() {
   } else html += `<div class="bar"><span class="k">Torque</span><span class="t"></span><span class="v">stopped</span></div>`;
   html += `<p class="legend">Installed torque ${fmt(M.torqueLimit / 1000, 1)} MNm. Reference thrust for this diameter ≈ ${fmt(REF.thrust[0] / 1000, 0)} MN (6.6 m mixed-face EPB scaled). Drawn opening ratio ${fmt(drawnOpening * 100, 0)} %.</p>`;
   ui.bars.innerHTML = html;
+  scheduleForecast();
+  ui.forecast.innerHTML = forecastHtml();
   void parts;
 
   const t = trough(zone, val("vl"));
@@ -850,6 +912,64 @@ function hud() {
     ...BUILDINGS.map((b) => [b.name, `${fmt((b.settle ?? 0) * 1000, 1)} mm, ε ${fmt(b.strain ?? 0, 3)} %, cat. ${b.cat ?? 0}`]),
     ["Surface heights", "exaggerated ×150"],
   ]);
+}
+
+ui.skip.onclick = () => {
+  // jump over the current stoppage (chamber flows are zero while stopped, so nothing else changes)
+  if (S.mode === "INTERVENTION") { S.simTime += S.stopLeft; S.stopLeft = 0; S.mode = "PUSH"; }
+  else if (!inProduction()) S.simTime = Math.ceil(S.simTime / 86400) * 86400;
+  else if (S.mode === "ACTIVITIES") { S.simTime += S.actLeft; S.actLeft = 0.001; }
+};
+
+// Forecast: 20 runs of 90 days at the current settings (ring build 35 min as in the class preset).
+let forecastKey = "", forecastTimer = null, FC = null;
+function forecastInputs() {
+  const v = val("adv") / 60000;
+  return { adv: val("adv"), shift: ui.shift.value, haulage: ui.haulage.value, iv: ui.interventions.checked, boring: v > 0 ? W / v / 60 : null };
+}
+function runForecast() {
+  const f = forecastInputs();
+  if (!f.boring) { FC = null; return; }
+  const runs = [];
+  for (let seed = 1; seed <= 20; seed++) {
+    runs.push(simulateDrive({ ring_length: W, boring_min: f.boring, ring_build: { kind: "fixed", value: M.buildMin }, shift_pattern: f.shift,
+      haulage: f.haulage, interventions: f.iv }, 90, seed));
+  }
+  const mean = (k) => runs.reduce((a, r) => a + r[k], 0) / runs.length;
+  const med = (k) => { const xs = runs.map((r) => r[k]).sort((a, b) => a - b); return (xs[9] + xs[10]) / 2; };
+  const shares = {};
+  for (const r of runs) for (const [k, v] of Object.entries(r.shares)) shares[k] = (shares[k] ?? 0) + v / runs.length;
+  FC = { util: mean("utilisation"), day: mean("mean_m_per_day"), week: mean("mean_m_per_week"), bestDay: med("best_day"), bestWeek: med("best_week"),
+    bestMonth: med("best_month"), stops: mean("interventions"), shares };
+  FC.check = recordCheck(M.D, FC.bestDay, FC.bestWeek, FC.bestMonth, "epb");
+}
+function scheduleForecast() {
+  const key = JSON.stringify(forecastInputs());
+  if (key === forecastKey) return;
+  forecastKey = key;
+  clearTimeout(forecastTimer);
+  forecastTimer = setTimeout(runForecast, 250);
+}
+const SHARE_COLORS = { boring: "#3987e5", ring_build: "#d95926", general: "#199e70", train_delay: "#b07ad9", maintenance_per_cycle: "#c9a227", intervention: "#ff7a45", maintenance_shift_and_idle: "#4b5560" };
+const SHARE_NAMES = { boring: "boring", ring_build: "ring build", general: "general activities", train_delay: "train delays", maintenance_per_cycle: "maintenance per cycle", intervention: "tool interventions", maintenance_shift_and_idle: "maintenance shift" };
+function forecastHtml() {
+  if (!FC) return `<p class="note">Set an advance speed above zero to forecast.</p>`;
+  const flag = (c) => c.above_world_record ? `<span class="flag bad">above world record ${fmt(c.world_record, 0)} m</span>`
+    : c.above_epb_reference ? `<span class="flag warn">above best EPB reference ${fmt(c.epb_reference, 1)} m</span>` : `<span class="flag ok">plausible</span>`;
+  const sh = Object.entries(FC.shares).filter(([, v]) => v > 0.002);
+  const sv = EPB_WEEKLY_SURVEY;
+  return `<dl>
+    <dt>Utilisation (boring / calendar time)</dt><dd>${fmt(FC.util * 100, 0)} %</dd>
+    <dt>Mean advance</dt><dd>${fmt(FC.day, 1)} m/day · ${fmt(FC.week, 0)} m/week</dd>
+    <dt>40-EPB survey (Roby & Willis 2014)</dt><dd>${fmt(sv.mean, 0)} ± ${fmt(sv.sd, 0)} m/week</dd>
+    <dt>Best day</dt><dd>${fmt(FC.bestDay, 1)} m ${flag(FC.check.day)}</dd>
+    <dt>Best week</dt><dd>${fmt(FC.bestWeek, 0)} m ${flag(FC.check.week)}</dd>
+    <dt>Best month (30 days)</dt><dd>${fmt(FC.bestMonth, 0)} m ${flag(FC.check.month)}</dd>
+    <dt>Tool interventions</dt><dd>${fmt(FC.stops, 1)} in 90 days</dd>
+  </dl>
+  <div class="shares">${sh.map(([k, v]) => `<i title="${SHARE_NAMES[k]} ${fmt(v * 100, 0)} %" style="width:${v * 100}%;background:${SHARE_COLORS[k]}"></i>`).join("")}</div>
+  <div class="legend">${sh.map(([k, v]) => `<span style="--c:${SHARE_COLORS[k]}">${SHARE_NAMES[k]} ${fmt(v * 100, 0)} %</span>`).join("")}</div>
+  <p class="note">20 runs × 90 days at the current speed, shift pattern and haulage. Best values are medians over the runs. Downtime distributions from a 6.88 m metro EPB (Moosazadeh et al. 2018).</p>`;
 }
 
 ui.pause.onclick = () => { S.paused = !S.paused; ui.pause.textContent = S.paused ? "Resume" : "Pause"; };

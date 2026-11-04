@@ -1,0 +1,316 @@
+{
+ "uniform_seed42": [
+  0.601103752036579,
+  0.448290559113957,
+  0.8524657936068252,
+  0.6697340415557846,
+  0.17481389886233956,
+  0.5265925423009321,
+  0.2732279944466427,
+  0.6247446540510282,
+  0.8654746484244242,
+  0.4723170552169904,
+  0.2499237343436107,
+  0.8820588336093351,
+  0.7457375650992617,
+  0.3070015135454014,
+  0.19725383806508034,
+  0.500729487859644,
+  0.6866120180347934,
+  0.610620898543857,
+  0.00384295207913965,
+  0.47078192385379225
+ ],
+ "normal_inv": [
+  [
+   0.001,
+   -3.090232304709404
+  ],
+  [
+   0.01,
+   -2.326347874388028
+  ],
+  [
+   0.2,
+   -0.8416212327266185
+  ],
+  [
+   0.5,
+   0.0
+  ],
+  [
+   0.8,
+   0.8416212327266186
+  ],
+  [
+   0.99,
+   2.326347874388028
+  ],
+  [
+   0.999,
+   3.090232304709404
+  ]
+ ],
+ "samples": {
+  "ring_build": [
+   12.031329486846035,
+   15.070192976248759,
+   17.417968427787706,
+   20.683135533407544,
+   32.5758115977495
+  ],
+  "boring": [
+   24.84051837244163,
+   30.72633832313644,
+   34.137,
+   38.35782597388959,
+   53.63405799132778
+  ],
+  "general": [
+   6.5054710717700726,
+   14.141354995561107,
+   19.6904,
+   27.589083020877563,
+   64.66177831993802
+  ],
+  "train_delay": [
+   25.0,
+   32.583426132260584,
+   38.377223398316204,
+   45.50510257216821,
+   60.0
+  ],
+  "rings_between_stops": [
+   40.40492487241864,
+   141.3017929404279,
+   216.98563849939194,
+   309.90948919826604,
+   558.2262968613185
+  ],
+  "stop_hours": [
+   24.34424698971896,
+   68.99916652067878,
+   105.11,
+   160.11950081583842,
+   453.8284591290017
+  ]
+ },
+ "drives": [
+  {
+   "in": {
+    "shift_pattern": "2x10h_plus_4h_maintenance",
+    "haulage": "conveyor",
+    "boring_min": null,
+    "interventions": true,
+    "days": 90,
+    "seed": 1
+   },
+   "out": {
+    "days": 90,
+    "rings": 946,
+    "metres": 1419.0,
+    "utilisation": 0.2594378554408673,
+    "mean_m_per_day": 15.766666666666667,
+    "mean_m_per_week": 110.36666666666667,
+    "best_day": 25.5,
+    "best_week": 166.5,
+    "best_month": 622.5,
+    "shares": {
+     "boring": 0.2594378554408673,
+     "ring_build": 0.14009945129983548,
+     "general": 0.18995417665289138,
+     "train_delay": 0.0,
+     "maintenance_per_cycle": 0.0,
+     "intervention": 0.29384184993974066,
+     "maintenance_shift_and_idle": 0.11666666666666514
+    },
+    "interventions": 6,
+    "check": {
+     "day": {
+      "value": 25.5,
+      "world_record": 115.7,
+      "above_world_record": false,
+      "epb_reference": 40.6,
+      "above_epb_reference": false
+     },
+     "week": {
+      "value": 166.5,
+      "world_record": 428.0,
+      "above_world_record": false,
+      "epb_reference": 260.0,
+      "above_epb_reference": false
+     },
+     "month": {
+      "value": 622.5,
+      "world_record": 1482.0,
+      "above_world_record": false,
+      "epb_reference": 920.0,
+      "above_epb_reference": false
+     }
+    }
+   }
+  },
+  {
+   "in": {
+    "shift_pattern": "2x12h_maintenance_per_cycle",
+    "haulage": "rail",
+    "boring_min": null,
+    "interventions": true,
+    "days": 60,
+    "seed": 7
+   },
+   "out": {
+    "days": 60,
+    "rings": 245,
+    "metres": 367.5,
+    "utilisation": 0.10659008298440513,
+    "mean_m_per_day": 6.125,
+    "mean_m_per_week": 42.875,
+    "best_day": 15.0,
+    "best_week": 96.0,
+    "best_month": 235.5,
+    "shares": {
+     "boring": 0.10659008298440513,
+     "ring_build": 0.05395989589060112,
+     "general": 0.07597647665176421,
+     "train_delay": 0.11299005484156559,
+     "maintenance_per_cycle": 0.10459867294492108,
+     "intervention": 0.5458848166867416,
+     "maintenance_shift_and_idle": 1.2212453270876722e-15
+    },
+    "interventions": 2,
+    "check": {
+     "day": {
+      "value": 15.0,
+      "world_record": 115.7,
+      "above_world_record": false,
+      "epb_reference": 40.6,
+      "above_epb_reference": false
+     },
+     "week": {
+      "value": 96.0,
+      "world_record": 428.0,
+      "above_world_record": false,
+      "epb_reference": 260.0,
+      "above_epb_reference": false
+     },
+     "month": {
+      "value": 235.5,
+      "world_record": 1482.0,
+      "above_world_record": false,
+      "epb_reference": 920.0,
+      "above_epb_reference": false
+     }
+    }
+   }
+  },
+  {
+   "in": {
+    "shift_pattern": "2x10h_plus_4h_maintenance",
+    "haulage": "conveyor",
+    "boring_min": 20.0,
+    "interventions": false,
+    "days": 30,
+    "seed": 3
+   },
+   "out": {
+    "days": 30,
+    "rings": 562,
+    "metres": 843.0,
+    "utilisation": 0.2601851851851852,
+    "mean_m_per_day": 28.1,
+    "mean_m_per_week": 196.70000000000002,
+    "best_day": 33.0,
+    "best_week": 201.0,
+    "best_month": 843.0,
+    "shares": {
+     "boring": 0.2601851851851852,
+     "ring_build": 0.24901518761211466,
+     "general": 0.3241329605360341,
+     "train_delay": 0.0,
+     "maintenance_per_cycle": 0.0,
+     "intervention": 0.0,
+     "maintenance_shift_and_idle": 0.16666666666666607
+    },
+    "interventions": 0,
+    "check": {
+     "day": {
+      "value": 33.0,
+      "world_record": 115.7,
+      "above_world_record": false,
+      "epb_reference": 40.6,
+      "above_epb_reference": false
+     },
+     "week": {
+      "value": 201.0,
+      "world_record": 428.0,
+      "above_world_record": false,
+      "epb_reference": 260.0,
+      "above_epb_reference": false
+     },
+     "month": {
+      "value": 843.0,
+      "world_record": 1482.0,
+      "above_world_record": false,
+      "epb_reference": 920.0,
+      "above_epb_reference": false
+     }
+    }
+   }
+  },
+  {
+   "in": {
+    "shift_pattern": "idealised_24h",
+    "haulage": "conveyor",
+    "boring_min": 25.0,
+    "interventions": true,
+    "days": 120,
+    "seed": 11
+   },
+   "out": {
+    "days": 120,
+    "rings": 1055,
+    "metres": 1582.5,
+    "utilisation": 0.15270414619212666,
+    "mean_m_per_day": 13.1875,
+    "mean_m_per_week": 92.3125,
+    "best_day": 36.0,
+    "best_week": 225.0,
+    "best_month": 699.0,
+    "shares": {
+     "boring": 0.15270414619212666,
+     "ring_build": 0.116476907633383,
+     "general": 0.1610560575469267,
+     "train_delay": 0.0,
+     "maintenance_per_cycle": 0.0,
+     "intervention": 0.5697628886275629,
+     "maintenance_shift_and_idle": 7.771561172376096e-16
+    },
+    "interventions": 7,
+    "check": {
+     "day": {
+      "value": 36.0,
+      "world_record": 115.7,
+      "above_world_record": false,
+      "epb_reference": 40.6,
+      "above_epb_reference": false
+     },
+     "week": {
+      "value": 225.0,
+      "world_record": 428.0,
+      "above_world_record": false,
+      "epb_reference": 260.0,
+      "above_epb_reference": false
+     },
+     "month": {
+      "value": 699.0,
+      "world_record": 1482.0,
+      "above_world_record": false,
+      "epb_reference": 920.0,
+      "above_epb_reference": false
+     }
+    }
+   }
+  }
+ ]
+}
