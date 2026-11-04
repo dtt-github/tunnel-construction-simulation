@@ -66,7 +66,7 @@ export function hardRockUtilisation(prMh, diameterM, {
   const curve = Number.isFinite(curve_radius_m);
   const t = {
     boring: 1000 / prMh,
-    regrip: machine === "double" ? 0 : (1000 * regrip_min) / (60 * stroke_m) + (curve ? 409000 / curve_radius_m ** 2 : 0),
+    regrip: (1000 * regrip_min) / (60 * stroke_m) + (curve ? 409000 / curve_radius_m ** 2 : 0),
     tbm_breakdown: tbmBreakdownDowntime(prMh, ucs_mpa),
     backup: backupDowntime(prMh, haulage),
     cutters: cutter_h_per_km === null ? cutterDowntimeFarrokh(prMh, quartz_percent) : cutter_h_per_km,

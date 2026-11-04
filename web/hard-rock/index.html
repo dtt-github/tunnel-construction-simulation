@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Hard-Rock Gripper TBM</title>
+<title>Hard-Rock TBM</title>
 <link rel="icon" href="data:,">
 <link rel="stylesheet" href="../style.css">
 <!-- shared console widgets (views, labels, bars, legends, flags) -->
@@ -21,22 +21,24 @@
 <canvas id="view"></canvas>
 <div id="labels"></div>
 <div id="views">
-  <button data-view="machine" class="on">Machine</button>
-  <button data-view="face">Cutterhead</button>
-  <button data-view="l1">L1 support</button>
-  <button data-view="gripper">Grippers</button>
-  <button data-view="l2">Backup (L2)</button>
+  <!-- view buttons are added by the machine module -->
   <label class="chk"><input type="checkbox" id="showLabels" checked> Labels</label>
 </div>
 
 <aside id="console">
   <header>
-    <h1 id="title">Hard-rock open gripper TBM · Ø 9.58 m</h1>
+    <h1 id="title">Hard-rock TBM</h1>
     <span id="fidelity" title="Which physics drives the numbers">Analytical (browser)</span>
   </header>
 
   <section>
     <h2>Operator</h2>
+    <label>Machine
+      <select id="machine">
+        <option value="gripper">Open gripper (main beam) · 9.58 m</option>
+        <option value="double">Double shield (segmental lining) · 9.9 m</option>
+      </select>
+    </label>
     <label>Start at
       <select id="start">
         <option value="0">Chainage 0 m: gneiss (RMR 70)</option>
@@ -86,14 +88,13 @@
     <h2>Model limits</h2>
     <ul class="limits">
       <li>Geology along the drive is illustrative; rock strengths, CAI and RMR are typical values for the rock types, not a project.</li>
-      <li>Machine torque, power and thrust are the Gotthard-class preset values, which come from trade press and are not yet verified. The number of cutters (62) and the stroke (1.8 m) are assumptions.</li>
-      <li>Downtime per km follows Farrokh (2018). Support downtime is digitised from a figure (±20 h/km); per-bolt installation times are not modelled. Cutter wear excludes chipping and bearing failures.</li>
-      <li>The final cast-in-place lining is placed after or behind the drive and is not shown.</li>
+      <li>Downtime per km follows Farrokh (2018). Support downtime is digitised from a figure (±20 h/km). Cutter wear excludes chipping and bearing failures.</li>
     </ul>
+    <ul class="limits" id="machineLimits"></ul>
   </section>
 
   <footer>
-    Models: CSM disc cutters with drive and speed limits (Rostami &amp; Ozdemir; Rostami &amp; Chang 2017), cutter wear (Frenzel 2011), RMR support classes (Bieniawski 1989), downtime per km (Farrokh 2018). Machine layout from the <a href="https://github.com/dtt-github/tunnel-construction-simulation/blob/main/docs/research/methods-reference.md#hard-rock-tbms">methods reference</a>.
+    Models: CSM disc cutters with drive and speed limits (Rostami &amp; Ozdemir; Rostami &amp; Chang 2017), cutter wear (Frenzel 2011), RMR support classes (Bieniawski 1989), downtime per km (Farrokh 2018). Machine layouts from the <a href="https://github.com/dtt-github/tunnel-construction-simulation/blob/main/docs/research/methods-reference.md#hard-rock-tbms">methods reference</a>.
   </footer>
 </aside>
 
