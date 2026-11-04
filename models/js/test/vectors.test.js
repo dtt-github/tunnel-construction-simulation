@@ -3,7 +3,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { cutterForces, tbmPerformance, hoekBrown, gaussianTrough, presetTrough, twinTroughs, burlandCategory, wedgeSilo, daubWindow, siloStress } from "../index.js";
+import { cutterForces, tbmPerformance, hoekBrown, gaussianTrough, presetTrough, twinTroughs, burlandCategory, wedgeSilo, daubWindow, siloStress, chamber, screw, crownPressure } from "../index.js";
 
 const vec = (name) => JSON.parse(readFileSync(new URL(`../../test-vectors/${name}.json`, import.meta.url)));
 
@@ -83,5 +83,25 @@ test("face support matches python", () => {
     close(fs, rest, `face D=${i.diameter} phi=${i.phi_deg}`);
     close(fs, { theta_deg, wedge_length, silo_stress }, `face geometry D=${i.diameter}`, 1e-6);
     close(daubWindow(fs, i.diameter, i.cover, i.gamma, { q: i.q, ...water }), out.window, `window D=${i.diameter}`);
+  }
+});
+
+test("epb chamber and screw match python", () => {
+  const v = vec("epb_chamber");
+  for (const { in: i, out } of v.screw) {
+    const sc = screw(i);
+    close({ q_th: sc.theoreticalFlow(i.rpm), q: sc.discharge(i.rpm), outlet: sc.outletPressure(250), mid: sc.pressureAlong(i.length / 2, 250) }, out, "screw");
+  }
+  for (const { in: i, out } of v.chamber) {
+    const ch = chamber(i.volume, i.k_solid);
+    const q = ch.screwFlowForPressure(i.p, i.q_exc, i.fir, i.fer);
+    const steady = ch.steadyState(i.q_exc, q, i.fir, i.fer);
+    close({ screw_flow: q, steady, stiffness: ch.stiffness(steady), state_at: ch.stateAt(i.p, 0.1), crown: crownPressure(i.p, 3.5) },
+      { screw_flow: out.screw_flow, steady: out.steady, stiffness: out.stiffness, state_at: out.state_at, crown: out.crown }, `chamber V=${i.volume}`, 1e-7);
+    let st = steady;
+    for (const tr of out.trace) {
+      close({ t: tr.t, p: ch.pressure(st), fill: ch.fill(st), air: ch.airFraction(st) }, tr, `trace V=${i.volume} t=${tr.t}`, 1e-7);
+      for (let n = 0; n < 20; n++) st = ch.step(st, 1, i.q_exc, tr.t < i.stop ? 0 : 1.5 * q, i.fir, i.fer);
+    }
   }
 });

@@ -85,4 +85,28 @@ for dia, cov, g, phi, c, hw, q, kw in [(10, 15, 20, 30, 0, None, 0, None), (8, 1
 silo = [{"in": [d, b, l, g, c, phi, k, q], "out": silo_stress(d, b, l, g, c, phi, k, q)}
         for d, b, l, g, c, phi, k, q in [(10, 5, 3, 20, 0, 30, 0.8, 0), (25, 7, 4, 10, 5, 28, 0.8, 50), (4, 6, 6, 18, 0, 0, 0.8, 10)]]
 write("face_support", {"wedge_silo": face, "silo": silo})
+from tunnelsim_models.epb_chamber import Chamber, Screw, crown_pressure  # noqa: E402
+
+epb = []
+# (chamber m^3, K_s kPa, excavated m^3/s, target kPa, FIR, FER, screw stop s)
+for vol, ks, qe, p, fir, fer, stop in [(30, 1e5, 0.032, 200, 0.0, 10, 20), (30, 1e5, 0.032, 200, 0.4, 10, 60), (55, 5e4, 0.09, 320, 0.6, 15, 30),
+                                       (8, 1e5, 0.004, 120, 0.2, 8, 10)]:
+    ch = Chamber(vol, ks)
+    q = ch.screw_flow_for_pressure(p, qe, fir, fer)
+    st = ch.steady_state(qe, q, fir, fer)
+    trace = []
+    for t in range(0, 241, 20):  # screw stopped for `stop` s, then 1.5x the balance flow
+        trace.append({"t": t, "p": ch.pressure(st), "fill": ch.fill(st), "air": ch.air_fraction(st)})
+        for _ in range(20):
+            st = ch.step(st, 1.0, qe, 0.0 if t < stop else 1.5 * q, fir, fer)
+    st_at = ch.state_at(p, 0.1)
+    epb.append({"in": {"volume": vol, "k_solid": ks, "q_exc": qe, "p": p, "fir": fir, "fer": fer, "stop": stop},
+                "out": {"screw_flow": q, "steady": asdict(ch.steady_state(qe, q, fir, fer)), "stiffness": ch.stiffness(ch.steady_state(qe, q, fir, fer)),
+                        "state_at": asdict(st_at), "crown": crown_pressure(p, 3.5), "trace": trace}})
+screws = []
+for d, ds, pitch, length, eta, lam, rpm in [(0.9, 0.3, 0.7, 12, 0.6, 3, 10), (1.2, 0.4, 0.9, 16, 0.5, 4, 6)]:
+    sc = Screw(d, ds, pitch, length, eta, lam)
+    screws.append({"in": {"diameter": d, "shaftDiameter": ds, "pitch": pitch, "length": length, "efficiency": eta, "decayLength": lam, "rpm": rpm},
+                   "out": {"q_th": sc.theoretical_flow(rpm), "q": sc.discharge(rpm), "outlet": sc.outlet_pressure(250), "mid": sc.pressure_along(length / 2, 250)}})
+write("epb_chamber", {"chamber": epb, "screw": screws})
 print("wrote", sorted(p.name for p in OUT.glob("*.json")))
