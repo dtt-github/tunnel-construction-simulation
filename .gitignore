@@ -2,6 +2,8 @@
 knowledge/books/*
 !knowledge/books/.gitkeep
 knowledge/private/
+knowledge/notes/*
+!knowledge/notes/.gitkeep
 
 # Python
 .venv*/

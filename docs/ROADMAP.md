@@ -30,7 +30,7 @@ Client:
 - [x] Hard-rock single-shield demo: CSM-driven advance, boring/ring-build cycle, Jolt muck, alarms
 - [ ] EPB TBM: chamber pressure gauges, screw speed control, conditioning, settlement heatmap on the surface with buildings
 - [ ] Geology editor along the alignment; scenario files (JSON)
-- [ ] Downtime / activity-time model (discrete-event, after Kumas 2015 thesis) for realistic utilisation; downtime broken down by subsystem
+- [ ] Downtime / activity-time model (discrete-event) for realistic utilisation; downtime broken down by subsystem
 - [ ] Open TBM signal schema and CSV/OPC-UA-style export of simulated machine data
 - [ ] Machine presets named by class, never by brand (e.g. "7.1 m urban EPB", "14.4 m hard-rock main beam"), built from published spec numbers ([industry survey](research/industry-survey.md))
 - [ ] Advance-rate check: simulated best day/week/month versus the industry world-record table by diameter class, as an upper bound
@@ -52,12 +52,12 @@ Client:
 
 - [ ] Open gripper and double shield (gripper/shoe kinematics, Kamino closed loops)
 - [ ] Continuous advance: lining installed while mining, with no ring-build stop; small-diameter machines launched from the surface (porting)
-- [ ] NATM/SEM sequencing with CCM/LDP and shotcrete ageing E(t); shotcrete deposition (RobetArme research)
+- [ ] NATM/SEM sequencing with CCM/LDP and shotcrete ageing E(t); shotcrete deposition
 - [ ] Drill & blast cycle: jumbo, charging, blast, ventilation, mucking
 - [ ] Roadheader (Bilgin ICR, Evans pick forces)
 - [ ] Pipe jacking and microtunnelling (jacking force, lubrication)
 - [ ] Shaft sinking (VSM, caisson); cut-and-cover with props, dewatering and basal heave
-- [ ] Tunnel ventilation (1-D network; reuse MASTERMINE reduced-order model experience)
+- [ ] Tunnel ventilation (1-D network, reduced-order models)
 
 ## Phase 4: fidelity and validation (ongoing)
 

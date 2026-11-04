@@ -12,4 +12,3 @@ Implemented models. Each source file states its references, equations and units;
 
 - [research/research-survey.md](research/research-survey.md): models, ranges, datasets, standards (with verification tags).
 - [research/industry-survey.md](research/industry-survey.md): manufacturer spec numbers, such as disc cutter ratings of 267 kN (17″) and 311 kN (19″/20″), published machine power and torque, and world-record advance rates by diameter class.
-- World Tunnel Congress 2017 and 2018 proceedings were mined for empirical ranges: disc load limits of about 250–315 kN by cutter size, face-pressure case values, volume loss splits, conditioning ratios, PPV limits by shotcrete age. Values used in code cite the paper ID and page.
