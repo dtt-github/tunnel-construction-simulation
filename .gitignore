@@ -21,3 +21,7 @@ node_modules/
 # OS / tools
 .DS_Store
 .claude/
+
+# Phase 0 replay recordings (large; regenerate with --record)
+phase0/replays/*.tsr.gz
+phase0/replays/*.b64.txt

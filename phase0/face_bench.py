@@ -48,6 +48,8 @@ def main():
     p.add_argument("--settle", type=int, default=60, help="frames with the plate fixed")
     p.add_argument("--iterations", type=int, default=50)
     p.add_argument("--out", type=str, default=None)
+    p.add_argument("--record", type=str, default=None, help="write a TSR0 replay (slab -0.75 D < y < 0) to this .tsr.gz")
+    p.add_argument("--record-every", type=int, default=2, help="record every n-th frame")
     args = p.parse_args()
 
     wp.init()
@@ -143,6 +145,13 @@ def main():
     qd_np[plate, 0] = -args.speed
     n_move = int(round(args.retract / args.speed * args.fps))
 
+    area = math.pi * (R - 0.25 * t) ** 2
+    rec = None
+    if args.record:
+        from replay import Recorder
+
+        rec = Recorder([-x_back - 0.1, -half_w - 0.1, -0.1], [x_front + 0.1, half_w + 0.1, zs + 0.5])
+        rec_mask = (pts[:, 1] < 0.0) & (pts[:, 1] > -0.75 * D)  # slab behind the section plane y = 0
     log = []  # (retraction m, plate normal force N)
     frame_times = []
     for f in range(args.settle + n_move):
@@ -165,10 +174,11 @@ def main():
         bids[valid] = body_index[np.clip(cid[valid], 0, len(body_index) - 1)]
         fx = float(-imp[bids == plate, 0].sum() / dt)  # soil pushes the plate towards -x
         log.append((max(0.0, (f - args.settle + 1) * args.speed * dt) if moving else 0.0, fx))
+        if rec is not None and f % args.record_every == 0:
+            rec.add(sand_state.particle_q.numpy()[rec_mask], t=(f + 1) * dt, retraction=log[-1][0], pressure_kPa=fx / area / 1e3)
 
     log = np.array(log)
     frame_times = np.array(frame_times)
-    area = math.pi * (R - 0.25 * t) ** 2
     gamma = args.density * G
     phi = math.atan(args.friction)
     p_ref, n_gamma = vermeer_limit_pressure(gamma, D, phi)
@@ -205,6 +215,11 @@ def main():
         "speed_m_s": args.speed,
     }
     print(json.dumps(result, indent=2))
+    if rec is not None:
+        rec.save(args.record, args.fps / args.record_every, {
+            "kind": "face", "diameter": D, "axis_z": zc, "surface_z": zs, "x_back": x_back, "x_front": x_front,
+            "half_width": half_w, "plate_thickness": t, "settle_s": args.settle * dt, "speed": args.speed, "result": result,
+        })
     if args.out:
         with open(args.out, "w") as fh:
             json.dump(result, fh, indent=2)

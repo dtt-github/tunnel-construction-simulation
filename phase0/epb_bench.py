@@ -72,6 +72,8 @@ def main():
     p.add_argument("--frames", type=int, default=300)
     p.add_argument("--iterations", type=int, default=50)
     p.add_argument("--out", type=str, default=None)
+    p.add_argument("--record", type=str, default=None, help="write a TSR0 replay to this .tsr.gz")
+    p.add_argument("--record-every", type=int, default=3, help="record every n-th frame")
     args = p.parse_args()
 
     wp.init()
@@ -253,6 +255,12 @@ def main():
     band_area = [float(np.trapezoid(chord * ((zz >= lo) & (zz < hi)), zz)) for lo, hi in bands]
     rows = []
     frame_times = []
+    rec = None
+    if args.record:
+        from replay import Recorder
+
+        z_out = z_b + Ls * math.sin(alpha)
+        rec = Recorder([-Ls * math.cos(alpha) - 1.5, -R - 0.5, -0.1], [x_face + 1.0, R + 0.5, max(zc + R, z_out) + 1.0])
     for f in range(args.frames):
         tt = (f + 1) * dt
         q_np[cutter, 3:7] = qmul(qaxis([1, 0, 0], w_c * tt), q0_cut)
@@ -284,6 +292,9 @@ def main():
         m = bid == screw
         tau_s = float((np.cross(pos[m] - P_b, F[m]) @ u).sum())
         rows.append((tt, p_top, p_axis, p_bot, tau_c, tau_s))
+        if rec is not None and f % args.record_every == 0:
+            rec.add(ss.particle_q.numpy(), t=tt, cutter_angle=w_c * tt, screw_angle=w_s * tt, p_top_kPa=p_top / 1e3,
+                    p_axis_kPa=p_axis / 1e3, p_bottom_kPa=p_bot / 1e3, cutter_torque_kNm=abs(tau_c) / 1e3, screw_torque_kNm=abs(tau_s) / 1e3)
         if (f + 1) % 30 == 0:
             counts.append((tt, count_out(ss.particle_q.numpy())[1]))
 
@@ -333,6 +344,14 @@ def main():
         "particles_leaked": leaked,
     }
     print(json.dumps(result, indent=2))
+    if rec is not None:
+        rec.save(args.record, args.fps / args.record_every, {
+            "kind": "epb", "diameter": D, "chamber": L, "slab": args.slab, "axis_z": zc, "wall": t,
+            "cutter": {"x": x_ch, "r0": r0, "r1": r1, "spokes": 6, "arm_r": 0.6 * R, "arm_dx": -0.3, "rpm": args.cutter_rpm},
+            "screw": {"p_b": [float(v) for v in P_b], "u": [float(v) for v in u], "length": Ls, "casing_start": s_c,
+                      "flight_start": s_in, "half_width": a_s, "radius": rs, "pitch": pitch, "rpm": args.screw_rpm},
+            "result": result,
+        })
     if args.out:
         with open(args.out, "w") as fh:
             json.dump(result, fh, indent=2)
