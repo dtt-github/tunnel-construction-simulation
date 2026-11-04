@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Urban Slurry Shield</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="../style.css">
+<link rel="stylesheet" href="../epb/epb.css">
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.182.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.182.0/examples/jsm/"
+  }
+}
+</script>
+</head>
+<body>
+<canvas id="view"></canvas>
+<div id="labels"></div>
+<div id="views">
+  <button data-view="machine" class="on">Machine</button>
+  <button data-view="chamber">Chamber</button>
+  <button data-view="tail">Tail &amp; ring build</button>
+  <button data-view="surface">Surface</button>
+  <label class="chk"><input type="checkbox" id="showLabels" checked> Labels</label>
+</div>
+
+<aside id="console">
+  <header>
+    <h1>Urban slurry shield (Mixshield) · Ø 7.08 m</h1>
+    <span id="fidelity" title="Which physics drives the numbers">Analytical (browser)</span>
+  </header>
+
+  <section>
+    <h2>Operator</h2>
+    <label>Advance speed <output id="advOut"></output><input id="adv" type="range" min="0" max="80" step="1" value="60"></label>
+    <label>Cutterhead speed <output id="rpmOut"></output><input id="rpm" type="range" min="0" max="3.2" step="0.1" value="2.0"></label>
+    <label>Support pressure target, axis (air regulator) <output id="targetOut"></output><input id="target" type="range" min="100" max="350" step="5" value="200"></label>
+    <label>Feed flow <output id="feedOut"></output><input id="feed" type="range" min="600" max="1200" step="10" value="900"></label>
+    <label>Discharge pump
+      <select id="disMode"><option value="auto">Automatic (hold the working-chamber level)</option><option value="manual">Manual flow</option></select>
+    </label>
+    <label>Discharge flow (manual) <output id="disOut"></output><input id="dis" type="range" min="600" max="1300" step="10" value="1000"></label>
+    <label>Bentonite yield point τ<sub>f</sub> <output id="tauOut"></output><input id="tau" type="range" min="5" max="80" step="1" value="30"></label>
+    <label>Volume loss (scenario input) <output id="vlOut"></output><input id="vl" type="range" min="0.3" max="2" step="0.05" value="1.0"></label>
+    <label>Shift pattern
+      <select id="shift">
+        <option value="2x10h_plus_4h_maintenance">2 × 10 h production + 4 h maintenance shift</option>
+        <option value="2x12h_maintenance_per_cycle">2 × 12 h, maintenance in every cycle</option>
+        <option value="idealised_24h">Idealised 24 h, no maintenance (upper bound)</option>
+      </select>
+    </label>
+    <label>Segment supply
+      <select id="haulage"><option value="conveyor">Segment trains, no delays (spoil leaves by pipeline)</option><option value="rail">Segment trains with delays every cycle</option></select>
+    </label>
+    <label class="chk2"><input type="checkbox" id="interventions" checked> Cutting-tool interventions (hyperbaric)</label>
+    <label>Time scale <output id="tsOut"></output><input id="ts" type="range" min="1" max="300" step="1" value="60"></label>
+    <div class="buttons"><button id="pause">Pause</button><button id="skip" disabled>Skip stoppage</button><button id="reset">Reset</button></div>
+  </section>
+
+  <section>
+    <h2>Support pressure at the face (bar)</h2>
+    <div id="gauge"></div>
+    <dl id="chamber"></dl>
+  </section>
+
+  <section>
+    <h2>Filter cake</h2>
+    <dl id="cake"></dl>
+  </section>
+
+  <section>
+    <h2>Slurry circuit</h2>
+    <dl id="circuit"></dl>
+  </section>
+
+  <section>
+    <h2>Alarms</h2>
+    <div id="alarms"></div>
+  </section>
+
+  <section>
+    <h2>Cycle</h2>
+    <dl id="cycle"></dl>
+  </section>
+
+  <section>
+    <h2>Advance with downtime</h2>
+    <div id="forecast"></div>
+  </section>
+
+  <section>
+    <h2>Thrust and torque</h2>
+    <div id="bars"></div>
+  </section>
+
+  <section>
+    <h2>Ground and surface</h2>
+    <dl id="ground"></dl>
+  </section>
+
+  <section>
+    <h2>Model limits</h2>
+    <ul class="limits">
+      <li>Volume loss is a scenario input; it does not yet respond to face pressure or grouting.</li>
+      <li>Building categories use greenfield horizontal strain only (no deflection ratio, no building stiffness).</li>
+      <li>The air-cushion dynamics (Boyle's law, level balance, first-order air regulator) are this project's own derivation; no open source with equations was found. Chamber area, air volume and regulator time are assumed.</li>
+      <li>Penetration uses DAUB's steady e<sub>max</sub> (conservative); the support transferred is approximated as 1 − e/L over the wedge length. Over-excavation when support falls short is illustrative.</li>
+      <li>The dry-mass balance assumes ideal density and flow meters; the separation plant is shown only as a load, not modelled.</li>
+      <li>Downtime uses distributions fitted on one 6.88 m metro EPB (Tabriz; Moosazadeh et al. 2018), applied to this slurry machine as an assumption. Separation-plant stops, pipe extensions and learning curve are not modelled.</li>
+      <li>Shield length, chamber sizes, friction coefficients and machine weights are illustrative assumptions.</li>
+    </ul>
+  </section>
+
+  <footer>
+    Models: wedge-silo face support and DAUB window, filter cake and penetration (DAUB 2016; Broere &amp; van Tol 2000), air cushion (own derivation), dry-mass balance (Shomee et al. 2022), deposit limit (Durand, after Miedema), thrust and torque components (Shi et al. 2011), Gaussian settlement (Peck; O'Reilly &amp; New; Mair &amp; Taylor), utilisation and downtime (Moosazadeh et al. 2018; record rates with sources). Machine class from <a href="https://github.com/dtt-github/tunnel-construction-simulation/blob/main/docs/research/methods-reference.md">published references</a>.
+  </footer>
+</aside>
+
+<script type="module" src="main.js"></script>
+</body>
+</html>

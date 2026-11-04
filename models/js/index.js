@@ -9,3 +9,4 @@ export * from "./utilisation.js";
 export * from "./hard_rock.js";
 export * from "./ground_response.js";
 export * from "./sem.js";
+export * from "./slurry.js";
