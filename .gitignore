@@ -1,0 +1,21 @@
+# Knowledge that must never be published (copyright / confidential)
+knowledge/books/*
+!knowledge/books/.gitkeep
+knowledge/private/
+
+# Python
+.venv*/
+**/.venv*/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Node
+node_modules/
+
+# Large raw simulation dumps
+*.npz
+
+# OS / tools
+.DS_Store
+.claude/

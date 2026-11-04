@@ -1,0 +1,12 @@
+{
+  "name": "tunnel-construction-simulation",
+  "private": true,
+  "type": "module",
+  "license": "Apache-2.0",
+  "scripts": {
+    "test": "node --test \"models/js/test/*.test.js\"",
+    "test:py": "cd models/py && uv run pytest -q",
+    "vectors": "cd models/py && uv run python make_vectors.py",
+    "serve": "python3 -m http.server 8741 --bind 127.0.0.1"
+  }
+}

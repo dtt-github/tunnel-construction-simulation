@@ -1,0 +1,22 @@
+Tunnel Construction Simulation
+Copyright 2026 DigitalTwin Technology GmbH and the Tunnel Construction Simulation contributors
+
+This project was initiated by DigitalTwin Technology GmbH (https://www.digitaltwin.technology),
+its main contributor, as part of its work on ConstructionWare (https://www.constructionware.app).
+Sister project: https://github.com/dtt-github/construction-site-simulation
+
+This product includes software developed by DigitalTwin Technology GmbH and the Tunnel Construction
+Simulation contributors, licensed under the Apache License, Version 2.0 (see LICENSE).
+
+3D assets and data are NOT covered by the Apache License. Each keeps its own license, listed below
+when added.
+
+Software dependencies (not included in this repository) keep their own licenses, including NVIDIA
+Newton and Warp (Apache-2.0), three.js (MIT) and Jolt Physics (MIT).
+
+Engineering standards and guidelines (DAUB, ITA-AITES, EN, DIN, ÖGG, BTS) are cited, not
+reproduced. Models are implemented from the published scientific literature cited in each source file.
+
+## Third-party assets
+
+None yet.
