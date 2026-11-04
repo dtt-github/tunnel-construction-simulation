@@ -3,7 +3,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { cutterForces, tbmPerformance, hoekBrown, gaussianTrough, presetTrough, twinTroughs, burlandCategory, wedgeSilo, daubWindow, siloStress, chamber, screw, crownPressure, shieldThrust, cutterheadTorque, verticalStress, referenceInstalled, Rng, normalInv, sample as sampleDist, DIST, simulateDrive, recordCheck, maxRpm, cutterChangeHPerKm, supportDowntime, rmrClass, hardRockUtilisation, equivalentMohrCoulomb, groundReaction, pressureForDisplacement, ldp, squeezingStrain, squeezingClass, ringSupport, steelSetSupport, boltSupport, combine, supportEquilibrium, shieldFriction } from "../index.js";
+import { cutterForces, tbmPerformance, hoekBrown, gaussianTrough, presetTrough, twinTroughs, burlandCategory, wedgeSilo, daubWindow, siloStress, chamber, screw, crownPressure, shieldThrust, cutterheadTorque, verticalStress, referenceInstalled, Rng, normalInv, sample as sampleDist, DIST, simulateDrive, recordCheck, maxRpm, cutterChangeHPerKm, supportDowntime, rmrClass, hardRockUtilisation, equivalentMohrCoulomb, groundReaction, pressureForDisplacement, ldp, squeezingStrain, squeezingClass, ringSupport, steelSetSupport, boltSupport, combine, supportEquilibrium, shieldFriction, shotcreteModulus, shotcreteStrength, mc90Modulus, earlyStrengthClass, fictitiousPressure, liningInteraction, sulemConvergence, triggerLevel } from "../index.js";
 
 const vec = (name) => JSON.parse(readFileSync(new URL(`../../test-vectors/${name}.json`, import.meta.url)));
 
@@ -155,4 +155,17 @@ test("ground response matches python", () => {
   close({ ring, sets, bolts, combined: combine(ring, sets) }, { ring: v.support.ring, sets: v.support.sets, bolts: v.support.bolts, combined: v.support.combined }, "supports");
   close(supportEquilibrium(2, 3, 749.9, 0.3, 24.72, 0.22, combine(ring, sets), 0.005), v.support.eq, "equilibrium", 1e-7);
   for (const { in: a, out } of v.shield) close(shieldFriction(...a), out, `shield ${a}`, 1e-7);
+});
+
+test("sem models match python", () => {
+  const v = vec("sem");
+  for (const [t, e, f, e2, e90] of v.ageing) close([shotcreteModulus(t), shotcreteStrength(t), shotcreteModulus(t, "oreste_example"), mc90Modulus(t / 24, 21537, 13943)], [e, f, e2, e90], `ageing ${t}`);
+  for (const [t, f, cls] of v.classes) assert.equal(earlyStrengthClass(t, f), cls, `class ${t} ${f}`);
+  for (const [x, p] of v.fict) close(fictitiousPressure(x, 2.7, 5.0), p, `fict ${x}`);
+  for (const { in: a, out } of v.lining) {
+    const li = liningInteraction(...a);
+    close({ u_install: li.u_install, u_final: li.u_final, p_final: li.p_final, hours_to_95: li.hours_to_95, min_safety: li.min_safety, min_safety_age_h: li.min_safety_age_h }, out, `lining ${a}`, 1e-6);
+  }
+  for (const [x, t, c] of v.sulem) close(sulemConvergence(x, t, 20, 4.6, 6, 5.7, 0.3), c, `sulem ${x} ${t}`);
+  for (const [m, lvl] of v.triggers) assert.equal(triggerLevel(m, 10), lvl);
 });

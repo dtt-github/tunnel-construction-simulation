@@ -97,7 +97,7 @@ A slice is not done until its realism checklist passes.
 11. [~] Rock support: RMR classes → support pattern and support downtime per km by machine type done; per-bolt and per-ring-beam installation times open
 12. [~] Utilisation / activity-time model (discrete events) (EPB done: ring build, general activities, train delays, per-cycle maintenance, maintenance shift, cutting-tool interventions, record-rate check, [MODELS](MODELS.md#utilisation-and-downtime); open: hard-rock stroke/regrip/support/cutter-change terms, locomotive travel time, breakdowns by subsystem)
 13. [ ] Drill & blast: round design (Holmberg / Langefors), Kuz-Ram fragmentation, PPV limits, cycle times
-14. [ ] SEM: excavation sequence and ring-closure distance, shotcrete ageing E(t)
+14. [x] SEM: excavation sequence and ring-closure distance, shotcrete ageing E(t) ([MODELS](MODELS.md#sem--natm-sprayed-concrete-lining))
 
 ### Slice A: urban EPB, 7 m class (first; most models already exist)
 
@@ -161,7 +161,9 @@ Demo: [web/epb/](../web/epb/) ([live](https://dtt-github.github.io/tunnel-constr
 
 ### Slice D: SEM / NATM
 
-- [ ] Heading, bench and invert sequence, lattice girders, mesh and spiles, sprayed shotcrete, temporary invert, optical targets, convergence monitoring
+Demo: [web/sem/](../web/sem/) ([live](https://dtt-github.github.io/tunnel-construction-simulation/web/sem/)). Realism checklist: [realism/sem-heading.md](realism/sem-heading.md).
+
+- [x] Heading, bench and invert sequence, lattice girders, mesh and spiles, sprayed shotcrete, temporary invert, optical targets, convergence monitoring
 - [ ] Membrane and cast-in-place inner lining with a formwork traveller, cast once convergence is below 1 mm/month
 
 ### Slice E: drill & blast

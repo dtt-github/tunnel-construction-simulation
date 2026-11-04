@@ -14,6 +14,7 @@ Every model exists twice: a Python reference in [`models/py/tunnelsim_models/`](
 | [Thrust and torque](#thrust-and-torque) | `thrust_torque.py` | `thrust_torque.js` | Hand-checked; friction coefficients illustrative |
 | [Hard-rock drive](#hard-rock-drive) | `hard_rock.py` | `hard_rock.js` | Reproduces Farrokh's worked example within 3 %; support curve digitised |
 | [Ground response and squeezing](#ground-response-and-squeezing) | `ground_response.py` | `ground_response.js` | Reproduces Hoek's and Hoek & Marinos's worked examples; shield friction a screening estimate |
+| [SEM / NATM sprayed concrete lining](#sem--natm-sprayed-concrete-lining) | `sem.py` | `sem.js` | Checked against Brenner shotcrete data and Oreste's trends; Sulem parameters from one site |
 | [Utilisation and downtime](#utilisation-and-downtime) | `utilisation.py` | `utilisation.js` | Deterministic limits hand-checked; default EPB inside a 40-EPB survey; one-project distributions |
 
 Also: [machine class presets](#machine-class-presets) and [where default parameters come from](#default-parameter-sources).
@@ -223,6 +224,41 @@ Convergence–confinement around a circular tunnel, squeezing classes, and two m
 - **Shield friction** can under-predict by up to about 2×, ignores creep and standstill time, and is not a design method.
 - **Ground reaction curve:** the closed form has no dilation, so it is severe for very weak rock. In the demo fault zone it gives 7.9 % strain, against 1.55 % from Hoek & Marinos's empirical fit; both are shown.
 - **Gripper bearing check:** not a published rule.
+
+## SEM / NATM sprayed concrete lining
+
+Shotcrete ageing, the interaction of an ageing lining with the ground during advance, excavation sequence rules by ground class, and convergence monitoring.
+
+- **Shotcrete ageing:**
+  - E(t) = E₀(1 − e^(−αt)) and σc(t) = σc₀(1 − e^(−βt)), with t in hours (Oreste 2003, [doi:10.1007/s00603-002-0043-z](https://doi.org/10.1007/s00603-002-0043-z), after Weber and Pöttler), using Oreste's example and Kielder parameter sets;
+  - a CEB-FIP MC90 age function fitted through measured Brenner shotcrete (Neu et al. 2017, [doi:10.3390/ma10091067](https://doi.org/10.3390/ma10091067));
+  - EN 14487-1 early-strength classes J1–J3 (boundary lines as drawn in the Sika handbook).
+- **Lining interaction:** Oreste's incremental method.
+  - The face effect is a fictitious pressure 0.72·p0·b/(x + b) with b = 0.845R (Panet & Guenot).
+  - Each displacement step loads the lining with its stiffness at that age; the age follows from the distance to the face and the advance rate.
+  - Output: final load and closure, time to 95 % of the load, and the minimum safety factor (strength at age / stress).
+- **Sequence:**
+  - FHWA (2009) Table 9-1 rock classes: sequence, initial lining, support timing and pre-support;
+  - ring closure within one diameter (Table 9-2);
+  - cycle times per metre from Crossrail Stepney Green.
+- **Monitoring:**
+  - convergence law C(x, t) of Sulem et al. 1987, [doi:10.1016/0148-9062(87)90522-5](https://doi.org/10.1016/0148-9062(87)90522-5), with one site's parameters (Guayacán-Carrillo et al. 2016);
+  - trigger levels at 75 / 105 / 150 % of the prediction (Crossrail);
+  - final lining once the rate is below 1 mm/month (FHWA p. 8-15).
+
+**Validated against:**
+
+- ageing limits and the time constant;
+- the MC90 fit passes through the measured 1 d and 28 d moduli and is within 10 % at 7 d;
+- the Sika early-strength rules of thumb (1 MPa at 1 h and 10 MPa at 24 h are J2);
+- the face-effect values at x = 0 and x = b;
+- the lining responds as Oreste reports: a stiffer lining gives less closure and more load, and a faster advance gives less load.
+
+**Limits:**
+
+- Oreste's method assumes a closed ring.
+- The Sulem time parameters come from one claystone site.
+- Weber, Pöttler and Chang originals were not available; the forms used are as cited by Oreste.
 
 ## Utilisation and downtime
 

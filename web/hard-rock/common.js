@@ -88,7 +88,7 @@ export function createScene(views) {
     }
     controls.update();
   };
-  return { renderer, scene, camera, updateCamera };
+  return { renderer, scene, camera, controls, updateCamera };
 }
 
 const labelLayer = document.getElementById("labels");

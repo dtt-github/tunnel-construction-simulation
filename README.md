@@ -15,6 +15,7 @@ It runs in the browser, with no install and no GPU needed.
 |---|---|---|
 | [Recorded GPU runs](https://dtt-github.github.io/tunnel-construction-simulation/phase0/replays/) | Soil simulated with the material-point method on an NVIDIA DGX Spark, then replayed: a tunnel face collapsing as its support retracts, and an EPB chamber stirred by a rotating cutterhead | Phase 0 benchmark. Tests speed and stability, not calibrated performance |
 | [Hard-rock open gripper TBM](https://dtt-github.github.io/tunnel-construction-simulation/web/hard-rock/) | A 9.58 m main-beam TBM: disc cutterhead with buckets, grippers and regrip cycle, rock bolts, mesh and ring beams at L1 and shotcrete at L2 by rock class, fault zone, downtime per km | Slice B ([realism checklist](docs/realism/hard-rock-gripper.md)) |
+| [SEM / NATM heading](https://dtt-github.github.io/tunnel-construction-simulation/web/sem/) | A 10 m sprayed-concrete heading in weak rock: top heading, bench and invert by ground class, lattice girders, pipe canopies and ring closure in a fault zone, shotcrete stiffening with age, convergence monitoring with trigger levels | Slice D ([realism checklist](docs/realism/sem-heading.md)) |
 | [Hard-rock double shield TBM](https://dtt-github.github.io/tunnel-construction-simulation/web/hard-rock/?machine=double) | A 9.9 m Follo-class double shield: telescopic shields, gripper shield, main and auxiliary thrust cylinders, segment rings built while boring with pea gravel and grout, single-shield mode in the fault zone | Slice B ([realism checklist](docs/realism/hard-rock-double-shield.md)) |
 | [Urban EPB shield](https://dtt-github.github.io/tunnel-construction-simulation/web/epb/) | A 7 m EPB laid out front to back. Chamber pressure inside the DAUB window, automatic or manual screw control, foam conditioning, thrust and torque breakdown, the push and ring-build cycle with a universal 6 + key ring, and surface settlement over buildings | Slice A, with shift pattern, downtime and a 90-day advance forecast checked against record rates ([realism checklist](docs/realism/epb-slice-a.md)) |
 
@@ -100,7 +101,7 @@ npm run test:py
    - A: urban EPB (demo live, with downtime and record-rate check)
    - B: hard rock (open gripper and double shield live)
    - C: slurry
-   - D: SEM/NATM
+   - D: SEM/NATM (heading live; final lining stage next)
    - E: drill & blast
 4. **Phase 2:** GPU ground physics coupled to the machine.
 5. **Phase 3:** further methods.

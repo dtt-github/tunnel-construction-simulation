@@ -1,0 +1,10 @@
+table.mon { width: 100%; border-collapse: collapse; font-size: 12px; font-variant-numeric: tabular-nums; }
+table.mon th { color: var(--muted); font-weight: 500; text-align: right; padding: 2px 4px; border-bottom: 1px solid var(--line); }
+table.mon th:first-child, table.mon td:first-child { text-align: left; }
+table.mon td { text-align: right; padding: 2px 4px; border-bottom: 1px solid rgba(255, 255, 255, 0.04); }
+.lvl { display: inline-block; min-width: 46px; text-align: center; border-radius: 8px; padding: 0 6px; font-size: 11px; }
+.lvl.none { color: var(--muted); border: 1px solid var(--line); }
+.lvl.green { color: #57c38a; border: 1px solid rgba(87, 195, 138, .6); }
+.lvl.amber { color: #f2b43a; border: 1px solid rgba(242, 180, 58, .7); }
+.lvl.red { color: #ff7a45; border: 1px solid rgba(255, 122, 69, .7); }
+#monitor { overflow-x: auto; }

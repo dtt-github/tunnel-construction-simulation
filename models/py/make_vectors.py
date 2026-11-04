@@ -173,4 +173,18 @@ grv["support"] = {"ring": asdict(ring), "sets": asdict(sets), "bolts": asdict(bo
 for args in [(5, 10, 0.05, 10, 1000, 0.25, 25, 0.9564, 0.30), (4.95, 13.7, 0.10, 8.1, 595, 0.25, 22.9, 0.78, 0.275), (4.79, 4.0, 0.05, 8.1, 595, 0.25, 22.9, 0.78, 0.425)]:
     grv["shield"].append({"in": list(args), "out": asdict(gr.shield_friction(*args))})
 write("ground_response", grv)
+from tunnelsim_models import sem  # noqa: E402
+
+semv = {"ageing": [[t, sem.shotcrete_modulus(t), sem.shotcrete_strength(t), sem.shotcrete_modulus(t, "oreste_example"), sem.mc90_modulus(t / 24, 21537, 13943)]
+                   for t in (2, 6, 24, 72, 168, 672)],
+        "classes": [[t, f, sem.early_strength_class(t, f)] for t, f in ((1, 1.0), (24, 10), (24, 1.0), (24, 3), (24, 20), (0.5, 0.3), (6, 2.5))],
+        "fict": [[x, sem.fictitious_pressure(x, 2.7, 5.0)] for x in (0, 2, 10, 40)], "lining": [], "sulem": [], "triggers": []}
+for gsi, mi, sci, ei, p0, th, xi, v in [(22, 8, 15, 3000, 2.7, 0.35, 1.0, 0.125), (45, 9, 30, 8000, 2.7, 0.2, 1.0, 0.125), (22, 8, 15, 3000, 4.05, 0.35, 2.0, 0.25)]:
+    m = gr.equivalent_mohr_coulomb(gsi, mi, sci, ei, p0)
+    li = sem.lining_interaction(p0, 5.0, m.e_rm, 0.25, m.phi_deg, m.c, th, xi, v)
+    semv["lining"].append({"in": [p0, 5.0, m.e_rm, 0.25, m.phi_deg, m.c, th, xi, v],
+                           "out": {k: getattr(li, k) for k in ("u_install", "u_final", "p_final", "hours_to_95", "min_safety", "min_safety_age_h")}})
+semv["sulem"] = [[x, t, sem.sulem_convergence(x, t, 20, 4.6, 6, 5.7, 0.3)] for x, t in ((0, 1), (2, 0.5), (10, 5), (50, 60))]
+semv["triggers"] = [[m_, sem.trigger_level(m_, 10)] for m_ in (5, 8, 11, 16)]
+write("sem", semv)
 print("wrote", sorted(p.name for p in OUT.glob("*.json")))

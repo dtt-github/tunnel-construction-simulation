@@ -13,6 +13,13 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
   - thrust and torque breakdown;
   - surface settlement with Burland categories for buildings.
   - Assumptions and gaps are listed in its [realism checklist](docs/realism/epb-slice-a.md).
+- **SEM / NATM heading** (Slice D, `web/sem/`):
+  - top heading, bench and invert by FHWA ground class;
+  - lattice girders, pipe canopies and a temporary invert in the fault zone, with ring closure within one diameter;
+  - shotcrete stiffening with age;
+  - lining load and safety from Oreste's method;
+  - convergence monitoring with Crossrail trigger levels and the final-lining criterion.
+  - New `sem` model (Python + JavaScript) for shotcrete ageing, lining interaction, sequence rules and the Sulem convergence law.
 - **Ground response model** (Python + JavaScript):
   - equivalent Mohr–Coulomb parameters, ground reaction curve and longitudinal displacement profile;
   - squeezing classes;

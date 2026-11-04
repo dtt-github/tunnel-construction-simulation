@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SEM Tunnel Heading</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="../style.css">
+<!-- shared console widgets (views, labels, bars, legends, flags) -->
+<link rel="stylesheet" href="../epb/epb.css">
+<link rel="stylesheet" href="sem.css">
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.182.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.182.0/examples/jsm/"
+  }
+}
+</script>
+</head>
+<body>
+<canvas id="view"></canvas>
+<div id="labels"></div>
+<div id="views">
+  <!-- view buttons are added by the scene -->
+  <label class="chk"><input type="checkbox" id="showLabels" checked> Labels</label>
+</div>
+
+<aside id="console">
+  <header>
+    <h1>SEM / NATM heading in weak rock · 10 m</h1>
+    <span id="fidelity" title="Which physics drives the numbers">Analytical (browser)</span>
+  </header>
+
+  <section>
+    <h2>Operator</h2>
+    <label>Start at
+      <select id="start">
+        <option value="0">Chainage 0 m: siltstone, moderately jointed</option>
+        <option value="52">Chainage 52 m: fault zone ahead</option>
+        <option value="70">Chainage 70 m: inside the fault zone</option>
+      </select>
+    </label>
+    <label>Shotcrete
+      <select id="shot">
+        <option value="kielder">Kielder (E 28 GPa, 35 MPa; slower gain)</option>
+        <option value="oreste_example">Oreste example (E 12 GPa, 27 MPa; faster stiffening)</option>
+      </select>
+    </label>
+    <label class="chk2"><input type="checkbox" id="closure" checked> Close the ring within one diameter in the fault zone (FHWA)</label>
+    <label>Time scale <output id="tsOut"></output><input id="ts" type="range" min="60" max="7200" step="60" value="1800"></label>
+    <div class="buttons"><button id="pause">Pause</button><button id="reset">Reset</button></div>
+  </section>
+
+  <section>
+    <h2>Alarms</h2>
+    <div id="alarms"></div>
+  </section>
+
+  <section>
+    <h2>Sequence</h2>
+    <dl id="sequence"></dl>
+  </section>
+
+  <section>
+    <h2>Ground and lining</h2>
+    <dl id="ground"></dl>
+  </section>
+
+  <section>
+    <h2>Convergence monitoring</h2>
+    <div id="monitor"></div>
+  </section>
+
+  <section>
+    <h2>Model limits</h2>
+    <ul class="limits">
+      <li>Geology is illustrative (siltstone and a crushed fault zone under 100 m of cover). The horseshoe section is treated as a circle of radius 5 m for the ground response.</li>
+      <li>Lining load from Oreste's (2003) method for a closed ring: in the siltstone, where the ring is not closed early, the load and safety factor are those of a closed ring.</li>
+      <li>Convergence readings use the time law of Sulem et al. (1987) with parameters fitted at one claystone site, scaled to the predicted closure, with ±20 % scatter between sections (illustrative).</li>
+      <li>Cycle times per metre come from Crossrail's Stepney Green caverns (London Clay); rock rounds may be quicker or slower.</li>
+    </ul>
+  </section>
+
+  <footer>
+    Models: Hoek–Brown and ground reaction curve (Hoek), shotcrete ageing and lining interaction (Oreste 2003), sequence by ground class (FHWA 2009), convergence law (Sulem et al. 1987), trigger levels (Crossrail). Method card in the <a href="https://github.com/dtt-github/tunnel-construction-simulation/blob/main/docs/research/methods-reference.md">methods reference</a>.
+  </footer>
+</aside>
+
+<script type="module" src="main.js"></script>
+</body>
+</html>

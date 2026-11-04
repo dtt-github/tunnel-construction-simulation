@@ -9,6 +9,7 @@ from .thrust_torque import REFERENCE_MACHINES, Thrust, Torque, cutterhead_torque
 from .utilisation import DriveResult, DriveSettings, record_check, simulate_drive
 from .hard_rock import RMR_CLASSES, HardRockUtilisation, cutter_change_h_per_km, hard_rock_utilisation, rmr_class, support_downtime
 from .ground_response import RockMass, Support, equivalent_mohr_coulomb, ground_reaction, ldp, shield_friction, squeezing_class, squeezing_strain, support_equilibrium
+from .sem import SEM_ROCK_CLASSES, SHOTCRETE, LiningInteraction, early_strength_class, lining_interaction, shotcrete_modulus, shotcrete_strength, sulem_convergence, trigger_level
 from .face_support import DAUB_DEFAULTS, FaceSupport, SupportWindow, daub_window, silo_stress, vermeer_limit, wedge_silo
 from .hoek_brown import hoek_brown, sigma1_at_failure
 from .settlement import (
@@ -81,4 +82,13 @@ __all__ = [
     "shield_friction",
     "RockMass",
     "Support",
+    "shotcrete_modulus",
+    "shotcrete_strength",
+    "early_strength_class",
+    "lining_interaction",
+    "sulem_convergence",
+    "trigger_level",
+    "SEM_ROCK_CLASSES",
+    "SHOTCRETE",
+    "LiningInteraction",
 ]
