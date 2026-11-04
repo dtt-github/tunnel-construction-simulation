@@ -174,7 +174,7 @@ Cutter wear and changes, rock support by class, and utilisation as downtime per 
   - a double shield below RMR 50 is assumed to fall back to single-shield mode.
 - **Utilisation:** Farrokh (2018), [doi:10.22044/jme.2018.6815.1509](https://doi.org/10.22044/jme.2018.6815.1509), with downtime terms in h/km:
   - boring, 1000 / PR;
-  - regrip, 1000 t_r / (60 L_s) plus a curve term; zero for a double shield, which regrips while boring;
+  - regrip, 1000 t_r / (60 L_s) plus a curve term; double shields also stop for each regrip (a few minutes to 15–30 min, Herrenknecht; Maggio 2020);
   - TBM breakdown (fits by rock strength) and backup (fits for rail or conveyor);
   - cutters and support;
   - maintenance and transport classes;

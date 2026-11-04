@@ -13,6 +13,13 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
   - thrust and torque breakdown;
   - surface settlement with Burland categories for buildings.
   - Assumptions and gaps are listed in its [realism checklist](docs/realism/epb-slice-a.md).
+- **Hard-rock double shield TBM** in the same page (`?machine=double`):
+  - Follo-class 9.9 m machine with telescopic, gripper and tail shields;
+  - main and auxiliary thrust cylinders, segment rings built while boring, pea gravel and grout;
+  - single-shield mode in the fault zone.
+  - The page is split into shared parts (`common.js`) and one module per machine.
+  - The double-shield class preset now carries the verified Follo values.
+  - The downtime model counts regrips for double shields (a few minutes to 15–30 min).
 - **Hard-rock open gripper TBM demo** (Slice B, `web/hard-rock/`), replacing the early prototype at `web/`:
   - flat disc cutterhead with buckets, muck ring and belt;
   - roof shield, main beam, grippers with propel cylinders and the regrip cycle;

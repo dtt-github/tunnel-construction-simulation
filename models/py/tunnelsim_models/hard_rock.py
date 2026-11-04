@@ -153,13 +153,14 @@ def hard_rock_utilisation(
 ) -> HardRockUtilisation:
     """Downtime per km and utilisation (Farrokh 2018). cutter_h_per_km overrides the quartz-based cutter fit.
 
-    Double shields regrip while boring, so their regrip term is set to zero (continuous mode).
+    Double shields build rings while boring, but boring still stops for each regrip (the gripper shield is pulled up to
+    the front shield): "a few minutes" (Herrenknecht) to 15-30 min (Maggio 2020, citing Wittke 2006); pass regrip_min.
     """
     if pr_m_h <= 0:
         raise ValueError("penetration rate must be positive")
     t = {
         "boring": 1000 / pr_m_h,
-        "regrip": 0.0 if machine == "double" else 1000 * regrip_min / (60 * stroke_m) + (409000 / curve_radius_m**2 if math.isfinite(curve_radius_m) else 0.0),
+        "regrip": 1000 * regrip_min / (60 * stroke_m) + (409000 / curve_radius_m**2 if math.isfinite(curve_radius_m) else 0.0),
         "tbm_breakdown": tbm_breakdown_downtime(pr_m_h, ucs_mpa),
         "backup": backup_downtime(pr_m_h, haulage),
         "cutters": cutter_downtime_farrokh(pr_m_h, quartz_percent) if cutter_h_per_km is None else cutter_h_per_km,

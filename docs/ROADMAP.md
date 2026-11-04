@@ -143,7 +143,7 @@ Demo: [web/epb/](../web/epb/) ([live](https://dtt-github.github.io/tunnel-constr
   - stroke → regrip cycle, with support installed in parallel;
   - support class from the rock mass (model 11);
   - cast-in-place final lining shown as a later stage, or on the backup.
-- [ ] Double shield (variant):
+- [x] Double shield (variant) ([realism checklist](realism/hard-rock-double-shield.md)):
   - telescopic shield, gripper shield, segments with pea gravel;
   - concurrent boring and ring build;
   - falls back to single-shield mode in faults.

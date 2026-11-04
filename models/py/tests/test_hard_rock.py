@@ -52,7 +52,9 @@ def test_farrokh_worked_example():
 
 def test_double_shield_and_curves():
     base = hard_rock_utilisation(3.0, 10, rmr=60)
-    ds = hard_rock_utilisation(3.0, 10, rmr=60, machine="double")
-    assert ds.h_per_km["regrip"] == 0 and ds.advance_m_day > base.advance_m_day
+    ds = hard_rock_utilisation(3.0, 10, rmr=60, machine="double", stroke_m=1.8, regrip_min=10)
+    assert ds.h_per_km["regrip"] == pytest.approx(1000 * 10 / (60 * 1.8))  # boring stops for each regrip
+    assert ds.h_per_km["support"] < base.h_per_km["support"]  # segments built while boring
+    assert ds.advance_m_day > base.advance_m_day
     curved = hard_rock_utilisation(3.0, 10, rmr=60, curve_radius_m=300)
     assert curved.h_per_km["regrip"] == pytest.approx(base.h_per_km["regrip"] + 409000 / 300**2)

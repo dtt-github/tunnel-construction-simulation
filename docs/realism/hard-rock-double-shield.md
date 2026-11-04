@@ -1,0 +1,24 @@
+# Realism checklist: hard-rock double shield TBM, Slice B
+
+- **Demo:** [`web/hard-rock/?machine=double`](../../web/hard-rock/)
+- **Class preset:** `hard-rock-double-shield-10m` in [machine-classes.json](../../models/presets/machine-classes.json)
+- **Method card:** [double shield](../research/methods-reference.md#double-shield)
+- **Rules:** [ROADMAP realism rules](../ROADMAP.md#realism-rules-apply-to-every-phase)
+- **Models:** [CSM disc cutter](../MODELS.md#csm-disc-cutter), [hard-rock drive](../MODELS.md#hard-rock-drive)
+
+Reviewed 4 Nov 2026. Status: ✅ meets the rule · ⚠️ partly, gap listed · ❌ not yet.
+
+| # | Rule | Status | Evidence | Known gaps |
+|---|---|---|---|---|
+| 1 | One method, one machine class, one ground | ✅ | Double shield TBM, class "10 m hard-rock double shield": 9.9 m, 4,550 kW, 11,115 kNm, 1.8 m rings (Follo Line machines, Herrenknecht reference). Same hard-rock alignment as the gripper demo. DAUB's main range for double shields is UCS ≥ 25 MPa and RMR 21–100. | Geology values are typical for the rock types, not a project. |
+| 2 | Right support and lining for the method | ✅ | Precast segment rings (universal, 6 + key, key last) built in the tailskin. Pea gravel in the crown and grout in the invert once a ring leaves the tailskin (Brenner exploratory machine, Alfero 2022). No rock bolting or shotcrete on the backup. | Segment thickness (320 mm) comes from a search snippet only; the ring type for Follo is not published. |
+| 3 | Right layout and muck path | ✅ | Front to back: flat disc cutterhead (60 × 19″: 4 double centre, 46 face, 10 gauge), buckets, muck ring and machine belt. Front shield, inner and outer telescopic shields, gripper shield with gripper shoes in side windows, and tailskin, with lengths from the 10.65 m Brenner machines (1.97, 2.35, 2.93, 3.98, 2.48 m). Main thrust cylinders between the front and gripper shields; 16 auxiliary cylinders on the last ring. Erector and segment feeder; backup with pea gravel and grout plant, segment crane, conveyor and power. | Stabilisers and torque cylinders are not drawn. Backup length is shorter than the real 150–210 m. |
+| 4 | Right cycle and utilisation | ✅ | **Double-shield mode** (RMR ≥ 50): the grippers react the main cylinders and the telescope opens; a ring is built in the tailskin at the same time. Then a regrip pulls the gripper shield up (10 min, within the published "a few minutes" to 15–30 min). **Single-shield mode** (RMR < 50, the fault zone): the telescope stays closed and the auxiliary cylinders push off the last ring; boring and ring building alternate. After each stroke comes the remaining downtime from the per-km model (Farrokh 2018). | Ring-build time (30 min) is an assumption. Single-shield mode below RMR 50 follows the support-downtime model, not project data. |
+| 5 | Every number in a cited range | ⚠️ | Speed limited to 6.43 rpm by the 19″ gauge-cutter speed. Penetration capped at 15 mm/rev. Drive at its 4,550 kW power limit in gneiss: 4.2 m/h, 270 kN per cutter (rated 311 kN). Mean rate about 20 m/day in gneiss and 13 m/day in the fault zone, against Follo's typical 27 m/day and Brenner's 10.2 m/day over the whole drive including faults. | Thrust, gripper force and stroke for a 10 m machine are not published; the stroke is taken equal to the ring width. |
+| 6 | Honest labels | ✅ | "Analytical (browser)" badge; the Model limits panel lists the verified and assumed values and the single-shield-mode rule. | — |
+
+## Before the next publish
+
+- [ ] Ring-build time and segment thickness for a 10 m double shield from a primary source.
+- [ ] Main thrust, auxiliary thrust and gripper force for a 10 m machine.
+- [ ] Shield jamming check in squeezing ground (roadmap model 8). The 6.85 m Brenner exploratory machine was stuck for 32 and 46 days in fault zones.
