@@ -3,6 +3,14 @@
 
 export const C_DEFAULT = 2.12;
 
+// Gauge-cutter speed limits (Rostami & Chang 2017) and the practical penetration maximum (Macias & Barton 2022);
+// see csm.py for the sources.
+export const GAUGE_SPEED_LIMIT_M_MIN = Object.freeze({ 432: 165, 483: 200 });
+export const PRACTICAL_MAX_PENETRATION_MM = 15;
+/** Cutterhead speed limit from the gauge-cutter linear speed. */
+export const maxRpm = (headDiameterM, cutterDiameterMm = 482.6) =>
+  (cutterDiameterMm <= 440 ? GAUGE_SPEED_LIMIT_M_MIN[432] : GAUGE_SPEED_LIMIT_M_MIN[483]) / (Math.PI * headDiameterM);
+
 /** 19-inch constant-cross-section disc. */
 export const DEFAULT_CUTTER = Object.freeze({
   diameter_mm: 482.6,
@@ -36,18 +44,26 @@ export function penetrationForNormalForce(normalForceN, ucsMpa, btsMpa, cutter =
 }
 
 /**
- * Steady-state hard-rock TBM performance for a given net cutting thrust.
+ * Steady-state hard-rock TBM performance for a given net cutting thrust. Drive: installed torque up to the speed where
+ * it meets the installed power, then constant power. max_penetration_mm caps penetration per revolution.
  * @param {{thrust_kn:number,rpm:number,n_cutters:number,head_diameter_m:number,ucs_mpa:number,bts_mpa:number,
- *          max_torque_knm?:number|null,cutter?:object,torque_radius_factor?:number}} o
+ *          max_torque_knm?:number|null,max_power_kw?:number|null,max_penetration_mm?:number|null,cutter?:object,
+ *          torque_radius_factor?:number}} o
  */
 export function tbmPerformance(o) {
   const cutter = o.cutter ?? DEFAULT_CUTTER;
   const k = ((o.torque_radius_factor ?? 0.3) * o.head_diameter_m * o.n_cutters) / 1000;
   const torqueAt = (p) => k * cutterForces(p, o.ucs_mpa, o.bts_mpa, cutter).rolling_n;
+  let tmax = o.max_torque_knm ?? null;
+  let byPower = false;
+  if (o.max_power_kw != null && o.rpm > 0) {
+    const tPower = (o.max_power_kw * 60) / (2 * Math.PI * o.rpm);
+    if (tmax === null || tPower < tmax) { tmax = tPower; byPower = true; }
+  }
   let p = penetrationForNormalForce((o.thrust_kn * 1000) / o.n_cutters, o.ucs_mpa, o.bts_mpa, cutter);
   let limited_by = "thrust";
-  const tmax = o.max_torque_knm;
-  if (tmax != null && torqueAt(p) > tmax) {
+  if (o.max_penetration_mm != null && p > o.max_penetration_mm) { p = o.max_penetration_mm; limited_by = "penetration"; }
+  if (tmax !== null && torqueAt(p) > tmax) {
     let lo = 0;
     let hi = p;
     for (let i = 0; i < 80; i++) {
@@ -56,7 +72,7 @@ export function tbmPerformance(o) {
       else hi = mid;
     }
     p = 0.5 * (lo + hi);
-    limited_by = "torque";
+    limited_by = byPower ? "power" : "torque";
   }
   const f = cutterForces(p, o.ucs_mpa, o.bts_mpa, cutter);
   const torque = k * f.rolling_n;
@@ -69,5 +85,7 @@ export function tbmPerformance(o) {
     cutterhead_power_kw: (torque * 2 * Math.PI * o.rpm) / 60,
     cutter_overloaded: f.normal_n / 1000 > cutter.max_load_kn,
     limited_by,
+    thrust_used_kn: (f.normal_n * o.n_cutters) / 1000,
+    torque_available_knm: tmax,
   };
 }

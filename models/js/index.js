@@ -6,3 +6,4 @@ export * from "./face_support.js";
 export * from "./epb_chamber.js";
 export * from "./thrust_torque.js";
 export * from "./utilisation.js";
+export * from "./hard_rock.js";

@@ -3,54 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Tunnel Construction Simulation</title>
+<title>Hard-Rock TBM</title>
+<link rel="icon" href="data:,">
+<!-- The early single-shield prototype was replaced by the open gripper TBM in hard-rock/ (see docs/ROADMAP.md, Slice B). -->
+<meta http-equiv="refresh" content="0; url=hard-rock/">
 <link rel="stylesheet" href="style.css">
-<script type="importmap">
-{
-  "imports": {
-    "three": "https://cdn.jsdelivr.net/npm/three@0.182.0/build/three.module.js",
-    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.182.0/examples/jsm/"
-  }
-}
-</script>
 </head>
 <body>
-<canvas id="view"></canvas>
-<aside id="console">
-  <header>
-    <h1>Hard-rock TBM · single shield Ø 7.0 m</h1>
-    <span id="fidelity" title="Which physics drives the numbers">Analytical (browser)</span>
-  </header>
-  <p class="rebuild"><b>Being rebuilt.</b> This early prototype does not yet look or behave like a real hard-rock TBM: the cutterhead has no buckets, there are no thrust cylinders, erector or backfill, muck does not follow the real path, and advance ignores downtime. Treat the numbers as illustrative.</p>
-
-  <section>
-    <h2>Operator</h2>
-    <label>Net cutting thrust <output id="thrustOut"></output>
-      <input id="thrust" type="range" min="2000" max="18000" step="250" value="11000"></label>
-    <label>Cutterhead speed <output id="rpmOut"></output>
-      <input id="rpm" type="range" min="1" max="10" step="0.1" value="6"></label>
-    <label>Time scale <output id="tsOut"></output>
-      <input id="timescale" type="range" min="1" max="600" step="1" value="120"></label>
-    <div class="buttons"><button id="pause">Pause</button><button id="reset">Reset</button></div>
-  </section>
-
-  <section>
-    <h2>Machine</h2>
-    <dl id="machine"></dl>
-    <div id="alarms"></div>
-  </section>
-
-  <section>
-    <h2>Ground at the face</h2>
-    <dl id="ground"></dl>
-  </section>
-
-  <footer>
-    Models: CSM disc cutter (Rostami &amp; Ozdemir 1993), Hoek–Brown 2002, Hoek–Diederichs 2006.
-    Physics: <a href="https://github.com/jrouwe/JoltPhysics.js" target="_blank" rel="noopener">Jolt</a> (muck).
-    Phase 1 skeleton: no GPU server connected.
-  </footer>
-</aside>
-<script type="module" src="main.js"></script>
+<p style="padding: 24px">The hard-rock demo has moved: <a href="hard-rock/" style="color: var(--accent)">open the hard-rock gripper TBM</a>.</p>
 </body>
 </html>
