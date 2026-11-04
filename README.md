@@ -65,7 +65,7 @@ npm test
 npm run test:py
 ```
 
-`npm test` checks the JavaScript models against the shared vectors (Node ≥ 20). `npm run test:py` runs the Python reference models with [uv](https://docs.astral.sh/uv/).
+`npm test` checks the JavaScript models against the shared vectors (Node ≥ 22). `npm run test:py` runs the Python reference models with [uv](https://docs.astral.sh/uv/).
 
 ## Repository layout
 
