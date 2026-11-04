@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Urban EPB Shield</title>
+<link rel="stylesheet" href="../style.css">
+<link rel="stylesheet" href="epb.css">
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.182.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.182.0/examples/jsm/"
+  }
+}
+</script>
+</head>
+<body>
+<canvas id="view"></canvas>
+<div id="labels"></div>
+<div id="views">
+  <button data-view="machine" class="on">Machine</button>
+  <button data-view="chamber">Chamber</button>
+  <button data-view="tail">Tail &amp; ring build</button>
+  <button data-view="surface">Surface</button>
+  <label class="chk"><input type="checkbox" id="showLabels" checked> Labels</label>
+</div>
+
+<aside id="console">
+  <header>
+    <h1>Urban EPB shield · Ø 7.08 m</h1>
+    <span id="fidelity" title="Which physics drives the numbers">Analytical (browser)</span>
+  </header>
+
+  <section>
+    <h2>Operator</h2>
+    <label>Advance speed <output id="advOut"></output><input id="adv" type="range" min="0" max="80" step="1" value="60"></label>
+    <label>Cutterhead speed <output id="rpmOut"></output><input id="rpm" type="range" min="0" max="3.2" step="0.1" value="2.0"></label>
+    <label>Screw control
+      <select id="screwMode"><option value="auto">Automatic (hold target pressure)</option><option value="manual">Manual speed</option></select>
+    </label>
+    <label>Target pressure, axis <output id="targetOut"></output><input id="target" type="range" min="100" max="350" step="5" value="220"></label>
+    <label>Screw speed (manual) <output id="screwOut"></output><input id="screw" type="range" min="0" max="22" step="0.1" value="11"></label>
+    <label>Foam injection ratio FIR <output id="firOut"></output><input id="fir" type="range" min="0" max="80" step="1" value="40"></label>
+    <label>Foam expansion ratio FER <output id="ferOut"></output><input id="fer" type="range" min="8" max="15" step="0.5" value="10"></label>
+    <label>Volume loss (scenario input) <output id="vlOut"></output><input id="vl" type="range" min="0.3" max="2" step="0.05" value="1.0"></label>
+    <label>Time scale <output id="tsOut"></output><input id="ts" type="range" min="1" max="300" step="1" value="60"></label>
+    <div class="buttons"><button id="pause">Pause</button><button id="reset">Reset</button></div>
+  </section>
+
+  <section>
+    <h2>Chamber pressure (bar)</h2>
+    <div id="gauge"></div>
+    <dl id="chamber"></dl>
+  </section>
+
+  <section>
+    <h2>Alarms</h2>
+    <div id="alarms"></div>
+  </section>
+
+  <section>
+    <h2>Cycle</h2>
+    <dl id="cycle"></dl>
+  </section>
+
+  <section>
+    <h2>Thrust and torque</h2>
+    <div id="bars"></div>
+  </section>
+
+  <section>
+    <h2>Ground and surface</h2>
+    <dl id="ground"></dl>
+  </section>
+
+  <section>
+    <h2>Model limits</h2>
+    <ul class="limits">
+      <li>Volume loss is a scenario input; it does not yet respond to face pressure or grouting.</li>
+      <li>Building categories use greenfield horizontal strain only (no deflection ratio, no building stiffness).</li>
+      <li>Advance per day counts the push and ring-build cycle only; downtime (logistics, maintenance, tool changes) is not modelled yet.</li>
+      <li>Chamber volume, screw efficiency, friction coefficients and machine weights are illustrative assumptions.</li>
+    </ul>
+  </section>
+
+  <footer>
+    Models: wedge-silo face support and DAUB window, chamber volume balance with foam, simplified screw (Merritt &amp; Mair), thrust and torque components (Shi et al. 2011), Gaussian settlement (Peck; O'Reilly &amp; New; Mair &amp; Taylor). Machine class from <a href="https://github.com/dtt-github/tunnel-construction-simulation/blob/main/docs/research/methods-reference.md">published references</a>.
+  </footer>
+</aside>
+
+<script type="module" src="main.js"></script>
+</body>
+</html>
