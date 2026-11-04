@@ -99,6 +99,13 @@ def test_longitudinal_components():
     assert volume_loss_components(1, 0, 0, 8.0, behind=1, behind_offset_m=4.0) == [(0.5, 0.0), (0.5, 12.0)]
     with pytest.raises(ValueError):
         volume_loss_components(1, 1, 1, 8.0, behind=-0.5)
+    # longitudinal width: a narrower i_long steepens the profile but leaves the final trough unchanged
+    narrow = gaussian_trough(6, 20, 0.01, components=[(1.0, 9.0)], i_long=5.0)
+    assert narrow.fraction_at_face == pytest.approx(0.5 * (1 + math.erf(-9 / 5 / math.sqrt(2))))
+    assert narrow.fraction_at_face < t.fraction_at_face
+    assert narrow.settlement(3.0) == pytest.approx(t.settlement(3.0))
+    with pytest.raises(ValueError):
+        gaussian_trough(6, 20, 0.01, i_long=0.0)
     with pytest.raises(ValueError):
         gaussian_trough(6, 20, 0.01, components=[(0.5, 0.0), (0.4, 5.0)])
 

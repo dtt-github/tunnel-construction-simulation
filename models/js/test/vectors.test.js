@@ -48,14 +48,14 @@ function checkTrough(t, out, path) {
 
 test("asymmetric and multi-component troughs match python", () => {
   for (const { in: i, out } of vec("settlement").asymmetric) {
-    const t = gaussianTrough(i.diameter_m, i.axis_depth_m, i.volume_loss, i.k, { kLeft: i.k_left, kRight: i.k_right, components: i.components ?? undefined });
+    const t = gaussianTrough(i.diameter_m, i.axis_depth_m, i.volume_loss, i.k, { kLeft: i.k_left, kRight: i.k_right, components: i.components ?? undefined, iLong: i.i_long ?? null });
     checkTrough(t, out, "asym");
   }
 });
 
 test("method presets match python", () => {
   for (const { in: i, out } of vec("settlement").presets) {
-    checkTrough(presetTrough(i.method, i.diameter_m, i.axis_depth_m, { shieldLengthM: i.shield_length_m }), out, i.method);
+    checkTrough(presetTrough(i.method, i.diameter_m, i.axis_depth_m, { shieldLengthM: i.shield_length_m, iLong: i.i_long ?? null }), out, i.method);
   }
 });
 

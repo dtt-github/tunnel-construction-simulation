@@ -49,19 +49,22 @@ def trough_out(t, xs, ys):
 
 ys = [-20.0, -5.0, 0.0, 4.0, 9.0, 30.0]
 asym = []
-for dia, z0, vl, k, kl, kr, comps in [
-    (6.0, 20.0, 0.01, 0.5, 0.7, 0.5, None),
-    (5.0, 19.5, 0.006, 0.5, None, 0.35, [(0.2, 0.0), (0.3, 4.0), (0.5, 8.0)]),
-    (8.0, 15.0, 0.012, 0.4, 0.45, 0.6, [(0.5, 0.0), (0.5, 6.0)]),
+for dia, z0, vl, k, kl, kr, comps, il in [
+    (6.0, 20.0, 0.01, 0.5, 0.7, 0.5, None, None),
+    (5.0, 19.5, 0.006, 0.5, None, 0.35, [(0.2, 0.0), (0.3, 4.0), (0.5, 8.0)], None),
+    (8.0, 15.0, 0.012, 0.4, 0.45, 0.6, [(0.5, 0.0), (0.5, 6.0)], None),
+    (6.0, 20.0, 0.008, 0.5, None, None, [(0.1, 0.0), (0.4, 9.0), (0.5, 18.0)], 6.0),
 ]:
-    t = gaussian_trough(dia, z0, vl, k, k_left=kl, k_right=kr, components=comps)
-    asym.append({"in": {"diameter_m": dia, "axis_depth_m": z0, "volume_loss": vl, "k": k, "k_left": kl, "k_right": kr, "components": comps},
+    t = gaussian_trough(dia, z0, vl, k, k_left=kl, k_right=kr, components=comps, i_long=il)
+    asym.append({"in": {"diameter_m": dia, "axis_depth_m": z0, "volume_loss": vl, "k": k, "k_left": kl, "k_right": kr, "components": comps, "i_long": il},
                  "out": trough_out(t, [-2 * t.i, -5.0, 0.0, 5.0, t.i, 2 * t.i], ys)})
 
 presets = []
-for method, dia, z0, length in [("open_face_stiff_clay", 4.85, 20.0, None), ("closed_face_clay", 6.0, 18.0, 9.0), ("closed_face_sand", 10.0, 25.0, 12.0), ("scl_stiff_clay", 7.0, 22.0, None)]:
-    t = preset_trough(method, dia, z0, shield_length_m=length)
-    presets.append({"in": {"method": method, "diameter_m": dia, "axis_depth_m": z0, "shield_length_m": length},
+for method, dia, z0, length, il in [("open_face_stiff_clay", 4.85, 20.0, None, None), ("closed_face_clay", 6.0, 18.0, 9.0, None),
+                                    ("closed_face_sand", 10.0, 25.0, 12.0, None), ("scl_stiff_clay", 7.0, 22.0, None, None),
+                                    ("closed_face_clay", 6.0, 18.0, 9.0, 5.0)]:
+    t = preset_trough(method, dia, z0, shield_length_m=length, i_long=il)
+    presets.append({"in": {"method": method, "diameter_m": dia, "axis_depth_m": z0, "shield_length_m": length, "i_long": il},
                     "out": trough_out(t, [0.0, 5.0, t.i], ys)})
 
 twins = []

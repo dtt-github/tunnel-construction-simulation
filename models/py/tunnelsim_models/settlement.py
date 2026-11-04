@@ -25,13 +25,15 @@ the volume loss is split into components k with fraction w_k, each generated at 
 (face loss at 0, shield passage over the shield, tail void at the shield tail, and loss behind the tail from
 lining deformation and grout shrinkage; Mair & Taylor 1997):
 
-    S(x, y) = S(x) * sum_k w_k * Phi((y - y_k) / i)          y = distance behind the face
+    S(x, y) = S(x) * sum_k w_k * Phi((y - y_k) / i_long)     y = distance behind the face, i_long defaults to i
 
 A single component at y = 0 gives the classic profile with half the final settlement above the face. Closed-face
 machines with good face control put most of the volume loss at and behind the tail, which shifts the profile back and
 reduces the fraction that has occurred when the face passes. With the longitudinal width equal to the transverse i,
 a loss at the tail alone still leaves Phi(-L/i) (about 0.2 for L = 8 m, i = 9 m) at the face, so a lower fraction at
-the face needs loss further back; the "behind" component sits one shield length behind the tail by default.
+the face needs loss further back; the "behind" component sits one shield length behind the tail by default. Attewell &
+Woodman use the transverse i along the drive; i_long sets a different longitudinal width (below i for a steeper
+profile, so less settlement ahead of the loss). Calibrate it per project.
 
 Units: metres; VL as a fraction (0.01 = 1 %). Settlement positive downward.
 """
@@ -79,6 +81,7 @@ class Trough:
     i_left: float | None = None
     i_right: float | None = None
     components: tuple[tuple[float, float], ...] = ((1.0, 0.0),)  # (fraction of VL, distance behind face m)
+    i_long: float | None = None  # longitudinal width; None = i
 
     def _i_side(self, x: float) -> float:
         if x < 0:
@@ -98,7 +101,8 @@ class Trough:
 
     def longitudinal_fraction(self, y_behind_face: float) -> float:
         """Fraction of the final transverse trough developed at y (y > 0: behind the face)."""
-        return sum(w * _phi((y_behind_face - yk) / self.i) for w, yk in self.components)
+        il = self.i if self.i_long is None else self.i_long
+        return sum(w * _phi((y_behind_face - yk) / il) for w, yk in self.components)
 
     @property
     def fraction_at_face(self) -> float:
@@ -118,8 +122,10 @@ def gaussian_trough(
     k_left: float | None = None,
     k_right: float | None = None,
     components: Sequence[tuple[float, float]] | None = None,
+    i_long: float | None = None,
 ) -> Trough:
-    """Gaussian trough. k_left / k_right override k on either side; components = [(fraction, y_behind_face_m)]."""
+    """Gaussian trough. k_left / k_right override k on either side; components = [(fraction, y_behind_face_m)];
+    i_long (m) sets the longitudinal width (default: the mean transverse i)."""
     if axis_depth_m <= diameter_m / 2:
         raise ValueError("axis depth must exceed the tunnel radius")
     il = (k if k_left is None else k_left) * axis_depth_m
@@ -127,6 +133,8 @@ def gaussian_trough(
     comps = tuple((float(w), float(y)) for w, y in (components or [(1.0, 0.0)]))
     if abs(sum(w for w, _ in comps) - 1) > 1e-9 or any(w < 0 for w, _ in comps):
         raise ValueError("component fractions must be non-negative and sum to 1")
+    if i_long is not None and i_long <= 0:
+        raise ValueError("i_long must be positive")
     vs = volume_loss * math.pi * diameter_m**2 / 4
     asym = k_left is not None or k_right is not None
     return Trough(
@@ -137,6 +145,7 @@ def gaussian_trough(
         i_left=il if asym else None,
         i_right=ir if asym else None,
         components=comps,
+        i_long=i_long,
     )
 
 
@@ -153,7 +162,7 @@ def volume_loss_components(face: float, shield: float, tail: float, shield_lengt
 
 
 def preset_trough(method: str, diameter_m: float, axis_depth_m: float, *, shield_length_m: float | None = None,
-                  volume_loss: float | None = None, k: float | None = None) -> Trough:
+                  volume_loss: float | None = None, k: float | None = None, i_long: float | None = None) -> Trough:
     """Trough from METHOD_PRESETS; shield length defaults to 1.5 D (set it from the machine preset)."""
     p = METHOD_PRESETS[method]
     length = 1.5 * diameter_m if shield_length_m is None else shield_length_m
@@ -163,6 +172,7 @@ def preset_trough(method: str, diameter_m: float, axis_depth_m: float, *, shield
         p["volume_loss"] if volume_loss is None else volume_loss,
         p["k"] if k is None else k,
         components=volume_loss_components(*p["split"][:3], length, *p["split"][3:]),
+        i_long=i_long,
     )
 
 

@@ -53,23 +53,25 @@ const phi = (z) => 0.5 * (1 + erf(z / Math.SQRT2));
 
 /**
  * Gaussian trough. opts.kLeft / opts.kRight override k on either side (asymmetric trough);
- * opts.components = [[fraction, yBehindFaceM], ...] splits the volume loss along the drive.
+ * opts.components = [[fraction, yBehindFaceM], ...] splits the volume loss along the drive; opts.iLong (m) sets the
+ * longitudinal width (default: the mean transverse i).
  */
 export function gaussianTrough(diameterM, axisDepthM, volumeLoss, k = 0.5, opts = {}) {
   if (axisDepthM <= diameterM / 2) throw new RangeError("axis depth must exceed the tunnel radius");
-  const { kLeft = null, kRight = null, components = [[1, 0]] } = opts;
+  const { kLeft = null, kRight = null, components = [[1, 0]], iLong = null } = opts;
   const il = (kLeft ?? k) * axisDepthM;
   const ir = (kRight ?? k) * axisDepthM;
   const sumW = components.reduce((s, [w]) => s + w, 0);
   if (Math.abs(sumW - 1) > 1e-9 || components.some(([w]) => w < 0)) {
     throw new RangeError("component fractions must be non-negative and sum to 1");
   }
+  if (iLong !== null && !(iLong > 0)) throw new RangeError("iLong must be positive");
   const i = (il + ir) / 2;
   const vs = (volumeLoss * Math.PI * diameterM ** 2) / 4;
   const sMax = (2 * vs) / (Math.sqrt(2 * Math.PI) * (il + ir));
   const iSide = (x) => (x < 0 ? il : ir);
   const settlement = (x) => sMax * Math.exp(-(x * x) / (2 * iSide(x) ** 2));
-  const longitudinalFraction = (y) => components.reduce((s, [w, yk]) => s + w * phi((y - yk) / i), 0);
+  const longitudinalFraction = (y) => components.reduce((s, [w, yk]) => s + w * phi((y - yk) / (iLong ?? i)), 0);
   return {
     i,
     i_left: il,
@@ -78,6 +80,7 @@ export function gaussianTrough(diameterM, axisDepthM, volumeLoss, k = 0.5, opts 
     s_max: sMax,
     z0: axisDepthM,
     components: components.map(([w, y]) => [w, y]),
+    i_long: iLong,
     settlement,
     horizontal: (x) => -(x / axisDepthM) * settlement(x),
     slope: (x) => -(x / iSide(x) ** 2) * settlement(x),
@@ -107,12 +110,13 @@ export function volumeLossComponents(face, shield, tail, shieldLengthM, behind =
 }
 
 /** Trough from METHOD_PRESETS; shield length defaults to 1.5 D (set it from the machine preset). */
-export function presetTrough(method, diameterM, axisDepthM, { shieldLengthM = null, volumeLoss = null, k = null } = {}) {
+export function presetTrough(method, diameterM, axisDepthM, { shieldLengthM = null, volumeLoss = null, k = null, iLong = null } = {}) {
   const p = METHOD_PRESETS[method];
   if (!p) throw new RangeError(`unknown method ${method}`);
   const length = shieldLengthM ?? 1.5 * diameterM;
   return gaussianTrough(diameterM, axisDepthM, volumeLoss ?? p.volume_loss, k ?? p.k, {
     components: volumeLossComponents(...p.split.slice(0, 3), length, ...p.split.slice(3)),
+    iLong,
   });
 }
 
