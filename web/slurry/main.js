@@ -14,6 +14,7 @@ import {
   durandVelocity, pipeVelocity, CONTROL_TOLERANCE,
   verticalStress, presetTrough, burlandCategory, referenceInstalled, erf,
   Rng, sample as sampleDist, DIST, SHIFT_PATTERNS, PER_CYCLE_MAINTENANCE_MIN, simulateDrive, recordCheck, EPB_WEEKLY_SURVEY,
+  jsceRing, woodInertia, subgradeModulus, ringLoads, sectionStresses, jackingStress, burstingForce, annulusVolume, groutWindow, ITA2000_ALLOWABLE,
 } from "../../models/js/index.js";
 
 // ---------------------------------------------------------------- machine and scenario
@@ -41,8 +42,8 @@ const AREA = Math.PI * R * R;
 const Z0 = 15; // axis depth, m
 const WATER = 1; // water table depth, m: saturated sands and gravels, the slurry machine's ground (DAUB 2025)
 const ZONES = [
-  { name: "Dense sand", from: -60, to: 20, gamma: 20, phi: 35, c: 0, k0: 0.43, k: 0.35, d10: 0.15e-3, rho: 2.0, color: 0xb59a62 },
-  { name: "Sandy gravel", from: 20, to: 260, gamma: 21, phi: 38, c: 0, k0: 0.38, k: 0.3, d10: 1.0e-3, rho: 2.1, color: 0x8f8a7c },
+  { name: "Dense sand", Es: 60e3, from: -60, to: 20, gamma: 20, phi: 35, c: 0, k0: 0.43, k: 0.35, d10: 0.15e-3, rho: 2.0, color: 0xb59a62 },
+  { name: "Sandy gravel", Es: 100e3, from: 20, to: 260, gamma: 21, phi: 38, c: 0, k0: 0.38, k: 0.3, d10: 1.0e-3, rho: 2.1, color: 0x8f8a7c },
 ];
 const zoneAt = (ch) => ZONES.find((z) => ch >= z.from && ch < z.to) ?? ZONES.at(-1);
 const BUILDINGS = [
@@ -522,7 +523,7 @@ label("Face position", faceMarker, [0, 1.8, 0], true);
 
 // ---------------------------------------------------------------- UI
 const ids = ["adv", "rpm", "disMode", "target", "dis", "feed", "tau", "vl", "ts", "advOut", "rpmOut", "targetOut", "disOut", "feedOut", "tauOut", "vlOut", "tsOut",
-  "pause", "reset", "gauge", "chamber", "alarms", "cycle", "bars", "ground", "showLabels", "shift", "haulage", "interventions", "skip", "forecast", "cake", "circuit"];
+  "pause", "reset", "gauge", "chamber", "alarms", "cycle", "bars", "ground", "showLabels", "shift", "haulage", "interventions", "skip", "forecast", "lining", "cake", "circuit"];
 const ui = Object.fromEntries(ids.map((id) => [id, document.getElementById(id)]));
 const val = (id) => +ui[id].value;
 
@@ -849,6 +850,45 @@ function bars(parts, total, limit, unit) {
   return `<div class="bar"><span class="k">Total ${unit}</span><span class="t">${segs}</span><span class="v">${fmt(total / 1000, 1)}</span></div><div class="legend">${legend}</div>`;
 }
 
+// Segment lining (ITA WG2 2000 elastic equation method, Wood's joint reduction, ITA / DAUB jacking, bursting and
+// grout checks). Ground stiffness E_s per zone, concrete E 36 GPa and a 0.2 m shoe pad are assumed.
+const SEG = { n: 8, E: 36e6, pad: 0.2, gammaC: 25 };
+const SEG_T = (M.ringOD - M.ringID) / 2, SEG_RC = (M.ringOD + M.ringID) / 4;
+const liningCache = new Map();
+function liningAt(zone) {
+  if (!liningCache.has(zone.name)) {
+    const [pv, q1, q2] = ringLoads(Z0, M.ringOD / 2, zone.gamma, zone.k0, WATER);
+    const eta = woodInertia(1, SEG.n);
+    const r = jsceRing(pv, q1, q2, SEG.gammaC * SEG_T, SEG_RC, (SEG.E * SEG_T ** 3) / 12, subgradeModulus(zone.Es, SEG_RC), { eta });
+    const iMax = r.moment.indexOf(Math.max(...r.moment)), iMin = r.moment.indexOf(Math.min(...r.moment));
+    const sMax = sectionStresses(r.normal[iMax], r.moment[iMax], SEG_T), sMin = sectionStresses(r.normal[iMin], r.moment[iMin], SEG_T);
+    liningCache.set(zone.name, { pv, q1, q2, eta, r, iMax, iMin, sigma: Math.max(sMax[0], sMin[0]), sigmaMin: Math.min(sMax[1], sMin[1]),
+      oval: (2 * r.deflection) / M.ringID, grout: groutWindow(Z0 - R, zone.gamma, WATER) });
+  }
+  return liningCache.get(zone.name);
+}
+function liningRows(zone) {
+  const L = liningAt(zone), r = L.r;
+  const shoe = S.thrust ? S.thrust.total / N_CYL : null;
+  const js = shoe ? jackingStress(shoe, N_CYL, SEG_RC, SEG_T) : null;
+  const [tb] = shoe ? burstingForce(shoe, SEG_T, SEG.pad) : [null];
+  const rows = [
+    ["Ring", `7 + key, ${fmt(SEG_T * 1000, 0)} mm, ${W} m wide; joints cut bending stiffness to ${fmt(L.eta * 100, 0)} % (Wood)`],
+    ["Loads at crown / springline", `${fmt(L.pv, 0)} kPa vertical; ${fmt(L.q1, 0)}–${fmt(L.q2, 0)} kPa lateral (earth + water, full overburden)`],
+    ["Bending moment", `+${fmt(r.moment[L.iMax], 0)} kNm/m at ${r.angles_deg[L.iMax]}°, ${fmt(r.moment[L.iMin], 0)} kNm/m at ${r.angles_deg[L.iMin]}° from the crown`],
+    ["Normal force", `${fmt(Math.min(...r.normal), 0)}–${fmt(Math.max(...r.normal), 0)} kN/m`],
+    ["Concrete stress", `${fmt(L.sigma / 1000, 1)} MPa max, ${fmt(L.sigmaMin / 1000, 1)} MPa min${L.sigmaMin < 0 ? ", tension carried by the reinforcement" : ""} (ITA 2000 allowable ${fmt(ITA2000_ALLOWABLE.concrete_42 / 1000, 0)} MPa for C42)`],
+    ["Ovalisation", `${fmt(L.oval * 100, 2)} % of the inner diameter (limit 0.5 %, DAUB)`],
+    ["Jacking stress per shoe", js ? `${fmt(shoe / 1000, 2)} MN on ${N_CYL} shoes: ${fmt(js / 1000, 1)} MPa (allowable ${fmt((ITA2000_ALLOWABLE.concrete_42 * ITA2000_ALLOWABLE.jacking_factor) / 1000, 1)} MPa while jacking)` : "no thrust on the ring"],
+    ["Bursting force per shoe", tb ? `${fmt(tb, 0)} kN (DAUB, 0.2 m pad)` : "—"],
+    ["Annulus grout", `${fmt(annulusVolume(M.D, M.ringOD, W), 2)} m³ per ring; pressure at the crown ${fmt(L.grout[0] / 100, 2)}–${fmt(L.grout[1] / 100, 2)} bar (above groundwater, at most 69 kPa over it)`],
+  ];
+  const alarms = [];
+  if (js && js > ITA2000_ALLOWABLE.concrete_42 * ITA2000_ALLOWABLE.jacking_factor) alarms.push(`Jacking stress ${fmt(js / 1000, 1)} MPa above the allowable for the temporary jacking state`);
+  if (L.oval > 0.005) alarms.push(`Ring ovalisation ${fmt(L.oval * 100, 2)} % above 0.5 % of the inner diameter`);
+  return { rows, alarms };
+}
+
 function hud() {
   for (const [id, out, f] of [["adv", "advOut", (v) => `${v} mm/min`], ["rpm", "rpmOut", (v) => `${fmt(v, 1)} rpm`], ["target", "targetOut", (v) => `${fmt(v / 100, 2)} bar`],
     ["dis", "disOut", (v) => `${v} m³/h`], ["feed", "feedOut", (v) => `${v} m³/h`], ["tau", "tauOut", (v) => `${v} Pa`], ["vl", "vlOut", (v) => `${fmt(v, 2)} %`], ["ts", "tsOut", (v) => `×${v}`]]) {
@@ -922,6 +962,9 @@ function hud() {
   if (S.stalled) alarms.push(`Torque ${fmt(S.torque, 0)} kNm above the installed ${M.torqueLimit} kNm: cutterhead stalled`);
   if (S.mode === "INTERVENTION") alarms.push("Cutting-tool intervention: slurry level lowered, face held by the air cushion and the filter cake");
   for (const b of BUILDINGS) if (b.cat >= 2) alarms.push(`${b.name}: Burland category ${b.cat} (${b.catName})`);
+  const lin = liningRows(zoneAt(S.chainage));
+  dl(ui.lining, lin.rows);
+  alarms.push(...lin.alarms);
   ui.alarms.innerHTML = alarms.length ? alarms.map((a) => `<div>${a}</div>`).join("") : `<div class="ok">Within limits</div>`;
 
   const v = val("adv") / 60000;

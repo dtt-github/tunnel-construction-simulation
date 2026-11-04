@@ -13,6 +13,7 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
   - thrust and torque breakdown;
   - surface settlement with Burland categories for buildings.
   - Assumptions and gaps are listed in its [realism checklist](docs/realism/epb-slice-a.md).
+- **Segment lining model** (Python + JavaScript, `lining`): ring forces by the elastic equation method (ITA WG2 2000, reproduces its Design Example 1) with Wood's joint reduction, jacking stress and bursting under the shoes, annulus grout volume and pressure window, taper. The EPB and Mixshield demos show a Segment lining panel with these checks.
 - **Drill & blast road tunnel** (Slice E, `web/drill-blast/`):
   - a Norwegian T10.5 road tunnel driven round by round: survey, drilling with a three-boom jumbo, charging, blast, ventilation, scaling, mucking with a loader and trucks, bolting and sprayed concrete;
   - the face pattern and charges from published rules (Holmberg cut, Olofsson burden, smooth contour), with a "Norwegian practice" setting fitted to published hole counts;

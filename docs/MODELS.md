@@ -16,6 +16,7 @@ Every model exists twice: a Python reference in [`models/py/tunnelsim_models/`](
 | [Hard-rock drive](#hard-rock-drive) | `hard_rock.py` | `hard_rock.js` | Reproduces Farrokh's worked example within 3 %; support curve digitised |
 | [Ground response and squeezing](#ground-response-and-squeezing) | `ground_response.py` | `ground_response.js` | Reproduces Hoek's and Hoek & Marinos's worked examples; shield friction a screening estimate |
 | [SEM / NATM sprayed concrete lining](#sem--natm-sprayed-concrete-lining) | `sem.py` | `sem.js` | Checked against Brenner shotcrete data and Oreste's trends; Sulem parameters from one site |
+| [Segment lining](#segment-lining) | `lining.py` | `lining.js` | Reproduces ITA WG2 (2000) Design Example 1 and its jacking check |
 | [Drill & blast](#drill--blast) | `drill_blast.py` | `drill_blast.js` | Reproduces Yilmaz's worked example, SS 460 48 66 tables and NFF cycle figures; Norwegian pattern fitted to published hole counts |
 | [Utilisation and downtime](#utilisation-and-downtime) | `utilisation.py` | `utilisation.js` | Deterministic limits hand-checked; default EPB inside a 40-EPB survey; one-project distributions |
 
@@ -295,6 +296,38 @@ Shotcrete ageing, the interaction of an ageing lining with the ground during adv
 - Oreste's method assumes a closed ring.
 - The Sulem time parameters come from one claystone site.
 - Weber, Pöttler and Chang originals were not available; the forms used are as cited by Oreste.
+
+## Segment lining
+
+What it computes:
+
+- bending moment, normal force and springline deflection around a ring by the elastic equation method (JSCE, ITA WG2 2000 Table II-2): uniform vertical load, uniform and triangular lateral load, self weight, and a triangular soil reaction over 45–135° with bedding k = E_s / R;
+- Wood's reduction of the bending stiffness for n segments, I_r = (4/n)² I;
+- full-overburden loads for shallow rings (earth and water at the crown, lateral K0 times the effective stress plus water at crown and invert);
+- extreme-fibre concrete stresses and ovalisation;
+- jacking stress under one thrust shoe (ITA 2000) and the bursting force behind it (ACI 318 and DAUB forms, ITA 2019);
+- annulus grout volume per ring and the grout pressure window at the crown (above groundwater, at most 69 kPa over it);
+- ring taper for a curve, with offset longitudinal joints (DAUB).
+
+**References:**
+
+- [ITA WG2 (2000)](https://about.ita-aites.org/publications/wg-publications/download/80_37554c46d738a06a0d79e03e8e7c5f59), Guidelines for the design of shield tunnel lining: Table II-2, Design Example 1, jacking check;
+- [ITA WG2 Report 22 (2019)](https://about.ita-aites.org/publications/wg-publications/download/1825_470d8f379299b5ad89de378875dd1b8f): Wood's reduction, bursting, grout pressure, taper, load factors;
+- [DAUB (2024)](https://www.daub-ita.de/fileadmin/documents/daub/gtcrec2/2024-12_Tuebbingdesign_EN_final_web.pdf): bedding, taper with offset joints, tolerances, ovalisation.
+
+**Validated against:**
+
+- ITA 2000 Design Example 1: M 6.52 / −0.39 / −5.07 / −4.20 kNm/m and N 278.00 / 291.31 / 302.44 / 304.29 kN/m at 0 / 40 / 70 / 90°, soil reaction 3.27 kPa;
+- the ITA 2000 jacking check: about 13 MPa for 10 jacks of 1000 kN;
+- an all-round pressure gives pure compression N = p R and no bending;
+- bursting forces and taper by hand.
+
+**Limits:**
+
+- ITA 2019 Table 6 drops the (Q′ − Q) factor of the triangular load; the ITA 2000 form is used, which reproduces the example;
+- the published example's deflection omits the self-weight term, and so does the default here;
+- Muir Wood, Curtis and Duddeck–Erdmann closed forms are not used (no open copy); no bedded-beam model with joint springs;
+- loads are full overburden, suitable for shallow rings; no rock loads for the double shield.
 
 ## Drill & blast
 

@@ -93,7 +93,7 @@ A slice is not done until its realism checklist passes.
 7. [x] Convergence–confinement: GRC, support curves (bolts, shotcrete, ribs), LDP ([MODELS](MODELS.md#ground-response-and-squeezing))
 8. [~] Squeezing (Hoek & Marinos) and shield jamming (Ramoni & Anagnostou) (squeezing done; jamming as a screening estimate; time-dependent creep and standstills open)
 9. [x] Settlement trough and Burland categories
-10. [ ] Segment lining: Muir Wood / Duddeck–Erdmann, jack loads, universal-ring key position, annulus fill volume and pressure
+10. [~] Segment lining: ring forces (JSCE elastic equation method, ITA 2000, with Wood's joint reduction), jacking stress and bursting, annulus volume and grout pressure window, taper done ([MODELS](MODELS.md#segment-lining)); open: Muir Wood / Duddeck–Erdmann (no open copy), universal-ring key position, ring loads in rock for the double shield
 11. [~] Rock support: RMR classes → support pattern and support downtime per km by machine type done; per-bolt and per-ring-beam installation times open
 12. [~] Utilisation / activity-time model (discrete events) (EPB done: ring build, general activities, train delays, per-cycle maintenance, maintenance shift, cutting-tool interventions, record-rate check, [MODELS](MODELS.md#utilisation-and-downtime); open: hard-rock stroke/regrip/support/cutter-change terms, locomotive travel time, breakdowns by subsystem)
 13. [x] Drill & blast: round design (Holmberg cut, Olofsson burden), Kuz-Ram fragmentation, PPV limits, cycle times ([MODELS](MODELS.md#drill--blast)); Langefors' burden formula and the NTNU advance model open (no open copy)

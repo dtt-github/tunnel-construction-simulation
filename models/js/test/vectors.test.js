@@ -3,7 +3,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { cutterForces, tbmPerformance, hoekBrown, gaussianTrough, presetTrough, twinTroughs, burlandCategory, wedgeSilo, daubWindow, siloStress, chamber, screw, crownPressure, shieldThrust, cutterheadTorque, verticalStress, referenceInstalled, Rng, normalInv, sample as sampleDist, DIST, simulateDrive, recordCheck, maxRpm, cutterChangeHPerKm, supportDowntime, rmrClass, hardRockUtilisation, equivalentMohrCoulomb, groundReaction, pressureForDisplacement, ldp, squeezingStrain, squeezingClass, ringSupport, steelSetSupport, boltSupport, combine, supportEquilibrium, shieldFriction, shotcreteModulus, shotcreteStrength, mc90Modulus, earlyStrengthClass, fictitiousPressure, liningInteraction, sulemConvergence, triggerLevel, infiltration as slurryInfiltration, cushion, dischargeDensity, drySolidsFlow, theoreticalDryFlow, durandVelocity, pipeVelocity, excessPorePressure, designRound, roundCycle, bottomCharge, burden, firstCutBurden, holeDepth, cutSections, kuzRamX50, uniformityIndex, ppv, maxChargePerDelay, ss4604866Limit, SUPPORT_CLASSES } from "../index.js";
+import { cutterForces, tbmPerformance, hoekBrown, gaussianTrough, presetTrough, twinTroughs, burlandCategory, wedgeSilo, daubWindow, siloStress, chamber, screw, crownPressure, shieldThrust, cutterheadTorque, verticalStress, referenceInstalled, Rng, normalInv, sample as sampleDist, DIST, simulateDrive, recordCheck, maxRpm, cutterChangeHPerKm, supportDowntime, rmrClass, hardRockUtilisation, equivalentMohrCoulomb, groundReaction, pressureForDisplacement, ldp, squeezingStrain, squeezingClass, ringSupport, steelSetSupport, boltSupport, combine, supportEquilibrium, shieldFriction, shotcreteModulus, shotcreteStrength, mc90Modulus, earlyStrengthClass, fictitiousPressure, liningInteraction, sulemConvergence, triggerLevel, infiltration as slurryInfiltration, cushion, dischargeDensity, drySolidsFlow, theoreticalDryFlow, durandVelocity, pipeVelocity, excessPorePressure, designRound, roundCycle, bottomCharge, burden, firstCutBurden, holeDepth, cutSections, kuzRamX50, uniformityIndex, ppv, maxChargePerDelay, ss4604866Limit, SUPPORT_CLASSES, jsceRing, woodInertia, ringLoads, sectionStresses, jackingStress, burstingForce, annulusVolume, groutWindow, taper } from "../index.js";
 
 const vec = (name) => JSON.parse(readFileSync(new URL(`../../test-vectors/${name}.json`, import.meta.url)));
 
@@ -202,4 +202,15 @@ test("drill and blast models match python", () => {
     x50: kuzRamX50(7, 0.6, 34.79), n: uniformityIndex(2.5, 2.44, 89, 0.1, 8, 9.5), ppv: ppv(40, 8), qmax: maxChargePerDelay(50, 20),
     ss: [15, 60, 500].flatMap((d) => ["rock", "sand_gravel", "clay"].map((g) => ss4604866Limit(d, { groundPath: g }))) }, b, "basic");
   assert.deepEqual(Object.keys(SUPPORT_CLASSES), ["I", "II", "III", "IV"]);
+});
+
+test("lining models match python", () => {
+  const v = vec("lining");
+  for (const { in: a, out } of v.rings) {
+    const r = jsceRing(...a.slice(0, 7), { eta: a[7], deadLoadInDeflection: a[8] });
+    close({ moment: r.moment, normal: r.normal, deflection: r.deflection, reaction: r.reaction }, out, `ring ${a[0]}`);
+  }
+  close({ wood: [4, 6, 7, 8].map((n) => woodInertia(1, n)), loads: ringLoads(20, 3.4, 20, 0.5, 3), sec: sectionStresses(1000, 50, 0.3),
+    jack: jackingStress(1000, 10, 1.6125, 0.125), burst_aci: burstingForce(3000, 0.35, 0.2, 0.03, "aci"), burst_daub: burstingForce(3000, 0.35, 0.2),
+    annulus: annulusVolume(7.06, 6.9, 1.5), grout: groutWindow(16.5, 20, 3), taper: [taper(6.9, 1.5, 250), taper(6.9, 1.5, 250, 22.5)] }, v.basic, "basic");
 });

@@ -222,4 +222,16 @@ dbv["basic"] = {"qb": db.bottom_charge(38, 1.5, 0.8), "b": db.burden(38, 1.36), 
                 "n": db.uniformity_index(2.5, 2.44, 89, 0.1, 8, 9.5), "ppv": db.ppv(40, 8), "qmax": db.max_charge_per_delay(50, 20),
                 "ss": [db.ss4604866_limit(d_, "rock", g) for d_ in (15, 60, 500) for g in ("rock", "sand_gravel", "clay")]}
 write("drill_blast", dbv)
+from tunnelsim_models import lining as ln  # noqa: E402
+
+lnv = {"rings": [], "basic": {}}
+for args in [(183.60, 157.68, 202.83, 3.25, 1.6125, 33e6 * 1.6276e-4, 20000, 1.0, False), (332.0, 234.0, 300.0, 7.5, 3.25, 35e6 * 0.3**3 / 12, 15000, 0.327, False),
+             (250.0, 150.0, 220.0, 8.75, 3.4, 37e6 * 0.35**3 / 12, 30000, 0.25, True)]:
+    r = ln.jsce_ring(*args[:7], eta=args[7], dead_load_in_deflection=args[8])
+    lnv["rings"].append({"in": list(args), "out": {"moment": r.moment, "normal": r.normal, "deflection": r.deflection, "reaction": r.reaction}})
+lnv["basic"] = {"wood": [ln.wood_inertia(1.0, n) for n in (4, 6, 7, 8)], "loads": list(ln.ring_loads(20, 3.4, 20, 0.5, 3)),
+                "sec": list(ln.section_stresses(1000, 50, 0.3)), "jack": ln.jacking_stress(1000, 10, 1.6125, 0.125),
+                "burst_aci": list(ln.bursting_force(3000, 0.35, 0.2, 0.03, "aci")), "burst_daub": list(ln.bursting_force(3000, 0.35, 0.2)),
+                "annulus": ln.annulus_volume(7.06, 6.9, 1.5), "grout": list(ln.grout_window(16.5, 20, 3)), "taper": [ln.taper(6.9, 1.5, 250), ln.taper(6.9, 1.5, 250, 22.5)]}
+write("lining", lnv)
 print("wrote", sorted(p.name for p in OUT.glob("*.json")))
