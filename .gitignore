@@ -25,3 +25,6 @@ node_modules/
 # Phase 0 replay recordings (large; regenerate with --record)
 phase0/replays/*.tsr.gz
 phase0/replays/*.b64.txt
+
+# Local outreach drafts (never published)
+outreach/

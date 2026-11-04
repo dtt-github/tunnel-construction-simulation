@@ -1,0 +1,92 @@
+name: Machine data
+description: Specifications, operating logs, cycle times or 3D models of real tunnelling machines and equipment
+title: "[Machine data] "
+labels: ["validation-data", "machines"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for offering data. The simulator models machine classes from published specifications; each value carries its source and a *verified* flag in the [machine class presets](../blob/main/models/presets/machine-classes.json). Several values are not published anywhere we could find, for example the thrust, gripper force and stroke of a 10 m hard-rock TBM, the thrust of a slurry shield, ring-build times, and per-bolt or per-hole times for drill & blast. The *Known gaps* column of each [realism checklist](../tree/main/docs/realism) lists them.
+
+        Partial data is welcome: a single data sheet, one shift log or a few measured cycle times already helps.
+
+        **Do not post confidential data in this public issue.** If the data can't be public, choose *Can share privately with the maintainers only* under *Licence*, describe it in words, and we'll arrange a private exchange.
+  - type: input
+    id: machine
+    attributes:
+      label: Machine or equipment
+      description: Maker, type and model, diameter or size, and the project if relevant. "Anonymised" is fine.
+      placeholder: "e.g. 9.9 m double shield TBM, 1.8 m rings; or three-boom drill jumbo with 5.3 m feed"
+    validations: {required: true}
+  - type: dropdown
+    id: method
+    attributes:
+      label: Tunnelling method
+      options:
+        - EPB shield
+        - Slurry / Mixshield
+        - Hard-rock open gripper TBM
+        - Double or single shield TBM
+        - SEM / NATM
+        - Drill & blast
+        - Other (state below)
+    validations: {required: true}
+  - type: checkboxes
+    id: data_type
+    attributes:
+      label: Data type
+      description: Tick all that apply.
+      options:
+        - label: Specifications (thrust, torque, power, speeds, strokes, pressures, masses)
+        - label: Operating logs (thrust, torque, penetration, chamber or slurry pressures, screw or pump data)
+        - label: Cycle and activity times (ring build, regrip, drilling, charging, bolting, spraying)
+        - label: Downtime and maintenance records
+        - label: Cutter or tool wear and change records
+        - label: 3D model or drawings for visualisation
+  - type: textarea
+    id: what
+    attributes:
+      label: What does the data contain?
+      description: Parameters, units, sample rate and how much of the drive it covers. Note the ground the machine worked in, if known.
+      placeholder: "e.g. 1 Hz logs of thrust, torque, rpm and penetration over 3 km in granite and gneiss, with ring numbers"
+    validations: {required: true}
+  - type: input
+    id: format
+    attributes:
+      label: Format and size
+      placeholder: "e.g. CSV, 400 MB; PDF data sheet; glTF / STEP model"
+  - type: dropdown
+    id: license
+    attributes:
+      label: Licence the data can be shared under
+      description: CC-BY-4.0 or CC0 let us publish the data with the demos and tests. 3D models must allow redistribution and modification. Other terms are fine to discuss.
+      options:
+        - CC-BY-4.0 (preferred)
+        - CC0 (preferred)
+        - Other open licence (state it below)
+        - Can share privately with the maintainers only
+        - Not sure yet
+    validations: {required: true}
+  - type: textarea
+    id: credit
+    attributes:
+      label: How to credit
+      description: The citation, organisation or people we must name wherever the data is used.
+      placeholder: "e.g. Data courtesy of Example Machines AG"
+  - type: textarea
+    id: link
+    attributes:
+      label: Data link or attachment
+      description: A URL (data sheet, repository, paper) or drag files here. Leave empty for private data.
+  - type: input
+    id: contact
+    attributes:
+      label: Contact
+      description: How to reach you if it isn't your GitHub account (name, organisation, email).
+  - type: checkboxes
+    id: rights
+    attributes:
+      label: Permission
+      options:
+        - label: I have the right to share this data under the licence chosen above, or I have chosen the private option.
+          required: true

@@ -1,0 +1,102 @@
+name: Geology data
+description: Real ground along a tunnel (boreholes, long sections, rock-mass classes, lab tests), ideally with how the tunnel performed in it
+title: "[Geology data] "
+labels: ["validation-data", "geology"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for offering data. Every demo in this simulator (EPB, Mixshield, hard-rock gripper and double shield, SEM / NATM, drill & blast) runs on **illustrative** geology: values typical of the rock or soil type, not a real project. See the *Known gaps* column of each [realism checklist](../tree/main/docs/realism) and the [model catalogue](../blob/main/docs/MODELS.md).
+
+        Partial data is welcome: one borehole log, one geological long section or a table of rock classes per chainage already helps. Ground data is most useful when it comes with what the tunnel did in it (advance rate, support installed, convergence, settlement, machine logs).
+
+        **Do not post confidential data in this public issue.** If the data can't be public, choose *Can share privately with the maintainers only* under *Licence*, describe it in words, and we'll arrange a private exchange.
+  - type: input
+    id: project
+    attributes:
+      label: Project or site
+      description: Tunnel name, country, and the section or chainage covered. "Anonymised" is fine.
+      placeholder: "e.g. Example rail tunnel, Norway, ch. 2+000 to 4+500, single-track drill & blast"
+    validations: {required: true}
+  - type: dropdown
+    id: method
+    attributes:
+      label: Tunnelling method
+      options:
+        - EPB shield
+        - Slurry / Mixshield
+        - Hard-rock open gripper TBM
+        - Double or single shield TBM
+        - SEM / NATM
+        - Drill & blast
+        - Other or not yet built (state below)
+    validations: {required: true}
+  - type: checkboxes
+    id: data_type
+    attributes:
+      label: Data type
+      description: Tick all that apply.
+      options:
+        - label: Borehole logs or CPTs
+        - label: Geological long section or 3D ground model
+        - label: Rock-mass classification along the alignment (Q, RMR, GSI)
+        - label: Laboratory tests (UCS, BTS, CAI, density, grading, strength and stiffness parameters)
+        - label: Groundwater (levels, inflows, permeability)
+        - label: Face mapping or prognosis-versus-actual comparison
+        - label: Performance in that ground (advance rates, support classes installed, convergence, settlement)
+        - label: TBM or jumbo logs (thrust, torque, penetration, pressures, drilling parameters)
+  - type: textarea
+    id: what
+    attributes:
+      label: What does the data contain?
+      description: Parameters, units, spacing along the alignment, and how much of the tunnel it covers.
+      placeholder: |
+        e.g. Q and RMR every 5 m over 2.5 km from face mapping, UCS from 40 point-load tests,
+        support class installed per round, and weekly advance
+    validations: {required: true}
+  - type: textarea
+    id: methods
+    attributes:
+      label: How was it obtained?
+      description: Investigation and test methods, standards used, who classified the rock, and any known limitations.
+      placeholder: "e.g. Q logged by the site geologist per NGI handbook; UCS per ISRM suggested method; CPTs per ISO 22476-1"
+  - type: input
+    id: format
+    attributes:
+      label: Format and size
+      placeholder: "e.g. CSV + PDF long section, 12 MB; AGS 4 borehole files"
+  - type: dropdown
+    id: license
+    attributes:
+      label: Licence the data can be shared under
+      description: CC-BY-4.0 or CC0 let us publish the data with the demos and tests. Other terms are fine to discuss.
+      options:
+        - CC-BY-4.0 (preferred)
+        - CC0 (preferred)
+        - Open Government Licence or other open licence (state it below)
+        - Can share privately with the maintainers only
+        - Not sure yet
+    validations: {required: true}
+  - type: textarea
+    id: credit
+    attributes:
+      label: How to credit
+      description: The citation, DOI, organisation or people we must name wherever the data is used.
+      placeholder: "e.g. Data courtesy of Example Tunnel JV; cite Doe et al. (2024), doi:10.xxxx/xxxxx"
+  - type: textarea
+    id: link
+    attributes:
+      label: Data link or attachment
+      description: A URL (repository, Zenodo, paper, public portal) or drag files here. Leave empty for private data.
+  - type: input
+    id: contact
+    attributes:
+      label: Contact
+      description: How to reach you if it isn't your GitHub account (name, organisation, email).
+  - type: checkboxes
+    id: rights
+    attributes:
+      label: Permission
+      options:
+        - label: I have the right to share this data under the licence chosen above, or I have chosen the private option.
+          required: true
