@@ -505,25 +505,29 @@ function updatePlayhead(k) {
 }
 
 // ---------- run switching ----------
+let pendingRun = null;
 async function selectRun(name) {
-  run = RUNS[name];
+  // the animation loop keeps playing the current run while the next one loads, so run and data only change together below
+  pendingRun = name;
   for (const b of document.querySelectorAll(".tab")) b.setAttribute("aria-selected", b.dataset.run === name ? "true" : "false");
   try { history.replaceState(null, "", `#${name}`); } catch (e) { /* hash not available */ }
   $("status").hidden = false; $("status").textContent = "Loading recorded run…";
+  let d;
   try {
-    data = cache[name] || (cache[name] = await loadReplay(run.file));
-    if (!data.ref) {
+    d = cache[name] || (cache[name] = await loadReplay(RUNS[name].file));
+    if (!d.ref) {
       // displacement is measured from the start of the action (after the bed has settled)
-      const t = data.meta.scalars.t, t0 = data.meta.scene.settle_s || 0;
+      const t = d.meta.scalars.t, t0 = d.meta.scene.settle_s || 0;
       let r = 0;
-      while (r < data.F - 1 && t[r] < t0) r++;
-      data.ref = stateAt(data, r);
+      while (r < d.F - 1 && t[r] < t0) r++;
+      d.ref = stateAt(d, r);
     }
   } catch (e) {
-    $("status").textContent = `Could not load the replay: ${e.message}`;
+    if (pendingRun === name) $("status").textContent = `Could not load the replay: ${e.message}`;
     return;
   }
-  if (run !== RUNS[name]) return;
+  if (pendingRun !== name) return;
+  run = RUNS[name]; data = d;
   if (points) { scene.remove(points); points.geometry.dispose(); }
   if (overlay) scene.remove(overlay);
   const g = new THREE.BufferGeometry();
