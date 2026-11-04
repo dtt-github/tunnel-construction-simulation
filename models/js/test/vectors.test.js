@@ -3,7 +3,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { cutterForces, tbmPerformance, hoekBrown, gaussianTrough, presetTrough, twinTroughs, burlandCategory, wedgeSilo, daubWindow, siloStress, chamber, screw, crownPressure } from "../index.js";
+import { cutterForces, tbmPerformance, hoekBrown, gaussianTrough, presetTrough, twinTroughs, burlandCategory, wedgeSilo, daubWindow, siloStress, chamber, screw, crownPressure, shieldThrust, cutterheadTorque, verticalStress, sanityBands } from "../index.js";
 
 const vec = (name) => JSON.parse(readFileSync(new URL(`../../test-vectors/${name}.json`, import.meta.url)));
 
@@ -103,5 +103,15 @@ test("epb chamber and screw match python", () => {
       close({ t: tr.t, p: ch.pressure(st), fill: ch.fill(st), air: ch.airFraction(st) }, tr, `trace V=${i.volume} t=${tr.t}`, 1e-7);
       for (let n = 0; n < 20; n++) st = ch.step(st, 1, i.q_exc, tr.t < i.stop ? 0 : 1.5 * q, i.fir, i.fer);
     }
+  }
+});
+
+test("thrust and torque match python", () => {
+  for (const { in: i, out } of vec("thrust_torque")) {
+    const water = i.hw === null ? {} : { waterDepth: i.hw };
+    const th = shieldThrust(i.d, i.ln, i.z, i.g, i.p, { k0: i.k0, muShield: i.mus, shieldWeight: i.ws, tools: i.tools, tailSeal: i.tail, backupWeight: i.wb, ...water });
+    const sn = (verticalStress(i.z, i.g, water) * (1 + i.k0)) / 2;
+    const tq = cutterheadTorque(i.d, i.p, sn, { openingRatio: i.xi, nArms: i.na, armArea: i.aa, armRadius: i.ar, tools: i.ttool, seals: i.seals });
+    close({ sv_eff: verticalStress(i.z, i.g, water), sv_total: verticalStress(i.z, i.g, { ...water, effective: false }), thrust: th, sigma_n: sn, torque: tq, bands: sanityBands(i.d) }, out, `D=${i.d}`);
   }
 });

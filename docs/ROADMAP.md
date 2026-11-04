@@ -17,7 +17,7 @@ Models (Python reference + JS twin + tests):
 2. [ ] Cutter wear and change events (CAI, NTNU CLI)
 3. [ ] Face support pressure: Anagnostou–Kovári wedge-silo with seepage, DAUB 2016 p_min/p_max window (wedge-silo without seepage and the DAUB window done, [MODELS](MODELS.md); seepage forces and checking the DAUB factors still open)
 4. [ ] EPB chamber pressure mass balance and screw conveyor (Merritt & Mair), FIR/FER conditioning; slurry pressure and filter cake (DIN 4126) (EPB chamber, foam and simplified screw done, [MODELS](MODELS.md); slurry branch and the full Merritt & Mair screw model still open)
-5. [ ] Thrust and torque component decomposition (shield friction, face, tools, tail seal, backup)
+5. [x] Thrust and torque component decomposition (shield friction, face, tools, tail seal, backup) ([MODELS](MODELS.md))
 6. [x] Hoek–Brown/GSI parameters, rock-mass modulus
 7. [ ] Convergence–confinement: GRC (Carranza-Torres & Fairhurst), support curves, LDP (Vlachopoulos & Diederichs)
 8. [ ] Squeezing (Hoek & Marinos) and shield jamming (Ramoni & Anagnostou)
