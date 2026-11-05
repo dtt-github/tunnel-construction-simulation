@@ -8,7 +8,7 @@ import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import {
   wedgeSilo, daubWindow, DAUB_DEFAULTS, chamber as makeChamber, screw as makeScrew, shieldThrust, cutterheadTorque, toolTorque,
-  verticalStress, presetTrough, twinTroughs, burlandCategory, referenceInstalled, erf,
+  verticalStress, presetTrough, twinTroughs, loadFactor, macklinVolumeLoss, burlandCategory, referenceInstalled, erf,
   Rng, sample as sampleDist, DIST, SHIFT_PATTERNS, PER_CYCLE_MAINTENANCE_MIN, simulateDrive, recordCheck, EPB_WEEKLY_SURVEY,
   jsceRing, woodInertia, subgradeModulus, terzaghiLoads, activeCoefficient, sectionStresses, jackingStress, burstingForce, annulusVolume, groutWindow, ITA2000_ALLOWABLE,
   scenario as loadScenario,
@@ -560,6 +560,24 @@ function trough(zone, vl) {
   if (!troughCache.has(key)) troughCache.set(key, presetTrough("closed_face_clay", M.D, zone.z0, { shieldLengthM: M.shieldLength, volumeLoss: vl / 100, k: zone.k }));
   return troughCache.get(key);
 }
+// Volume loss from the face (Macklin 1999, quoted from Divall et al. 2023, open; models/js/settlement.js): in London
+// Clay the load factor LF = N / N_TC at the face sets a volume loss 0.23 % x exp(4.4 LF). The volume loss used for a
+// zone is the larger of the scenario's measured value (slider) and the mean Macklin value while that zone was dug, so
+// lowering the face pressure raises the settlement of the ground dug meanwhile. S_u = 85 + 5 z kPa, z below +20 m OD
+// (about ground level here), is the Crossrail Paddington design profile (Chandegra & Kokkinou 2016, Learning Legacy),
+// carried along the line. Other units (Lambeth Group, sands, Chalk) keep the measured value: Macklin's data are from
+// overconsolidated clay.
+const suLondonClay = (z) => 85 + 5 * z;
+function faceLoadFactor(zone, p) {
+  if (!SCN || zone.unit !== "LC") return null;
+  return loadFactor(zone.gamma * zone.z0, p, suLondonClay(zone.z0), (zone.z0 - R) / M.D);
+}
+const macklinDug = new Map(); // zone key -> [sum of Macklin VL (%) x advance, advance]
+function vlFor(zone) {
+  const r = macklinDug.get(zone.key);
+  const vl = r && r[1] > 0 ? Math.max(val("vl"), r[0] / r[1]) : val("vl");
+  return Math.round(vl * 1000) / 1000; // 0.001 % steps keep the trough cache small
+}
 // Second bore, driven after this one (scenario settlement.second_bore): its own trough at offset_m, with the published
 // volume-loss ratio and trough widths towards / away from this bore (Hyde Park, Wan et al. 2017; Thames, Cheng & Mikulski 2014).
 const BORE2 = SCN?.data.settlement?.second_bore ?? null;
@@ -579,6 +597,7 @@ function windowFor(zone, pasteWeight) {
   return { fs, w: daubWindow(fs, M.D, cover, zone.gamma, { waterDepth: zone.water, supportUnitWeight: pasteWeight, deviation: DAUB_DEFAULTS.deviation_epb }) };
 }
 function reset() {
+  macklinDug.clear();
   for (const r of rings) world.remove(r.g);
   rings.length = 0;
   for (let n = -8; n < 0; n++) addRing(n, ZR - n * W); // launch section behind the build position, already grouted
@@ -682,6 +701,12 @@ function substep(dt) {
     const adv = Math.min(v * dt, W - S.stroke);
     S.stroke += adv;
     S.chainage += adv;
+    const lf = faceLoadFactor(zone, p);
+    if (lf !== null && adv > 0) {
+      const r = macklinDug.get(zone.key) ?? [0, 0];
+      r[0] += 100 * macklinVolumeLoss(lf) * adv; r[1] += adv;
+      macklinDug.set(zone.key, r);
+    }
     S.pushTime += dt;
     if (v > 0) S.boringTime += dt;
     S.excavated += AREA * adv;
@@ -816,13 +841,13 @@ function tunnelFraction(t, c, ch) {
 // Surface settlement and building categories.
 let surfaceMax = 0;
 function bothSmax(zone) {
-  const t = trough(zone, val("vl")), t2 = trough2(zone, val("vl"));
+  const t = trough(zone, vlFor(zone)), t2 = trough2(zone, vlFor(zone));
   let m = 0;
   for (let x = -20; x <= BORE2.offset_m + 20; x += 0.25) m = Math.max(m, t.settlement(x) + t2.settlement(x - BORE2.offset_m));
   return m;
 }
 function updateSurface() {
-  const vl = val("vl"), c = S.chainage;
+  const c = S.chainage;
   // the surface grid covers 260 m of chainage; it follows the face in 50 m steps
   const surfOff = Math.max(Math.floor((c - 60) / 50) * 50, 0);
   surface.position.z = -surfOff;
@@ -832,8 +857,8 @@ function updateSurface() {
   bore2Tube.visible = both;
   // after both drives every trough is final; otherwise this bore's trough grows with the face
   const settle = (x, ch) => {
-    const zone = zoneAt(ch), t = trough(zone, vl);
-    return both ? t.settlement(x) + trough2(zone, vl).settlement(x - BORE2.offset_m) : t.settlement(x) * tunnelFraction(t, c, ch);
+    const zone = zoneAt(ch), zvl = vlFor(zone), t = trough(zone, zvl);
+    return both ? t.settlement(x) + trough2(zone, zvl).settlement(x - BORE2.offset_m) : t.settlement(x) * tunnelFraction(t, c, ch);
   };
   for (let k = 0; k < pos.count; k++) {
     const x = pos.getX(k), ch = -pos.getZ(k) + surfOff;
@@ -1031,7 +1056,7 @@ function hud() {
   ui.forecast.innerHTML = forecastHtml();
   void parts;
 
-  const t = trough(zone, val("vl"));
+  const t = trough(zone, vlFor(zone)), lfNow = faceLoadFactor(zone, CH.pressure(S.st));
   dl(ui.ground, [
     ["Ground at the face", zone.name],
     ["φ′, c′, K0 (face average)", `${fmt(zone.phi, 1)}°, ${fmt(zone.c, 0)} kPa, ${fmt(zone.k0, 2)}`],
@@ -1040,6 +1065,7 @@ function hud() {
       ["Nearest borehole", nearestBorehole(S.chainage)]] : [["Water table", `${zone.water} m below ground`]]),
     ["Required effective support", fs.s_eff > 0 ? `${fmt(fs.s_eff / 100, 2)} bar` : "none (self-supporting)"],
     ["Pore pressure at axis", `${fmt(fs.u_axis / 100, 2)} bar`],
+    ["Volume loss from the face (Macklin 1999)", lfNow === null ? "not applied: not London Clay at the axis" : `load factor ${fmt(lfNow, 2)} → ${fmt(100 * macklinVolumeLoss(lfNow), 2)} %; this zone ${fmt(vlFor(zone), 2)} % (measured ${fmt(val("vl"), 2)} %)`],
     ["Final Smax (this zone)", `${fmt(t.s_max * 1000, 1)} mm`],
     ...(BORE2 ? [["Second bore", `${fmt(BORE2.offset_m, 1)} m away, VL ×${BORE2.vl_ratio} (${fmt(val("vl") * BORE2.vl_ratio, 2)} %), K ${BORE2.k_inner} towards this bore, ${BORE2.k_outer} away; final Smax of both ${fmt(bothSmax(zone) * 1000, 1)} mm${bothBores() ? " (shown)" : ""}`]] : []),
     ["Surface settlement now", `${fmt(surfaceMax * 1000, 1)} mm max`],
