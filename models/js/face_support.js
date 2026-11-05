@@ -4,8 +4,11 @@
 
 export const GAMMA_W = 10;
 
-// Common defaults; not checked against the DAUB document here, so verify per project.
-export const DAUB_DEFAULTS = Object.freeze({ eta_earth: 1.5, eta_water: 1.05, max_fraction_of_overburden: 0.9 });
+// DAUB (2016), chapter 3: safety factors on the earth and water parts of the minimum support force (Eq. 4), the fraction
+// of the crown overburden allowed as maximum (Eq. 5), and the support-pressure deviations to keep inside the window.
+export const DAUB_DEFAULTS = Object.freeze({
+  eta_earth: 1.5, eta_water: 1.05, max_fraction_of_overburden: 0.9, deviation_epb: 30, deviation_slurry: 10,
+});
 
 const rad = (d) => (d * Math.PI) / 180;
 
@@ -30,12 +33,12 @@ function layeredSilo(cover, b, length, gamma, gammaSub, c, phi, k, q, waterDepth
  * Returns { s_eff, theta_deg, wedge_length, silo_stress, u_crown, u_axis, side }.
  */
 export function wedgeSilo(diameter, cover, gamma, phiDeg, c = 0,
-  { gammaSub = null, waterDepth = Infinity, q = 0, kSilo = 0.8, kWedge = null } = {}) {
+  { gammaSub = null, waterDepth = Infinity, q = 0, kSilo = 0.8, kWedge = null, side = null } = {}) {
   if (diameter <= 0 || cover <= 0) throw new RangeError("diameter and cover must be positive");
   if (!(phiDeg >= 0 && phiDeg < 90)) throw new RangeError("phi must be in [0, 90) degrees");
   const gsub = gammaSub ?? gamma - GAMMA_W;
   const kw = kWedge ?? 1 - Math.sin(rad(phiDeg));
-  const b = (diameter * Math.sqrt(Math.PI)) / 2, h = b;
+  const b = side ?? (diameter * Math.sqrt(Math.PI)) / 2, h = b; // DAUB uses a square of side D
   const gWedge = waterDepth <= cover + h / 2 ? gsub : gamma;
   const tp = Math.tan(rad(phiDeg));
 
@@ -83,16 +86,20 @@ export function vermeerLimit(diameter, gamma, phiDeg) {
   return gamma * diameter * (1 / (9 * Math.tan(rad(phiDeg))) - 0.05);
 }
 
-/** Operating window for the support pressure (DAUB 2016 structure, factors as parameters). */
+/**
+ * Operating window for the support pressure (DAUB 2016, chapter 3). The maximum uses the minimum unit weights and no
+ * surface load; `deviation` is the support-pressure deviation kept inside the window (DAUB: 10 kPa slurry, 30 kPa EPB).
+ */
 export function daubWindow(fs, diameter, cover, gamma, {
-  gammaSub = null, waterDepth = Infinity, q = 0, supportUnitWeight = 12,
+  gammaSub = null, waterDepth = Infinity, supportUnitWeight = 12, gammaMin = null, gammaSubMin = null, deviation = 0,
   etaEarth = DAUB_DEFAULTS.eta_earth, etaWater = DAUB_DEFAULTS.eta_water,
   maxFraction = DAUB_DEFAULTS.max_fraction_of_overburden,
 } = {}) {
   const gsub = gammaSub ?? gamma - GAMMA_W;
+  const gMin = gammaMin ?? gamma, gsubMin = gammaSubMin ?? gsub;
   const hw = Math.min(Math.max(waterDepth, 0), cover);
   // a negative water depth is free water above the ground (a river): its weight adds to the total overburden
-  const sigmaCrown = q + gamma * hw + (gsub + GAMMA_W) * (cover - hw) + GAMMA_W * Math.max(-waterDepth, 0);
+  const sigmaCrown = gMin * hw + (gsubMin + GAMMA_W) * (cover - hw) + GAMMA_W * Math.max(-waterDepth, 0);
   const dz = (diameter / 2) * supportUnitWeight;
   const pMinAxis = etaEarth * Math.max(fs.s_eff, 0) + etaWater * fs.u_axis;
   const pMaxCrown = maxFraction * sigmaCrown;
@@ -103,6 +110,9 @@ export function daubWindow(fs, diameter, cover, gamma, {
     p_min_crown: pMinCrown,
     p_max_crown: pMaxCrown,
     overburden_crown: sigmaCrown,
-    feasible: pMinCrown <= pMaxCrown,
+    deviation,
+    p_min_crown_operating: pMinCrown + deviation,
+    p_max_crown_operating: pMaxCrown - deviation,
+    feasible: pMinCrown + deviation <= pMaxCrown - deviation,
   };
 }

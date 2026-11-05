@@ -27,7 +27,10 @@
      "p_min_crown": 0.0,
      "p_max_crown": 270.0,
      "overburden_crown": 300.0,
-     "feasible": true
+     "deviation": 10.0,
+     "feasible": true,
+     "p_min_crown_operating": 10.0,
+     "p_max_crown_operating": 260.0
     }
    }
   },
@@ -58,7 +61,10 @@
      "p_min_crown": 107.74676557061309,
      "p_max_crown": 216.0,
      "overburden_crown": 240.0,
-     "feasible": true
+     "deviation": 10.0,
+     "feasible": true,
+     "p_min_crown_operating": 117.74676557061309,
+     "p_max_crown_operating": 206.0
     }
    }
   },
@@ -85,11 +91,14 @@
     },
     "window": {
      "p_min_axis": 126.0,
-     "p_max_axis": 198.9,
+     "p_max_axis": 189.9,
      "p_min_crown": 90.0,
-     "p_max_crown": 162.9,
-     "overburden_crown": 181.0,
-     "feasible": true
+     "p_max_crown": 153.9,
+     "overburden_crown": 171.0,
+     "deviation": 30.0,
+     "feasible": true,
+     "p_min_crown_operating": 120.0,
+     "p_max_crown_operating": 123.9
     }
    }
   },
@@ -116,11 +125,14 @@
     },
     "window": {
      "p_min_axis": 238.1825213247733,
-     "p_max_axis": 468.0,
+     "p_max_axis": 450.0,
      "p_min_crown": 166.1825213247733,
-     "p_max_crown": 396.0,
-     "overburden_crown": 440.0,
-     "feasible": true
+     "p_max_crown": 378.0,
+     "overburden_crown": 420.0,
+     "deviation": 30.0,
+     "feasible": true,
+     "p_min_crown_operating": 196.1825213247733,
+     "p_max_crown_operating": 348.0
     }
    }
   },
@@ -151,7 +163,10 @@
      "p_min_crown": 0.0,
      "p_max_crown": 216.0,
      "overburden_crown": 240.0,
-     "feasible": true
+     "deviation": 30.0,
+     "feasible": true,
+     "p_min_crown_operating": 30.0,
+     "p_max_crown_operating": 186.0
     }
    }
   },
@@ -182,7 +197,10 @@
      "p_min_crown": 195.84076013204523,
      "p_max_crown": 252.0,
      "overburden_crown": 280.0,
-     "feasible": true
+     "deviation": 10.0,
+     "feasible": true,
+     "p_min_crown_operating": 205.84076013204523,
+     "p_max_crown_operating": 242.0
     }
    }
   }
@@ -227,5 +245,55 @@
    ],
    "out": 82.0
   }
- ]
+ ],
+ "daub_example_8_1": {
+  "in": {
+   "diameter": 10,
+   "cover": 15,
+   "gamma": 18,
+   "gamma_sub": 8,
+   "gamma_min": 17,
+   "gamma_sub_min": 7,
+   "phi_deg": 30,
+   "water_depth": 2,
+   "q": 10,
+   "k_silo": 0.0,
+   "k_wedge": 0.417,
+   "side": 10,
+   "deviation": 10.0
+  },
+  "out": {
+   "support": {
+    "s_eff": 41.207303640856765,
+    "theta_deg": 66.56429509666911,
+    "wedge_length": 4.334787062030797,
+    "silo_stress": 150.0,
+    "u_crown": 130.0,
+    "u_axis": 180.0,
+    "side": 10
+   },
+   "window": {
+    "p_min_axis": 250.81095546128515,
+    "p_max_axis": 289.5,
+    "p_min_crown": 190.81095546128515,
+    "p_max_crown": 229.5,
+    "overburden_crown": 255.0,
+    "deviation": 10.0,
+    "p_min_crown_operating": 200.81095546128515,
+    "p_max_crown_operating": 219.5
+   }
+  },
+  "daub_published": {
+   "theta_crit_deg": 66.56,
+   "E_re_kN": 4122.32,
+   "s_crown_min": 190.8,
+   "s_axis_min": 250.8,
+   "sigma_v_crown_min": 255.0,
+   "s_crown_max": 229.5,
+   "operating_crown": [
+    200.8,
+    219.5
+   ]
+  }
+ }
 }

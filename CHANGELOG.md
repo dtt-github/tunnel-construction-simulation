@@ -4,6 +4,14 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## [Unreleased]
 
+### Changed
+
+- **Face support window checked against DAUB (2016)** ([free PDF](https://www.daub-ita.de/fileadmin/documents/daub/gtcrec1/2016-10_DAUB_Recommendations_for_Face_Support_Pressure_Calculations_for_Shield_Tunnelling_in_Soft_Ground.pdf)):
+  - the safety factors (1.5 earth, 1.05 water) and the 0.9 blow-out limit are confirmed; the blow-out limit now uses the minimum unit weights and no surface load, as DAUB does;
+  - the set point must now stay inside the window by the machine's support-pressure deviation (±30 kPa EPB, ±10 kPa slurry). The EPB and Mixshield demos show this operating range at the crown and raise an alarm if it is empty; along both drives it stays open (narrowest 36 kPa, Mixshield);
+  - DAUB's worked example 8.1 is reproduced (critical angle 66.56°, earth force 4,121 against 4,122 kN, operating range 200.8–219.5 kPa) and is now a test vector in Python and JavaScript;
+  - seepage forces are not added: DAUB applies them only when the support is below the groundwater pressure, which the 1.05 factor excludes in closed mode.
+
 ### Added
 
 - **Phase 2, WP7: recorded GPU sand face in the EPB demo** (`server/tunnelsim_server/record.py`, `web/epb/recordings/face-sand-cd1.tsr.gz`):

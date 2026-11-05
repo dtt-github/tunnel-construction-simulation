@@ -192,7 +192,7 @@ Each package ends with a check. A package is done only when its check passes, or
 
 **Check:**
 - The vertical pressure gradient falls within the range of the Guangzhou–Foshan and Changsha upper/lower earth-pressure records at similar depth (open data already in the repository).
-- The chamber holds a target within the demo's control band. That band (±0.2–0.3 bar) is still marked unverified in the research survey; it needs a source before this check is final.
+- The chamber holds a target within ±30 kPa, the EPB support-pressure deviation of DAUB (2016), chapter 3.
 - Torque from mixing stays below the installed 9.8 MNm.
 
 **Status (5 Nov 2026): first runs, blocked** ([results](../validation/mpm-chamber.md)).

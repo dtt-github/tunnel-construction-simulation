@@ -7,7 +7,7 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import {
-  wedgeSilo, daubWindow, chamber as makeChamber, screw as makeScrew, shieldThrust, cutterheadTorque, toolTorque,
+  wedgeSilo, daubWindow, DAUB_DEFAULTS, chamber as makeChamber, screw as makeScrew, shieldThrust, cutterheadTorque, toolTorque,
   verticalStress, presetTrough, twinTroughs, burlandCategory, referenceInstalled, erf,
   Rng, sample as sampleDist, DIST, SHIFT_PATTERNS, PER_CYCLE_MAINTENANCE_MIN, simulateDrive, recordCheck, EPB_WEEKLY_SURVEY,
   jsceRing, woodInertia, subgradeModulus, terzaghiLoads, activeCoefficient, sectionStresses, jackingStress, burstingForce, annulusVolume, groutWindow, ITA2000_ALLOWABLE,
@@ -575,7 +575,8 @@ if (BORE2) ui.bore2.closest("label").hidden = false;
 function windowFor(zone, pasteWeight) {
   const cover = zone.z0 - R;
   const fs = wedgeSilo(M.D, cover, zone.gamma, zone.phi, zone.c, { waterDepth: zone.water });
-  return { fs, w: daubWindow(fs, M.D, cover, zone.gamma, { waterDepth: zone.water, supportUnitWeight: pasteWeight }) };
+  // DAUB (2016) chapter 3: the set point must stay inside the window by the machine's pressure deviation (±30 kPa)
+  return { fs, w: daubWindow(fs, M.D, cover, zone.gamma, { waterDepth: zone.water, supportUnitWeight: pasteWeight, deviation: DAUB_DEFAULTS.deviation_epb }) };
 }
 function reset() {
   for (const r of rings) world.remove(r.g);
@@ -961,6 +962,7 @@ function hud() {
   ], val("target") / 100);
   dl(ui.chamber, [
     ["DAUB window at axis", `${fmt(w.p_min_axis / 100, 2)} – ${fmt(w.p_max_axis / 100, 2)} bar`],
+    ["Operating range at crown", w.feasible ? `${fmt(w.p_min_crown_operating / 100, 2)} – ${fmt(w.p_max_crown_operating / 100, 2)} bar (±${fmt(w.deviation, 0)} kPa deviation inside the window)` : `none: the window is narrower than ±${fmt(w.deviation, 0)} kPa`],
     ["Chamber fill", `${fmt(fill * 100, 1)} %`],
     ["Air in chamber", `${fmt(air * 100, 1)} %`],
     ["Stiffness", `${fmt(CH.stiffness(S.st) / 100, 2)} bar per m³`],
@@ -973,6 +975,7 @@ function hud() {
   if (fill < 0.999) alarms.push(`Chamber not full (${fmt(fill * 100, 0)} %): face support lost, over-excavation`);
   else if (p < w.p_min_axis) alarms.push(`Axis pressure ${fmt(p / 100, 2)} bar below the DAUB minimum ${fmt(w.p_min_axis / 100, 2)} bar`);
   if (pCrown > w.p_max_crown) alarms.push(`Crown pressure above the blow-out limit ${fmt(w.p_max_crown / 100, 2)} bar`);
+  if (!w.feasible) alarms.push(`DAUB window narrower than the ±${fmt(w.deviation, 0)} kPa pressure deviation: no safe set point`);
   if (S.mode === "PUSH" && Math.abs(p - val("target")) > 30 && auto) alarms.push("Pressure more than ±0.3 bar from target");
   if (S.stalled) alarms.push(`Torque ${fmt(S.torque, 0)} kNm above the installed ${M.torqueLimit} kNm: cutterhead stalled`);
   if (val("fir") === 0) alarms.push("No foam: unconditioned soil makes the chamber stiff and pressure hard to control");

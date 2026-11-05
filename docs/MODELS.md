@@ -84,14 +84,18 @@ What it computes:
 Wedge-silo limit equilibrium for closed-face shields, the Vermeer cohesionless limit, and the DAUB operating window.
 
 - **Mechanism:** a Horn wedge loaded by a Janssen silo. The silo is layered above and below the water table; water is hydrostatic. The circular face is replaced by a square of equal area.
-- **Operating window:** p_min = 1.5 × earth + 1.05 × water at the axis; p_max = 0.9 × overburden at the crown. The factors are parameters and still need checking against the DAUB document.
+- **Operating window (DAUB 2016, chapter 3):**
+  - p_min = 1.5 × earth + 1.05 × water at the axis;
+  - p_max = 0.9 × the total vertical stress at the crown, with the minimum unit weights and no surface load;
+  - the set point must stay inside the window by the machine's pressure deviation: ±30 kPa for an EPB, ±10 kPa for a slurry shield.
+- **Seepage:** DAUB applies seepage forces only when the support pressure is set below the groundwater pressure (EPB open or transition mode, after Anagnostou & Kovári 1996). With the 1.05 factor on the water pressure they don't arise in closed mode, so they aren't modelled.
 
 **References:**
 
 - Horn (1961); Janssen (1895);
 - Anagnostou & Kovári (1994), [doi:10.1016/0886-7798(94)90028-0](https://doi.org/10.1016/0886-7798(94)90028-0);
 - Vermeer, Ruse & Marcher (2002);
-- DAUB / ITA-AITES (2016).
+- DAUB (2016), *Recommendations for Face Support Pressure Calculations for Shield Tunnelling in Soft Ground*, version 10/2016, [free PDF](https://www.daub-ita.de/fileadmin/documents/daub/gtcrec1/2016-10_DAUB_Recommendations_for_Face_Support_Pressure_Calculations_for_Shield_Tunnelling_in_Soft_Ground.pdf).
 
 **Validated against:**
 
@@ -99,12 +103,17 @@ Wedge-silo limit equilibrium for closed-face shields, the Vermeer cohesionless l
 - dry sand within 1.0–1.3 × Vermeer for φ 25–40°, as expected for limit equilibrium;
 - nearly cover-independent; stiff undrained clay is self-supporting;
 - the window closes at very shallow cover under water;
-- the Phase 0 MPM face benchmark reached 0.79 of Vermeer at D/20 ([results](../phase0/RESULTS.md)).
+- the Phase 0 MPM face benchmark reached 0.79 of Vermeer at D/20 ([results](../phase0/RESULTS.md));
+- DAUB (2016) example 8.1, slurry shield in sand, run with DAUB's options (no silo, side friction (K0 + Ka)/2, square face of side D):
+  - critical angle 66.56° (DAUB 66.56°);
+  - earth force 4,120.7 kN against DAUB's 4,122.3 kN;
+  - minimum crown pressure 190.8 kPa, maximum 229.5 kPa and operating range 200.8–219.5 kPa, all as published (a test vector in Python and JavaScript).
 
 **Limits:**
 
-- no seepage forces yet;
-- the DAUB partial factors are not yet verified.
+- seepage forces are not modelled: they only arise with the support below the groundwater pressure (EPB open or transition mode);
+- the demos use the average unit weight for the maximum too, because the scenarios carry no minimum values. DAUB uses the minimum, which lowers the maximum slightly;
+- the defaults (silo K 0.8, side friction 1 − sin φ′, equal-area square) differ from DAUB's example options; both are available.
 
 ## EPB chamber and screw conveyor
 

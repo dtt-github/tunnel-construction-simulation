@@ -88,12 +88,23 @@ for dia, cov, g, phi, c, hw, q, kw in [(10, 15, 20, 30, 0, None, 0, None), (8, 1
                                        (12, 20, 21, 35, 2, 5, 20, None), (8, 12, 20, 0, 40, None, 0, None), (7, 10, 20, 35, 0, -8, 0, None)]:
     kw_args = {"q": q, "k_wedge": kw} | ({} if hw is None else {"water_depth": hw})
     fs = wedge_silo(dia, cov, g, phi, c, **kw_args)
-    win = daub_window(fs, dia, cov, g, q=q, **({} if hw is None else {"water_depth": hw}))
+    win = daub_window(fs, dia, cov, g, deviation=30.0 if c else 10.0, **({} if hw is None else {"water_depth": hw}))
     face.append({"in": {"diameter": dia, "cover": cov, "gamma": g, "phi_deg": phi, "c": c, "water_depth": hw, "q": q, "k_wedge": kw},
-                 "out": {"support": asdict(fs), "window": asdict(win) | {"feasible": win.feasible}}})
+                 "out": {"support": asdict(fs), "window": asdict(win) | {"feasible": win.feasible, "p_min_crown_operating": win.p_min_crown_operating,
+                                                                           "p_max_crown_operating": win.p_max_crown_operating}}})
+# DAUB (2016) example 8.1, case 1: slurry shield, D 10 m, crown 15 m deep, sand phi' 30, gamma 18 / 8 (min 17 / 7),
+# water 2 m below the surface, 10 kPa traffic load, no silo, side friction (K0 + Ka) / 2, square face of side D
+daub_fs = wedge_silo(10, 15, 18, 30, 0, gamma_sub=8, water_depth=2, q=10, k_silo=0.0, k_wedge=0.417, side=10)
+daub_win = daub_window(daub_fs, 10, 15, 18, gamma_sub=8, water_depth=2, gamma_min=17, gamma_sub_min=7, deviation=10.0)
+daub_example = {"in": {"diameter": 10, "cover": 15, "gamma": 18, "gamma_sub": 8, "gamma_min": 17, "gamma_sub_min": 7, "phi_deg": 30,
+                       "water_depth": 2, "q": 10, "k_silo": 0.0, "k_wedge": 0.417, "side": 10, "deviation": 10.0},
+                "out": {"support": asdict(daub_fs), "window": asdict(daub_win) | {"p_min_crown_operating": daub_win.p_min_crown_operating,
+                                                                                   "p_max_crown_operating": daub_win.p_max_crown_operating}},
+                "daub_published": {"theta_crit_deg": 66.56, "E_re_kN": 4122.32, "s_crown_min": 190.8, "s_axis_min": 250.8,
+                                   "sigma_v_crown_min": 255.0, "s_crown_max": 229.5, "operating_crown": [200.8, 219.5]}}
 silo = [{"in": [d, b, l, g, c, phi, k, q], "out": silo_stress(d, b, l, g, c, phi, k, q)}
         for d, b, l, g, c, phi, k, q in [(10, 5, 3, 20, 0, 30, 0.8, 0), (25, 7, 4, 10, 5, 28, 0.8, 50), (4, 6, 6, 18, 0, 0, 0.8, 10)]]
-write("face_support", {"wedge_silo": face, "silo": silo})
+write("face_support", {"wedge_silo": face, "silo": silo, "daub_example_8_1": daub_example})
 from tunnelsim_models.epb_chamber import Chamber, Screw, crown_pressure  # noqa: E402
 
 epb = []

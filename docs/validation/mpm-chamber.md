@@ -54,7 +54,7 @@ The Guangzhou–Foshan data ([doi:10.17632/cjwbjttf88.1](https://doi.org/10.1763
 | | P0 strain basis (default) | P1d | P1d, voxel 0.1 m | Check |
 |---|---|---|---|---|
 | Axis pressure at standstill (kPa) | 185 | 209 | 200 | target 200 |
-| Axis pressure while excavating, mean (5–95 %) | **32 (23–44)** | 236 (187–292) | 196 (154–243) | 200 ± 20–30 (the demo's band, itself unverified) |
+| Axis pressure while excavating, mean (5–95 %) | **32 (23–44)** | 236 (187–292) | 196 (154–243) | 200 ± 30 (DAUB 2016's EPB pressure deviation) |
 | Screw speed while excavating (rpm) | 0 (the pressure is below target) | 22, at the cap | 20 | feed-forward 10 |
 | Vertical gradient, standstill / excavating / stop (kPa/m) | 3.8 / 12.2 / 11.8 | 2.1 / −3.5 / −2.3 | 7.6 / 2.2 / 2.6 | Botlek: high while excavating (10–20+), lower at a stop; muck 13 |
 | Cutterhead torque while excavating (MNm) | 1.8 | 9.4 | 7.7 | below 9.8 installed |

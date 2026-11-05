@@ -82,9 +82,7 @@ A slice is not done until its realism checklist passes.
    - [x] Cap penetration (practical maximum 15 mm/rev, Macias & Barton 2022), not the solver bound.
    - [x] Add a power limit and a constant-power region to the drive; speed limit from gauge-cutter speed.
 2. [~] Cutter wear and change events (CAI model and 66 min per change done, [MODELS](MODELS.md#hard-rock-drive); NTNU CLI open)
-3. [~] Face support (wedge-silo and DAUB window done). Still open:
-   - seepage forces;
-   - checking the DAUB partial factors against the document.
+3. [x] Face support (wedge-silo and DAUB window done; the factors, the maximum and the operating deviations checked against DAUB 2016, which also reproduces its example 8.1). Seepage forces are not needed in closed mode: DAUB applies them only when the support is below the groundwater pressure.
 4. [~] EPB chamber (volume balance, foam, simplified screw done) and slurry (air cushion, filter cake per DIN 4126, circuit mass balance and deposit velocity done, [MODELS](MODELS.md#slurry-shield-mixshield)). Still open:
    - the full Merritt & Mair screw model;
    - separation-plant capacity and fines.

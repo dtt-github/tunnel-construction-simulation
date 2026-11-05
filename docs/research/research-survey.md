@@ -219,9 +219,9 @@ Each entry gives the reference and the core equation, and is cited [R] unless no
 - **Jancsecz & Steiner (1994).** *Tunnelling '94*. 3-D earth pressure coefficient K_A3D, widely used in German practice.
 - **Broere (2001).** PhD thesis, TU Delft, *Tunnel Face Stability & New CPT Applications*. Multilayer wedge with groundwater flow and slurry or foam infiltration, giving excess pore pressure ahead of the face.
 - **DAUB / ITA-AITES (2016).** *Recommendations for Face Support Pressure Calculations for Shield Tunnelling in Soft Ground* [V] (https://tunnelsandtunnelling.com/?p=8156).
-  - Minimum support pressure: E_re (earth, from an active failure mechanism, partial factor about 1.5) plus W_re (water, factor about 1.05). Factor values are [R]; check them in the document.
+  - Minimum support pressure: E_re (earth, from an active failure mechanism, safety factor 1.5) plus W_re (water, 1.05), chapter 3, Eq. (4) [V] ([free PDF](https://www.daub-ita.de/fileadmin/documents/daub/gtcrec1/2016-10_DAUB_Recommendations_for_Face_Support_Pressure_Calculations_for_Shield_Tunnelling_in_Soft_Ground.pdf)).
   - Maximum support pressure: at most 0.9 × total vertical stress at the crown, against blow-out and break-up [V].
-  - The simulator should show the operating window between p_min and p_max and the control tolerance (e.g. ±0.2–0.3 bar) **[UNVERIFIED typical tolerance]**.
+  - The simulator should show the operating window between p_min and p_max and keep the set point inside it by the support-pressure deviation: ±10 kPa for a slurry shield, ±30 kPa for an EPB (chapter 3 and example 8.1) [V].
 - **EPB chamber and screw conveyor.**
   - Chamber pressure dynamics follow from mass balance: dp/dt ≈ (K_c/V_ch)·(Q_excavated·(1+FIR/100·φ_gas) − Q_screw), where K_c is the bulk compressibility of the conditioned soil. Practical control models of this form appear in Yeh (1996) and in many 2010s control papers. The form is generic **[R, generic form]**.
   - Screw conveyor: Merritt & Mair (2006), *Géotechnique* 56(9), model tests; and Merritt & Mair (2008), *Géotechnique* 58(2), theoretical model. They give the pressure drop along the screw from soil–casing and soil–flight friction (roughly exponential decay with length) and screw discharge Q = η·A_eff·pitch·N.

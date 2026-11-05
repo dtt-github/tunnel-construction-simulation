@@ -60,3 +60,23 @@ def test_river_above_the_ground():
     assert w.overburden_crown == (10 + 10) * 10 + 10 * 8
     dry_river = daub_window(fs, 7, 10, 20, water_depth=0)
     assert w.overburden_crown - dry_river.overburden_crown == 80
+
+
+def test_daub_example_8_1():
+    # DAUB (2016) example 8.1, case 1 (slurry shield, sand): the published numbers on pp. 52-54
+    fs = wedge_silo(10, 15, 18, 30, 0, gamma_sub=8, water_depth=2, q=10, k_silo=0.0, k_wedge=0.417, side=10)
+    assert fs.theta_deg == pytest.approx(66.56, abs=0.05)
+    assert fs.s_eff * 10 * 10 == pytest.approx(4122.32, rel=2e-3)  # E_re, kN
+    w = daub_window(fs, 10, 15, 18, gamma_sub=8, water_depth=2, gamma_min=17, gamma_sub_min=7, deviation=10.0)
+    assert w.p_min_axis == pytest.approx(250.8, abs=0.2)
+    assert w.p_min_crown == pytest.approx(190.8, abs=0.2)
+    assert w.overburden_crown == pytest.approx(255.0)
+    assert w.p_max_crown == pytest.approx(229.5)
+    assert (w.p_min_crown_operating, w.p_max_crown_operating) == (pytest.approx(200.8, abs=0.2), pytest.approx(219.5))
+    assert w.feasible
+
+
+def test_deviation_can_close_the_window():
+    fs = wedge_silo(10, 15, 18, 30, 0, gamma_sub=8, water_depth=2, q=10, k_silo=0.0, k_wedge=0.417, side=10)
+    w = daub_window(fs, 10, 15, 18, gamma_sub=8, water_depth=2, gamma_min=17, gamma_sub_min=7, deviation=30.0)
+    assert not w.feasible  # 220.8 > 199.5: an EPB's +/-30 kPa would not fit this window

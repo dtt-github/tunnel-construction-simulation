@@ -98,7 +98,7 @@
 
 | Model | What it is checked against | Kind |
 |---|---|---|
-| Face support (wedge-silo, DAUB window) | Vermeer et al. (2002); the Phase 0 GPU face | Analytical and numerical bracket. DAUB partial factors not verified; no seepage forces |
+| Face support (wedge-silo, DAUB window) | DAUB (2016) example 8.1 (reproduced: 66.56°, 4,121 against 4,122 kN, operating range 200.8–219.5 kPa); Vermeer et al. (2002); the Phase 0 GPU face | Worked example and analytical bracket, no field data. Factors and deviations checked against DAUB; seepage only arises below groundwater pressure (not in closed mode) |
 | EPB chamber and screw | Analytical limits (Boyle, stiffness), behaviour checks | Not checked against field data. Screw efficiency and decay length are illustrative |
 | Slurry shield (Mixshield) | DAUB section 8.1 worked example (within 0.002 m) | Worked example only. Air-cushion dynamics are this project's derivation |
 | Segment lining | ITA 2000 Design Example 1 | Worked example only |
@@ -133,7 +133,7 @@ Ranked by how much each changes what a user sees, then by whether open data coul
 | 3 | Torque in foam-conditioned clay 2.7× over | EPB | Torque bar over-reads in clay | Sofia gives the target; needs face and chamber friction for conditioned soil |
 | 4 | CSM penetration fitted to one project (Follo gneiss); doesn't follow section strength | Gripper, double shield | Penetration in other rocks is untested | An open TBM dataset in other rock types (Yinsong is not open) |
 | 5 | Chamber model (screw efficiency, decay length, paste weight) unchecked; the GPU chamber is blocked | EPB | Chamber pressure dynamics illustrative | Botlek gradients (Bezuijen 2005) are now in hand; needs the MPM fix or an analytical gradient model |
-| 6 | Face support: DAUB partial factors unverified; no seepage forces | EPB, Mixshield | Support window may be off under water | The DAUB recommendations; seepage forces from Anagnostou & Kovári (1994), already in the [research survey](../research/research-survey.md) |
+| 6 | ~~Face support: DAUB factors unverified; no seepage forces~~ Closed 6 Nov 2026: factors and deviations checked against DAUB (2016), example 8.1 reproduced; seepage arises only below the groundwater pressure. The Mixshield's operating range is as narrow as 36 kPa in places | EPB, Mixshield | – | – |
 | 7 | Gripper force, stroke and ring-build time for a 10 m double shield are not published | Double shield | Cycle times assumed | Manufacturer or thesis data |
 | 8 | Drill & blast specific charge (1.8 kg/m³), charging time per hole and support-work overlap | Drill & blast | Round time and peak weeks | Norwegian theses (NTNU) with logged rounds |
 | 9 | SEM: Sulem time law from one claystone site; sand-lens position illustrative; the whole-ring term transferred | SEM | Convergence history is illustrative | A convergence time series in comparable ground |

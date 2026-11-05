@@ -82,8 +82,18 @@ test("face support matches python", () => {
     const { theta_deg, wedge_length, silo_stress, ...rest } = out.support;
     close(fs, rest, `face D=${i.diameter} phi=${i.phi_deg}`);
     close(fs, { theta_deg, wedge_length, silo_stress }, `face geometry D=${i.diameter}`, 1e-6);
-    close(daubWindow(fs, i.diameter, i.cover, i.gamma, { q: i.q, ...water }), out.window, `window D=${i.diameter}`);
+    close(daubWindow(fs, i.diameter, i.cover, i.gamma, { deviation: i.c ? 30 : 10, ...water }), out.window, `window D=${i.diameter}`);
   }
+  // DAUB (2016) example 8.1: same inputs as python, and the published numbers
+  const { in: d, out: o, daub_published: pub } = v.daub_example_8_1;
+  const fs = wedgeSilo(d.diameter, d.cover, d.gamma, d.phi_deg, 0,
+    { gammaSub: d.gamma_sub, waterDepth: d.water_depth, q: d.q, kSilo: d.k_silo, kWedge: d.k_wedge, side: d.side });
+  close(fs, { s_eff: o.support.s_eff, u_axis: o.support.u_axis }, "daub 8.1 support");
+  const w = daubWindow(fs, d.diameter, d.cover, d.gamma,
+    { gammaSub: d.gamma_sub, waterDepth: d.water_depth, gammaMin: d.gamma_min, gammaSubMin: d.gamma_sub_min, deviation: d.deviation });
+  close(w, o.window, "daub 8.1 window");
+  close(w.p_min_crown, pub.s_crown_min, "daub 8.1 published s_crown_min", 1e-3);
+  close(w.p_max_crown, pub.s_crown_max, "daub 8.1 published s_crown_max", 1e-3);
 });
 
 test("epb chamber and screw match python", () => {
