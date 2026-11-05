@@ -33,4 +33,4 @@ These values are in `web/epb/main.js`:
 - [x] Downtime and utilisation model (roadmap model 12), so that advance per day is realistic.
 - [x] Record-rate check of best day, week and month for the diameter class.
 - [x] Thrust and torque bars checked on open field data ([validation](../validation/epb-open-data.md)). Shield and rim friction were refitted to 0.17 and 0.07. Thrust is within about ±25 % on three projects. Torque is still about 2.7× over in foam-conditioned clays (Sofia).
-- [ ] Volume loss responding to face-pressure deficit and grout filling. This needs a published relation; until then volume loss stays a labelled scenario input.
+- [~] Volume loss responding to face-pressure deficit: done in London Clay with Macklin's (1999) load-factor relation, quoted from Divall et al. (2023, open); at the normal 2.2 bar it gives 0.51 %, the measured Hyde Park value. Still open: grout filling, and other ground (Lambeth Group, sands), for which no open relation was found.

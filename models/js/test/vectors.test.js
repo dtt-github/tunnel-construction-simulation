@@ -3,6 +3,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
+import { loadFactor, criticalStabilityRatio, macklinVolumeLoss, faceVolumeLoss } from "../settlement.js";
 import { cutterForces, tbmPerformance, hoekBrown, gaussianTrough, presetTrough, twinTroughs, burlandCategory, wedgeSilo, daubWindow, siloStress, chamber, screw, crownPressure, shieldThrust, cutterheadTorque, verticalStress, referenceInstalled, Rng, normalInv, sample as sampleDist, DIST, simulateDrive, recordCheck, maxRpm, cutterChangeHPerKm, supportDowntime, rmrClass, hardRockUtilisation, equivalentMohrCoulomb, groundReaction, pressureForDisplacement, ldp, squeezingStrain, squeezingClass, ringSupport, steelSetSupport, boltSupport, combine, supportEquilibrium, shieldFriction, shotcreteModulus, shotcreteStrength, mc90Modulus, earlyStrengthClass, fictitiousPressure, liningInteraction, sulemConvergence, triggerLevel, kirschCrownFactor, crownSettlement, infiltration as slurryInfiltration, cushion, dischargeDensity, drySolidsFlow, theoreticalDryFlow, durandVelocity, pipeVelocity, excessPorePressure, designRound, roundCycle, bottomCharge, burden, firstCutBurden, holeDepth, cutSections, kuzRamX50, uniformityIndex, ppv, maxChargePerDelay, ss4604866Limit, SUPPORT_CLASSES, jsceRing, woodInertia, ringLoads, sectionStresses, jackingStress, burstingForce, annulusVolume, groutWindow, taper, scenario, terzaghiLoads, activeCoefficient } from "../index.js";
 
 const vec = (name) => JSON.parse(readFileSync(new URL(`../../test-vectors/${name}.json`, import.meta.url)));
@@ -70,6 +71,13 @@ test("twin troughs match python", () => {
 test("burland categories", () => {
   assert.deepEqual(burlandCategory(0.01), [0, "Negligible"]);
   assert.equal(burlandCategory(0.2)[0], 3);
+});
+
+test("face volume loss matches python", () => {
+  for (const { in: i, out } of vec("settlement").face_volume_loss) {
+    const lf = loadFactor(i.sigma_v, i.support, i.su, i.cover_over_d);
+    close({ n_tc: criticalStabilityRatio(i.cover_over_d), lf, macklin: macklinVolumeLoss(lf), vl: faceVolumeLoss(i.base_vl, lf) }, out, "face VL");
+  }
 });
 
 test("face support matches python", () => {

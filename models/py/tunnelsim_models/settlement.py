@@ -17,6 +17,16 @@ References
   second bore 16.2 m from the first, incremental VL 1.5-1.9 x the first bore's, Ky 0.42-0.47 towards the first bore
   and 0.29-0.43 away from it).
 - Burland, J.B. (1995). Assessment of risk of damage to buildings due to tunnelling and excavation. Proc. 1st IC Earthquake Geotech. Eng.
+- Macklin, S.R. (1999). The prediction of volume loss due to tunnelling in overconsolidated clay based on heading
+  geometry and stability number. Ground Engineering 32(4). Not open; the relation is quoted from Divall, Goodey,
+  Davies, Le & Nguyen (2023), Twin-tunnelling: case studies in clay, J. Mining and Earth Sciences 64(6), 66-78,
+  doi:10.46326/jmes.2023.64(6).08, accepted version open at https://openaccess.city.ac.uk/id/eprint/31563/, Eq. (4)-(6)
+  and Fig. 1 (VL (%) = 0.23 e^(4.4 LF) for LF >= 0.2, LF = N / N_TC,
+  N = (sigma_v - sigma_T) / S_u, N_TC from Kimura & Mair (1981); field data from overconsolidated clay, mostly C/D > 1.)
+- Kimura, T., Mair, R.J. (1981). Centrifugal testing of model tunnels in soft clay. Proc. 10th ICSMFE, Stockholm, 1,
+  319-322, https://www.issmge.org/uploads/publications/1/35/1981_01_0061.pdf. N at collapse for a heading supported to
+  the face (P/D 0): 7.05 at C/D 1.5 and 9.0 at C/D 3.0, digitised from Fig. 9 (docs/validation/mpm-clay.md); N is
+  constant above C/D about 3.
 
     i      = K * z0                       trough width (inflection point); i_left / i_right for an asymmetric trough
     V_s    = VL * pi * D^2 / 4            settlement volume per metre of tunnel (m^3/m)
@@ -230,3 +240,36 @@ def burland_category(tensile_strain_percent: float) -> tuple[int, str]:
         if tensile_strain_percent < limit:
             return cat, name
     raise AssertionError("unreachable")
+
+
+# Kimura & Mair (1981) Fig. 9, heading supported to the face (P/D 0): (C/D, N at collapse), digitised to about +/-0.2
+KIMURA_MAIR_NTC_FACE_SUPPORTED = ((1.5, 7.05), (3.0, 9.0))
+
+
+def critical_stability_ratio(cover_over_d: float) -> float:
+    """N at collapse for a closed-face shield (P/D 0), linear between Kimura & Mair's two points; constant beyond them
+    (their tests show N constant above C/D about 3; below C/D 1.5 the value at 1.5 is kept, an extrapolation)."""
+    (c0, n0), (c1, n1) = KIMURA_MAIR_NTC_FACE_SUPPORTED
+    t = min(max((cover_over_d - c0) / (c1 - c0), 0.0), 1.0)
+    return n0 + t * (n1 - n0)
+
+
+def load_factor(sigma_v_axis: float, support_axis: float, su_axis: float, cover_over_d: float) -> float:
+    """LF = N / N_TC with the stability ratio N = (sigma_v - sigma_T) / S_u at the axis (Broms & Bennermark 1967;
+    Mair 1989). Stresses in kPa: total overburden, support pressure and undrained strength at the axis."""
+    if su_axis <= 0:
+        raise ValueError("undrained strength must be positive")
+    return max(sigma_v_axis - support_axis, 0.0) / su_axis / critical_stability_ratio(cover_over_d)
+
+
+def macklin_volume_loss(lf: float) -> float:
+    """Macklin (1999): VL = 0.23 % x exp(4.4 LF), as a fraction. Fitted for LF >= 0.2 in overconsolidated clay."""
+    return 0.0023 * math.exp(4.4 * lf)
+
+
+def face_volume_loss(base_volume_loss: float, lf: float) -> float:
+    """Volume loss with the face's contribution: the larger of the base value (measured for the drive, which carries
+    the tail void and grouting) and Macklin's value for the load factor at the face. It equals the base value while
+    the face is well supported and rises once a lower support pressure raises the load factor."""
+    return max(base_volume_loss, macklin_volume_loss(lf))
+

@@ -56,6 +56,7 @@ What it computes:
 - the longitudinal profile, built from face, shield, tail-void and behind-the-tail volume-loss components, with an optional longitudinal width;
 - excavation-method presets (volume loss and K);
 - twin tunnels: the second bore's trough at its own volume loss, with separate widths towards and away from the first bore;
+- volume loss from the face's load factor in overconsolidated clay (Macklin 1999): LF = N / N_TC, N = (σv − σT)/S_u, VL = 0.23 % × e^(4.4 LF), with N_TC from Kimura & Mair (1981) for a face supported up to the cutterhead (7.05 at C/D 1.5 to 9.0 at C/D ≥ 3);
 - Burland damage categories.
 
 **References:**
@@ -64,7 +65,9 @@ What it computes:
 - Mair & Taylor (1997);
 - Addenbrooke & Potts (2001), [doi:10.1061/(ASCE)1532-3641(2001)1:2(249)](https://doi.org/10.1061/(ASCE)1532-3641(2001)1:2(249));
 - Wan, Standing, Potts & Burland (2017), [doi:10.1680/jgeot.16.P.099](https://doi.org/10.1680/jgeot.16.P.099) (second bore at Hyde Park);
-- Burland (1995).
+- Burland (1995);
+- Macklin (1999), *Ground Engineering* 32(4), not open; the relation as quoted in [Divall et al. 2023](https://openaccess.city.ac.uk/id/eprint/31563/), Eq. (4)–(6), accepted version open;
+- Kimura & Mair (1981), [ISSMGE library](https://www.issmge.org/uploads/publications/1/35/1981_01_0061.pdf), digitised in [mpm-clay](validation/mpm-clay.md).
 
 **Validated against:**
 
@@ -77,7 +80,15 @@ What it computes:
 - one component at the face gives half the final settlement at the face; a tail-only component gives Φ(−L/i);
 - the closed-face preset leaves 0.1–0.2 of the final trough at the face; a narrower longitudinal width lowers it without changing the final trough;
 - twin-tunnel defaults equal plain superposition;
-- also checked privately against published UK case histories (licensed material, not in this repository).
+- also checked privately against published UK case histories (licensed material, not in this repository);
+- the load-factor relation: at the EPB demo's normal 2.2 bar in London Clay (axis about 31 m, S_u from the Crossrail Paddington design profile 85 + 5z kPa), LF ≈ 0.18 gives 0.51 %, the measured Hyde Park value (0.44–0.78 %) the demo already uses. This is a consistency check, not an independent test: no open data pair face pressure with volume loss on one drive.
+
+**Limits of the face volume loss:**
+
+- Macklin's relation is fitted on overconsolidated clay with C/D mostly above 1, and on LF ≥ 0.2; in the demo it is applied only where London Clay is at the axis;
+- the volume loss used is the larger of the measured value and Macklin's, so it rises when support drops but never falls below what was measured;
+- S_u is the Paddington design profile carried along the line; N_TC comes from two digitised centrifuge points;
+- grout filling and tail-void loss are not modelled separately; they remain in the measured value.
 
 ## Face support pressure
 

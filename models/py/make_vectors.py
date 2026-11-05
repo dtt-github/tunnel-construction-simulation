@@ -8,6 +8,7 @@ import math
 import pathlib
 from dataclasses import asdict
 
+from tunnelsim_models import critical_stability_ratio, face_volume_loss, load_factor, macklin_volume_loss
 from tunnelsim_models import Cutter, daub_window, silo_stress, wedge_silo, cutter_forces, gaussian_trough, hoek_brown, preset_trough, tbm_performance, twin_troughs
 
 OUT = pathlib.Path(__file__).resolve().parents[1] / "test-vectors"
@@ -81,7 +82,13 @@ for dia, z0, sp, vl1, vl2, k, f, kin, kout in [(5.0, 19.5, 26.0, 0.006, None, 0.
                          "second_vl_factor": f, "second_inner_k": kin, "second_outer_k": kout},
                   "out": {"samples": [{"x": x, "s": tw.settlement(x), "u": tw.horizontal(x)} for x in xs]}})
 
-write("settlement", {"symmetric": st, "asymmetric": asym, "presets": presets, "twin": twins})
+# load factor and Macklin volume loss: (sigma_v, support, S_u, C/D, base VL)
+face_vl = []
+for sv, pt, su, cd, base in [(600, 220, 235, 3.7, 0.005), (600, 0, 235, 3.7, 0.005), (300, 50, 120, 1.0, 0.003), (400, 300, 150, 2.2, 0.01)]:
+    lf = load_factor(sv, pt, su, cd)
+    face_vl.append({"in": {"sigma_v": sv, "support": pt, "su": su, "cover_over_d": cd, "base_vl": base},
+                    "out": {"n_tc": critical_stability_ratio(cd), "lf": lf, "macklin": macklin_volume_loss(lf), "vl": face_volume_loss(base, lf)}})
+write("settlement", {"symmetric": st, "asymmetric": asym, "presets": presets, "twin": twins, "face_volume_loss": face_vl})
 face = []
 # (D, cover, gamma, phi, c, water_depth, q, k_wedge)
 for dia, cov, g, phi, c, hw, q, kw in [(10, 15, 20, 30, 0, None, 0, None), (8, 12, 20, 30, 0, 3, 0, None), (6, 9, 19, 25, 8, 0, 10, 0.4),

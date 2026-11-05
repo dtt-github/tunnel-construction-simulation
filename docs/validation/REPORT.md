@@ -128,7 +128,7 @@ Ranked by how much each changes what a user sees, then by whether open data coul
 
 | # | Gap | Demos | Effect | Open data to close it |
 |---|---|---|---|---|
-| 1 | Volume loss is a scenario input; it doesn't respond to face pressure or grouting | EPB, Mixshield | Settlement doesn't change with the operator's actions | Needs paired face pressure and volume loss: none found under CC BY |
+| 1 | Volume loss is a scenario input; it doesn't respond to face pressure or grouting. **Partly closed 6 Nov 2026:** in London Clay (half the EPB drive) it now rises with the face's load factor (Macklin 1999); at normal pressure it equals the measured value. Still open: grouting, other ground, the Mixshield in Chalk | EPB, Mixshield | Settlement doesn't change with the operator's actions outside London Clay | Needs paired face pressure and volume loss: none found under CC BY |
 | 2 | Downtime distributions come from one 6.88 m EPB (Tabriz); no learning curve, day-to-day correlation, locomotive travel or slurry-plant stops | EPB, Mixshield | Best days too low; Mixshield working day 7–58 % fast; whole drive 2× fast | Crossrail and Thames delay breakdowns are not published; look for other open drive logs |
 | 3 | Torque in foam-conditioned clay 2.7× over | EPB | Torque bar over-reads in clay | Sofia gives the target; needs face and chamber friction for conditioned soil |
 | 4 | CSM penetration fitted to one project (Follo gneiss); doesn't follow section strength | Gripper, double shield | Penetration in other rocks is untested | An open TBM dataset in other rock types (Yinsong is not open) |

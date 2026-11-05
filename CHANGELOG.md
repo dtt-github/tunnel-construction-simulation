@@ -6,6 +6,11 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ### Changed
 
+- **Volume loss responds to face pressure in London Clay** (EPB demo; `settlement.load_factor`, `macklin_volume_loss`, `face_volume_loss` in Python and JavaScript):
+  - Macklin's (1999) relation VL = 0.23 % × e^(4.4 LF), quoted from [Divall et al. 2023](https://openaccess.city.ac.uk/id/eprint/31563/), with the load factor LF = N / N_TC at the face and N_TC from Kimura & Mair (1981) for a face supported up to the cutterhead;
+  - each 10 m of drive keeps the larger of the measured volume loss and the mean Macklin value while it was dug. At the normal 2.2 bar it gives 0.51 % (measured 0.5 %); at 1 bar 0.65 %, about 30 % more settlement over that stretch. Undrained strength is the Crossrail Paddington design profile (85 + 5z kPa);
+  - applied only where London Clay is at the axis (106 of 213 zones). The Mixshield in Chalk and other ground keep the measured value.
+
 - **Face support window checked against DAUB (2016)** ([free PDF](https://www.daub-ita.de/fileadmin/documents/daub/gtcrec1/2016-10_DAUB_Recommendations_for_Face_Support_Pressure_Calculations_for_Shield_Tunnelling_in_Soft_Ground.pdf)):
   - the safety factors (1.5 earth, 1.05 water) and the 0.9 blow-out limit are confirmed; the blow-out limit now uses the minimum unit weights and no surface load, as DAUB does;
   - the set point must now stay inside the window by the machine's support-pressure deviation (±30 kPa EPB, ±10 kPa slurry). The EPB and Mixshield demos show this operating range at the crown and raise an alarm if it is empty; along both drives it stays open (narrowest 36 kPa, Mixshield);

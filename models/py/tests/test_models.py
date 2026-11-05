@@ -179,3 +179,21 @@ def test_tbm_drive_and_penetration_limits():
     assert fast.cutterhead_power_kw == pytest.approx(2500, rel=1e-6)
     slow = tbm_performance(15000, 4, 50, 7.0, 140, 10, max_torque_knm=4200, max_power_kw=2500)
     assert slow.torque_available_knm == 4200  # below the base speed the installed torque governs
+
+
+def test_macklin_volume_loss():
+    from tunnelsim_models import critical_stability_ratio, face_volume_loss, load_factor, macklin_volume_loss
+
+    # Macklin (1999) as quoted by Divall et al. (2023): VL (%) = 0.23 exp(4.4 LF)
+    assert macklin_volume_loss(0.2) == pytest.approx(0.0023 * math.exp(0.88))
+    assert macklin_volume_loss(0.5) == pytest.approx(0.0208, rel=1e-2)
+    # Kimura & Mair (1981), heading supported to the face: 7.05 at C/D 1.5, 9.0 at 3.0, constant beyond
+    assert critical_stability_ratio(1.5) == pytest.approx(7.05)
+    assert critical_stability_ratio(3.0) == critical_stability_ratio(5.0) == pytest.approx(9.0)
+    assert critical_stability_ratio(2.25) == pytest.approx(8.025)
+    # a well-supported face keeps the measured volume loss; dropping the support raises it
+    lf_on = load_factor(600, 220, 235, 3.7)
+    lf_off = load_factor(600, 0, 235, 3.7)
+    assert face_volume_loss(0.005, lf_on) == pytest.approx(0.005, abs=3e-4)
+    assert face_volume_loss(0.005, lf_off) > 0.007
+    assert load_factor(600, 700, 235, 3.7) == 0.0  # support above the overburden: no driving stress

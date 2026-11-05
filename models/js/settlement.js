@@ -146,3 +146,30 @@ export function twinTroughs(diameterM, axisDepthM, spacingM, volumeLossFirst, vo
 export function burlandCategory(tensileStrainPercent) {
   for (const [limit, cat, name] of BURLAND) if (tensileStrainPercent < limit) return [cat, name];
 }
+
+// Volume loss from the face's load factor (Macklin 1999, quoted from Divall et al. 2023, open; Kimura & Mair 1981 for
+// N at collapse). See settlement.py for the sources and limits.
+export const KIMURA_MAIR_NTC_FACE_SUPPORTED = Object.freeze([[1.5, 7.05], [3.0, 9.0]]);
+
+/** N at collapse for a closed-face shield (P/D 0), linear between Kimura & Mair's points, constant beyond them. */
+export function criticalStabilityRatio(coverOverD) {
+  const [[c0, n0], [c1, n1]] = KIMURA_MAIR_NTC_FACE_SUPPORTED;
+  const t = Math.min(Math.max((coverOverD - c0) / (c1 - c0), 0), 1);
+  return n0 + t * (n1 - n0);
+}
+
+/** LF = N / N_TC, N = (sigma_v - sigma_T) / S_u at the axis (kPa). */
+export function loadFactor(sigmaVAxis, supportAxis, suAxis, coverOverD) {
+  if (!(suAxis > 0)) throw new RangeError("undrained strength must be positive");
+  return Math.max(sigmaVAxis - supportAxis, 0) / suAxis / criticalStabilityRatio(coverOverD);
+}
+
+/** Macklin (1999): VL = 0.23 % x exp(4.4 LF), as a fraction (fitted for LF >= 0.2, overconsolidated clay). */
+export function macklinVolumeLoss(lf) {
+  return 0.0023 * Math.exp(4.4 * lf);
+}
+
+/** The larger of the base volume loss (measured for the drive) and Macklin's value at the face's load factor. */
+export function faceVolumeLoss(baseVolumeLoss, lf) {
+  return Math.max(baseVolumeLoss, macklinVolumeLoss(lf));
+}
