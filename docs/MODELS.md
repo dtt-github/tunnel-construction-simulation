@@ -16,6 +16,7 @@ Every model exists twice: a Python reference in [`models/py/tunnelsim_models/`](
 | [Hard-rock drive](#hard-rock-drive) | `hard_rock.py` | `hard_rock.js` | Reproduces Farrokh's worked example within 3 %; support curve digitised |
 | [Ground response and squeezing](#ground-response-and-squeezing) | `ground_response.py` | `ground_response.js` | Reproduces Hoek's and Hoek & Marinos's worked examples; consistent with measured convergence in an Albanian flysch tunnel ([validation](validation/sem-convergence.md)); shield friction a screening estimate |
 | [SEM / NATM sprayed concrete lining](#sem--natm-sprayed-concrete-lining) | `sem.py` | `sem.js` | Checked against Brenner shotcrete data and Oreste's trends; Sulem parameters from one site |
+| [Ground scenarios](#ground-scenarios) | `scenario.py` | `scenario.js` | Interpolation and water systems unit-tested; first scenario from open BGS boreholes ([format and sources](SCENARIOS.md)) |
 | [Segment lining](#segment-lining) | `lining.py` | `lining.js` | Reproduces ITA WG2 (2000) Design Example 1 and its jacking check |
 | [Drill & blast](#drill--blast) | `drill_blast.py` | `drill_blast.js` | Reproduces Yilmaz's worked example, SS 460 48 66 tables and NFF cycle figures; Norwegian pattern fitted to published hole counts |
 | [Utilisation and downtime](#utilisation-and-downtime) | `utilisation.py` | `utilisation.js` | Deterministic limits hand-checked; default EPB inside a 40-EPB survey; one-project distributions |
@@ -312,6 +313,24 @@ Shotcrete ageing, the interaction of an ageing lining with the ground during adv
 - The Sulem time parameters come from one claystone site.
 - Weber, Pöttler and Chang originals were not available; the forms used are as cited by Oreste.
 
+## Ground scenarios
+
+Loads a scenario file (`tunnelsim-scenario/1`) and answers, at any chainage:
+
+- the ground surface and both water levels;
+- the stratigraphic column, interpolated between boreholes;
+- the unit at a given level;
+- the ground at a face of given diameter: units and their shares, mean overburden unit weight, face-averaged φ′, c′ and E, K0 at the axis, cover, and the pore pressure at the axis from the unit's water system.
+
+The format, the interpolation rules and the first scenario (Farringdon – Liverpool Street, from 14 open BGS/Crossrail boreholes) are described in [SCENARIOS.md](SCENARIOS.md).
+
+**Validated against:** hand-calculated interpolation; absent units and units below the bottom of a hole; the two water systems; Python and JavaScript agree on shared vectors.
+
+**Limits:**
+
+- linear interpolation between boreholes, no geological model;
+- one parameter set per unit (no sub-units, no depth profiles such as cu increasing with depth).
+
 ## Segment lining
 
 What it computes:
@@ -342,7 +361,7 @@ What it computes:
 - ITA 2019 Table 6 drops the (Q′ − Q) factor of the triangular load; the ITA 2000 form is used, which reproduces the example;
 - the published example's deflection omits the self-weight term, and so does the default here;
 - Muir Wood, Curtis and Duddeck–Erdmann closed forms are not used (no open copy); no bedded-beam model with joint springs;
-- loads are full overburden, suitable for shallow rings; no rock loads for the double shield.
+- the demos use Terzaghi's reduced vertical load (ITA 2000, Formula 2.2.1), which tends to the full overburden for shallow rings, and check the lateral coefficient at both ends of the ITA range (active and at rest); no rock loads for the double shield.
 
 ## Drill & blast
 

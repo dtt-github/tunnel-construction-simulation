@@ -35,6 +35,12 @@
 
   <section>
     <h2>Operator</h2>
+    <label>Ground
+      <select id="groundSel">
+        <option value="london">London: Farringdon – Liverpool Street (open BGS boreholes)</option>
+        <option value="illustrative">Illustrative: stiff clay, then clayey sand</option>
+      </select>
+    </label>
     <label>Advance speed <output id="advOut"></output><input id="adv" type="range" min="0" max="80" step="1" value="60"></label>
     <label>Cutterhead speed <output id="rpmOut"></output><input id="rpm" type="range" min="0" max="3.2" step="0.1" value="2.0"></label>
     <label>Screw control
@@ -90,6 +96,12 @@
     <h2>Segment lining</h2>
     <dl id="lining"></dl>
     <p class="note">Ring forces by the elastic equation method (ITA WG2 2000) with Wood's joint reduction; jacking, bursting and grout checks after ITA (2000, 2019) and DAUB (2024). Ground stiffness, concrete modulus and the shoe pad are assumed.</p>
+  </section>
+
+  <section>
+    <h2>Geological long section</h2>
+    <div id="section"></div>
+    <p class="note">14 Crossrail boreholes from the British Geological Survey (Open Government Licence v3.0; contains British Geological Survey materials © UKRI 2026). Unit parameters from open sources, some assumed; the tunnel level is an assumed alignment within the published depth. Details: <a href="https://github.com/dtt-github/tunnel-construction-simulation/blob/main/docs/SCENARIOS.md">scenario format and sources</a>.</p>
   </section>
 
   <section>

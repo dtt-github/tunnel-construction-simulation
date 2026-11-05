@@ -7,6 +7,8 @@ References
   Table II-2 (p. 316) member forces of the elastic equation method; Design Example 1 (pp. 323-326) reproduced in the
   tests; jacking stress check (p. 326); allowable stresses 15 MPa for f_ck 42 MPa, x1.65 for the temporary jacking state.
   The triangular lateral load enters with the factor (Q' - Q), which reproduces the example (ITA 2019 Table 6 drops it).
+  Formula 2.2.1 (Terzaghi's reduced vertical earth pressure for deep tunnels) and section 2.2 (lateral coefficient
+  between the active and the at-rest value).
 - ITA WG2 Report 22 (2019). Guidelines for the design of segmental tunnel linings,
   https://about.ita-aites.org/publications/wg-publications/download/1825_470d8f379299b5ad89de378875dd1b8f :
   eq (8) Wood's reduced inertia I_r = I_j + (4/n)^2 I (n > 4); eqs (2)-(3) bursting force (ACI 318, DAUB 2013);
@@ -99,6 +101,32 @@ def ring_loads(depth_axis: float, radius: float, gamma: float, k0: float, water_
     svi, ui = at(zi)
     p_v = svc
     return p_v, k0 * (svc - uc) + uc, k0 * (svi - ui) + ui
+
+
+def terzaghi_loads(depth_axis: float, radius: float, gamma: float, phi_deg: float, c: float, lam: float, water_depth: float,
+                   gamma_w: float = 10.0, surcharge: float = 0.0) -> tuple[float, float, float]:
+    """Loads on a ring (kPa) with the vertical earth pressure reduced by Terzaghi's formula (ITA WG2 2000, Formula 2.2.1):
+    h0 = B1 (1 - c / (B1 g)) (1 - exp(-tan(phi) H / B1)) / tan(phi) + P0 exp(-tan(phi) H / B1) / g,
+    B1 = R0 cot(pi/8 + phi/4), with K = 1 in the formula and g the effective unit weight above the crown. For shallow
+    cover it tends to the full overburden. Lateral earth pressure = lam x the vertical effective pressure, varying
+    linearly from crown to invert (ITA 2000 section 2.2: lam between the active and the at-rest coefficient); water
+    pressure hydrostatic. Returns (vertical at the crown, lateral at the crown, lateral at the invert), total."""
+    h = depth_axis - radius
+    hw = min(max(water_depth, 0.0), h)
+    g = (gamma * hw + (gamma - gamma_w) * (h - hw)) / h  # effective unit weight above the crown
+    t = math.tan(math.radians(phi_deg))
+    b1 = radius / math.tan(math.pi / 8 + math.radians(phi_deg) / 4)
+    e = math.exp(-t * h / b1)
+    h0 = min(b1 * (1 - c / (b1 * g)) * (1 - e) / t + surcharge * e / g, h + surcharge / g)
+    pe = g * max(h0, 0.0)
+    u_top = gamma_w * max(h - water_depth, 0.0)
+    u_bot = gamma_w * max(h + 2 * radius - water_depth, 0.0)
+    g_below = gamma - gamma_w if water_depth <= h else gamma
+    return pe + u_top, lam * pe + u_top, lam * (pe + g_below * 2 * radius) + u_bot
+
+
+def active_coefficient(phi_deg: float) -> float:
+    return math.tan(math.radians(45 - phi_deg / 2)) ** 2
 
 
 def section_stresses(n: float, m: float, thickness: float, width: float = 1.0) -> tuple[float, float]:

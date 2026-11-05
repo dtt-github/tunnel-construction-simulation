@@ -13,6 +13,11 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
   - thrust and torque breakdown;
   - surface settlement with Burland categories for buildings.
   - Assumptions and gaps are listed in its [realism checklist](docs/realism/epb-slice-a.md).
+- **Ground scenarios and real London geology** ([format and sources](docs/SCENARIOS.md)):
+  - a scenario file format (`tunnelsim-scenario/1`) and loader (Python + JavaScript): ground surface, upper water table and deep aquifer head, units interpolated between boreholes, the ground at the face;
+  - the first scenario: 2.1 km of the Elizabeth line from Farringdon to Liverpool Street, built from 14 Crossrail boreholes held by the British Geological Survey (Open Government Licence) by `models/scenarios/build_london.py`, with unit parameters from open sources;
+  - the EPB demo now drives through it by default, with a geological long section, ground, depth and water changing every 10 m; the illustrative ground stays selectable.
+- **Segment lining:** the vertical load is now reduced by Terzaghi's formula (ITA 2000, Formula 2.2.1), and the lateral coefficient is checked at the active and at-rest ends of the ITA range; ring overstress raises an alarm.
 - **Ground response against measured convergence** ([write-up](docs/validation/sem-convergence.md)): the Hoek–Brown, ground-reaction and LDP chain against 14 monitored sections of a headrace tunnel in weak flysch (Terron-Almenara & Panthi 2025, CC BY 4.0, via Zenodo 10.5281/zenodo.23040284). Every reading is reproduced within the installed support capacity; no defaults changed. Script: `models/py/validation/sem_convergence.py`.
 - **Validation against open field data** ([write-up](docs/validation/epb-open-data.md)): the EPB thrust and torque models against 281 rings of Changsha Metro Line 4 and 1,197 records of the Guangzhou–Foshan railway (CC BY 4.0, Mendeley Data), and published operating points from Mashhad Line 3 and Sofia Line 3. Script: `models/py/validation/epb_open_data.py`.
 - **Changed:** shield and rim friction defaults are now 0.17 and 0.07, fitted on Changsha; they were 0.3, illustrative. Thrust is within about ±25 % on three projects. The EPB and Mixshield thrust and torque bars drop accordingly.

@@ -1,0 +1,495 @@
+{
+ "format": "tunnelsim-scenario/1",
+ "name": "Farringdon - Liverpool Street (Elizabeth line corridor), London",
+ "description": "Ground along a 2.1 km corridor of the Elizabeth line between Farringdon and Liverpool Street, from 14 open BGS/Crossrail boreholes.",
+ "method": "epb",
+ "crs": "EPSG:27700",
+ "datum": "m OD (ground levels of the logs; datum not stated in the files, values fit m OD)",
+ "licence": "Borehole data: Open Government Licence v3.0. Contains British Geological Survey materials (c) UKRI 2026. Contains public sector information licensed under the Open Government Licence v3.0.",
+ "units": {
+  "MG": {
+   "name": "Made Ground",
+   "gamma": 18,
+   "phi": 25,
+   "c": 0,
+   "k0": 0.58,
+   "E": 10000,
+   "color": "#8a7f72",
+   "source": "Chandegra & Kokkinou (2016), Crossrail Learning Legacy, Design of the deep cut-and-cover Crossrail Paddington Station, Table 1, https://learninglegacy.crossrail.co.uk/documents/design-deep-cut-cover-crossrail-paddington-station-using-finite-element-method/",
+   "notes": "PAD prints c' 20 kPa; 0 is used. K0 = K0nc 0.577."
+  },
+  "AL": {
+   "name": "Alluvium",
+   "gamma": 17,
+   "phi": 20,
+   "c": 0,
+   "k0": 0.6,
+   "E": 5000,
+   "color": "#6f7a5a",
+   "source": "BGS Earthwise, London - Applied geology, https://earthwise.bgs.ac.uk/index.php/London_-_Applied_geology",
+   "assumed": [
+    "gamma",
+    "phi",
+    "c",
+    "k0",
+    "E"
+   ],
+   "notes": "Soft, normally consolidated, with peat (BGS); no open parameters found, values assumed."
+  },
+  "RTD": {
+   "name": "River Terrace Deposits (gravel)",
+   "gamma": 20,
+   "phi": 36,
+   "c": 0,
+   "k0": 0.41,
+   "E": 60000,
+   "color": "#b59a62",
+   "source": "Chandegra & Kokkinou (2016), Crossrail Learning Legacy, Design of the deep cut-and-cover Crossrail Paddington Station, Table 1, https://learninglegacy.crossrail.co.uk/documents/design-deep-cut-cover-crossrail-paddington-station-using-finite-element-method/",
+   "notes": "E = E50,ref 60 MPa."
+  },
+  "LC": {
+   "name": "London Clay Formation",
+   "gamma": 20,
+   "phi": 24,
+   "c": 1,
+   "k0": 1.5,
+   "E": 77600,
+   "color": "#6f6252",
+   "pore_pressure_ratio": 0.9,
+   "source": "Chandegra & Kokkinou (2016), Crossrail Learning Legacy, Design of the deep cut-and-cover Crossrail Paddington Station, Table 1, https://learninglegacy.crossrail.co.uk/documents/design-deep-cut-cover-crossrail-paddington-station-using-finite-element-method/; K0 and pore pressure: Wan, Standing, Potts & Burland (2019), Geotechnique 69(5):434-457, doi:10.1680/jgeot.17.P.309 (CC BY 4.0), Table 2 and p. 440",
+   "notes": "K0 1.5: top of the central-London design range 1.0-1.5 quoted in Wan et al.; measured 1.9-2.4 at 29-35 m (Hyde Park). Pore pressure about 0.9 x hydrostatic at Hyde Park (under-drained), derived from Wan et al. Table 2. cu = 83.1 + 7.4 z kPa (z below the top of the clay; Brosse et al. 2025, ISGSR, doi:10.3850/GRF-25280825_isgsr-185-P110-cd)."
+  },
+  "HF": {
+   "name": "Harwich Formation (basal London Clay sands and gravels)",
+   "gamma": 20,
+   "phi": 33,
+   "c": 0,
+   "k0": 1.0,
+   "E": 80000,
+   "color": "#9a8a62",
+   "water": "lower",
+   "source": "Environment Agency (2022), Management of the London Basin Chalk Aquifer, status report, https://www.gov.uk/government/publications/london-basin-chalk-aquifer-annual-status-report (OGL)",
+   "assumed": [
+    "gamma",
+    "phi",
+    "c",
+    "k0",
+    "E"
+   ],
+   "notes": "Part of the Chalk-Basal Sands aquifer (EA); no open strength or stiffness, values assumed like Upnor sand (LG Table 6.7)."
+  },
+  "LG": {
+   "name": "Lambeth Group",
+   "gamma": 20.2,
+   "phi": 22,
+   "c": 12,
+   "k0": 1.5,
+   "E": 100000,
+   "color": "#8c6a5a",
+   "water": "lower",
+   "source": "Entwisle et al. (2013), BGS OR/13/006, Engineering Geology of British Rocks and Soils: Lambeth Group, https://nora.nerc.ac.uk/id/eprint/503110/",
+   "assumed": [
+    "k0",
+    "E"
+   ],
+   "notes": "Bulk density medians 2.04-2.08 Mg/m3 (6.1.1); c', phi' of Reading Formation clay, triaxial (Table 6.7). Under-drained by the Thanet Sand and Chalk in central London (p. 186), but sand channels can hold high water pressure. K0 2.5 measured at Limehouse (7.3.5); 1.5 assumed. Drained E assumed."
+  },
+  "TS": {
+   "name": "Thanet Sand Formation",
+   "gamma": 18.6,
+   "phi": 37,
+   "c": 0,
+   "k0": 0.8,
+   "E": 150000,
+   "color": "#c2ad7a",
+   "water": "lower",
+   "source": "Menkiti et al. (2015), Crossrail Learning Legacy, Geology and geotechnical properties of the Thanet Sand Formation, section 4, https://learninglegacy.crossrail.co.uk/documents/geology-geotechnical-properties-thanet-sand-formation-update-crossrail-project-2/",
+   "assumed": [
+    "k0",
+    "E"
+   ],
+   "notes": "Bulk density 1.88-1.9 Mg/m3, c' 0, peak phi' 37-39 deg at 400-700 kPa (4.1-4.2). K0 and E only in figures there; assumed."
+  },
+  "CK": {
+   "name": "Chalk",
+   "gamma": 20,
+   "phi": 35,
+   "c": 100,
+   "k0": 1.0,
+   "E": 500000,
+   "color": "#d9d6c8",
+   "water": "lower",
+   "source": "BGS Earthwise, London - Applied geology, https://earthwise.bgs.ac.uk/index.php/London_-_Applied_geology",
+   "assumed": [
+    "gamma",
+    "phi",
+    "c",
+    "k0",
+    "E"
+   ],
+   "notes": "UCS 1.25-5 MPa saturated (BGS); no open strength or stiffness parameters, values assumed."
+  }
+ },
+ "alignment": {
+  "length": 2129,
+  "start": {
+   "E": 531300.0,
+   "N": 181780.0
+  },
+  "end": {
+   "E": 533420.0,
+   "N": 181580.0
+  },
+  "axis_level": [
+   [
+    0,
+    -16.0
+   ],
+   [
+    2129,
+    -19.0
+   ]
+  ],
+  "diameter": 7.1,
+  "source": "Assumed. Depth and geology at Farringdon: Crossrail Learning Legacy, Tunnelling in sand in Farringdon Crossrail Station, https://learninglegacy.crossrail.co.uk/documents/tunnelling-sand-farringdon-crossrail-station/; Geotechnical risk management for SCL tunnels in Farringdon, https://learninglegacy.crossrail.co.uk/documents/geotechnical-risk-management-for-sprayed-concrete-lining-tunnels-in-farringdon-crossrail-station/"
+ },
+ "ground_surface": [
+  [
+   -52.8,
+   19.83
+  ],
+  [
+   143.7,
+   16.15
+  ],
+  [
+   349.5,
+   14.49
+  ],
+  [
+   511.9,
+   15.38
+  ],
+  [
+   638.9,
+   16.09
+  ],
+  [
+   964.6,
+   12.44
+  ],
+  [
+   1050.9,
+   15.283
+  ],
+  [
+   1250.7,
+   13.585
+  ],
+  [
+   1394.6,
+   13.26
+  ],
+  [
+   1519.0,
+   13.333
+  ],
+  [
+   1627.6,
+   13.399
+  ],
+  [
+   1743.8,
+   13.91
+  ],
+  [
+   1898.5,
+   15.24
+  ],
+  [
+   2117.0,
+   13.89
+  ]
+ ],
+ "groundwater": {
+  "level": [
+   [
+    0,
+    13.0
+   ],
+   [
+    2129,
+    9.0
+   ]
+  ],
+  "deep_head": [
+   [
+    0,
+    -23.0
+   ],
+   [
+    2129,
+    -23.0
+   ]
+  ],
+  "source": "Water strikes in the BGS/Crossrail borehole logs (WSTG/WSTD); Environment Agency (2022), Management of the London Basin Chalk Aquifer, status report, https://www.gov.uk/government/publications/london-basin-chalk-aquifer-annual-status-report (OGL)",
+  "notes": "Strike readings, not equilibrium levels. London Clay pore pressure 0.9 x hydrostatic on the upper table."
+ },
+ "boreholes": [
+  {
+   "id": "RT131",
+   "bgs_loca_id": "202002061142130870",
+   "E": 531245.718,
+   "N": 181766.777,
+   "chainage": -52.8,
+   "offset": -18.3,
+   "ground_level": 19.83,
+   "base_level": -28.62,
+   "tops": {
+    "MG": 19.83,
+    "AL": 17.13,
+    "RTD": 14.73,
+    "LC": 12.23,
+    "LG": -1.37,
+    "TS": -17.47,
+    "CK": -26.87
+   }
+  },
+  {
+   "id": "RT132R",
+   "bgs_loca_id": "202002061142130871",
+   "E": 531437.601,
+   "N": 181708.841,
+   "chainage": 143.7,
+   "offset": -57.9,
+   "ground_level": 16.15,
+   "base_level": -32.75,
+   "tops": {
+    "MG": 16.15,
+    "AL": 13.65,
+    "RTD": 12.95,
+    "LC": 12.15,
+    "LG": -5.25,
+    "TS": -20.75,
+    "CK": -30.25
+   }
+  },
+  {
+   "id": "F32R",
+   "bgs_loca_id": "202002061142130300",
+   "E": 531648.929,
+   "N": 181758.028,
+   "chainage": 349.5,
+   "offset": 10.9,
+   "ground_level": 14.49,
+   "base_level": -30.26,
+   "tops": {
+    "MG": 14.49,
+    "RTD": 6.99,
+    "LC": 6.69,
+    "LG": -2.38,
+    "TS": -18.06,
+    "CK": -28.55
+   }
+  },
+  {
+   "id": "F6",
+   "bgs_loca_id": "202002061142130272",
+   "E": 531816.985,
+   "N": 181809.845,
+   "chainage": 511.9,
+   "offset": 78.3,
+   "ground_level": 15.38,
+   "base_level": -37.0,
+   "tops": {
+    "MG": 15.38,
+    "LC": 10.98,
+    "LG": -10.08,
+    "TS": -28.12,
+    "CK": -35.88
+   }
+  },
+  {
+   "id": "F14",
+   "bgs_loca_id": "202002061142130285",
+   "E": 531941.752,
+   "N": 181779.983,
+   "chainage": 638.9,
+   "offset": 60.3,
+   "ground_level": 16.09,
+   "base_level": -44.91,
+   "tops": {
+    "MG": 16.09,
+    "RTD": 12.69,
+    "LC": 11.59,
+    "LG": -17.41,
+    "TS": -33.66
+   }
+  },
+  {
+   "id": "RT48",
+   "bgs_loca_id": "202002061142130805",
+   "E": 532270.383,
+   "N": 181796.259,
+   "chainage": 964.6,
+   "offset": 107.3,
+   "ground_level": 12.44,
+   "base_level": -34.71,
+   "tops": {
+    "MG": 12.44,
+    "LC": 9.64,
+    "HF": -12.66,
+    "LG": -17.56,
+    "TS": -29.76
+   }
+  },
+  {
+   "id": "RT83",
+   "bgs_loca_id": "202002061142130826",
+   "E": 532351.688,
+   "N": 181739.289,
+   "chainage": 1050.9,
+   "offset": 58.2,
+   "ground_level": 15.283,
+   "base_level": -34.72,
+   "tops": {
+    "MG": 15.28,
+    "RTD": 10.38,
+    "LC": 10.08,
+    "HF": -15.67,
+    "LG": -16.72,
+    "TS": -33.62
+   }
+  },
+  {
+   "id": "RT84",
+   "bgs_loca_id": "202002061142130827",
+   "E": 532546.194,
+   "N": 181673.689,
+   "chainage": 1250.7,
+   "offset": 11.2,
+   "ground_level": 13.585,
+   "base_level": -39.91,
+   "tops": {
+    "MG": 13.59,
+    "AL": 9.49,
+    "RTD": 8.29,
+    "LC": 6.39,
+    "HF": -21.91,
+    "LG": -22.12
+   }
+  },
+  {
+   "id": "L24",
+   "bgs_loca_id": "202002061142130486",
+   "E": 532685.057,
+   "N": 181612.677,
+   "chainage": 1394.6,
+   "offset": -36.5,
+   "ground_level": 13.26,
+   "base_level": -59.74,
+   "tops": {
+    "MG": 13.26,
+    "AL": 9.76,
+    "RTD": 8.76,
+    "LC": 0.53,
+    "HF": -23.44,
+    "LG": -23.69,
+    "TS": -41.09,
+    "CK": -52.9
+   }
+  },
+  {
+   "id": "L27P",
+   "bgs_loca_id": "202002061142130490",
+   "E": 532812.991,
+   "N": 181644.552,
+   "chainage": 1519.0,
+   "offset": 7.3,
+   "ground_level": 13.333,
+   "base_level": -55.47,
+   "tops": {
+    "MG": 13.33,
+    "AL": 9.43,
+    "RTD": 8.63,
+    "LC": 6.83,
+    "LG": -30.82,
+    "TS": -44.32,
+    "CK": -53.47
+   }
+  },
+  {
+   "id": "L30R",
+   "bgs_loca_id": "202002061142130496",
+   "E": 532920.555,
+   "N": 181629.039,
+   "chainage": 1627.6,
+   "offset": 1.9,
+   "ground_level": 13.399,
+   "base_level": -45.1,
+   "tops": {
+    "MG": 13.4,
+    "AL": 9.9,
+    "RTD": 8.8,
+    "LC": 5.3,
+    "HF": -23.35,
+    "LG": -23.72,
+    "TS": -41.84
+   }
+  },
+  {
+   "id": "L47R",
+   "bgs_loca_id": "202002061142130511",
+   "E": 533036.333,
+   "N": 181618.563,
+   "chainage": 1743.8,
+   "offset": 2.4,
+   "ground_level": 13.91,
+   "base_level": -46.09,
+   "tops": {
+    "MG": 13.91,
+    "AL": 9.81,
+    "RTD": 8.61,
+    "LC": 7.91,
+    "HF": -21.59,
+    "LG": -21.99,
+    "TS": -39.64
+   }
+  },
+  {
+   "id": "LW11A",
+   "bgs_loca_id": "202002061142130522",
+   "E": 533182.386,
+   "N": 181519.468,
+   "chainage": 1898.5,
+   "offset": -82.6,
+   "ground_level": 15.24,
+   "base_level": -43.26,
+   "tops": {
+    "MG": 15.24,
+    "RTD": 10.54,
+    "LC": 5.34,
+    "LG": -24.66,
+    "TS": -42.26
+   }
+  },
+  {
+   "id": "LW9",
+   "bgs_loca_id": "202002061142130520",
+   "E": 533412.611,
+   "N": 181633.998,
+   "chainage": 2117.0,
+   "offset": 53.1,
+   "ground_level": 13.89,
+   "base_level": -41.16,
+   "tops": {
+    "MG": 13.89,
+    "RTD": 9.39,
+    "LC": 6.59,
+    "LG": -22.41,
+    "TS": -40.01
+   }
+  }
+ ],
+ "build": "models/scenarios/build_london.py"
+}

@@ -179,7 +179,7 @@ Demo: [web/drill-blast/](../web/drill-blast/) ([live](https://dtt-github.github.
 
 ### Cross-cutting client work
 
-- [ ] Geology editor along the alignment; scenario files (JSON); method picker restricted by the DAUB and FHWA pairing
+- [~] Ground scenario files (JSON, [format](SCENARIOS.md)) with a loader in Python and JS; first real alignment Farringdon – Liverpool Street from open BGS boreholes, used by the EPB demo. Open: a geology editor, scenarios for the other methods, a method picker restricted by the DAUB and FHWA pairing
 - [ ] Logistics: muck removal capacity (belt or trains), segment and grout supply, ventilation
 - [ ] Guidance loop:
   - total station and active target;

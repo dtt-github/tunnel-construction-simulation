@@ -31,3 +31,4 @@ outreach/
 
 # Downloaded validation data (open licences; fetched by the scripts)
 models/py/validation/.cache/
+models/scenarios/.cache/

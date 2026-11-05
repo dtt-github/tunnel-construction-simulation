@@ -13,6 +13,7 @@ from .sem import SEM_ROCK_CLASSES, SHOTCRETE, LiningInteraction, early_strength_
 from .slurry import Cushion, CushionState, Infiltration, discharge_density, dry_solids_flow, durand_velocity, forms_membrane, infiltration, stagnation_gradient
 from .drill_blast import DESIGNS, SUPPORT_CLASSES, Cycle, Round, design_round, max_charge_per_delay, ppv, round_cycle, ss4604866_limit
 from .lining import RingForces, annulus_volume, bursting_force, grout_window, jacking_stress, jsce_ring, ring_loads, taper, wood_inertia
+from .scenario import FaceGround, Layer, Scenario
 from .face_support import DAUB_DEFAULTS, FaceSupport, SupportWindow, daub_window, silo_stress, vermeer_limit, wedge_silo
 from .hoek_brown import hoek_brown, sigma1_at_failure
 from .settlement import (
@@ -28,6 +29,9 @@ from .settlement import (
 )
 
 __all__ = [
+    "FaceGround",
+    "Layer",
+    "Scenario",
     "RingForces",
     "annulus_volume",
     "bursting_force",

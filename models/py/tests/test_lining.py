@@ -1,5 +1,7 @@
 """Segmental lining against ITA WG2 (2000) Design Example 1 and the jacking check, ITA 2019 bursting formulas and the
 DAUB taper."""
+import math
+
 import pytest
 
 from tunnelsim_models import lining as L
@@ -52,3 +54,20 @@ def test_loads_and_stresses():
     assert q1 == pytest.approx(0.5 * (332 - 136) + 136)
     hi, lo = L.section_stresses(1000, 50, 0.3)
     assert hi == pytest.approx(1000 / 0.3 + 50 / 0.015)
+
+
+def test_terzaghi_loads():
+    # shallow cover: close to the full overburden; deep cover: reduced well below it
+    p_sh, _, _ = L.terzaghi_loads(6.0, 3.4, 20, 30, 0, 0.5, 100)
+    assert p_sh == pytest.approx(20 * 2.6, rel=0.15) and p_sh <= 20 * 2.6
+    p_dp, q1, q2 = L.terzaghi_loads(40.0, 3.4, 20, 30, 0, 0.5, 100)
+    b1 = 3.4 / math.tan(math.pi / 8 + math.radians(30) / 4)
+    t = math.tan(math.radians(30))
+    h0 = b1 * (1 - math.exp(-t * 36.6 / b1)) / t
+    assert p_dp == pytest.approx(20 * h0) and p_dp < 0.35 * 20 * 36.6
+    assert q1 == pytest.approx(0.5 * p_dp) and q2 == pytest.approx(0.5 * (p_dp + 20 * 6.8))
+    # below the water table: effective weight for the earth pressure, water added in full
+    p_w, q1w, _ = L.terzaghi_loads(40.0, 3.4, 20, 30, 0, 0.5, 0.0)
+    assert p_w - 10 * 36.6 == pytest.approx(10 * h0)
+    assert q1w == pytest.approx(0.5 * 10 * h0 + 10 * 36.6)
+    assert L.active_coefficient(30) == pytest.approx(1 / 3)

@@ -19,6 +19,7 @@ Start with the [project README](../README.md) for the live demo and quick start.
 
 | Document | Purpose |
 |---|---|
+| [SCENARIOS.md](SCENARIOS.md) | Ground scenario file format; the Farringdon – Liverpool Street scenario from open BGS boreholes, with its sources |
 | [ARCHITECTURE.md](ARCHITECTURE.md) | Physics by scale (alignment, machine, face and chamber, cutter); browser and GPU-server split; the model library contract |
 | [ROADMAP.md](ROADMAP.md) | Realism rules for every demo; Phase 0 to 5; the method-by-method slices of Phase 1 |
 | [MODELS.md](MODELS.md) | One section per implemented model: what it computes, files, references, validation, known limits |

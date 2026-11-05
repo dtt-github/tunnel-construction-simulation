@@ -39,3 +39,6 @@ button:disabled { opacity: 0.4; cursor: default; }
 .flag.warn { color: var(--accent); border: 1px solid rgba(242,180,58,.6); }
 .flag.bad { color: var(--warn); border: 1px solid rgba(255,122,69,.6); }
 p.note { color: var(--muted); font-size: 11px; margin: 6px 0 0; }
+
+#section svg { width: 100%; height: auto; display: block; margin: 4px 0; }
+#section text { font-size: 8px; fill: var(--muted); }

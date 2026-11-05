@@ -3,7 +3,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { cutterForces, tbmPerformance, hoekBrown, gaussianTrough, presetTrough, twinTroughs, burlandCategory, wedgeSilo, daubWindow, siloStress, chamber, screw, crownPressure, shieldThrust, cutterheadTorque, verticalStress, referenceInstalled, Rng, normalInv, sample as sampleDist, DIST, simulateDrive, recordCheck, maxRpm, cutterChangeHPerKm, supportDowntime, rmrClass, hardRockUtilisation, equivalentMohrCoulomb, groundReaction, pressureForDisplacement, ldp, squeezingStrain, squeezingClass, ringSupport, steelSetSupport, boltSupport, combine, supportEquilibrium, shieldFriction, shotcreteModulus, shotcreteStrength, mc90Modulus, earlyStrengthClass, fictitiousPressure, liningInteraction, sulemConvergence, triggerLevel, infiltration as slurryInfiltration, cushion, dischargeDensity, drySolidsFlow, theoreticalDryFlow, durandVelocity, pipeVelocity, excessPorePressure, designRound, roundCycle, bottomCharge, burden, firstCutBurden, holeDepth, cutSections, kuzRamX50, uniformityIndex, ppv, maxChargePerDelay, ss4604866Limit, SUPPORT_CLASSES, jsceRing, woodInertia, ringLoads, sectionStresses, jackingStress, burstingForce, annulusVolume, groutWindow, taper } from "../index.js";
+import { cutterForces, tbmPerformance, hoekBrown, gaussianTrough, presetTrough, twinTroughs, burlandCategory, wedgeSilo, daubWindow, siloStress, chamber, screw, crownPressure, shieldThrust, cutterheadTorque, verticalStress, referenceInstalled, Rng, normalInv, sample as sampleDist, DIST, simulateDrive, recordCheck, maxRpm, cutterChangeHPerKm, supportDowntime, rmrClass, hardRockUtilisation, equivalentMohrCoulomb, groundReaction, pressureForDisplacement, ldp, squeezingStrain, squeezingClass, ringSupport, steelSetSupport, boltSupport, combine, supportEquilibrium, shieldFriction, shotcreteModulus, shotcreteStrength, mc90Modulus, earlyStrengthClass, fictitiousPressure, liningInteraction, sulemConvergence, triggerLevel, infiltration as slurryInfiltration, cushion, dischargeDensity, drySolidsFlow, theoreticalDryFlow, durandVelocity, pipeVelocity, excessPorePressure, designRound, roundCycle, bottomCharge, burden, firstCutBurden, holeDepth, cutSections, kuzRamX50, uniformityIndex, ppv, maxChargePerDelay, ss4604866Limit, SUPPORT_CLASSES, jsceRing, woodInertia, ringLoads, sectionStresses, jackingStress, burstingForce, annulusVolume, groutWindow, taper, scenario, terzaghiLoads, activeCoefficient } from "../index.js";
 
 const vec = (name) => JSON.parse(readFileSync(new URL(`../../test-vectors/${name}.json`, import.meta.url)));
 
@@ -212,5 +212,22 @@ test("lining models match python", () => {
   }
   close({ wood: [4, 6, 7, 8].map((n) => woodInertia(1, n)), loads: ringLoads(20, 3.4, 20, 0.5, 3), sec: sectionStresses(1000, 50, 0.3),
     jack: jackingStress(1000, 10, 1.6125, 0.125), burst_aci: burstingForce(3000, 0.35, 0.2, 0.03, "aci"), burst_daub: burstingForce(3000, 0.35, 0.2),
-    annulus: annulusVolume(7.06, 6.9, 1.5), grout: groutWindow(16.5, 20, 3), taper: [taper(6.9, 1.5, 250), taper(6.9, 1.5, 250, 22.5)] }, v.basic, "basic");
+    annulus: annulusVolume(7.06, 6.9, 1.5), grout: groutWindow(16.5, 20, 3), taper: [taper(6.9, 1.5, 250), taper(6.9, 1.5, 250, 22.5)],
+    terzaghi: [[6.0, 3.4, 20, 30, 0, 0.5, 100], [40.0, 3.4, 20, 30, 0, 0.5, 100], [40.0, 3.4, 20, 30, 0, 0.5, 0.0], [35.0, 3.5, 20.2, 22, 12, 1.5, 9.0],
+      [30.0, 3.5, 19.5, 24, 1, 0.42, 4.0, 10.0, 15.0]].map((a) => terzaghiLoads(...a)), ka: activeCoefficient(24) }, v.basic, "basic");
+});
+
+test("scenario loader matches python", () => {
+  const v = vec("scenario");
+  const s = scenario(v.data);
+  for (const p of v.points) {
+    const col = s.column(p.ch).map((l) => [l.unit, l.top, l.base]);
+    assert.equal(col.length, p.column.length, `column ${p.ch}`);
+    col.forEach((l, i) => { assert.equal(l[0], p.column[i][0]); close([l[1], l[2]], [p.column[i][1], p.column[i][2]], `layer ${p.ch} ${i}`); });
+    assert.equal(s.unitAt(p.ch, -20), p.unit_m20);
+    close(s.porePressure(p.ch, -30), p.u_m30, `u ${p.ch}`);
+    const f = s.face(p.ch, 7.1);
+    assert.equal(f.unit_at_axis, p.face.unit_at_axis);
+    close({ ...f, unit_at_axis: 0 }, { ...p.face, unit_at_axis: 0 }, `face ${p.ch}`);
+  }
 });

@@ -14,7 +14,7 @@ import {
   durandVelocity, pipeVelocity, CONTROL_TOLERANCE,
   verticalStress, presetTrough, burlandCategory, referenceInstalled, erf,
   Rng, sample as sampleDist, DIST, SHIFT_PATTERNS, PER_CYCLE_MAINTENANCE_MIN, simulateDrive, recordCheck, EPB_WEEKLY_SURVEY,
-  jsceRing, woodInertia, subgradeModulus, ringLoads, sectionStresses, jackingStress, burstingForce, annulusVolume, groutWindow, ITA2000_ALLOWABLE,
+  jsceRing, woodInertia, subgradeModulus, terzaghiLoads, activeCoefficient, sectionStresses, jackingStress, burstingForce, annulusVolume, groutWindow, ITA2000_ALLOWABLE,
 } from "../../models/js/index.js";
 
 // ---------------------------------------------------------------- machine and scenario
@@ -858,13 +858,19 @@ const SEG_T = (M.ringOD - M.ringID) / 2, SEG_RC = (M.ringOD + M.ringID) / 4;
 const liningCache = new Map();
 function liningAt(zone) {
   if (!liningCache.has(zone.name)) {
-    const [pv, q1, q2] = ringLoads(Z0, M.ringOD / 2, zone.gamma, zone.k0, WATER);
-    const eta = woodInertia(1, SEG.n);
-    const r = jsceRing(pv, q1, q2, SEG.gammaC * SEG_T, SEG_RC, (SEG.E * SEG_T ** 3) / 12, subgradeModulus(zone.Es, SEG_RC), { eta });
-    const iMax = r.moment.indexOf(Math.max(...r.moment)), iMin = r.moment.indexOf(Math.min(...r.moment));
-    const sMax = sectionStresses(r.normal[iMax], r.moment[iMax], SEG_T), sMin = sectionStresses(r.normal[iMin], r.moment[iMin], SEG_T);
-    liningCache.set(zone.name, { pv, q1, q2, eta, r, iMax, iMin, sigma: Math.max(sMax[0], sMin[0]), sigmaMin: Math.min(sMax[1], sMin[1]),
-      oval: (2 * r.deflection) / M.ringID, grout: groutWindow(Z0 - R, zone.gamma, WATER) });
+    // vertical load reduced by Terzaghi's formula (ITA 2000, 2.2.1); lateral coefficient at both ends of the ITA range
+    // (active and at rest), the case with the higher concrete stress governs
+    const eta = woodInertia(1, SEG.n), ka = activeCoefficient(zone.phi);
+    const cases = [["active", ka], ["at rest", zone.k0]].map(([lamName, lam]) => {
+      const [pv, q1, q2] = terzaghiLoads(Z0, M.ringOD / 2, zone.gamma, zone.phi, zone.c, lam, WATER);
+      const r = jsceRing(pv, q1, q2, SEG.gammaC * SEG_T, SEG_RC, (SEG.E * SEG_T ** 3) / 12, subgradeModulus(zone.Es, SEG_RC), { eta });
+      const iMax = r.moment.indexOf(Math.max(...r.moment)), iMin = r.moment.indexOf(Math.min(...r.moment));
+      const sMax = sectionStresses(r.normal[iMax], r.moment[iMax], SEG_T), sMin = sectionStresses(r.normal[iMin], r.moment[iMin], SEG_T);
+      return { lamName, lam, pv, q1, q2, eta, r, iMax, iMin, sigma: Math.max(sMax[0], sMin[0]), sigmaMin: Math.min(sMax[1], sMin[1]),
+        oval: (2 * r.deflection) / M.ringID };
+    });
+    const g = cases[0].sigma >= cases[1].sigma ? cases[0] : cases[1];
+    liningCache.set(zone.name, { ...g, overburden: zone.gamma * (Z0 - M.ringOD / 2), grout: groutWindow(Z0 - R, zone.gamma, WATER) });
   }
   return liningCache.get(zone.name);
 }
@@ -875,18 +881,19 @@ function liningRows(zone) {
   const [tb] = shoe ? burstingForce(shoe, SEG_T, SEG.pad) : [null];
   const rows = [
     ["Ring", `7 + key, ${fmt(SEG_T * 1000, 0)} mm, ${W} m wide; joints cut bending stiffness to ${fmt(L.eta * 100, 0)} % (Wood)`],
-    ["Loads at crown / springline", `${fmt(L.pv, 0)} kPa vertical; ${fmt(L.q1, 0)}–${fmt(L.q2, 0)} kPa lateral (earth + water, full overburden)`],
+    ["Loads at crown / springline", `${fmt(L.pv, 0)} kPa vertical (Terzaghi-reduced; full overburden ${fmt(L.overburden, 0)} kPa); ${fmt(L.q1, 0)}–${fmt(L.q2, 0)} kPa lateral, ${L.lamName} coefficient ${fmt(L.lam, 2)} governs`],
     ["Bending moment", `+${fmt(r.moment[L.iMax], 0)} kNm/m at ${r.angles_deg[L.iMax]}°, ${fmt(r.moment[L.iMin], 0)} kNm/m at ${r.angles_deg[L.iMin]}° from the crown`],
     ["Normal force", `${fmt(Math.min(...r.normal), 0)}–${fmt(Math.max(...r.normal), 0)} kN/m`],
     ["Concrete stress", `${fmt(L.sigma / 1000, 1)} MPa max, ${fmt(L.sigmaMin / 1000, 1)} MPa min${L.sigmaMin < 0 ? ", tension carried by the reinforcement" : ""} (ITA 2000 allowable ${fmt(ITA2000_ALLOWABLE.concrete_42 / 1000, 0)} MPa for C42)`],
-    ["Ovalisation", `${fmt(L.oval * 100, 2)} % of the inner diameter (limit 0.5 %, DAUB)`],
+    ["Ovalisation", `${fmt(Math.abs(L.oval) * 100, 2)} % of the inner diameter, ${L.oval >= 0 ? "squatting" : "rising"} (limit 0.5 %, DAUB)`],
     ["Jacking stress per shoe", js ? `${fmt(shoe / 1000, 2)} MN on ${N_CYL} shoes: ${fmt(js / 1000, 1)} MPa (allowable ${fmt((ITA2000_ALLOWABLE.concrete_42 * ITA2000_ALLOWABLE.jacking_factor) / 1000, 1)} MPa while jacking)` : "no thrust on the ring"],
     ["Bursting force per shoe", tb ? `${fmt(tb, 0)} kN (DAUB, 0.2 m pad)` : "—"],
     ["Annulus grout", `${fmt(annulusVolume(M.D, M.ringOD, W), 2)} m³ per ring; pressure at the crown ${fmt(L.grout[0] / 100, 2)}–${fmt(L.grout[1] / 100, 2)} bar (above groundwater, at most 69 kPa over it)`],
   ];
   const alarms = [];
   if (js && js > ITA2000_ALLOWABLE.concrete_42 * ITA2000_ALLOWABLE.jacking_factor) alarms.push(`Jacking stress ${fmt(js / 1000, 1)} MPa above the allowable for the temporary jacking state`);
-  if (L.oval > 0.005) alarms.push(`Ring ovalisation ${fmt(L.oval * 100, 2)} % above 0.5 % of the inner diameter`);
+  if (L.sigma > ITA2000_ALLOWABLE.concrete_42) alarms.push(`Ring concrete stress ${fmt(L.sigma / 1000, 1)} MPa above the ITA 2000 allowable ${fmt(ITA2000_ALLOWABLE.concrete_42 / 1000, 0)} MPa`);
+  if (Math.abs(L.oval) > 0.005) alarms.push(`Ring ovalisation ${fmt(Math.abs(L.oval) * 100, 2)} % above 0.5 % of the inner diameter`);
   return { rows, alarms };
 }
 

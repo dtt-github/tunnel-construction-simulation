@@ -45,6 +45,21 @@ export function ringLoads(depthAxis, radius, gamma, k0, waterDepth, gammaW = 10,
   return [svc, k0 * (svc - uc) + uc, k0 * (svi - ui) + ui];
 }
 
+/** Terzaghi-reduced vertical earth pressure (ITA WG2 2000, Formula 2.2.1) and the lateral loads; see lining.py. */
+export function terzaghiLoads(depthAxis, radius, gamma, phiDeg, c, lam, waterDepth, gammaW = 10, surcharge = 0) {
+  const h = depthAxis - radius, hw = Math.min(Math.max(waterDepth, 0), h);
+  const g = (gamma * hw + (gamma - gammaW) * (h - hw)) / h;
+  const t = Math.tan((phiDeg * Math.PI) / 180);
+  const b1 = radius / Math.tan(Math.PI / 8 + (phiDeg * Math.PI) / 180 / 4);
+  const e = Math.exp((-t * h) / b1);
+  const h0 = Math.min((b1 * (1 - c / (b1 * g)) * (1 - e)) / t + (surcharge * e) / g, h + surcharge / g);
+  const pe = g * Math.max(h0, 0);
+  const uTop = gammaW * Math.max(h - waterDepth, 0), uBot = gammaW * Math.max(h + 2 * radius - waterDepth, 0);
+  const gBelow = waterDepth <= h ? gamma - gammaW : gamma;
+  return [pe + uTop, lam * pe + uTop, lam * (pe + gBelow * 2 * radius) + uBot];
+}
+export const activeCoefficient = (phiDeg) => Math.tan(((45 - phiDeg / 2) * Math.PI) / 180) ** 2;
+
 export function sectionStresses(n, m, thickness, width = 1) {
   const a = width * thickness, w = (width * thickness ** 2) / 6;
   return [n / a + Math.abs(m) / w, n / a - Math.abs(m) / w];
