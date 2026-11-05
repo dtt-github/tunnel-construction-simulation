@@ -6,6 +6,12 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ### Added
 
+- **Phase 2, WP0 and WP1: GPU ground physics groundwork** ([plan](docs/plans/phase2-mpm-face-chamber.md), [element tests](docs/validation/mpm-element-tests.md)):
+  - `server/`: Newton MPM package with run records, a GPU-load check and a golden test reproducing Phase 0 exactly;
+  - Newton's yield criterion read from the solver: √J2 ≤ s + μp. The Mohr–Coulomb mapping is μ = sin φ′ (plane strain, ψ = 0), confirmed by a Rankine active-wall test within ±6 % for φ′ ≤ 34°; Phase 0's μ = tan φ′ was not a valid match;
+  - the at-rest state cannot come from the MPM (K 0.74–0.86, independent of ν); it comes from the analytical model;
+  - granular column collapse against Rousseau et al. (2022, CC-BY data): 7 of 8 measured runouts within ±17 %, as close as the source's own simulation.
+
 - **Mixshield demo checked against the Thames Tunnel drive** ([validation](docs/validation/slurry-thames-advance.md)):
   - ring build 32 min (Crossrail average), was 35 min; two 12 h shifts by default on the Thames route; the 80 mm/min advance limit now sourced (T&T 2014);
   - the forecast panel shows drive H (Sophia and Mary, King et al. 2017) beside the model. The working day is 7–58 % fast (10.7–12.5 against 7.9–10.0 rings), the best week close (77–92 against 91–100); separation-plant stops are not modelled and no open source quantifies them.

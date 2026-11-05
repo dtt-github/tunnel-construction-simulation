@@ -25,11 +25,13 @@ Results go to `results/<name>.json`, with a run record:
 | Path | What it holds | Work package |
 |---|---|---|
 | `tunnelsim_server/scenes/face.py` | Tunnel face in dry sand under a retracting plate, ported unchanged from `phase0/face_bench.py` | WP0; WP2 adds pressure control |
-| `tunnelsim_server/materials.py` | Soil parameters and their mapping to Newton's material | WP0 (friction only); WP1 adds the elastoplastic mapping |
+| `tunnelsim_server/materials.py` | Soil parameters and their mapping to Newton's Drucker–Prager material: μ = sin φ′, s = c′ cos φ′; Tresca μ = 0, s = cu | WP1 |
 | `tunnelsim_server/probes.py` | Forces on collider bodies from the contact impulses | WP0 |
 | `tunnelsim_server/runrecord.py` | Run records and the GPU load and reservation check | WP0 |
 | `tunnelsim_server/runner.py` | Batch runs to JSON | WP0 |
 | `tests/test_golden_face.py` | Golden test: the Phase 0 face numbers must not drift | WP0 |
+| `tunnelsim_server/scenes/k0.py`, `rankine.py`, `collapse.py` | Element tests: at-rest stress, Rankine active wall, Rousseau et al. column collapse ([results](../docs/validation/mpm-element-tests.md)) | WP1 |
+| `tests/test_materials.py`, `tests/test_element_gpu.py` | The Mohr–Coulomb mapping; Rankine and B00 collapse pinned on the GPU | WP1 |
 | `gpu_reservations.json` | GPU windows reserved for this project on the shared Spark (local time) | WP0 |
 
 Still to come: `scenes/chamber.py` and `scenes/screw.py` (WP4, WP5) and `live.py` (WP6, local only).

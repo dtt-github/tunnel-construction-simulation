@@ -94,6 +94,12 @@ Each package ends with a check. A package is done only when its check passes, or
 - column runout within the experimental scatter of the dataset;
 - the friction mapping is fixed here and not tuned again later.
 
+**Status (5 Nov 2026, [element tests](../validation/mpm-element-tests.md)):**
+- **Friction mapping fixed:** Newton's criterion is √J2 ≤ s + μp. μ = sin φ′ (plane strain, ψ = 0) is within ±6 % of Rankine for φ′ ≤ 34° at H/10–H/20. It is weaker at high friction (φ′ ≈ 49°) and on finer grids (+16–26 % at H/40).
+- **K0 failed:** K is 0.74–0.86 whatever ν is. The plan's fallback applies: the at-rest state comes from the analytical model.
+- **Simple shear** is not possible with kinematic colliders, so a Rankine active-wall test took its place.
+- **Column collapse:** 7 of 8 Rousseau runouts within ±17 %, as close as the source's own simulation.
+
 ### WP2: dry-sand face with pressure control (about 3 weeks)
 
 - **Pressure control.** Replace the retracting plate with a pressure-controlled face: the support pressure is set and lowered in steps, and face displacement is measured. This is how the centrifuge tests were run, and how the demo's operator acts.

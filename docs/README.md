@@ -29,6 +29,7 @@ Start with the [project README](../README.md) for the live demo and quick start.
 | [validation/hard-rock-projects.md](validation/hard-rock-projects.md) | Hard-rock TBM penetration and advance against Follo, Gotthard, Guadarrama, Brenner and Niagara |
 | [validation/epb-crossrail-advance.md](validation/epb-crossrail-advance.md) | EPB ring cycle and advance against the Crossrail running-tunnel drives |
 | [validation/slurry-thames-advance.md](validation/slurry-thames-advance.md) | Mixshield ring cycle and advance against the Crossrail Thames Tunnel drive |
+| [validation/mpm-element-tests.md](validation/mpm-element-tests.md) | GPU MPM (Phase 2) element tests: material mapping, at-rest stress, Rankine wall, Rousseau column collapse |
 | [validation/epb-open-data.md](validation/epb-open-data.md) | EPB thrust and torque models against open field data (Changsha Metro Line 4, Guangzhou–Foshan), CC BY 4.0 |
 | [realism/drill-blast-heading.md](realism/drill-blast-heading.md) | Realism checklist for the drill & blast road tunnel demo |
 | [realism/slurry-mixshield.md](realism/slurry-mixshield.md) | Realism checklist for the urban slurry shield (Mixshield) demo |

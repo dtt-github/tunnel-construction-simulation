@@ -1,0 +1,49 @@
+{
+  "scene": "collapse",
+  "time": "2026-11-05T16:59:56",
+  "git": "4005ca7+dirty",
+  "versions": {
+    "newton": "1.7.0",
+    "warp": "1.19.0",
+    "numpy": "2.5.4",
+    "python": "3.12.3"
+  },
+  "params": {
+    "run": "G00",
+    "voxel": 0.005,
+    "ppc": 2,
+    "width": 0.06,
+    "bed": 0.02,
+    "gate_speed": 1.0,
+    "fps": 240.0,
+    "t_max": 4.0,
+    "rest_speed": 0.01,
+    "iterations": 50,
+    "seed": 0
+  },
+  "gpu_before": {
+    "name": "NVIDIA GB10",
+    "utilisation_percent": 4,
+    "driver": "580.178.04",
+    "other_processes": []
+  },
+  "timing_valid_for_decisions": false,
+  "timing_note": "outside a reserved window",
+  "calibration": "uncalibrated",
+  "result": {
+    "run": "G00",
+    "material": "2.7 mm granules",
+    "inclination_deg": 0,
+    "H0": 0.11,
+    "L0": 0.1833,
+    "particles": 175584,
+    "t_rest_s": 0.7,
+    "Hf_sim": 0.1076,
+    "Hf_exp": 0.12,
+    "runout_sim": 0.1017,
+    "runout_sim_5mm": 0.0917,
+    "runout_exp": 0.11,
+    "runout_rousseau_sim": 0.1,
+    "ms_per_step": 16.3
+  }
+}
