@@ -450,13 +450,15 @@ Outputs: utilisation (boring time / calendar time); mean advance per day and wee
 - a 4 h maintenance shift removes a sixth of production;
 - interventions and rail haulage slow the drive;
 - default urban EPB settings give about 15–29 % utilisation and a weekly mean within two standard deviations of the survey (85 ± 36 m/week);
-- best day and month stay below the published references.
+- best day and month stay below the published references;
+- the Crossrail drives (King, Thomas & Stenning 2017, Table 3; [validation](validation/epb-crossrail-advance.md)): with 1.6 m rings, a 32 min build and two 12 h shifts, the model gives 11.8–12.5 rings a day without tool interventions, against 12.3–14.9 on drives X and Y excluding delays. Its best day (13–14 rings) and best week (about 90 rings) are well below Crossrail's 33–59 and 169–216, because ring times are drawn independently and days average out.
 
 **Limits:**
 
 - the distributions come from one project;
 - locomotive travel time growing with tunnel length is not modelled: on the source project's own settings the model gives about 19 % utilisation against the paper's 14 %;
-- no learning curve, breakdowns by subsystem or ground-related stops besides tool interventions;
+- no learning curve, breakdowns by subsystem, station transits or ground-related stops besides tool interventions;
+- no day-to-day correlation of ring times, so best days and weeks are too low;
 - hard-rock terms (stroke, regrip, rock support, cutter changes per cutter) are still to come.
 
 ---

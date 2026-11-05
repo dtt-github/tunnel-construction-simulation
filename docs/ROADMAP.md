@@ -115,9 +115,9 @@ Demo: [web/epb/](../web/epb/) ([live](https://dtt-github.github.io/tunnel-constr
   - two-component grout through the tailskin;
   - backup with foam plant and belt or muck cars.
 - [~] Cycle (done except key-position selection driven by steering; keys follow a fixed alternating pattern):
-  - push one ring (≈ 1.4–1.5 m), then build a universal ring of 6 + 1 segments with key-position selection;
+  - push one ring (1.6 m, Crossrail), then build a ring of 7 segments + key with key-position selection;
   - grout during the push;
-  - rates: ≈ 15–20 min push, ≈ 35 min build, ≈ 12–20 m/day.
+  - rates: 32 min build (Crossrail average); 12.3–14.9 rings per working day on Crossrail drives X and Y ([validation](validation/epb-crossrail-advance.md)).
 - [~] Console (done except grout pressure):
   - chamber pressure gauges by height inside the DAUB window;
   - screw speed and FIR/FER;

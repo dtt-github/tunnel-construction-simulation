@@ -6,6 +6,12 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ### Added
 
+- **EPB demo checked against the Crossrail drives** ([validation](docs/validation/epb-crossrail-advance.md)):
+  - the ring is now Crossrail's: 1.6 m, 7 segments + small key, 300 mm (King, Thomas & Stenning 2017). It was 1.2 m and 6 + key, taken from a Moscow metro source;
+  - ring build 32 min, the Crossrail average (Tunnels & Tunnelling 2021), was 35 min; shield 12 m (Crossrail station-transits paper), was an assumed 9.5 m, which raises the shield-friction thrust;
+  - two 12 h shifts a day, seven days a week, as on Crossrail, by default on the London route;
+  - the forecast panel shows Crossrail's Table 3 beside the model. The average working day matches (11.8–12.5 rings against 12.3–14.9); the best day and week stay well below Crossrail's, which is stated as a limit.
+
 - **Drill & blast cycle checked against Norwegian data** ([validation](docs/validation/drill-blast-cycle.md)):
   - logged rounds at the Ulvin rail tunnel (Messelt 2013): mucking 220 m³/h and downtime 13 % of the round are now in the model, which had no downtime;
   - a contractor's T10.5 estimate (Furunes & Strype 2022): ventilation 20 min and scaling 1.5 h, replacing assumed 0.5 h and 1 h. Every activity of the demo's round is inside the estimate's P5–P95;

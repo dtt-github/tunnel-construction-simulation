@@ -30,7 +30,10 @@
     "TNT-GOTTHARD-S210": "https://tunnelsandtunnelling.com/?p=5739",
     "ALPTRANSIT-BAUBLATT": "https://www.alptransit-portal.ch (milestone Pin_039: Baublatt, \"410 Meter lang und gefrässig\")",
     "HANSEN-2018": "https://hdl.handle.net/11250/2503069",
-    "IDDENG-2019": "https://nva.sikt.no/registration/0198e6b19388-e58a5658-5843-49c9-8b5e-13171b80cf86"
+    "IDDENG-2019": "https://nva.sikt.no/registration/0198e6b19388-e58a5658-5843-49c9-8b5e-13171b80cf86",
+    "KING-2017": "https://learninglegacy.crossrail.co.uk/wp-content/uploads/2017/04/Machine-driven-tunnels-on-the-Elizabeth-line-London.pdf",
+    "TNT-RING-BUILD": "https://www.tunnelsandtunnelling.com/?p=9006",
+    "CRL-TRANSITS": "https://learninglegacy.crossrail.co.uk/documents/tbm-station-transits/"
   },
   "presets": [
     {
@@ -63,6 +66,13 @@
           "source": "TunnelTalk Crossrail article, Dec 2011",
           "verified": false
         },
+        "shield_length": {
+          "value": 12.0,
+          "unit": "m",
+          "source": "CRL-TRANSITS",
+          "verified": true,
+          "note": "mid-shield articulation; TBM 120 m long"
+        },
         "thrust_max": {
           "value": null,
           "unit": "kN",
@@ -88,28 +98,49 @@
           "note": "main range of application"
         },
         "ring_width": {
-          "value": 1.2,
+          "value": 1.6,
           "unit": "m",
-          "source": "TNT-MOSCOW",
-          "verified": true
+          "source": "KING-2017",
+          "verified": true,
+          "note": "Crossrail running tunnels; 1 m rings in pilot tunnels through stations"
         },
         "segments_per_ring": {
-          "value": "6 + key",
+          "value": "7 + key",
           "unit": null,
-          "source": "TNT-MOSCOW",
-          "verified": true
+          "source": "KING-2017",
+          "verified": true,
+          "note": "300 mm SFRC, 6.2 m ID, 6.8 m OD, taper across the diameter"
         },
         "push_time": {
-          "value": 16,
+          "value": null,
           "unit": "min",
-          "source": "TNT-MOSCOW",
-          "verified": true
+          "source": null,
+          "verified": false,
+          "note": "not published for Crossrail; the earlier 16 min was a Moscow value for 1.2 m rings"
         },
         "ring_build_time": {
-          "value": 35,
+          "value": 32,
           "unit": "min",
-          "source": "TNT-MOSCOW",
-          "verified": true
+          "source": "TNT-RING-BUILD",
+          "verified": true,
+          "note": "Crossrail average, bolted segments (Tunnels & Tunnelling, 25 Feb 2021)"
+        },
+        "production_rings_per_day": {
+          "value": [
+            12.3,
+            14.9
+          ],
+          "unit": "rings/d",
+          "source": "KING-2017",
+          "verified": true,
+          "note": "drives X and Y excluding delays (Table 3); 5.1-9.0 including delays; best day 33-59 rings, best week 169-216"
+        },
+        "shift_pattern": {
+          "value": "2 x 12 h, 7 days",
+          "unit": null,
+          "source": "KING-2017",
+          "verified": true,
+          "note": "west (C300): 3 x 8 h"
         },
         "lining": {
           "value": "precast segments, universal ring with tapered key",

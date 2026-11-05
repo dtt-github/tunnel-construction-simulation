@@ -27,6 +27,7 @@ Start with the [project README](../README.md) for the live demo and quick start.
 | [validation/sem-convergence.md](validation/sem-convergence.md) | Ground-response chain against measured convergence in a weak-rock tunnel (Albania, CC BY 4.0), and against measured crown settlement in the Farringdon platform tunnels |
 | [validation/drill-blast-cycle.md](validation/drill-blast-cycle.md) | Drill & blast round cycle against logged Ulvin rounds, a T10.5 contractor estimate and Tunnelbyggetid |
 | [validation/hard-rock-projects.md](validation/hard-rock-projects.md) | Hard-rock TBM penetration and advance against Follo, Gotthard, Guadarrama, Brenner and Niagara |
+| [validation/epb-crossrail-advance.md](validation/epb-crossrail-advance.md) | EPB ring cycle and advance against the Crossrail running-tunnel drives |
 | [validation/epb-open-data.md](validation/epb-open-data.md) | EPB thrust and torque models against open field data (Changsha Metro Line 4, Guangzhou–Foshan), CC BY 4.0 |
 | [realism/drill-blast-heading.md](realism/drill-blast-heading.md) | Realism checklist for the drill & blast road tunnel demo |
 | [realism/slurry-mixshield.md](realism/slurry-mixshield.md) | Realism checklist for the urban slurry shield (Mixshield) demo |
