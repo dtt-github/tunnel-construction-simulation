@@ -15,12 +15,18 @@
   h1 { font-size: 30px; line-height: 1.2; margin: 0 0 8px; }
   .lede { color: var(--muted); margin: 0 0 36px; }
   .cards { display: grid; gap: 16px; }
-  a.card { display: block; padding: 20px 22px; background: var(--card); border: 1px solid var(--line); border-radius: 10px;
-           color: inherit; text-decoration: none; transition: border-color .15s; }
-  a.card:hover, a.card:focus-visible { border-color: var(--accent); outline: none; }
+  .card { position: relative; padding: 20px 22px; background: var(--card); border: 1px solid var(--line); border-radius: 10px;
+          transition: border-color .15s; }
+  .card:hover, .card:focus-within { border-color: var(--accent); }
   .card h2 { font-size: 18px; margin: 0 0 4px; }
-  .card h2::after { content: " →"; color: var(--accent); }
+  .card h2 a { color: inherit; text-decoration: none; outline: none; }
+  .card h2 a::before { content: ""; position: absolute; inset: 0; border-radius: 10px; }
+  .card h2 a::after { content: " →"; color: var(--accent); }
   .card p { margin: 0; color: var(--muted); font-size: 15px; }
+  .card p.checked { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--line); font-size: 14px; }
+  .checked strong { color: var(--ink); font-weight: 600; }
+  .checked a { position: relative; z-index: 1; color: var(--accent); }
+  .checked a:hover, .checked a:focus-visible { text-decoration-thickness: 2px; }
   footer { margin-top: 40px; font-size: 14px; color: var(--muted); }
   footer a { color: inherit; }
 </style>
@@ -30,36 +36,43 @@
   <h1>Tunnel Construction Simulation</h1>
   <p class="lede">An open simulator for mechanised tunnelling: published analytical models in the browser, GPU ground physics on the server.</p>
   <div class="cards">
-    <a class="card" href="web/epb/">
-      <h2>Urban EPB shield (7 m class)</h2>
-      <p>An earth-pressure-balance machine laid out front to back from published references, driven by the analytical models: chamber pressure held inside the DAUB support window by the screw conveyor, foam conditioning, thrust and torque breakdown, ring building with a 6 + key universal ring, and surface settlement under buildings. Shift pattern, downtime and tool interventions give a 90-day advance forecast, checked against published record rates.</p>
-    </a>
-    <a class="card" href="web/slurry/">
-      <h2>Urban slurry shield (Mixshield)</h2>
-      <p>A 7.08 m Crossrail-class Mixshield in saturated sand and gravel: submerged wall and air cushion holding the support pressure within ±10 kPa, feed and discharge lines with a crusher at the suction, filter cake or slurry penetration at the face, and the dry-mass balance and deposit velocity in the circuit.</p>
-    </a>
-    <a class="card" href="phase0/replays/">
-      <h2>Recorded GPU runs</h2>
-      <p>Phase 0 benchmarks of the material-point method, recorded on the GPU server and replayed in the browser: a model tunnel face collapsing as its support retracts, and an EPB chamber stirred by a rotating cutterhead. They test speed and stability, not calibrated machine performance.</p>
-    </a>
-    <a class="card" href="web/hard-rock/">
-      <h2>Hard-rock open gripper TBM</h2>
+    <div class="card">
+      <h2><a href="web/epb/">Urban EPB shield (7 m class)</a></h2>
+      <p>A 7 m EPB driven through real London ground: the Farringdon – Liverpool Street corridor from open BGS boreholes, with the 60 real buildings over the line. Chamber pressure held inside the DAUB window by the screw conveyor, foam conditioning, thrust and torque breakdown, ring building with a 6 + key universal ring, and surface settlement over the buildings, with the second bore. Shift pattern, downtime and tool interventions give a 90-day advance forecast.</p>
+      <p class="checked"><strong>Checked against:</strong> thrust and torque against four open field datasets (<a href="https://github.com/dtt-github/tunnel-construction-simulation/blob/main/docs/validation/epb-open-data.md">EPB field data</a>); the settlement trough reproduces Hyde Park, 8.1 against 8.3 mm, and the second bore follows it (<a href="https://github.com/dtt-github/tunnel-construction-simulation/blob/main/docs/validation/settlement.md">settlement</a>); the advance forecast against published record rates.</p>
+    </div>
+    <div class="card">
+      <h2><a href="web/slurry/">Urban slurry shield (Mixshield)</a></h2>
+      <p>A 7.08 m Crossrail-class Mixshield on the Crossrail Thames Tunnel, Plumstead to North Woolwich, in real ground from open BGS boreholes (Chalk, Thanet Sand, the river above): submerged wall and air cushion, feed and discharge lines with a crusher at the suction, filter cake or slurry penetration at the face, and the dry-mass balance and deposit velocity in the circuit.</p>
+      <p class="checked"><strong>Checked against:</strong> settlement of both bores against 17 measured sections of this drive, median ratio 1.10 (<a href="https://github.com/dtt-github/tunnel-construction-simulation/blob/main/docs/validation/settlement.md">settlement</a>); the support window under the river, 3.0–3.6 bar, against the more than 3 bar Crossrail needed.</p>
+    </div>
+    <div class="card">
+      <h2><a href="phase0/replays/">Recorded GPU runs</a></h2>
+      <p>Phase 0 benchmarks of the material-point method, recorded on the GPU server and replayed in the browser: a model tunnel face collapsing as its support retracts, and an EPB chamber stirred by a rotating cutterhead.</p>
+      <p class="checked"><strong>Checked against:</strong> nothing yet. They test speed and stability, not calibrated machine performance.</p>
+    </div>
+    <div class="card">
+      <h2><a href="web/hard-rock/">Hard-rock open gripper TBM</a></h2>
       <p>A 9.58 m main-beam TBM with the Gotthard Base Tunnel machine data: disc cutterhead with buckets, grippers and the regrip cycle, rock bolts, mesh and ring beams installed by rock class, shotcrete on the backup, and a fault zone that slows the drive.</p>
-    </a>
-    <a class="card" href="web/drill-blast/">
-      <h2>Drill &amp; blast road tunnel</h2>
-      <p>A Norwegian T10.5 road tunnel driven round by round: the drilling pattern from published rules, a three-boom jumbo, charging, blast, ventilation, scaling, loader and trucks, bolts and sprayed concrete by support class, and vibration at a house above.</p>
-    </a>
-    <a class="card" href="web/sem/">
-      <h2>SEM / NATM heading</h2>
-      <p>The Crossrail Farringdon platform tunnel in real London ground: an 11 m sprayed-concrete enlargement of a TBM pilot in Lambeth Group and London Clay, ring closure behind the face, spiles in a water-bearing sand lens, and predicted crown settlement (about 11 mm in the Lambeth Group) beside the measured 10–16.5 mm. A weak-rock heading with a fault zone stays selectable.</p>
-    </a>
-    <a class="card" href="web/hard-rock/?machine=double">
-      <h2>Hard-rock double shield TBM</h2>
-      <p>A 9.9 m double shield with the Follo Line machine data, its penetration and average advance checked against Follo: telescopic and gripper shields, segment rings built while boring with pea-gravel backfill, and single-shield mode through the fault zone.</p>
-    </a>
+      <p class="checked"><strong>Checked against:</strong> machine data from Herrenknecht and the AlpTransit archive; disc-cutter penetration against the Follo Line logs; working-day advance bracketed by Gotthard's 8–10 m per calendar day (<a href="https://github.com/dtt-github/tunnel-construction-simulation/blob/main/docs/validation/hard-rock-projects.md">hard-rock projects</a>).</p>
+    </div>
+    <div class="card">
+      <h2><a href="web/drill-blast/">Drill &amp; blast road tunnel</a></h2>
+      <p>A Norwegian T10.5 road tunnel driven round by round: the drilling pattern from published rules, a three-boom jumbo, charging, blast, ventilation, scaling, loader and trucks, bolts and sprayed concrete by support class, downtime, and vibration at a house above.</p>
+      <p class="checked"><strong>Checked against:</strong> hole counts against current Norwegian rounds; the round cycle against logged rounds at the Ulvin tunnel and a contractor's T10.5 estimate, 12.7 h against NFF's "about 12 h" (<a href="https://github.com/dtt-github/tunnel-construction-simulation/blob/main/docs/validation/drill-blast-cycle.md">drill &amp; blast cycle</a>).</p>
+    </div>
+    <div class="card">
+      <h2><a href="web/sem/">SEM / NATM heading</a></h2>
+      <p>The Crossrail Farringdon platform tunnel in real London ground: an 11 m sprayed-concrete enlargement of a TBM pilot in Lambeth Group and London Clay, undrained ground response, ring closure behind the face, and spiles in a water-bearing sand lens. A weak-rock heading with a fault zone stays selectable.</p>
+      <p class="checked"><strong>Checked against:</strong> predicted crown settlement, 10.4–13.7 mm, against the measured 10.3–16.5 mm and Crossrail's own 10 mm design analysis; the ground response against measured convergence in a weak-rock tunnel (<a href="https://github.com/dtt-github/tunnel-construction-simulation/blob/main/docs/validation/sem-convergence.md">SEM convergence</a>).</p>
+    </div>
+    <div class="card">
+      <h2><a href="web/hard-rock/?machine=double">Hard-rock double shield TBM</a></h2>
+      <p>A 9.9 m double shield with the Follo Line machine data: telescopic and gripper shields, segment rings built while boring with pea-gravel backfill, and single-shield mode through the fault zone.</p>
+      <p class="checked"><strong>Checked against:</strong> Follo Line TBM1: penetration 6.4 against 6.32 mm/rev, within about ±27 % section by section; advance 13–15 against 14.1 m a day (<a href="https://github.com/dtt-github/tunnel-construction-simulation/blob/main/docs/validation/hard-rock-projects.md">hard-rock projects</a>).</p>
+    </div>
   </div>
-  <footer>Source and model references: <a href="https://github.com/dtt-github/tunnel-construction-simulation">github.com/dtt-github/tunnel-construction-simulation</a></footer>
+  <footer>Every model and its checks: <a href="https://github.com/dtt-github/tunnel-construction-simulation/blob/main/docs/MODELS.md">model catalogue</a> and <a href="https://github.com/dtt-github/tunnel-construction-simulation/tree/main/docs/validation">validation pages</a>. Source: <a href="https://github.com/dtt-github/tunnel-construction-simulation">github.com/dtt-github/tunnel-construction-simulation</a></footer>
 </main>
 </body>
 </html>
