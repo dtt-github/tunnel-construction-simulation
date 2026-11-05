@@ -270,7 +270,8 @@ Convergence–confinement around a circular tunnel, squeezing classes, and two m
 
 **Against field data** ([validation](validation/sem-convergence.md)): 14 monitored sections of a headrace tunnel in weak flysch, Albania (Terron-Almenara & Panthi 2025, CC BY 4.0).
 
-- **Farringdon platform tunnels** ([validation](validation/sem-convergence.md#farringdon-platform-tunnels-undrained-ground-london-clays)): with Crossrail's undrained design lines and the ring closed 5–10 m behind the face, the predicted crown settlement is 5–12 mm, against 10.3–18.9 mm measured (mean about 13.6 mm). That is the right order, but low by about 1.3–2.7×.
+- **Farringdon platform tunnels** ([validation](validation/sem-convergence.md#farringdon-platform-tunnels-undrained-ground-london-clays)): with Crossrail's undrained design lines and the ring closed 7.5 m behind the face, the predicted crown settlement is 10.4–13.7 mm, against 10.3–16.5 mm measured outside compensation grouting (mean 13.6 mm) and 10 mm from Crossrail's design FE. The ring movement alone (5–10 mm) read 1.3–2.7× low; the crown factor and the whole-ring settlement below close most of that.
+- **Crown settlement in undrained clay** (`sem.crown_settlement`): the axisymmetric ring movement times the Kirsch crown factor 1 + (1 − K)(3 − 4ν)/(1 + K), with K the total-stress ratio (Brady & Brown 2006), plus 2–3 mm settlement of the ring as a whole, measured in the Crossrail Whitechapel enlargements (Stärk et al.). For ν → 0.5 the crown follows σv whatever K is.
 
 - Unsupported, the chain gives a median 1.77× the measured convergence after the station.
 - Every reading is reproduced with 1–51 % of the installed support capacity (median 11–19 %).

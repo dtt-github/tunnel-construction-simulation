@@ -2,10 +2,15 @@
 the Crossrail Farringdon platform tunnels (SEM enlargements in Lambeth Group and London Clay).
 
 Data and parameters (Crossrail Learning Legacy, read and cited, not redistributed):
-- Measured crown settlement, platform tunnels PTW and PTE: 10.3-18.9 mm; mean 13.5 / 13.7 mm outside the compensation
-  grouting zone, 15.9 / 16.4 mm inside it. Gakis, Grau & Schwind (2016), Tunnel deformations caused by compensation
-  grouting at Crossrail Farringdon Station, Table 1:
+- Measured crown settlement, platform tunnels PTW and PTE: 10.3-16.5 mm and mean 13.5 / 13.7 mm outside the zone of
+  concurrent compensation grouting; 12.8-18.9 mm, mean 15.9 / 16.4 mm inside it (about 2.5 mm from the grouting).
+  Readings rose linearly until ring closure (3-5 days), decelerated for 3-5 more days, then stayed steady. The design 2D
+  FE (Mohr-Coulomb, these design lines) gave 10 mm without grouting. Gakis, Grau & Schwind (2016), Tunnel deformations
+  caused by compensation grouting at Crossrail Farringdon Station, Table 1, Table 4 and In-tunnel monitoring:
   https://learninglegacy.crossrail.co.uk/documents/tunnel-deformations-caused-compensation-grouting-crossrail-farringdon-station/
+- Whole-ring settlement 2-3 mm in the 10.5-11.5 m Whitechapel enlargements in London Clay (crown 7-10 mm): Staerk,
+  Jimenez Rangel & Wade, Analyses of convergence and utilisation of SCL-tunnels during excavation:
+  https://learninglegacy.crossrail.co.uk/documents/analyses-convergence-utilisation-scl-tunnels-excavation/
 - Undrained design lines, z = depth below the top of the London Clay: London Clay cu = 85 + 6.5 z kPa, E = 40 + 3.7 z MPa;
   Lambeth Group cu = 95 + 10 z kPa, E = 36 + 5.9 z MPa; nu 0.495; K0 0.6 gave realistic deformations and 1.2 governed
   lining stress. Temporary sprayed concrete lining tunnels in Farringdon Crossrail Station, Table 1:
@@ -19,7 +24,9 @@ Data and parameters (Crossrail Learning Legacy, read and cited, not redistribute
 Set-up: an 11 m circle (the 11.4 x 10.6 m section), Tresca ground (phi = 0, c = cu), p0 the mean of the total vertical
 and horizontal stress at the axis. The ring is taken to carry load from closure; before that the open top-heading arch
 counts as no support. The quantity compared is the crown movement after the first survey, one 1 m round behind the
-face: u_final - u_free(x = 1 m) from the Vlachopoulos & Diederichs profile.
+face: u_final - u_free(x = 1 m) from the Vlachopoulos & Diederichs profile. That movement is the mean radial one; the
+crown takes it times the Kirsch factor for the total-stress ratio at the axis (in undrained ground the crown follows the
+vertical stress, so K0 0.6 and 1.2 nearly agree), plus 2-3 mm settlement of the whole ring (Whitechapel).
 
 Run:  uv run python validation/sem_farringdon.py      (prints a Markdown summary)
 """
@@ -33,12 +40,13 @@ sys.path.insert(0, str(HERE.parent))
 
 from tunnelsim_models.ground_response import ground_reaction, ldp  # noqa: E402
 from tunnelsim_models.scenario import Scenario  # noqa: E402
-from tunnelsim_models.sem import lining_interaction  # noqa: E402
+from tunnelsim_models.sem import WHOLE_BODY_SETTLEMENT, crown_settlement, lining_interaction  # noqa: E402
 
 SCENARIO = HERE.parent.parent / "scenarios" / "london-farringdon-liverpool-street.json"
 D, R, NU, LINING, SURVEY_X, RATE = 11.0, 5.5, 0.495, 0.4, 1.0, 1.1 / 24
 DESIGN = {"LC": (lambda z: 85 + 6.5 * z, lambda z: 40 + 3.7 * z), "LG": (lambda z: 95 + 10 * z, lambda z: 36 + 5.9 * z)}
-MEASURED = (10.3, 18.9, 13.6)  # min, max, mean outside compensation grouting (mm)
+MEASURED = (10.3, 16.5, 13.6)  # min, max, mean outside the concurrent compensation grouting (mm)
+CROSSRAIL_FE = 10.0  # mm, design 2D FE without grouting
 
 
 def ground(s: Scenario, ch: float) -> dict:
@@ -51,22 +59,31 @@ def ground(s: Scenario, ch: float) -> dict:
             "shares": f.units_on_face}
 
 
-def crown_mm(g: dict, k0: float, closure_x: float) -> float:
-    p0 = (g["sv"] + k0 * (g["sv"] - g["u"]) + g["u"]) / 2000
+def crown_mm(g: dict, k0: float, closure_x: float, whole_body: float = 0.0) -> tuple[float, float]:
+    """(mean radial movement after the first survey, crown settlement with the Kirsch factor and whole-ring term), mm."""
+    sh = k0 * (g["sv"] - g["u"]) + g["u"]
+    p0 = (g["sv"] + sh) / 2000
     free = ground_reaction(p0, 0, R, g["e"], NU, 0.0, g["cu"])
     li = lining_interaction(p0, R, g["e"], NU, 0.0, g["cu"], LINING, closure_x, RATE, "kielder")
-    return (li.u_final - free.u * ldp(SURVEY_X, R, free.r_p)) * 1000
+    u_survey = free.u * ldp(SURVEY_X, R, free.r_p)
+    return max(li.u_final - u_survey, 0) * 1000, crown_settlement(li.u_final, u_survey, sh / g["sv"], NU, whole_body) * 1000
 
 
 if __name__ == "__main__":
     s = Scenario.load(SCENARIO)
-    closures = (1.0, 5.0, 7.5, 10.0)
+    closures = (5.0, 7.5, 10.0)
+    wb = sum(WHOLE_BODY_SETTLEMENT) / 2
     print("| Scenario chainage | Clay at the axis | z below LC top (m) | cu (kPa) | E (MPa) | K0 | "
-          + " | ".join(f"Ring closed {x:g} m back (mm)" for x in closures) + " |")
+          + " | ".join(f"Ring closed {x:g} m back: mean radial / crown (mm)" for x in closures) + " |")
     print("|---" * (6 + len(closures)) + "|")
+    rows = []
     for ch in range(360, 661, 60):
         g = ground(s, ch)
         for k0 in (0.6, 1.2):
-            vals = " | ".join(f"{max(crown_mm(g, k0, x), 0):.1f}" for x in closures)
+            r = [crown_mm(g, k0, x, wb) for x in closures]
+            rows.append((ch, k0, r))
+            vals = " | ".join(f"{a:.1f} / {b:.1f}" for a, b in r)
             print(f"| {ch} | {g['clay']} | {g['z']:.1f} | {g['cu'] * 1000:.0f} | {g['e']:.0f} | {k0} | {vals} |")
-    print(f"\nMeasured crown settlement: {MEASURED[0]}-{MEASURED[1]} mm, mean {MEASURED[2]} mm outside compensation grouting.")
+    mid = [r[1][1] for _, k0, r in rows if k0 == 0.6]
+    print(f"\nCrown settlement with the ring closed 7.5 m back, K0 0.6, whole ring {wb * 1000:.1f} mm: {min(mid):.1f}-{max(mid):.1f} mm.")
+    print(f"Measured (outside compensation grouting): {MEASURED[0]}-{MEASURED[1]} mm, mean {MEASURED[2]} mm. Crossrail design FE: {CROSSRAIL_FE:.0f} mm.")

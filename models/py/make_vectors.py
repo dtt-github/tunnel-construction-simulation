@@ -188,6 +188,8 @@ for gsi, mi, sci, ei, p0, th, xi, v in [(22, 8, 15, 3000, 2.7, 0.35, 1.0, 0.125)
                            "out": {k: getattr(li, k) for k in ("u_install", "u_final", "p_final", "hours_to_95", "min_safety", "min_safety_age_h")}})
 semv["sulem"] = [[x, t, sem.sulem_convergence(x, t, 20, 4.6, 6, 5.7, 0.3)] for x, t in ((0, 1), (2, 0.5), (10, 5), (50, 60))]
 semv["triggers"] = [[m_, sem.trigger_level(m_, 10)] for m_ in (5, 8, 11, 16)]
+semv["crown"] = [[k, nu, uf, us, sem.kirsch_crown_factor(k, nu), sem.crown_settlement(uf, us, k, nu)]
+                 for k, nu, uf, us in ((0.6, 0.495, 0.012, 0.004), (1.0, 0.3, 0.01, 0.002), (1.2, 0.495, 0.009, 0.003), (0.6, 0.495, 0.002, 0.004))]
 write("sem", semv)
 from tunnelsim_models import slurry as sl  # noqa: E402
 

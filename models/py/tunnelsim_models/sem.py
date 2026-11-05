@@ -17,6 +17,12 @@ References
   C(x, t) = C_inf [1 - (X / (X + x))^2] [1 + m (1 - (T / (T + t))^n)], as given by Guayacan-Carrillo et al. (2016).
 - Crossrail Learning Legacy, Stepney Green caverns: cycle times (top heading 1 m in 1.5-2.0 h, bench 2 m in 2.5-2.8 h,
   invert 2 m in 3.2-3.5 h) and trigger levels at 75 / 105 / 150 % of the predicted lining displacement.
+- Brady, B.H.G., Brown, E.T. (2006). Rock Mechanics for Underground Mining, 3rd ed.: Kirsch displacement around a
+  circular opening under vertical stress p and horizontal K p, u_r = (p a / 4G)[(1 + K) - (1 - K)(3 - 4 nu) cos 2theta] at
+  the wall (as given in the open GeoStudio SIGMA/W verification "Kirsch", files.seequent.com/GeoStudio/SigmaW/Verification-Kirsch.pdf).
+- Staerk, Jimenez Rangel & Wade, Analyses of convergence and utilisation of SCL-tunnels during excavation (Crossrail
+  Whitechapel, Learning Legacy): the 10.5-11.5 m enlargements in London Clay settled as a whole by 2-3 mm, with 7-10 mm
+  at the crown; movements faded within 5-12 days.
 
 Units: m, MPa, hours unless stated.
 """
@@ -192,3 +198,20 @@ def trigger_level(measured: float, predicted: float) -> str:
         if measured >= f * predicted:
             level = name
     return level
+
+
+# --------------------------------------------------------------------------- in-tunnel crown settlement (undrained clay)
+
+def kirsch_crown_factor(k: float, nu: float) -> float:
+    """Crown displacement over the mean radial displacement of an elastic circular opening under total vertical stress
+    sv and horizontal k sv (Kirsch; Brady & Brown 2006). For nu -> 0.5 the crown follows sv alone, whatever k."""
+    return 1 + (1 - k) * (3 - 4 * nu) / (1 + k)
+
+
+WHOLE_BODY_SETTLEMENT = (0.002, 0.003)  # m, settlement of the whole ring, Crossrail Whitechapel enlargements (Staerk et al.)
+
+
+def crown_settlement(u_final: float, u_survey: float, k: float, nu: float, whole_body: float = 0.0025) -> float:
+    """Crown settlement after the first survey: the axisymmetric (mean-stress) movement u_final - u_survey scaled to the
+    crown by the Kirsch factor, plus the settlement of the ring as a whole, which a plane-strain ring cannot produce."""
+    return max(u_final - u_survey, 0.0) * kirsch_crown_factor(k, nu) + whole_body

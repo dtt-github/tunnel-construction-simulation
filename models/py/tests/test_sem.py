@@ -7,7 +7,7 @@ from tunnelsim_models.ground_response import equivalent_mohr_coulomb
 from tunnelsim_models.sem import (
     BRENNER_SHOTCRETE, SEM_ROCK_CLASSES, SHOTCRETE, average_advance_rate, early_strength_class, fictitious_pressure,
     lining_interaction, mc90_modulus, ring_closure_ok, shotcrete_modulus, shotcrete_strength, sulem_convergence,
-    trigger_level,
+    WHOLE_BODY_SETTLEMENT, crown_settlement, kirsch_crown_factor, trigger_level,
 )
 
 
@@ -57,3 +57,15 @@ def test_sequence_and_monitoring():
     assert sulem_convergence(1e6, 1e9, 20, 4.6, 6, 5.7, 0.3) == pytest.approx(20 * (1 + 5.7 * (1 - (6 / (6 + 1e9)) ** 0.3)), rel=1e-6)
     assert sulem_convergence(10, 30, 20, 4.6, 6, 5.7, 0.3) > sulem_convergence(10, 3, 20, 4.6, 6, 5.7, 0.3)
     assert trigger_level(7, 10) == "none" and trigger_level(8, 10) == "green" and trigger_level(11, 10) == "amber" and trigger_level(16, 10) == "red"
+
+
+def test_crown_settlement():
+    # Kirsch: hydrostatic stress gives a uniform wall movement; with nu -> 0.5 the crown follows sv whatever K
+    assert kirsch_crown_factor(1.0, 0.3) == pytest.approx(1.0)
+    sv = 1.0
+    for k in (0.6, 1.2):
+        mean = (1 + k) / 2 * sv
+        assert mean * kirsch_crown_factor(k, 0.4999) == pytest.approx(sv, rel=1e-3)
+    assert WHOLE_BODY_SETTLEMENT == (0.002, 0.003)
+    assert crown_settlement(0.010, 0.004, 1.0, 0.3, 0.0025) == pytest.approx(0.0085)
+    assert crown_settlement(0.002, 0.004, 0.6, 0.495) == pytest.approx(0.0025)  # no heave from the ring part

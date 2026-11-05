@@ -9,9 +9,10 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 - **SEM demo on real London ground** ([checklist](docs/realism/sem-heading.md), [validation](docs/validation/sem-convergence.md#farringdon-platform-tunnels-undrained-ground-london-clays)):
   - the SEM demo now opens on the Crossrail Farringdon platform tunnel: an 11 m sprayed-concrete enlargement of a 6.2 m TBM pilot, on the Farringdon – Liverpool Street scenario, with Crossrail's undrained design lines;
   - the sequence follows Farringdon: 1 m top headings, 2 m bench and invert, the ring closed 5–10 m back, 400 mm fibre-reinforced lining without girders. A water-bearing sand lens brings wellpoints, face pockets and 4 m spiles. The heading keeps the published 1.1 m/day (0.5 m/day in the lens);
-  - the predicted crown settlement is shown beside the measured 10.3–18.9 mm; the model is about half of it, and the limits panel says why;
+  - the predicted crown settlement (about 10.5–14 mm) is shown beside the measured 10.3–16.5 mm outside compensation grouting and Crossrail's 10 mm FE;
   - the weak-rock heading stays selectable (`?ground=rock`);
   - Reset now puts the camera on the new face.
+- **Crown settlement in undrained clay:** `sem.crown_settlement` (Python and JS, with test vectors) scales the ring movement to the crown with the Kirsch factor and adds 2–3 mm settlement of the whole ring measured at Crossrail Whitechapel. The Farringdon prediction moves from 5–8 mm (low by 1.3–2.7×) to 10.4–13.7 mm, inside the measured 10.3–16.5 mm. In-tunnel readings levelled out within days of ring closure, so consolidation is ruled out as the cause.
 - **Undrained ground response:** the ground reaction curve handles φ = 0 (Tresca) as the limit of Duncan Fama, in Python and JavaScript, with a test and test vectors. Script: `models/py/validation/sem_farringdon.py`.
 - **Urban EPB demo** (Slice A, [live](https://dtt-github.github.io/tunnel-construction-simulation/web/epb/)):
   - a 7 m EPB laid out front to back, with an articulated shield and 16 pairs of thrust cylinders;
