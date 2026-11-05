@@ -1,0 +1,79 @@
+{
+  "scene": "face_sand",
+  "time": "2026-11-05T17:11:17",
+  "git": "cb0b255+dirty",
+  "versions": {
+    "newton": "1.7.0",
+    "warp": "1.19.0",
+    "numpy": "2.5.4",
+    "python": "3.12.3"
+  },
+  "params": {
+    "diameter": 5.0,
+    "cover": 2.0,
+    "voxel_per_d": 10.0,
+    "ppc": 2,
+    "control": "displacement",
+    "retract_over_d": 0.05,
+    "rate_over_d": 0.025,
+    "target_kpa": 0.0,
+    "servo_gain": 0.5,
+    "duration": 2.0,
+    "steel_friction": 0.3,
+    "fps": 60.0,
+    "settle": 60,
+    "iterations": 50,
+    "seed": 0,
+    "moving_threshold_over_d": 0.002,
+    "soil": {
+      "name": "Wang et al. (2024) sand, phi 33.1",
+      "density": 1580.0,
+      "friction": 0.5461019610144291,
+      "source": "Wang et al. (2024), doi:10.1016/j.undsp.2023.11.001, Table 1: gamma 15.5 kN/m3, phi 33.1 deg, c 0",
+      "yield_stress": 0.0,
+      "young_modulus": 1000000000000000.0,
+      "poisson_ratio": 0.3121938587263447,
+      "dilatancy": 0.0,
+      "phi_deg": 33.1,
+      "cohesion": 0.0,
+      "match": "plane_strain",
+      "extra": {
+        "k0": 0.4538980389855709
+      }
+    }
+  },
+  "gpu_before": {
+    "name": "NVIDIA GB10",
+    "utilisation_percent": 91,
+    "driver": "580.178.04",
+    "other_processes": [
+      "python",
+      "python"
+    ]
+  },
+  "timing_valid_for_decisions": false,
+  "timing_note": "GPU shared with other processes: timings are lower bounds",
+  "calibration": "uncalibrated",
+  "result": {
+    "diameter_m": 5.0,
+    "cover_over_D": 2.0,
+    "voxel_per_D": 10.0,
+    "particles": 142459,
+    "control": "displacement",
+    "p_settled_kPa": 74.775,
+    "p_1pct_kPa": 7.806,
+    "p_3pct_kPa": 8.57,
+    "p_5pct_kPa": 8.931,
+    "p_min_kPa": 6.393,
+    "face_displacement_over_D": 0.05,
+    "p_final_kPa": 8.889,
+    "zone_top_above_crown_over_D": 1.954,
+    "zone_reaches_surface": true,
+    "wedge_inclination_deg": 50.4,
+    "max_settlement_over_D": 0.01842,
+    "max_settlement_ahead_of_face_over_D": 0.221,
+    "p_vermeer_kPa": 9.334,
+    "gamma_kN_m3": 15.5,
+    "ms_per_frame": 26.48
+  }
+}

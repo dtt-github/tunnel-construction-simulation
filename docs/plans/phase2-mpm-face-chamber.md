@@ -119,6 +119,21 @@ Each package ends with a check. A package is done only when its check passes, or
   - chimney to the surface at C/D 0.5 but not at 1.5.
 - **Production resolution:** the coarsest resolution that passes. If none that runs live passes, the live view gets a stated correction factor and the label says so.
 
+**Status (5 Nov 2026, [face in sand](../validation/mpm-face-sand.md)):** the face is **uncalibrated**.
+- **Pressure:** within ±25 % of Wang et al. at D/10 (0.93–1.22). It is 40–100 % above Idinger's measured range at C/D ≤ 1, on the analytical values; finer grids add about 20 %.
+- **Mechanism and settlement fail:** the chimney always reaches the surface, the wedge is 54° against 64–68°, and settlement is 4–6× too large. The flow has no dilation.
+- **Dilatancy controls all three.** A WP1b is added, to derive Newton's dilatancy factor and set it from an independent source (Bolton 1986) before WP2 is repeated as a prediction.
+- **The pressure servo works:** it holds above the limit and gives way below it.
+
+### WP1b: dilatancy (added 5 Nov 2026, about 1 week)
+
+- Derive what Newton's `dilatancy` factor means as a dilation angle, from the flow rule in the solver.
+- Check it with an element test that measures volume change in shear.
+- Set it per soil from Bolton (1986), using relative density and stress level.
+- Repeat the WP2 runs as a prediction.
+
+**Check:** the element test gives the intended dilation angle within ±2°. Then the WP2 checks again, unchanged.
+
 ### WP3: undrained clay face (about 2 weeks)
 
 - Tresca-like material (friction 0, `yield_stress` = cu, finite E), as on the SEM page.

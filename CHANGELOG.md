@@ -6,6 +6,11 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ### Added
 
+- **Phase 2, WP2: tunnel face in dry sand on the GPU** ([results](docs/validation/mpm-face-sand.md)), still **uncalibrated**:
+  - half-model with displacement control (as the experiments) and a retract-only pressure servo (as the live view will need); the servo holds above the limit pressure and gives way below it;
+  - face pressure within ±25 % of Wang et al. (2024) at D/10, but 40–100 % above Idinger et al.'s (2011) measured range at C/D ≤ 1; finer grids add about 20 % and converge at D/20–D/30;
+  - the mechanism and settlement do not match: with no dilation the chimney always reaches the surface. Dilatancy controls all of it, so a WP1b sets it from an independent source before WP2 is repeated.
+
 - **Phase 2, WP0 and WP1: GPU ground physics groundwork** ([plan](docs/plans/phase2-mpm-face-chamber.md), [element tests](docs/validation/mpm-element-tests.md)):
   - `server/`: Newton MPM package with run records, a GPU-load check and a golden test reproducing Phase 0 exactly;
   - Newton's yield criterion read from the solver: √J2 ≤ s + μp. The Mohr–Coulomb mapping is μ = sin φ′ (plane strain, ψ = 0), confirmed by a Rankine active-wall test within ±6 % for φ′ ≤ 34°; Phase 0's μ = tan φ′ was not a valid match;
