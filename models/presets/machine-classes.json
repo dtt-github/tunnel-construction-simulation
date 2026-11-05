@@ -25,7 +25,12 @@
     "TO-FOLLO": "https://www.tunnel-online.info/en/artikel/tunnel_Follo_Line_Project_A_new_Dimension_in_Hard_Rock_Tunnelling-3173456.html",
     "NCE-FOLLO": "https://www.newcivilengineer.com/innovative-thinking/tunnels-norways-follo-line-10-04-2019/",
     "MAGGIO-2020": "https://webthesis.biblio.polito.it/15216/1/tesi.pdf",
-    "ALFERO-2022": "https://webthesis.biblio.polito.it/23141/1/tesi.pdf"
+    "ALFERO-2022": "https://webthesis.biblio.polito.it/23141/1/tesi.pdf",
+    "HK-GOTTHARD": "https://www.herrenknecht.com/en/references/referencesdetail/gotthard-base-tunnel/",
+    "TNT-GOTTHARD-S210": "https://tunnelsandtunnelling.com/?p=5739",
+    "ALPTRANSIT-BAUBLATT": "https://www.alptransit-portal.ch (milestone Pin_039: Baublatt, \"410 Meter lang und gefrässig\")",
+    "HANSEN-2018": "https://hdl.handle.net/11250/2503069",
+    "IDDENG-2019": "https://nva.sikt.no/registration/0198e6b19388-e58a5658-5843-49c9-8b5e-13171b80cf86"
   },
   "presets": [
     {
@@ -232,11 +237,11 @@
           "verified": true
         },
         "thrust_max": {
-          "value": null,
+          "value": 25565,
           "unit": "kN",
-          "source": null,
-          "verified": false,
-          "note": "not found for a 10 m machine; Guadarrama 16-21 MN only in an unreachable source"
+          "source": "HANSEN-2018",
+          "verified": true,
+          "note": "including 3200 kN shield drag (Table 2.4)"
         },
         "lining": {
           "value": "precast segments (optional in ideal rock), built while boring",
@@ -284,11 +289,11 @@
           "verified": true
         },
         "cutters": {
-          "value": "60 x 19-inch: 4 double centre, 46 face, 10 gauge",
+          "value": "71 x 19-inch",
           "unit": null,
-          "source": "MAGGIO-2020",
+          "source": "HANSEN-2018",
           "verified": true,
-          "note": "10.65 m Brenner machine"
+          "note": "Follo Table 2.4; the demo draws 4 centre and 10 gauge discs after the Brenner machine (MAGGIO-2020)"
         },
         "disc_load_max": {
           "value": 314,
@@ -339,6 +344,20 @@
           "source": "TO-FOLLO",
           "verified": true,
           "note": "14-15 rings a day"
+        },
+        "mean_penetration": {
+          "value": 6.32,
+          "unit": "mm/rev",
+          "source": "HANSEN-2018",
+          "verified": true,
+          "note": "TBM1, 4.5 km weighted mean at 5.08 rpm and 21217 kN gross thrust (Table 5.1)"
+        },
+        "average_day": {
+          "value": 14.1,
+          "unit": "m/day",
+          "source": "IDDENG-2019",
+          "verified": true,
+          "note": "northbound machines to August 2018, including probing and pre-grouting (Table 3.3, after Kalager & Gammelsaeter 2019); best day 31 m"
         }
       }
     },
@@ -346,13 +365,13 @@
       "id": "hard-rock-main-beam-9.5m",
       "class": "9.5 m hard-rock open gripper (main beam)",
       "method": "gripper",
-      "basis": "Gotthard-class gripper TBM",
+      "basis": "Gotthard Base Tunnel gripper TBMs (Herrenknecht, 9.43 and 9.58 m)",
       "fields": {
         "diameter": {
           "value": 9.58,
           "unit": "m",
-          "source": "TT-GOTTHARD",
-          "verified": false
+          "source": "HK-GOTTHARD",
+          "verified": true
         },
         "cutterhead_rpm_max": {
           "value": 6.6,
@@ -362,22 +381,37 @@
           "note": "gauge speed limit 200 m/min for 19-inch discs: 200 / (pi * 9.58)"
         },
         "cutterhead_torque": {
-          "value": 5290,
+          "value": 8526,
           "unit": "kNm",
-          "source": "TB-GOTTHARD",
-          "verified": false
+          "source": "HK-GOTTHARD",
+          "verified": true
         },
         "cutterhead_power": {
           "value": 3500,
           "unit": "kW",
-          "source": "TB-GOTTHARD",
-          "verified": false
+          "source": "HK-GOTTHARD",
+          "verified": true
         },
         "thrust_max": {
           "value": 27488,
           "unit": "kN",
-          "source": "TB-GOTTHARD",
-          "verified": false
+          "source": "TNT-GOTTHARD-S210",
+          "verified": true,
+          "note": "S-210 at 9.33 m; not published for the 9.58 m machines"
+        },
+        "n_cutters": {
+          "value": 58,
+          "unit": null,
+          "source": "ALPTRANSIT-BAUBLATT",
+          "verified": true,
+          "note": "26 t per disc"
+        },
+        "stroke": {
+          "value": null,
+          "unit": "m",
+          "source": null,
+          "verified": false,
+          "note": "1.2-1.8 m reported only on a practitioner forum"
         },
         "support_l1": {
           "value": "rock bolts, mesh, steel ring beams; probe drilling",
@@ -408,13 +442,6 @@
           "unit": null,
           "source": "HK-GRIPPER",
           "verified": true
-        },
-        "stroke": {
-          "value": null,
-          "unit": "m",
-          "source": null,
-          "verified": false,
-          "note": "1.2-1.8 m reported only on a practitioner forum"
         }
       }
     },

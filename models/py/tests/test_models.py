@@ -35,11 +35,19 @@ def test_hoek_brown_intact_limit():
 
 def test_csm_19inch_disc():
     # 19" disc, T=19 mm, S=85 mm, p=5 mm in 150 MPa / 10 MPa rock: hand calc ~ 200 kN total, RC ~ 0.10
-    f = cutter_forces(5, 150, 10, Cutter())
+    f = cutter_forces(5, 150, 10, Cutter(psi=0.1))
     assert f.total_n / 1000 == pytest.approx(200.8, rel=5e-3)
     assert f.normal_n / 1000 == pytest.approx(199.8, rel=5e-3)
     assert f.rolling_coefficient == pytest.approx(math.tan(f.phi_rad / 2))
     assert f.rolling_coefficient == pytest.approx(0.102, abs=2e-3)
+
+
+def test_csm_follo_tbm1():
+    # Hansen (2018) Table 5.1: 5.08 rpm, 21217 kN gross (3200 kN shield drag), 6.32 mm/rev, 1.92 m/h; Table 2.4: 71 discs
+    perf = tbm_performance(21216.91 - 3200, 5.08, 71, 9.96, 152.45, 10.38, cutter=Cutter(spacing_mm=4980 / 71),
+                           max_torque_knm=11115, max_power_kw=4550)
+    assert perf.penetration_mm_rev == pytest.approx(6.32, rel=0.02)
+    assert perf.rop_m_h == pytest.approx(1.92, rel=0.03)
 
 
 def test_csm_monotonic_and_inverse():

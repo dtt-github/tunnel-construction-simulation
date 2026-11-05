@@ -61,8 +61,7 @@ def test_reference_machines():
     half = reference_installed("epb", 3.54)
     assert half["torque"][1] == pytest.approx(9800 / 8)
     assert reference_installed("epb", 3.3)["thrust"][1] == pytest.approx(45000 / 4)
-    # unverified entries only with the flag
-    assert reference_installed("gripper", 9)["torque"] is None
-    assert reference_installed("gripper", 9, include_unverified=True)["torque"] is not None
+    # Gotthard S-210 (9.33 m, Tunnels & Tunnelling 2006), scaled with D^3
+    assert reference_installed("gripper", 9)["torque"][1] == pytest.approx(5290 * (9 / 9.33) ** 3)
     for m in REFERENCE_MACHINES:
         assert m["source"] and m["type"] in ("epb", "slurry", "gripper")

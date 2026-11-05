@@ -67,9 +67,17 @@
      ]
     },
     "gripper": {
-     "torque": null,
-     "thrust": null,
-     "machines": []
+     "torque": [
+      2234.1115861973467,
+      2234.1115861973467
+     ],
+     "thrust": [
+      15473.050205114596,
+      15473.050205114596
+     ],
+     "machines": [
+      "Gotthard Base Tunnel"
+     ]
     }
    },
    "reference_all": {
@@ -183,9 +191,17 @@
      ]
     },
     "gripper": {
-     "torque": null,
-     "thrust": null,
-     "machines": []
+     "torque": [
+      11255.23271413707,
+      11255.23271413707
+     ],
+     "thrust": [
+      45471.82101094902,
+      45471.82101094902
+     ],
+     "machines": [
+      "Gotthard Base Tunnel"
+     ]
     }
    },
    "reference_all": {
@@ -299,9 +315,17 @@
      ]
     },
     "gripper": {
-     "torque": null,
-     "thrust": null,
-     "machines": []
+     "torque": [
+      416.86047089396556,
+      416.86047089396556
+     ],
+     "thrust": [
+      5052.424556772114,
+      5052.424556772114
+     ],
+     "machines": [
+      "Gotthard Base Tunnel"
+     ]
     }
    },
    "reference_all": {

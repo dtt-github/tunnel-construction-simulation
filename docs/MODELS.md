@@ -6,7 +6,7 @@ Every model exists twice: a Python reference in [`models/py/tunnelsim_models/`](
 
 | Model | Python | JavaScript | Status |
 |---|---|---|---|
-| [CSM disc cutter](#csm-disc-cutter) | `csm.py` | `csm.js` | Hand-checked; field validation pending |
+| [CSM disc cutter](#csm-disc-cutter) | `csm.py` | `csm.js` | Reproduces the Follo TBM1 mean penetration (6.36 against 6.32 mm/rev) with ψ = −0.1 |
 | [Hoek–Brown rock mass](#hoekbrown-rock-mass) | `hoek_brown.py` | `hoek_brown.js` | Hand-checked |
 | [Settlement and building damage](#settlement-and-building-damage) | `settlement.py` | `settlement.js` | Hand-checked; checked privately against published case histories |
 | [Face support pressure](#face-support-pressure) | `face_support.py` | `face_support.js` | Hand-checked; seepage not yet modelled |
@@ -30,13 +30,15 @@ Also: [machine class presets](#machine-class-presets) and [where default paramet
 Disc-cutter forces, penetration from thrust, rate of penetration, cutterhead torque (T ≈ 0.3·D·N·F_r), power and the torque limit.
 
 - **References:** Rostami & Ozdemir (1993); Rostami (1997).
-- **Validated against:** a hand calculation for a 19″ disc (p = 5 mm, UCS 150 MPa, BTS 10 MPa → F_t ≈ 201 kN, RC ≈ 0.10).
+- **Validated against:**
+  - a hand calculation for a 19″ disc (p = 5 mm, UCS 150 MPa, BTS 10 MPa, ψ 0.1 → F_t ≈ 201 kN, RC ≈ 0.10);
+  - Follo Line TBM1, the 4.5 km weighted mean (Hansen 2018, NTNU, [hdl:11250/2503069](https://hdl.handle.net/11250/2503069)): 71 discs, net thrust 18,017 kN, 5.08 rpm, UCS 152 MPa, BTS 10.4 MPa. Measured 6.32 mm/rev. With the spacing as radius / number of discs, ψ = −0.1 gives 6.36 mm/rev; the earlier ψ = 0.1 gave 11.8 mm/rev. ψ = −0.1 is now the default, inside Rostami's −0.2 to +0.2 ([validation](validation/hard-rock-projects.md)).
 - **Drive and speed limits:**
   - Available torque is the installed torque up to the speed where it meets the installed power, then power / angular speed. The two Niagara torque points (18,800 kNm at 2.4 rpm, 9,025 kNm at 5 rpm) both give 4,725 kW.
   - Speed limit from the gauge-cutter linear speed: rpm = V_L / (π D), with V_L = 165 m/min for 17″ and 200 m/min for 19″ discs (Rostami & Chang 2017, [doi:10.1016/j.eng.2017.12.009](https://doi.org/10.1016/j.eng.2017.12.009)).
   - Optional penetration cap. The practical maximum is 15 mm/rev, the lower end of the 15–20 mm/rev "brief maximum before the conveyor overloads" (Macias & Barton 2022).
   - The limit that binds is reported (thrust, penetration, torque or power), together with the thrust actually carried by the cutters.
-- **Limits:** field validation against the Yinsong dataset is pending.
+- **Limits:** ψ is fitted to one project mean in strong gneiss; scatter between sections and other rock types (the Yinsong dataset) are not yet tested.
 
 ## Hoek–Brown rock mass
 
@@ -235,7 +237,8 @@ Cutter wear and changes, rock support by class, and utilisation as downtime per 
 **Validated against:**
 
 - Farrokh's worked example (open TBM, 3.9 m, PR 4.7 m/h): 1,036 against 1,021 h/km, U 20.5 % against 21 %, 23.2 against 23.5 m/day;
-- the wear model gives 25.6 h/km against Farrokh's 30 h/km for low-quartz rock at CAI 2.
+- the wear model gives 25.6 h/km against Farrokh's 30 h/km for low-quartz rock at CAI 2;
+- Follo Line (9.96 m double shield): with the measured 1.92 m/h and Follo's 442 cutter changes per km, the model gives 12.9–14.9 m/day and 28–32 % utilisation, against the measured 14.1 m/day average and an implied 31 % ([validation](validation/hard-rock-projects.md)).
 
 **Limits:**
 

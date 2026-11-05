@@ -14,7 +14,11 @@ Core relations (constant-cross-section disc):
     Fn   = Ft * cos(phi / 2),   Fr = Ft * sin(phi / 2)
 
 Units: lengths in mm, stresses in MPa -> pressures in MPa, forces in N (mm^2 * MPa = N).
-C ~= 2.12 (dimensionless), psi in [-0.2, 0.2] (pressure-distribution exponent; ~0.1 for sharp discs).
+C ~= 2.12 (dimensionless), psi in [-0.2, 0.2] (pressure-distribution exponent). Default psi = -0.1: with the spacing
+taken as cutterhead radius / number of cutters (Bruland's average spacing), it reproduces the 4.5 km weighted mean of
+Follo Line TBM1 (9.96 m double shield, 71 x 19" discs, gneiss UCS 152 MPa, BTS 10.4 MPa, 5.08 rpm, net thrust
+21217 - 3200 kN shield drag): 6.36 against 6.32 mm/rev measured. Hansen (2018), NTNU MSc, Tables 2.4 and 5.1,
+https://hdl.handle.net/11250/2503069. With psi = 0.1 the model gave 11.8 mm/rev there (1.9x).
 """
 from __future__ import annotations
 
@@ -42,7 +46,7 @@ class Cutter:
     diameter_mm: float = 482.6  # 19-inch disc
     tip_width_mm: float = 19.0
     spacing_mm: float = 85.0
-    psi: float = 0.1
+    psi: float = -0.1  # back-analysed on Follo TBM1 (see module docstring)
     max_load_kn: float = 311.0  # 19" rated load, Robbins disc-cutter spec sheet (docs/research/industry-survey.md §4.2)
 
 

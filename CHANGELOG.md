@@ -6,6 +6,13 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ### Added
 
+- **Hard-rock TBMs checked against real projects** ([validation](docs/validation/hard-rock-projects.md)):
+  - the CSM disc-cutter model over-predicted the Follo Line TBM1 mean penetration by 1.9×. Its pressure-distribution exponent ψ is now −0.1, inside Rostami's range, which reproduces 6.32 mm/rev (6.36);
+  - with Follo's measured penetration and cutter changes, the downtime model gives 12.9–14.9 m/day against the measured 14.1 m/day average;
+  - double shield demo: 71 discs as at Follo; default thrust and speed are the logged Follo means. In gneiss it gives 6.85 mm/rev and 15.6 m/day (was 12.6 mm/rev and about 21 m/day);
+  - gripper demo: the Gotthard 9.58 m machine data (8,526 kNm, 3,500 kW, 58 discs at 26 t, 2 m stroke), replacing a torque that belonged to the 9.33 m S-210;
+  - Guadarrama, Brenner, Gotthard and Niagara averages listed as brackets; no open source gives their utilisation.
+
 - **SEM demo on real London ground** ([checklist](docs/realism/sem-heading.md), [validation](docs/validation/sem-convergence.md#farringdon-platform-tunnels-undrained-ground-london-clays)):
   - the SEM demo now opens on the Crossrail Farringdon platform tunnel: an 11 m sprayed-concrete enlargement of a 6.2 m TBM pilot, on the Farringdon – Liverpool Street scenario, with Crossrail's undrained design lines;
   - the sequence follows Farringdon: 1 m top headings, 2 m bench and invert, the ring closed 5–10 m back, 400 mm fibre-reinforced lining without girders. A water-bearing sand lens brings wellpoints, face pockets and 4 m spiles. The heading keeps the published 1.1 m/day (0.5 m/day in the lens);

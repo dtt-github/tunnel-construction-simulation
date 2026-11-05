@@ -8,15 +8,19 @@ import { THREE, CUT, mat, steel, dark, yellow, cyl, box, polar, shell, label, bu
 export const M = {
   kind: "gripper",
   title: "Hard-rock open gripper TBM · Ø 9.58 m",
-  D: 9.58, // m, Gotthard-class main beam (preset, trade press, unverified)
-  torque: 5290, power: 3500, thrustInstalled: 27.5, // kNm, kW, MN (preset, unverified)
+  D: 9.58, // m, Gotthard Base Tunnel gripper TBMs, 9.43 and 9.58 m (Herrenknecht reference)
+  torque: 8526, power: 3500, // kNm, kW (Herrenknecht reference; "3500 kW, 8500 kNm", Baublatt / AlpTransit portal)
+  thrustInstalled: 27.5, // MN, Gotthard S-210 at 9.33 m (Tunnels & Tunnelling, Oct 2006); not published for 9.58 m
   shoeArea: 2 * 2.6 * 3.2, // m^2, two gripper shoes as drawn (assumed)
-  nCutters: 62, // assumed: ~85 mm spacing over the face, plus centre and gauge cutters
-  stroke: 1.8, // m, assumed (1.2-1.8 m reported only informally)
+  nCutters: 58, // "58 sharp cutters", each pressed with 26 t (Baublatt / AlpTransit portal)
+  stroke: 2.0, // m: one gripper stroke gives 2 m of advance (Baublatt / AlpTransit portal)
+  thrustDefault: 14750, // kN, 58 discs x 26 t (about 254 kN) as at Gotthard
+  rpmDefault: 5.5, // rpm, assumed (Gotthard S-210: up to 6 rpm)
   regripMin: 4, // min, Farrokh (2018): 2-6 min per regrip
   utilMachine: () => "open",
   limits: [
-    "Machine torque, power and thrust are the Gotthard-class preset values, which come from trade press and are not yet verified. The number of cutters (62) and the stroke (1.8 m) are assumptions.",
+    "Torque and power are those of the Gotthard Base Tunnel gripper TBMs (Herrenknecht); 58 discs at 26 t each and a 2 m stroke from the AlpTransit portal. Installed thrust (27.5 MN) is that of the 9.33 m Gotthard S-210; the cutter layout drawn is schematic.",
+    "Average advance at Gotthard was about 8–10 m per calendar day over whole drives, including fault zones and stoppages; best days 38–56 m. The demo's working-day rates (Farrokh downtime model) are higher in good rock and are not a project forecast.",
     "Support patterns follow the RMR table (Bieniawski 1989); per-bolt installation times are not modelled. The final cast-in-place lining is placed after or behind the drive and is not shown.",
   ],
 };

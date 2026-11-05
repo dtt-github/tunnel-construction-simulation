@@ -58,8 +58,8 @@ REFERENCE_MACHINES = (
      "power_kw": None, "torque_kind": "installed", "verified": False,
      "source": "https://www.robbinstbm.com/projects/niagara-tunnel-project/"},
     {"project": "Gotthard Base Tunnel", "type": "gripper", "diameter": 9.33, "torque_knm": 5290.0, "thrust_kn": 27488.0,
-     "power_kw": 3500.0, "torque_kind": "installed", "verified": False,
-     "source": "trade press via search (Tunnelbuilder)"},
+     "power_kw": 3500.0, "torque_kind": "installed", "verified": True,
+     "source": "Tunnels & Tunnelling, Oct 2006, https://tunnelsandtunnelling.com/?p=5739"},
 )
 
 

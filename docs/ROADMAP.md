@@ -152,7 +152,7 @@ Demo: [web/epb/](../web/epb/) ([live](https://dtt-github.github.io/tunnel-constr
   - fault zones cut penetration and utilisation;
   - they need heavy support (ribs at 1 m, shotcrete);
   - they raise the jamming risk (model 8).
-- [ ] Check against reference projects: Guadarrama and Follo (double shield), Brenner exploratory tunnel (gripper), Niagara (large main beam).
+- [~] Check against reference projects ([validation](validation/hard-rock-projects.md)): Follo penetration and average advance reproduced (CSM ψ back-analysed); Gotthard machine data verified; Guadarrama, Brenner and Niagara bracket the rates. Open: utilisation and downtime by cause from a primary source; a section-by-section test (Yinsong dataset).
 
 ### Slice C: slurry / Mixshield
 
