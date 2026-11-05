@@ -7,7 +7,7 @@
 // Frame: metres, Y up, the face at z = 0 and the excavated tunnel along +z; the world (rock, support) moves by +chainage.
 
 import {
-  designRound, roundCycle, supportQuantities, SUPPORT_CLASSES, horseshoe, holeCharge, bottomCharge, ppv, maxChargePerDelay,
+  designRound, roundCycle, HOURS_PER_WEEK, supportQuantities, SUPPORT_CLASSES, horseshoe, holeCharge, bottomCharge, ppv, maxChargePerDelay,
   ss4604866Limit, NORTHERN_LINK, emptyHolesForDepth, overbreakPercent,
 } from "../../models/js/index.js";
 import { THREE, createScene, label, placeLabels, mat, box, fmt, dl, CUT, BEHIND_FACE, AHEAD_OF_FACE } from "../hard-rock/common.js";
@@ -433,14 +433,14 @@ function hud() {
   ]);
   // cycle: step bars with the current position
   const total = cy.total_h, done = cy.steps.slice(0, S.step).reduce((a, [, h]) => a + h, 0) + (hours - S.left / 3600);
-  const COLORS = ["#7f8c99", "#3987e5", "#d95926", "#ff7a45", "#b8b2a6", "#c9a227", "#8a6a45", "#199e70", "#b07ad9"];
+  const COLORS = ["#7f8c99", "#3987e5", "#d95926", "#ff7a45", "#b8b2a6", "#c9a227", "#8a6a45", "#199e70", "#b07ad9", "#4b5560"];
   const bars = cy.steps.map(([n, hh], i) => `<i title="${n} ${fmt(hh, 2)} h" style="width:${(100 * hh) / total}%;background:${COLORS[i]};${i === S.step ? "outline:2px solid #e7e9ec;outline-offset:-2px" : ""}"></i>`).join("");
   const legend = cy.steps.map(([n, hh], i) => `<span style="--c:${COLORS[i]}">${n} ${fmt(hh, 1)} h</span>`).join("");
   const days = S.simTime / 86400;
   ui.cycle.innerHTML = `<dl>
       <dt>Now</dt><dd>${name}: ${fmt(S.left / 3600, 1)} h left</dd>
       <dt>Round</dt><dd>${S.rounds + 1}, face at ${fmt(S.face, 1)} m · ${fmt(done, 1)} of ${fmt(total, 1)} h</dd>
-      <dt>Advance at 110 h per week</dt><dd>${fmt(cy.m_per_week, 0)} m/week (NFF: 40–80 m per week per face)</dd>
+      <dt>Advance at ${HOURS_PER_WEEK} h per week</dt><dd>${fmt(cy.m_per_week, 0)} m/week (Tunnelbyggetid model, 74.6 m²: about 48; logged Ulvin, 120 m²: about 23; NFF 40–80)</dd>
       <dt>Achieved so far</dt><dd>${days > 0.2 ? `${fmt(S.metres, 1)} m in ${fmt(S.simTime / 3600, 0)} working hours` : "—"}</dd>
     </dl><div class="shares">${bars}</div><div class="legend">${legend}</div>
     <p class="note">Activities one after another at the face. Rates: NFF Publications 14, 26 and 28 (drilling 2 m/min per boom, mucking 200 m³/h, 12 bolts/h, 6 m³/h sprayed concrete); charging and positioning times assumed.</p>`;
