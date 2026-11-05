@@ -13,15 +13,18 @@ import json
 from pathlib import Path
 
 from . import UNCALIBRATED
-from .materials import PHASE0_SAND, Soil, drained_sand
+from .materials import PHASE0_SAND, Soil, drained_sand, undrained_clay
 from .runrecord import gpu_snapshot, record
-from .scenes import collapse, face, face_sand, k0, rankine
+from .scenes import collapse, face, face_sand, k0, rankine, tunnel_2d
 
 RESULTS = Path(__file__).resolve().parent.parent / "results"
 # Face soils (WP2): rigid-plastic Drucker-Prager, mu = sin phi' (WP1)
 FACE_SOILS = {
     "idinger": drained_sand("Idinger et al. (2011) dry sand", 1500.0, 34.0, 1.0e15,
                             "Idinger, Aklik, Wu & Borja (2011), doi:10.1007/s11440-011-0139-2: rho_d 1.5 t/m3, phi 34 deg (direct shear), c' 0"),
+    # Kimura & Mair (1981): kaolin, cu 26 kPa; gamma D / cu = 2.5 derived from their Figs 6 and 10 (gamma 14.4 kN/m3 at D 4.5 m)
+    "kaolin": undrained_clay("Kimura & Mair (1981) kaolin", 14.4e3 / 9.81, 26.0e3, 1.0e15,
+                             "Kimura & Mair (1981), 10th ICSMFE: cu 26 kPa; unit weight 14.4 kN/m3 from gamma D / cu = 2.5 (Figs 6 and 10)"),
     "wang33": drained_sand("Wang et al. (2024) sand, phi 33.1", 1580.0, 33.1, 1.0e15,
                            "Wang et al. (2024), doi:10.1016/j.undsp.2023.11.001, Table 1: gamma 15.5 kN/m3, phi 33.1 deg, c 0"),
 }
@@ -41,10 +44,15 @@ def run(args) -> dict:
                                 match=args.match)
         if args.dilatancy:  # sensitivity only (WP2): not a calibrated parameter
             soil = dataclasses.replace(soil, dilatancy=args.dilatancy, name=soil.name + f", dilatancy {args.dilatancy}")
-        cfg = face_sand.FaceSandConfig(cover=args.cover, voxel_per_d=args.vpd, control=args.control, target_kpa=args.target_kpa, rate_over_d=args.rate,
+        cfg = face_sand.FaceSandConfig(diameter=args.diameter, cover=args.cover, retract_over_d=args.retract, voxel_per_d=args.vpd, control=args.control, target_kpa=args.target_kpa, rate_over_d=args.rate,
                                        iterations=args.iterations, seed=args.seed)
         result, _ = face_sand.run(cfg, soil)
         return record("face_sand", face_sand.params(cfg, soil), result, UNCALIBRATED, gpu)
+    if args.scene == "tunnel_2d":
+        soil = FACE_SOILS[args.soil]
+        cfg = tunnel_2d.Tunnel2DConfig(diameter=args.diameter, cover=args.cover, voxel_per_d=args.vpd, iterations=args.iterations, seed=args.seed)
+        result, _ = tunnel_2d.run(cfg, soil)
+        return record("tunnel_2d", tunnel_2d.params(cfg, soil), result, UNCALIBRATED, gpu)
     if args.scene == "k0":
         soil = drained_sand("element-test sand", 1600.0, args.phi, args.E, "element test (assumed values)", k0=args.k0)
         cfg = k0.K0Config(voxel=args.voxel, iterations=args.iterations, seed=args.seed)
@@ -67,7 +75,7 @@ def run(args) -> dict:
 def main() -> None:
     p = argparse.ArgumentParser()
     sub = p.add_subparsers(dest="scene", required=True)
-    for name, voxel in (("face", 0.1), ("face_sand", 0.0), ("k0", 0.1), ("rankine", 0.1), ("collapse", 0.005)):
+    for name, voxel in (("face", 0.1), ("face_sand", 0.0), ("tunnel_2d", 0.0), ("k0", 0.1), ("rankine", 0.1), ("collapse", 0.005)):
         s = sub.add_parser(name)
         s.add_argument("--voxel", type=float, default=voxel)
         s.add_argument("--iterations", type=int, default=50)
@@ -76,8 +84,15 @@ def main() -> None:
         if name == "face":
             s.add_argument("--diameter", type=float, default=2.0)
             s.add_argument("--cover", type=float, default=1.0)
+        if name == "tunnel_2d":
+            s.add_argument("--soil", choices=["kaolin"], default="kaolin")
+            s.add_argument("--diameter", type=float, default=4.5)
+            s.add_argument("--cover", type=float, default=2.0)
+            s.add_argument("--vpd", type=float, default=10.0)
         if name == "face_sand":
-            s.add_argument("--soil", choices=["idinger", "wang33"], default="idinger")
+            s.add_argument("--soil", choices=["idinger", "wang33", "kaolin"], default="idinger")
+            s.add_argument("--diameter", type=float, default=5.0)
+            s.add_argument("--retract", type=float, default=0.05, help="total retraction / D")
             s.add_argument("--cover", type=float, default=1.0)
             s.add_argument("--vpd", type=float, default=10.0, help="D / voxel")
             s.add_argument("--control", choices=["displacement", "pressure"], default="displacement")

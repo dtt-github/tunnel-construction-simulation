@@ -32,6 +32,7 @@ Results go to `results/<name>.json`, with a run record:
 | `tests/test_golden_face.py` | Golden test: the Phase 0 face numbers must not drift | WP0 |
 | `tunnelsim_server/scenes/k0.py`, `rankine.py`, `collapse.py` | Element tests: at-rest stress, Rankine active wall, Rousseau et al. column collapse ([results](../docs/validation/mpm-element-tests.md)) | WP1 |
 | `tests/test_materials.py`, `tests/test_element_gpu.py` | The Mohr–Coulomb mapping; Rankine and B00 collapse pinned on the GPU | WP1 |
+| `tunnelsim_server/scenes/tunnel_2d.py` | Plane-strain tunnel with a closing ring of segments; the clay investigation ([status](../docs/validation/mpm-clay.md)) | WP3 (blocked) |
 | `tunnelsim_server/scenes/face_sand.py`, `tests/test_face_sand_gpu.py` | Face in dry sand, half-model, displacement or pressure (servo) control, mechanism and settlement outputs ([results](../docs/validation/mpm-face-sand.md)) | WP2 |
 | `gpu_reservations.json` | GPU windows reserved for this project on the shared Spark (local time) | WP0 |
 

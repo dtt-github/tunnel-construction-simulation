@@ -151,6 +151,11 @@ Each package ends with a check. A package is done only when its check passes, or
 - N at collapse inside the published band (3–9 for C/D 1–3), and constant above C/D ≈ 3;
 - N ≈ 6 stays a conservative bound for an unlined heading length below 1D.
 
+**Status (5 Nov 2026, [clay](../validation/mpm-clay.md)): blocked.**
+- **The gap:** the MPM clay tunnel collapses at about half Kimura & Mair's stability ratio. That is N 2.0–2.8 against 3.5–4.3 in plane strain, below the weightless plasticity lower bound, and 3.8–4.3 against 7.05–9.0 for the heading at P/D 0.
+- **Ruled out:** cohesion scaling, stress level, leakage, friction, rate, solver convergence, resolution and the yield condition itself.
+- **What remains:** the soil is at yield almost everywhere, with a mean stress below the weight above. The next steps are a weightless benchmark and an equilibrium check. The London Clay route waits.
+
 ### WP4: EPB chamber with a pressure-controlled shove (about 3 weeks)
 
 - The shield and face advance under a **thrust**, not a fixed speed. Thrust balances chamber pressure, face resistance and shield friction from the analytical thrust model.
