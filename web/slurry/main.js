@@ -9,7 +9,7 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import {
-  wedgeSilo, daubWindow, shieldThrust, cutterheadTorque, toolTorque,
+  wedgeSilo, daubWindow, DAUB_DEFAULTS, shieldThrust, cutterheadTorque, toolTorque,
   infiltration as slurryInfiltration, cushion as makeCushion, facePressure, dischargeDensity, drySolidsFlow, theoreticalDryFlow,
   durandVelocity, pipeVelocity, CONTROL_TOLERANCE,
   verticalStress, presetTrough, twinTroughs, burlandCategory, referenceInstalled, erf,
@@ -600,7 +600,8 @@ if (BORE2) ui.bore2.closest("label").hidden = false;
 function windowFor(zone, pasteWeight) {
   const cover = zone.z0 - R;
   const fs = wedgeSilo(M.D, cover, zone.gamma, zone.phi, zone.c, { waterDepth: zone.water });
-  return { fs, w: daubWindow(fs, M.D, cover, zone.gamma, { waterDepth: zone.water, supportUnitWeight: pasteWeight }) };
+  // DAUB (2016) chapter 3: the set point must stay inside the window by the machine's pressure deviation (±10 kPa)
+  return { fs, w: daubWindow(fs, M.D, cover, zone.gamma, { waterDepth: zone.water, supportUnitWeight: pasteWeight, deviation: DAUB_DEFAULTS.deviation_slurry }) };
 }
 function reset() {
   for (const r of rings) world.remove(r.g);
@@ -992,6 +993,7 @@ function hud() {
   const dev = p - val("target");
   dl(ui.chamber, [
     ["DAUB window at axis", `${fmt(w.p_min_axis / 100, 2)} – ${fmt(w.p_max_axis / 100, 2)} bar`],
+    ["Operating range at crown", w.feasible ? `${fmt(w.p_min_crown_operating / 100, 2)} – ${fmt(w.p_max_crown_operating / 100, 2)} bar (±${fmt(w.deviation, 0)} kPa deviation inside the window)` : `none: the window is narrower than ±${fmt(w.deviation, 0)} kPa`],
     ["Air-cushion pressure", `${fmt(cs.p_air / 100, 3)} bar`],
     ["Working-chamber level", `${fmt(cs.level, 2)} m above the axis (set ${fmt(LEVEL_SP, 1)} m)`],
     ["Air volume", `${fmt(cs.air_volume, 1)} m³`],
@@ -1033,6 +1035,7 @@ function hud() {
   const alarms = [];
   if (p < w.p_min_axis) alarms.push(`Axis pressure ${fmt(p / 100, 2)} bar below the DAUB minimum ${fmt(w.p_min_axis / 100, 2)} bar`);
   if (pCrown > w.p_max_crown) alarms.push(`Crown pressure above the blow-out limit ${fmt(w.p_max_crown / 100, 2)} bar`);
+  if (!w.feasible) alarms.push(`DAUB window narrower than the ±${fmt(w.deviation, 0)} kPa pressure deviation: no safe set point`);
   if (Math.abs(dev) > CONTROL_TOLERANCE.slurry) alarms.push(`Support pressure ${fmt(dev, 0)} kPa from target: outside ±${CONTROL_TOLERANCE.slurry} kPa`);
   if (S.trip) alarms.push(S.trip);
   else if (cs.level > LEVEL_SP + 1.0) alarms.push("Working-chamber level high: air cushion shrinking");
