@@ -47,9 +47,9 @@
       <p class="checked"><strong>Checked against:</strong> settlement of both bores against 17 measured sections of this drive, median ratio 1.10 (<a href="https://github.com/dtt-github/tunnel-construction-simulation/blob/main/docs/validation/settlement.md">settlement</a>); the support window under the river, 3.0–3.6 bar, against the more than 3 bar Crossrail needed; rings per working day against this drive, 10.7–12.5 against 7.9–10.0 (<a href="https://github.com/dtt-github/tunnel-construction-simulation/blob/main/docs/validation/slurry-thames-advance.md">Thames advance</a>).</p>
     </div>
     <div class="card">
-      <h2><a href="phase0/replays/">Recorded GPU runs</a></h2>
-      <p>Phase 0 benchmarks of the material-point method, recorded on the GPU server and replayed in the browser: a model tunnel face collapsing as its support retracts, and an EPB chamber stirred by a rotating cutterhead.</p>
-      <p class="checked"><strong>Checked against:</strong> nothing yet. They test speed and stability, not calibrated machine performance.</p>
+      <h2><a href="web/epb/">Ground physics on the GPU: tunnel face in sand</a></h2>
+      <p>A material-point (MPM) model of a 5 m tunnel face in dry sand, recorded on the GPU server and played in the EPB demo's "Ground physics" panel: the face holds while the support pressure is above the limit, gives way when it drops below, with the failure chimney rising to the surface, and stops when the pressure is raised again. Run locally, the same panel takes the support pressure live.</p>
+      <p class="checked"><strong>Checked against:</strong> uncalibrated, reported as a bracket: Idinger et al.'s centrifuge tests measured a limit of 4.5–6 kPa at this cover, and the MPM gives 4.0–8.7 kPa depending on how the soil's friction cone is matched; Vermeer's analytical value is 8.4 kPa (<a href="https://github.com/dtt-github/tunnel-construction-simulation/blob/main/docs/validation/mpm-face-sand.md">MPM face in sand</a>). The clay face and the EPB chamber are not shown: both are blocked on a solver limitation (<a href="https://github.com/dtt-github/tunnel-construction-simulation/blob/main/docs/validation/mpm-clay.md">clay</a>, <a href="https://github.com/dtt-github/tunnel-construction-simulation/blob/main/docs/validation/mpm-chamber.md">chamber</a>). The earlier, unchecked <a href="phase0/replays/">Phase 0 benchmarks</a> remain available.</p>
     </div>
     <div class="card">
       <h2><a href="web/hard-rock/">Hard-rock open gripper TBM</a></h2>
