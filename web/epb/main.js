@@ -16,16 +16,18 @@ import {
 
 // ---------------------------------------------------------------- machine and scenario
 // Sourced values (see machine-classes.json): diameter, installed torque and power (Crossrail-class EPB), cutterhead and
-// screw speed ranges, 6 + key segments, ring-build time, DAUB pressure range. Values marked "assumed" are illustrative.
+// screw speed ranges, ring of 7 segments + key, ring-build time, shield length, DAUB pressure range. Values marked "assumed" are
+// illustrative. Crossrail lining and production: King, Thomas & Stenning (2017), Proc. ICE Civil Engineering 170(CE5),
+// doi:10.1680/jcien.16.00028 [KING]; shield: Crossrail Learning Legacy, TBM station transits [TRANSIT].
 const M = {
   D: 7.08, // m, sourced
   torqueLimit: 9800, // kNm installed, sourced
   power: 1920, // kW installed, sourced
-  shieldLength: 9.5, // assumed
+  shieldLength: 12, // m, 12 m shield with mid-shield articulation [TRANSIT]
   chamberLength: 0.9, // assumed
-  ringWidth: 1.2, // m, sourced (6 + key, 1.2 m rings)
-  ringOD: 6.8, ringID: 6.2, // assumed segment geometry (300 mm)
-  buildMin: 35, // min per ring, sourced
+  ringWidth: 1.6, // m, 7 segments + small key, 1.6 m rings [KING]
+  ringOD: 6.8, ringID: 6.2, // m, 300 mm SFRC segments [KING]
+  buildMin: 32, // min per ring, Crossrail average (Tunnels & Tunnelling, 25 Feb 2021, "Lord of the rings")
   shieldWeight: 4000, backupWeight: 6000, tailSeal: 500, // kN, assumed
   nTools: 80, toolForce: 4, // scrapers and rippers, kN tangential each, assumed
 };
@@ -447,8 +449,9 @@ for (const z of blocks) {
   world.add(b);
 }
 
-// Universal ring, 6 segments + key (key inserted last). Pieces are annular sectors centred on angle 0.
-const KEY_DEG = 360 / 19, SEG_DEG = (360 - KEY_DEG) / 6;
+// Tapered ring, 7 segments + small key (key inserted last, never below the axis [KING]). Pieces are annular sectors
+// centred on angle 0.
+const N_SEG = 7, KEY_DEG = 360 / 19, SEG_DEG = (360 - KEY_DEG) / N_SEG;
 const pieceGeo = (deg) => {
   const s = new THREE.Shape(), a = (deg * Math.PI) / 360, gap = 0.003;
   s.absarc(0, 0, M.ringOD / 2, -a + gap, a - gap, false);
@@ -475,9 +478,9 @@ function ringPieces(n) {
   const key = KEY_POS[((n % KEY_POS.length) + KEY_POS.length) % KEY_POS.length];
   const kd = (KEY_DEG * Math.PI) / 180, sd = (SEG_DEG * Math.PI) / 180;
   const pieces = [];
-  for (let i = 1; i <= 6; i++) pieces.push({ angle: key + kd / 2 + sd * (i - 0.5), key: false, i });
+  for (let i = 1; i <= N_SEG; i++) pieces.push({ angle: key + kd / 2 + sd * (i - 0.5), key: false, i });
   // build order: from the invert outwards in pairs, key last
-  const order = [3, 4, 2, 5, 1, 6].map((i) => pieces[i - 1]);
+  const order = [4, 3, 5, 2, 6, 1, 7].map((i) => pieces[i - 1]);
   order.push({ angle: key, key: true, i: 0 });
   return order;
 }
@@ -546,6 +549,8 @@ const ids = ["adv", "rpm", "screwMode", "target", "screw", "fir", "fer", "vl", "
 const ui = Object.fromEntries(ids.map((id) => [id, document.getElementById(id)]));
 const val = (id) => +ui[id].value;
 if (SCN?.data.settlement) { ui.vl.min = 0.1; ui.vl.value = SCN.data.settlement.volume_loss; }
+// Crossrail worked two 12 h shifts a day, seven days a week (west: three 8 h shifts) [KING]
+if (SCN) ui.shift.value = "2x12h_maintenance_per_cycle";
 
 // ---------------------------------------------------------------- simulation
 let S;
@@ -692,13 +697,13 @@ function substep(dt) {
   } else {
     S.pieceT += dt;
     S.buildTime += dt;
-    const per = (M.buildMin * 60) / 7;
+    const per = (M.buildMin * 60) / (N_SEG + 1);
     if (S.pieceT >= per) {
       S.pieceT -= per;
       const done = S.pieces[S.piece];
       if (done) buildGroup.add(makePiece(done, S.ring));
       S.piece++;
-      if (S.piece >= 7) {
+      if (S.piece >= N_SEG + 1) {
         buildGroup.clear();
         addRing(S.ring, ZR - S.chainage);
         S.ring++;
@@ -738,7 +743,7 @@ function animate(dtReal) {
       const placed = S.pieces.slice(0, S.piece);
       const cur = S.pieces[S.piece];
       const inSector = (p) => Math.abs(Math.atan2(Math.sin(c.a - p.angle), Math.cos(c.a - p.angle))) < ((p.key ? KEY_DEG : SEG_DEG) * Math.PI) / 360 + 0.05;
-      if (cur && inSector(cur) && S.pieceT / ((M.buildMin * 60) / 7) < 0.9) c.target = ZR - 0.1;
+      if (cur && inSector(cur) && S.pieceT / ((M.buildMin * 60) / (N_SEG + 1)) < 0.9) c.target = ZR - 0.1;
       else if (placed.some(inSector)) c.target = ZR;
       else c.target = ZR + W;
     }
@@ -757,7 +762,7 @@ function animate(dtReal) {
       pieceMesh.userData.id = `${S.ring}-${S.piece}`;
       machine.add(pieceMesh);
     }
-    const f = Math.min(S.pieceT / ((M.buildMin * 60) / 7), 1);
+    const f = Math.min(S.pieceT / ((M.buildMin * 60) / (N_SEG + 1)), 1);
     const pick = Math.min(f / 0.3, 1), rot = Math.min(Math.max((f - 0.3) / 0.35, 0), 1), ext = Math.min(Math.max((f - 0.65) / 0.3, 0), 1);
     const ease = (t) => t * t * (3 - 2 * t);
     const ang = -Math.PI / 2 + (Math.atan2(Math.sin(p.angle + Math.PI / 2), Math.cos(p.angle + Math.PI / 2))) * ease(rot);
@@ -892,7 +897,7 @@ function bars(parts, total, limit, unit) {
 
 // Segment lining (ITA WG2 2000 elastic equation method, Wood's joint reduction, ITA / DAUB jacking, bursting and
 // grout checks). Ground stiffness E_s per zone, concrete E 36 GPa and a 0.2 m shoe pad are assumed.
-const SEG = { n: 7, E: 36e6, pad: 0.2, gammaC: 25 };
+const SEG = { n: N_SEG + 1, E: 36e6, pad: 0.2, gammaC: 25 };
 const SEG_T = (M.ringOD - M.ringID) / 2, SEG_RC = (M.ringOD + M.ringID) / 4;
 const liningCache = new Map();
 function liningAt(zone) {
@@ -919,7 +924,7 @@ function liningRows(zone) {
   const js = shoe ? jackingStress(shoe, N_CYL, SEG_RC, SEG_T) : null;
   const [tb] = shoe ? burstingForce(shoe, SEG_T, SEG.pad) : [null];
   const rows = [
-    ["Ring", `6 + key, ${fmt(SEG_T * 1000, 0)} mm, ${W} m wide; joints cut bending stiffness to ${fmt(L.eta * 100, 0)} % (Wood)`],
+    ["Ring", `${N_SEG} + key, ${fmt(SEG_T * 1000, 0)} mm, ${W} m wide; joints cut bending stiffness to ${fmt(L.eta * 100, 0)} % (Wood)`],
     ["Loads at crown / springline", `${fmt(L.pv, 0)} kPa vertical (Terzaghi-reduced; full overburden ${fmt(L.overburden, 0)} kPa); ${fmt(L.q1, 0)}–${fmt(L.q2, 0)} kPa lateral, ${L.lamName} coefficient ${fmt(L.lam, 2)} governs`],
     ["Bending moment", `+${fmt(r.moment[L.iMax], 0)} kNm/m at ${r.angles_deg[L.iMax]}°, ${fmt(r.moment[L.iMin], 0)} kNm/m at ${r.angles_deg[L.iMin]}° from the crown`],
     ["Normal force", `${fmt(Math.min(...r.normal), 0)}–${fmt(Math.max(...r.normal), 0)} kN/m`],
@@ -998,7 +1003,7 @@ function hud() {
     ["Rings built", S.ring],
     ["Stroke", `${fmt(S.stroke * 1000, 0)} / ${W * 1000} mm`],
     ["Push time per ring", Number.isFinite(pushMin) ? `${fmt(pushMin, 0)} min` : "—"],
-    ["Ring build time", `${M.buildMin} min (6 + key)`],
+    ["Ring build time", `${M.buildMin} min (7 segments + key; Crossrail average)`],
     ["Cycle-only advance", `${fmt(cycleDay, 1)} m/day (no downtime)`],
     ["Achieved so far", days > 0.05 ? `${fmt(S.chainage / days, 1)} m/day · utilisation ${fmt((S.boringTime / S.simTime) * 100, 0)} %` : "—"],
     ["Next tool intervention", ui.interventions.checked ? `after ring ${Math.ceil(S.nextStop)}` : "off"],
@@ -1138,6 +1143,8 @@ function scheduleForecast() {
   clearTimeout(forecastTimer);
   forecastTimer = setTimeout(runForecast, 250);
 }
+// Crossrail drives X (Royal Oak - Farringdon) and Y (Limmo - Farringdon), rings/day of 1.6 m [KING Table 3]
+const CROSSRAIL = { exclDelays: ["12.3", "14.9"], inclDelays: ["5.1", "9.0"], bestDay: [33, 59], bestWeek: [169, 216] };
 const SHARE_COLORS = { boring: "#3987e5", ring_build: "#d95926", general: "#199e70", train_delay: "#b07ad9", maintenance_per_cycle: "#c9a227", intervention: "#ff7a45", maintenance_shift_and_idle: "#4b5560" };
 const SHARE_NAMES = { boring: "boring", ring_build: "ring build", general: "general activities", train_delay: "train delays", maintenance_per_cycle: "maintenance per cycle", intervention: "tool interventions", maintenance_shift_and_idle: "maintenance shift" };
 function forecastHtml() {
@@ -1150,6 +1157,7 @@ function forecastHtml() {
     <dt>Utilisation (boring / calendar time)</dt><dd>${fmt(FC.util * 100, 0)} %</dd>
     <dt>Mean advance</dt><dd>${fmt(FC.day, 1)} m/day · ${fmt(FC.week, 0)} m/week</dd>
     <dt>40-EPB survey (Roby & Willis 2014)</dt><dd>${fmt(sv.mean, 0)} ± ${fmt(sv.sd, 0)} m/week</dd>
+    <dt>Crossrail drives X and Y (King et al. 2017)</dt><dd>${CROSSRAIL.exclDelays.join("–")} rings a day without delays; ${CROSSRAIL.inclDelays.join("–")} over whole drives with station transits; best day ${CROSSRAIL.bestDay.join("–")} rings, best week ${CROSSRAIL.bestWeek.join("–")}. This forecast: ${fmt(FC.day / W, 1)} rings a day</dd>
     <dt>Best day</dt><dd>${fmt(FC.bestDay, 1)} m ${flag(FC.check.day)}</dd>
     <dt>Best week</dt><dd>${fmt(FC.bestWeek, 0)} m ${flag(FC.check.week)}</dd>
     <dt>Best month (30 days)</dt><dd>${fmt(FC.bestMonth, 0)} m ${flag(FC.check.month)}</dd>
@@ -1157,7 +1165,7 @@ function forecastHtml() {
   </dl>
   <div class="shares">${sh.map(([k, v]) => `<i title="${SHARE_NAMES[k]} ${fmt(v * 100, 0)} %" style="width:${v * 100}%;background:${SHARE_COLORS[k]}"></i>`).join("")}</div>
   <div class="legend">${sh.map(([k, v]) => `<span style="--c:${SHARE_COLORS[k]}">${SHARE_NAMES[k]} ${fmt(v * 100, 0)} %</span>`).join("")}</div>
-  <p class="note">20 runs × 90 days at the current speed, shift pattern and haulage. Best values are medians over the runs. Downtime distributions from a 6.88 m metro EPB (Moosazadeh et al. 2018).</p>`;
+  <p class="note">20 runs × 90 days at the current speed, shift pattern and haulage. Best values are medians over the runs. Downtime distributions from a 6.88 m metro EPB (Moosazadeh et al. 2018). Ring times are drawn ring by ring, so whole fast days like Crossrail's best are not reproduced.</p>`;
 }
 
 ui.pause.onclick = () => { S.paused = !S.paused; ui.pause.textContent = S.paused ? "Resume" : "Pause"; };
