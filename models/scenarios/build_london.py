@@ -87,6 +87,7 @@ GROUNDWATER = {
 # Assumed vertical alignment: axis -16 m OD at Farringdon to -19 m OD at Liverpool Street, inside the published depth
 # of the running tunnels (about 25-35 m below ground) and mostly in the Lambeth Group at Farringdon (about 83-85 %).
 ALIGNMENT = {
+    "ends": ["Farringdon", "Liverpool Street"],
     "length": 2129, "start": {"E": A[0], "N": A[1]}, "end": {"E": B[0], "N": B[1]},
     "axis_level": [[0, -16.0], [2129, -19.0]], "diameter": 7.1,
     "source": "Assumed. Depth and geology at Farringdon: Crossrail Learning Legacy, Tunnelling in sand in Farringdon Crossrail Station, "

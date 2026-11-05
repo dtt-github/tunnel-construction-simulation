@@ -169,10 +169,11 @@ def annulus_volume(d_excavated: float, d_ring_outer: float, ring_width: float) -
 
 def grout_window(depth_crown: float, gamma: float, water_depth: float, gamma_w: float = 10.0, max_over_water: float = 69.0) -> tuple[float, float]:
     """Grout pressure window at the crown (kPa): at least the groundwater pressure, at most the smaller of the total
-    overburden and the groundwater pressure plus `max_over_water` (AASHTO 69 kPa; South-East Asian practice up to 150)."""
-    hw = min(max(water_depth, 0.0), depth_crown)
-    u = gamma_w * max(depth_crown - hw, 0.0)
-    return u, min(gamma * depth_crown, u + max_over_water)
+    overburden and the groundwater pressure plus `max_over_water` (AASHTO 69 kPa; South-East Asian practice up to 150).
+    A negative water_depth is free water above the ground (a river): it adds to both the pore pressure and the overburden."""
+    u = gamma_w * max(depth_crown - water_depth, 0.0)
+    overburden = gamma * depth_crown + gamma_w * max(-water_depth, 0.0)
+    return u, min(overburden, u + max_over_water)
 
 
 def taper(d_outer: float, ring_width: float, curve_radius: float, offset_deg: float | None = None) -> float:

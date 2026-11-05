@@ -14,7 +14,7 @@ import {
   durandVelocity, pipeVelocity, CONTROL_TOLERANCE,
   verticalStress, presetTrough, burlandCategory, referenceInstalled, erf,
   Rng, sample as sampleDist, DIST, SHIFT_PATTERNS, PER_CYCLE_MAINTENANCE_MIN, simulateDrive, recordCheck, EPB_WEEKLY_SURVEY,
-  jsceRing, woodInertia, subgradeModulus, terzaghiLoads, activeCoefficient, sectionStresses, jackingStress, burstingForce, annulusVolume, groutWindow, ITA2000_ALLOWABLE,
+  scenario as loadScenario, jsceRing, woodInertia, subgradeModulus, terzaghiLoads, activeCoefficient, sectionStresses, jackingStress, burstingForce, annulusVolume, groutWindow, ITA2000_ALLOWABLE,
 } from "../../models/js/index.js";
 
 // ---------------------------------------------------------------- machine and scenario
@@ -39,13 +39,37 @@ const M = {
 };
 const R = M.D / 2;
 const AREA = Math.PI * R * R;
-const Z0 = 15; // axis depth, m
-const WATER = 1; // water table depth, m: saturated sands and gravels, the slurry machine's ground (DAUB 2025)
-const ZONES = [
-  { name: "Dense sand", Es: 60e3, from: -60, to: 20, gamma: 20, phi: 35, c: 0, k0: 0.43, k: 0.35, d10: 0.15e-3, rho: 2.0, color: 0xb59a62 },
-  { name: "Sandy gravel", Es: 100e3, from: 20, to: 260, gamma: 21, phi: 38, c: 0, k0: 0.38, k: 0.3, d10: 1.0e-3, rho: 2.1, color: 0x8f8a7c },
-];
+// Ground. Default: the Crossrail Thames Tunnel, Plumstead - North Woolwich, built from open BGS/Crossrail boreholes
+// (models/scenarios/thames-plumstead-north-woolwich.json): one zone per 10 m of drive with the ground at the face, its
+// own axis depth, the river above the bed and the d10 of the coarsest unit on the face. ?ground=illustrative gives the
+// two-zone sand and gravel ground.
+const GROUND = new URLSearchParams(location.search).get("ground") === "illustrative" ? "illustrative" : "thames";
+const SCN = GROUND === "thames" ? loadScenario(await (await fetch("../../models/scenarios/thames-plumstead-north-woolwich.json")).json()) : null;
+const BIN = 10; // m
+const GRANULAR = new Set(["RTD", "TS", "LG", "MG"]); // trough width k 0.35 (granular); clay and chalk 0.5 (Crossrail chalk: K = 0.5)
+let ZONES;
+if (SCN) {
+  ZONES = [];
+  for (let i = 0; i * BIN < SCN.length; i++) {
+    const ch = i * BIN + BIN / 2, f = SCN.face(ch, M.D);
+    const shares = Object.entries(f.units_on_face).sort((a, b) => b[1] - a[1]);
+    ZONES.push({
+      key: `b${i}`, from: i * BIN, to: (i + 1) * BIN,
+      name: shares.map(([u, sh]) => `${SCN.units[u].name.replace(/ \(.*\)/, "")}${shares.length > 1 ? ` ${Math.round(sh * 100)} %` : ""}`).join(", "),
+      gamma: f.gamma, phi: f.phi, c: f.c, k0: f.k0, Es: f.e_soil, z0: f.axis_depth, water: f.water_depth_equiv, u: f.u_axis, d10: f.d10,
+      rho: f.gamma / 9.81, k: shares.reduce((a, [u, sh]) => a + sh * (GRANULAR.has(u) ? 0.35 : 0.5), 0),
+      unit: f.unit_at_axis, color: parseInt(SCN.units[f.unit_at_axis].color.slice(1), 16),
+    });
+  }
+  ZONES[0].from = -60;
+} else {
+  ZONES = [
+    { key: "a", name: "Dense sand", Es: 60e3, from: -60, to: 20, gamma: 20, phi: 35, c: 0, k0: 0.43, k: 0.35, d10: 0.15e-3, rho: 2.0, color: 0xb59a62, z0: 15, water: 1 },
+    { key: "b", name: "Sandy gravel", Es: 100e3, from: 20, to: 260, gamma: 21, phi: 38, c: 0, k0: 0.38, k: 0.3, d10: 1.0e-3, rho: 2.1, color: 0x8f8a7c, z0: 15, water: 1 },
+  ];
+}
 const zoneAt = (ch) => ZONES.find((z) => ch >= z.from && ch < z.to) ?? ZONES.at(-1);
+const Z0 = Math.round(zoneAt(0).z0); // axis depth for the scene and the surface view; the physics uses each zone's own
 const BUILDINGS = [
   { name: "Building A", x: -4, ch: 45, w: 14, d: 10, h: 12 },
   { name: "Building B", x: 13, ch: 95, w: 12, d: 16, h: 18 },
@@ -428,7 +452,14 @@ label("Separation plant at the portal (screens, hydrocyclones, filter press)", c
 // ---------------------------------------------------------------- world: ground, lining, surface
 const world = new THREE.Group();
 scene.add(world);
+// ground blocks, merging neighbouring zones of the same colour
+const blocks = [];
 for (const z of ZONES) {
+  const last = blocks.at(-1);
+  if (last && last.color === z.color && last.to === z.from) last.to = z.to;
+  else blocks.push({ from: z.from, to: z.to, color: z.color });
+}
+for (const z of blocks) {
   const from = Math.max(z.from, 0), len = z.to - from;
   const b = box(16, 12, len, new THREE.MeshStandardMaterial({ color: z.color, roughness: 1, transparent: true, opacity: 0.4, depthWrite: false,
     clippingPlanes: [new THREE.Plane(new THREE.Vector3(0, 0, -1), 0), CUT[0]] }));
@@ -523,7 +554,7 @@ label("Face position", faceMarker, [0, 1.8, 0], true);
 
 // ---------------------------------------------------------------- UI
 const ids = ["adv", "rpm", "disMode", "target", "dis", "feed", "tau", "vl", "ts", "advOut", "rpmOut", "targetOut", "disOut", "feedOut", "tauOut", "vlOut", "tsOut",
-  "pause", "reset", "gauge", "chamber", "alarms", "cycle", "bars", "ground", "showLabels", "shift", "haulage", "interventions", "skip", "forecast", "lining", "cake", "circuit"];
+  "pause", "reset", "gauge", "chamber", "alarms", "cycle", "bars", "ground", "showLabels", "shift", "haulage", "interventions", "skip", "forecast", "lining", "cake", "circuit", "section", "groundSel"];
 const ui = Object.fromEntries(ids.map((id) => [id, document.getElementById(id)]));
 const val = (id) => +ui[id].value;
 
@@ -531,14 +562,14 @@ const val = (id) => +ui[id].value;
 let S;
 const troughCache = new Map();
 function trough(zone, vl) {
-  const key = `${zone.name}|${vl}`;
-  if (!troughCache.has(key)) troughCache.set(key, presetTrough("closed_face_sand", M.D, Z0, { shieldLengthM: M.shieldLength, volumeLoss: vl / 100, k: zone.k }));
+  const key = `${zone.key}|${vl}`;
+  if (!troughCache.has(key)) troughCache.set(key, presetTrough("closed_face_sand", M.D, zone.z0, { shieldLengthM: M.shieldLength, volumeLoss: vl / 100, k: zone.k }));
   return troughCache.get(key);
 }
 function windowFor(zone, pasteWeight) {
-  const cover = Z0 - R;
-  const fs = wedgeSilo(M.D, cover, zone.gamma, zone.phi, zone.c, { waterDepth: WATER });
-  return { fs, w: daubWindow(fs, M.D, cover, zone.gamma, { waterDepth: WATER, supportUnitWeight: pasteWeight }) };
+  const cover = zone.z0 - R;
+  const fs = wedgeSilo(M.D, cover, zone.gamma, zone.phi, zone.c, { waterDepth: zone.water });
+  return { fs, w: daubWindow(fs, M.D, cover, zone.gamma, { waterDepth: zone.water, supportUnitWeight: pasteWeight }) };
 }
 function reset() {
   for (const r of rings) world.remove(r.g);
@@ -638,7 +669,7 @@ function substep(dt) {
   const zone = zoneAt(S.chainage);
   const p = axisPressure();
   S.cutRpm = S.mode === "PUSH" ? val("rpm") : 0;
-  const sv = verticalStress(Z0, zone.gamma, { waterDepth: WATER });
+  const sv = verticalStress(zone.z0, zone.gamma, { waterDepth: zone.water });
   // torque at the current pressure: the slurry lubricates the face and the back of the head, so those friction
   // coefficients are lower than for the EPB paste (assumed); the rim uses the effective value fitted on open EPB data.
   // Above the installed limit the head stalls
@@ -654,8 +685,8 @@ function substep(dt) {
   const { fs, sEff } = cakeAt(zone, p);
   S.overbreak = v > 0 && fs.s_eff > 0 && sEff < fs.s_eff ? Math.min(0.3 * (1 - sEff / fs.s_eff), 0.3) : 0;
   circulate(dt, AREA * v * (1 + S.overbreak));
-  S.thrust = v > 0 ? shieldThrust(M.D, M.shieldLength, Z0, zone.gamma, p, {
-    waterDepth: WATER, k0: zone.k0, shieldWeight: M.shieldWeight, tools: 1000, tailSeal: M.tailSeal, backupWeight: M.backupWeight,
+  S.thrust = v > 0 ? shieldThrust(M.D, M.shieldLength, zone.z0, zone.gamma, p, {
+    waterDepth: zone.water, k0: zone.k0, shieldWeight: M.shieldWeight, tools: 1000, tailSeal: M.tailSeal, backupWeight: M.backupWeight,
   }) : null;
   S.simTime += dt;
   if (S.mode === "PUSH") {
@@ -806,7 +837,7 @@ function updateSurface() {
     // greenfield horizontal strain under the footprint at the building's chainage: u = -(x/z0) S, eps = du/dx
     let emax = 0;
     for (let x = b.x - b.w / 2; x <= b.x + b.w / 2; x += 0.25) {
-      const e = -(settle(x + 0.05, b.ch) * (x + 0.05) - settle(x - 0.05, b.ch) * (x - 0.05)) / (Z0 * 0.1);
+      const e = -(settle(x + 0.05, b.ch) * (x + 0.05) - settle(x - 0.05, b.ch) * (x - 0.05)) / (zoneAt(b.ch).z0 * 0.1);
       emax = Math.max(emax, e);
     }
     b.strain = emax * 100;
@@ -857,12 +888,12 @@ const SEG = { n: 8, E: 36e6, pad: 0.2, gammaC: 25 };
 const SEG_T = (M.ringOD - M.ringID) / 2, SEG_RC = (M.ringOD + M.ringID) / 4;
 const liningCache = new Map();
 function liningAt(zone) {
-  if (!liningCache.has(zone.name)) {
+  if (!liningCache.has(zone.key)) {
     // vertical load reduced by Terzaghi's formula (ITA 2000, 2.2.1); lateral coefficient at both ends of the ITA range
     // (active and at rest), the case with the higher concrete stress governs
     const eta = woodInertia(1, SEG.n), ka = activeCoefficient(zone.phi);
     const cases = [["active", ka], ["at rest", zone.k0]].map(([lamName, lam]) => {
-      const [pv, q1, q2] = terzaghiLoads(Z0, M.ringOD / 2, zone.gamma, zone.phi, zone.c, lam, WATER);
+      const [pv, q1, q2] = terzaghiLoads(zone.z0, M.ringOD / 2, zone.gamma, zone.phi, zone.c, lam, zone.water);
       const r = jsceRing(pv, q1, q2, SEG.gammaC * SEG_T, SEG_RC, (SEG.E * SEG_T ** 3) / 12, subgradeModulus(zone.Es, SEG_RC), { eta });
       const iMax = r.moment.indexOf(Math.max(...r.moment)), iMin = r.moment.indexOf(Math.min(...r.moment));
       const sMax = sectionStresses(r.normal[iMax], r.moment[iMax], SEG_T), sMin = sectionStresses(r.normal[iMin], r.moment[iMin], SEG_T);
@@ -870,9 +901,9 @@ function liningAt(zone) {
         oval: (2 * r.deflection) / M.ringID };
     });
     const g = cases[0].sigma >= cases[1].sigma ? cases[0] : cases[1];
-    liningCache.set(zone.name, { ...g, overburden: zone.gamma * (Z0 - M.ringOD / 2), grout: groutWindow(Z0 - R, zone.gamma, WATER) });
+    liningCache.set(zone.key, { ...g, overburden: zone.gamma * (zone.z0 - M.ringOD / 2) + 10 * Math.max(-zone.water, 0), grout: groutWindow(zone.z0 - R, zone.gamma, zone.water) });
   }
-  return liningCache.get(zone.name);
+  return liningCache.get(zone.key);
 }
 function liningRows(zone) {
   const L = liningAt(zone), r = L.r;
@@ -928,7 +959,7 @@ function hud() {
   // filter cake at the face
   const { fs, inf, sEff } = cakeAt(zone, p);
   dl(ui.cake, [
-    ["Ground d₁₀", `${fmt(zone.d10 * 1000, 2)} mm`],
+    ["Ground d₁₀ (coarsest unit on the face)", `${zone.d10 < 1e-5 ? `${fmt(zone.d10 * 1e6, 0)} µm` : `${fmt(zone.d10 * 1000, 2)} mm`}${SCN ? " (assumed: no grading in the open logs)" : ""}`],
     ["Excess pressure over pore water", `${fmt(Math.max(p - fs.u_axis, 0), 0)} kPa`],
     ["Stagnation gradient f_s0", `${fmt(inf.f_s0, 0)} kN/m³ (membrane at ≥ 200)`],
     ["At the face", inf.membrane ? "filter cake (membrane)" : `penetration up to ${fmt(inf.e_max, 2)} m`],
@@ -1022,8 +1053,10 @@ function hud() {
   const t = trough(zone, val("vl"));
   dl(ui.ground, [
     ["Ground at the face", zone.name],
-    ["φ′, c′", `${zone.phi}°, ${zone.c} kPa`],
-    ["Axis depth, water table", `${Z0} m, ${WATER} m`],
+    ["φ′, c′, K0 (face average)", `${fmt(zone.phi, 1)}°, ${fmt(zone.c, 0)} kPa, ${fmt(zone.k0, 2)}`],
+    ["Axis depth", `${fmt(zone.z0, 1)} m below ${zone.water < 0 ? "the river bed" : "ground"}`],
+    ...(SCN ? [[zone.water < 0 ? "River above the bed" : "Water table", zone.water < 0 ? `${fmt(-zone.water, 1)} m of water over the bed (high water)` : `${fmt(zone.water, 1)} m below ground`],
+      ["Nearest borehole", nearestBorehole(S.chainage)]] : [["Water table", `${zone.water} m below ground`]]),
     ["Required effective support", fs.s_eff > 0 ? `${fmt(fs.s_eff / 100, 2)} bar` : "none (self-supporting)"],
     ["Pore pressure at axis", `${fmt(fs.u_axis / 100, 2)} bar`],
     ["Final Smax (this zone)", `${fmt(t.s_max * 1000, 1)} mm`],
@@ -1031,6 +1064,65 @@ function hud() {
     ...BUILDINGS.map((b) => [b.name, `${fmt((b.settle ?? 0) * 1000, 1)} mm, ε ${fmt(b.strain ?? 0, 3)} %, cat. ${b.cat ?? 0}`]),
     ["Surface heights", "exaggerated ×150"],
   ]);
+  placeFace();
+}
+
+// Geological long section of the scenario: layers sampled every 20 m, the tunnel, both water levels, the boreholes
+// and the face position.
+function nearestBorehole(ch) {
+  const b = SCN.boreholes.reduce((m, x) => (Math.abs(x.chainage - ch) < Math.abs(m.chainage - ch) ? x : m));
+  return `${b.id} at chainage ${fmt(b.chainage, 0)} m, ${fmt(Math.abs(b.offset), 0)} m ${b.offset >= 0 ? "north" : "south"} of the line`;
+}
+function sectionSvg() {
+  const Wd = 320, Hd = 170, L = SCN.length;
+  const lv = SCN.boreholes.map((b) => b.ground_level).concat(SCN.data.river ? SCN.data.river.level.map((p) => p[1]) : []);
+  const top = Math.ceil(Math.max(...lv) / 5) * 5 + 2, bot = Math.floor((Math.min(...SCN.data.alignment.axis_level.map((p) => p[1])) - R - 12) / 5) * 5;
+  const X = (ch) => 6 + (ch / L) * (Wd - 12), Y = (lv) => 6 + ((top - lv) / (top - bot)) * (Hd - 30);
+  let g = "";
+  for (let ch = 0; ch < L; ch += 20) {
+    for (const l of SCN.column(ch + 10)) {
+      const y0 = Y(Math.min(l.top, top)), y1 = Y(Math.max(l.base, bot));
+      if (y1 > y0) g += `<rect x="${X(ch).toFixed(1)}" y="${y0.toFixed(1)}" width="${(X(ch + 20) - X(ch) + 0.4).toFixed(1)}" height="${(y1 - y0).toFixed(1)}" fill="${SCN.units[l.unit].color}"/>`;
+    }
+  }
+  const rv = SCN.data.river;
+  if (rv) { // river water above the bed
+    const pts = [];
+    for (let c = Math.max(rv.from, 0); c <= Math.min(rv.to, L); c += 10) pts.push([c, SCN.surfaceAt(c)]);
+    const lvl = (c) => interpPts(rv.level, c);
+    g += `<polygon points="${pts.map(([c, z]) => `${X(c).toFixed(1)},${Y(z).toFixed(1)}`).join(" ")} ${pts.slice().reverse().map(([c]) => `${X(c).toFixed(1)},${Y(lvl(c)).toFixed(1)}`).join(" ")}" fill="#3a6f9e" opacity="0.75"/>`;
+  }
+  const line = (f, attrs) => `<polyline points="${Array.from({ length: 44 }, (_, i) => (i * L) / 43).map((c) => `${X(c).toFixed(1)},${Y(f(c)).toFixed(1)}`).join(" ")}" fill="none" ${attrs}/>`;
+  { // the tunnel as a dark band between crown and invert
+    const cs = Array.from({ length: 44 }, (_, i) => (i * L) / 43);
+    g += `<polygon points="${cs.map((c) => `${X(c).toFixed(1)},${Y(SCN.axisAt(c) + R).toFixed(1)}`).join(" ")} ${cs.slice().reverse().map((c) => `${X(c).toFixed(1)},${Y(SCN.axisAt(c) - R).toFixed(1)}`).join(" ")}" fill="#15171a" fill-opacity="0.55" stroke="#e7e9ec" stroke-width="0.8"/>`;
+  }
+  g += line((c) => SCN.waterAt(c), 'stroke="#5aa0e6" stroke-dasharray="4 3"');
+  if (SCN.data.groundwater.deep_head) g += line((c) => interpPts(SCN.data.groundwater.deep_head, c), 'stroke="#5aa0e6" stroke-dasharray="1 3"');
+  for (const b of SCN.boreholes) g += `<line x1="${X(Math.max(b.chainage, 0)).toFixed(1)}" x2="${X(Math.max(b.chainage, 0)).toFixed(1)}" y1="${Y(b.ground_level).toFixed(1)}" y2="${Y(Math.max(b.base_level, bot)).toFixed(1)}" stroke="#15171a" stroke-width="1.2"/>`;
+  g += `<line id="faceLine" x1="0" x2="0" y1="4" y2="${Hd - 24}" stroke="#f2b43a" stroke-width="2"/>`;
+  for (let l = Math.ceil(bot / 10) * 10; l <= top; l += 10) g += `<text x="${Wd - 4}" y="${Y(l) + 3}" text-anchor="end">${l} m OD</text>`;
+  const used = [...new Set(SCN.order.filter((u) => SCN.boreholes.some((b) => u in b.tops)))];
+  const ends = SCN.data.alignment.ends ?? ["start", "end"];
+  const legend = used.map((u) => `<span style="--c:${SCN.units[u].color}">${SCN.units[u].name.replace(/ \(.*\)/, "")}</span>`).join("");
+  return `<svg viewBox="0 0 ${Wd} ${Hd}" role="img" aria-label="Geological long section along the drive">${g}<text x="6" y="${Hd - 8}">${ends[0]}</text><text x="${Wd - 6}" y="${Hd - 8}" text-anchor="end">${ends[1]}</text></svg>
+    <div class="legend">${legend}${rv ? '<span style="--c:#3a6f9e">river (high water)</span>' : ""}<span style="--c:#5aa0e6">water table (dashed)${SCN.data.groundwater.deep_head ? ", deep head (dotted)" : ""}</span><span style="--c:#15171a">tunnel, boreholes</span></div>`;
+}
+function interpPts(d, ch) {
+  if (ch <= d[0][0]) return d[0][1];
+  for (let i = 0; i + 1 < d.length; i++) if (ch <= d[i + 1][0]) return d[i][1] + ((d[i + 1][1] - d[i][1]) * (ch - d[i][0])) / (d[i + 1][0] - d[i][0]);
+  return d.at(-1)[1];
+}
+if (SCN) {
+  ui.section.innerHTML = sectionSvg();
+} else ui.section.closest("section").style.display = "none";
+ui.groundSel.value = GROUND;
+ui.groundSel.onchange = () => { location.search = ui.groundSel.value === "illustrative" ? "?ground=illustrative" : ""; };
+function placeFace() {
+  if (!SCN) return;
+  const x = 6 + (Math.min(Math.max(S.chainage, 0), SCN.length) / SCN.length) * (320 - 12);
+  const l = document.getElementById("faceLine");
+  if (l) { l.setAttribute("x1", x.toFixed(1)); l.setAttribute("x2", x.toFixed(1)); }
 }
 
 ui.skip.onclick = () => {

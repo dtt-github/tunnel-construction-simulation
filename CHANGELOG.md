@@ -13,6 +13,8 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
   - thrust and torque breakdown;
   - surface settlement with Burland categories for buildings.
   - Assumptions and gaps are listed in its [realism checklist](docs/realism/epb-slice-a.md).
+- **Thames crossing for the Mixshield** ([sources](docs/SCENARIOS.md)): the Crossrail Thames Tunnel, Plumstead to North Woolwich, from 15 BGS/Crossrail boreholes (four over the river; OGL) and the OpenStreetMap line, built by `models/scenarios/build_thames.py`. The Mixshield demo drives through it by default, with the river in the long section. Under the river the support window is 2.96–3.57 bar (Crossrail: above 3 bar). The scenario format gains `river`, `d10` per unit and `ends`.
+- **River above the ground:** the DAUB support window and the grout window now add the river column to the total overburden when the water level is above the ground surface.
 - **Ground scenarios and real London geology** ([format and sources](docs/SCENARIOS.md)):
   - a scenario file format (`tunnelsim-scenario/1`) and loader (Python + JavaScript): ground surface, upper water table and deep aquifer head, units interpolated between boreholes, the ground at the face;
   - the first scenario: 2.1 km of the Elizabeth line from Farringdon to Liverpool Street, built from 14 Crossrail boreholes held by the British Geological Survey (Open Government Licence) by `models/scenarios/build_london.py`, with unit parameters from open sources;

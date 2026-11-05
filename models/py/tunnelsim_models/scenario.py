@@ -14,6 +14,8 @@ level of a lower aquifer (in London the Chalk, Thanet Sand and, under-drained by
 says which system it follows ("water": "upper" by default, or "lower") and may scale the hydrostatic pore pressure by
 "pore_pressure_ratio" (under-drained clay). The pore pressure at the tunnel axis follows the unit there; for models
 that take a water depth, `FaceGround.water_depth_equiv` is the depth of a water table that gives the same pressure.
+Under a river the ground surface is the river bed and the upper water level is the river level, so that depth is
+negative. An optional `river` block (`level`, `from`, `to`) marks the reach for drawing. Units may carry `d10` (m).
 """
 from __future__ import annotations
 
@@ -55,7 +57,8 @@ class FaceGround:
     axis_depth: float  # axis depth below the ground surface, m
     water_depth: float  # upper water table depth below the ground surface, m
     u_axis: float  # pore pressure at the axis, kPa
-    water_depth_equiv: float  # water-table depth that gives u_axis hydrostatically, m
+    water_depth_equiv: float  # water-table depth that gives u_axis hydrostatically, m (negative under a river)
+    d10: float | None  # largest d10 of the units on the face, m (the coarsest governs slurry penetration)
 
 
 class Scenario:
@@ -148,5 +151,6 @@ class Scenario:
         e, _ = self._weighted(ch, crown, invert, "E")
         unit = self.unit_at(ch, axis)
         u = self.pore_pressure(ch, axis)
+        d10s = [float(self.units[k]["d10"]) for k in shares if "d10" in self.units[k]]
         return FaceGround(unit, shares, gamma, phi, c, float(self.units[unit]["k0"]), e, surf - crown, surf - axis,
-                          max(surf - self.water_at(ch), 0.0), u, (surf - axis) - u / 10.0)
+                          max(surf - self.water_at(ch), 0.0), u, (surf - axis) - u / 10.0, max(d10s) if d10s else None)

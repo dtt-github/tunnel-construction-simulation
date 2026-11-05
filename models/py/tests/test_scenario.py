@@ -82,3 +82,13 @@ def test_two_water_systems():
     f = s.face(0, 7.0, axis_level=-31)
     assert f.unit_at_axis == "LM" and f.u_axis == pytest.approx(70)
     assert f.water_depth_equiv == pytest.approx((12 + 31) - 7)
+
+
+def test_river_and_d10():
+    units = {**UNITS, "TG": {**UNITS["TG"], "d10": 0.0008}, "LC": {**UNITS["LC"], "d10": 0.00001}}
+    data = {**make(BH).data, "units": units, "groundwater": {"level": [[0, 20.0], [1000, 20.0]]}, "river": {"level": [[0, 20.0], [1000, 20.0]], "from": 0, "to": 1000}}
+    s = Scenario(data)
+    f = s.face(0, 7.0, axis_level=6.0)  # gravel 9..5 and London Clay below 5 on the face
+    assert f.d10 == pytest.approx(0.0008)
+    assert f.u_axis == pytest.approx(10 * (20 - 6))
+    assert f.water_depth_equiv == pytest.approx((12 - 6) - 14)  # negative: water above the ground surface

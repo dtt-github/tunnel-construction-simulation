@@ -145,10 +145,12 @@ def daub_window(fs: FaceSupport, diameter: float, cover: float, gamma: float, *,
 
     p_min = eta_earth * max(s', 0) + eta_water * u, taken at the axis; p_max = max_fraction * total overburden at the
     crown. The support medium (EPB paste ~12 kN/m^3, bentonite slurry ~11) sets the gradient from crown to axis.
+    A negative water_depth means free water above the ground surface (river bed); it raises u and the total overburden.
     """
     gsub = gamma - GAMMA_W if gamma_sub is None else gamma_sub
     hw = min(max(water_depth, 0.0), cover)
-    sigma_crown = q + gamma * hw + (gsub + GAMMA_W) * (cover - hw)
+    # a negative water depth is free water above the ground (a river): its weight adds to the total overburden
+    sigma_crown = q + gamma * hw + (gsub + GAMMA_W) * (cover - hw) + GAMMA_W * max(-water_depth, 0.0)
     dz = diameter / 2 * support_unit_weight
     p_min_axis = eta_earth * max(fs.s_eff, 0.0) + eta_water * fs.u_axis
     p_max_crown = max_fraction * sigma_crown

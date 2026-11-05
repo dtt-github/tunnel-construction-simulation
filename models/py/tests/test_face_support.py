@@ -50,3 +50,13 @@ def test_daub_window():
     # very shallow cover under high water: the window closes
     shallow = wedge_silo(8, 0.5, 20, 30, water_depth=0)
     assert not daub_window(shallow, 8, 0.5, 20, water_depth=0).feasible
+
+
+def test_river_above_the_ground():
+    # 8 m of river over the bed: pore pressure and total overburden both carry the water column
+    fs = wedge_silo(7, 10, 20, 35, water_depth=-8)
+    assert fs.u_axis == 10 * (10 + 3.5 + 8)
+    w = daub_window(fs, 7, 10, 20, water_depth=-8)
+    assert w.overburden_crown == (10 + 10) * 10 + 10 * 8
+    dry_river = daub_window(fs, 7, 10, 20, water_depth=0)
+    assert w.overburden_crown - dry_river.overburden_crown == 80

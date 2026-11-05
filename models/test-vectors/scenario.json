@@ -15,7 +15,8 @@
     "phi": 35,
     "c": 0,
     "k0": 0.45,
-    "E": 40000
+    "E": 40000,
+    "d10": 0.0008
    },
    "LC": {
     "gamma": 20,
@@ -155,7 +156,8 @@
     "axis_depth": 27.0,
     "water_depth": 7.0,
     "u_axis": 180.0,
-    "water_depth_equiv": 9.0
+    "water_depth_equiv": 9.0,
+    "d10": null
    },
    "u_m30": 60.0
   },
@@ -185,20 +187,23 @@
    ],
    "unit_m20": "LC",
    "face": {
-    "unit_at_axis": "LC",
+    "unit_at_axis": "TG",
     "units_on_face": {
-     "LC": 1.0
+     "MG": 0.24666666666666673,
+     "TG": 0.3377777777777777,
+     "LC": 0.41555555555555557
     },
-    "gamma": 19.853842923141535,
-    "phi": 23.0,
-    "c": 4.999999999999999,
-    "k0": 1.5,
-    "e_soil": 60000.0,
-    "cover": 23.810000000000002,
-    "axis_depth": 27.36,
+    "gamma": 19.0,
+    "phi": 27.546666666666667,
+    "c": 2.077777777777778,
+    "k0": 0.45,
+    "e_soil": 40911.11111111111,
+    "cover": 1.2599999999999998,
+    "axis_depth": 5.76,
     "water_depth": 6.88,
-    "u_axis": 184.32000000000002,
-    "water_depth_equiv": 8.927999999999997
+    "u_axis": 0.0,
+    "water_depth_equiv": 5.76,
+    "d10": 0.0008
    },
    "u_m30": 62.399999999999984
   },
@@ -241,7 +246,8 @@
     "axis_depth": 27.75,
     "water_depth": 6.75,
     "u_axis": 189.0,
-    "water_depth_equiv": 8.850000000000001
+    "water_depth_equiv": 8.850000000000001,
+    "d10": null
    },
    "u_m30": 65.0
   },
@@ -279,7 +285,8 @@
     "axis_depth": 28.5,
     "water_depth": 6.5,
     "u_axis": 198.0,
-    "water_depth_equiv": 8.7
+    "water_depth_equiv": 8.7,
+    "d10": null
    },
    "u_m30": 70.0
   },
@@ -322,7 +329,8 @@
     "axis_depth": 28.520000000000003,
     "water_depth": 6.36,
     "u_axis": 199.44,
-    "water_depth_equiv": 8.576000000000004
+    "water_depth_equiv": 8.576000000000004,
+    "d10": null
    },
    "u_m30": 72.80000000000001
   },
@@ -365,7 +373,8 @@
     "axis_depth": 27.4,
     "water_depth": 6.2,
     "u_axis": 190.8,
-    "water_depth_equiv": 8.319999999999997
+    "water_depth_equiv": 8.319999999999997,
+    "d10": null
    },
    "u_m30": 76.00000000000001
   },
@@ -408,7 +417,8 @@
     "axis_depth": 26.0,
     "water_depth": 6.0,
     "u_axis": 180.0,
-    "water_depth_equiv": 8.0
+    "water_depth_equiv": 8.0,
+    "d10": null
    },
    "u_m30": 80.0
   },
@@ -451,7 +461,8 @@
     "axis_depth": 26.0,
     "water_depth": 6.0,
     "u_axis": 180.0,
-    "water_depth_equiv": 8.0
+    "water_depth_equiv": 8.0,
+    "d10": null
    },
    "u_m30": 80.0
   }

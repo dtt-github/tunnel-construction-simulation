@@ -83,7 +83,7 @@ write("settlement", {"symmetric": st, "asymmetric": asym, "presets": presets, "t
 face = []
 # (D, cover, gamma, phi, c, water_depth, q, k_wedge)
 for dia, cov, g, phi, c, hw, q, kw in [(10, 15, 20, 30, 0, None, 0, None), (8, 12, 20, 30, 0, 3, 0, None), (6, 9, 19, 25, 8, 0, 10, 0.4),
-                                       (12, 20, 21, 35, 2, 5, 20, None), (8, 12, 20, 0, 40, None, 0, None)]:
+                                       (12, 20, 21, 35, 2, 5, 20, None), (8, 12, 20, 0, 40, None, 0, None), (7, 10, 20, 35, 0, -8, 0, None)]:
     kw_args = {"q": q, "k_wedge": kw} | ({} if hw is None else {"water_depth": hw})
     fs = wedge_silo(dia, cov, g, phi, c, **kw_args)
     win = daub_window(fs, dia, cov, g, q=q, **({} if hw is None else {"water_depth": hw}))
@@ -232,7 +232,7 @@ for args in [(183.60, 157.68, 202.83, 3.25, 1.6125, 33e6 * 1.6276e-4, 20000, 1.0
 lnv["basic"] = {"wood": [ln.wood_inertia(1.0, n) for n in (4, 6, 7, 8)], "loads": list(ln.ring_loads(20, 3.4, 20, 0.5, 3)),
                 "sec": list(ln.section_stresses(1000, 50, 0.3)), "jack": ln.jacking_stress(1000, 10, 1.6125, 0.125),
                 "burst_aci": list(ln.bursting_force(3000, 0.35, 0.2, 0.03, "aci")), "burst_daub": list(ln.bursting_force(3000, 0.35, 0.2)),
-                "annulus": ln.annulus_volume(7.06, 6.9, 1.5), "grout": list(ln.grout_window(16.5, 20, 3)), "taper": [ln.taper(6.9, 1.5, 250), ln.taper(6.9, 1.5, 250, 22.5)],
+                "annulus": ln.annulus_volume(7.06, 6.9, 1.5), "grout": list(ln.grout_window(16.5, 20, 3)), "grout_river": list(ln.grout_window(12, 19, -12.5)), "taper": [ln.taper(6.9, 1.5, 250), ln.taper(6.9, 1.5, 250, 22.5)],
                 "terzaghi": [list(ln.terzaghi_loads(*a)) for a in ((6.0, 3.4, 20, 30, 0, 0.5, 100), (40.0, 3.4, 20, 30, 0, 0.5, 100), (40.0, 3.4, 20, 30, 0, 0.5, 0.0),
                              (35.0, 3.5, 20.2, 22, 12, 1.5, 9.0), (30.0, 3.5, 19.5, 24, 1, 0.42, 4.0, 10.0, 15.0))],
                 "ka": ln.active_coefficient(24)}
@@ -241,7 +241,7 @@ from tunnelsim_models import scenario as sc  # noqa: E402
 
 SC_DATA = {
     "format": sc.FORMAT, "name": "vectors",
-    "units": {"MG": {"gamma": 19, "phi": 25, "c": 0, "k0": 0.5, "E": 10000}, "TG": {"gamma": 20, "phi": 35, "c": 0, "k0": 0.45, "E": 40000},
+    "units": {"MG": {"gamma": 19, "phi": 25, "c": 0, "k0": 0.5, "E": 10000}, "TG": {"gamma": 20, "phi": 35, "c": 0, "k0": 0.45, "E": 40000, "d10": 0.0008},
               "LC": {"gamma": 20, "phi": 23, "c": 5, "k0": 1.5, "E": 60000, "pore_pressure_ratio": 0.9},
               "LM": {"gamma": 20.5, "phi": 26, "c": 10, "k0": 1.2, "E": 80000, "water": "lower"}},
     "alignment": {"length": 1000, "axis_level": [[0, -15.0], [600, -18.0], [1000, -16.0]]},
@@ -252,10 +252,10 @@ SC_DATA = {
 scn = sc.Scenario(SC_DATA)
 scv = {"data": SC_DATA, "points": []}
 for ch in (0, 120, 250, 500, 640, 800, 1000, 1200):
-    f = scn.face(ch, 7.1)
+    f = scn.face(ch, 7.1) if ch != 120 else scn.face(ch, 9.0, axis_level=6.0)  # one face in the gravel
     scv["points"].append({"ch": ch, "column": [[l.unit, l.top, l.base] for l in scn.column(ch)], "unit_m20": scn.unit_at(ch, -20),
                           "face": {"unit_at_axis": f.unit_at_axis, "units_on_face": f.units_on_face, "gamma": f.gamma, "phi": f.phi, "c": f.c,
                                    "k0": f.k0, "e_soil": f.e_soil, "cover": f.cover, "axis_depth": f.axis_depth, "water_depth": f.water_depth,
-                                   "u_axis": f.u_axis, "water_depth_equiv": f.water_depth_equiv}, "u_m30": scn.pore_pressure(ch, -30)})
+                                   "u_axis": f.u_axis, "water_depth_equiv": f.water_depth_equiv, "d10": f.d10}, "u_m30": scn.pore_pressure(ch, -30)})
 write("scenario", scv)
 print("wrote", sorted(p.name for p in OUT.glob("*.json")))

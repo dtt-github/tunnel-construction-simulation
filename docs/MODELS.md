@@ -16,7 +16,7 @@ Every model exists twice: a Python reference in [`models/py/tunnelsim_models/`](
 | [Hard-rock drive](#hard-rock-drive) | `hard_rock.py` | `hard_rock.js` | Reproduces Farrokh's worked example within 3 %; support curve digitised |
 | [Ground response and squeezing](#ground-response-and-squeezing) | `ground_response.py` | `ground_response.js` | Reproduces Hoek's and Hoek & Marinos's worked examples; consistent with measured convergence in an Albanian flysch tunnel ([validation](validation/sem-convergence.md)); shield friction a screening estimate |
 | [SEM / NATM sprayed concrete lining](#sem--natm-sprayed-concrete-lining) | `sem.py` | `sem.js` | Checked against Brenner shotcrete data and Oreste's trends; Sulem parameters from one site |
-| [Ground scenarios](#ground-scenarios) | `scenario.py` | `scenario.js` | Interpolation and water systems unit-tested; first scenario from open BGS boreholes ([format and sources](SCENARIOS.md)) |
+| [Ground scenarios](#ground-scenarios) | `scenario.py` | `scenario.js` | Interpolation, water systems and river unit-tested; two scenarios from open BGS boreholes ([format and sources](SCENARIOS.md)) |
 | [Segment lining](#segment-lining) | `lining.py` | `lining.js` | Reproduces ITA WG2 (2000) Design Example 1 and its jacking check |
 | [Drill & blast](#drill--blast) | `drill_blast.py` | `drill_blast.js` | Reproduces Yilmaz's worked example, SS 460 48 66 tables and NFF cycle figures; Norwegian pattern fitted to published hole counts |
 | [Utilisation and downtime](#utilisation-and-downtime) | `utilisation.py` | `utilisation.js` | Deterministic limits hand-checked; default EPB inside a 40-EPB survey; one-project distributions |
@@ -322,7 +322,7 @@ Loads a scenario file (`tunnelsim-scenario/1`) and answers, at any chainage:
 - the unit at a given level;
 - the ground at a face of given diameter: units and their shares, mean overburden unit weight, face-averaged φ′, c′ and E, K0 at the axis, cover, and the pore pressure at the axis from the unit's water system.
 
-The format, the interpolation rules and the first scenario (Farringdon – Liverpool Street, from 14 open BGS/Crossrail boreholes) are described in [SCENARIOS.md](SCENARIOS.md).
+The format, the interpolation rules and the scenarios are described in [SCENARIOS.md](SCENARIOS.md): Farringdon – Liverpool Street (EPB, 14 open BGS/Crossrail boreholes) and the Thames crossing Plumstead – North Woolwich (Mixshield, 15 boreholes, four over the river). Under a river the water depth is negative; the face-support and grout windows add the river column.
 
 **Validated against:** hand-calculated interpolation; absent units and units below the bottom of a hole; the two water systems; Python and JavaScript agree on shared vectors.
 

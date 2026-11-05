@@ -71,3 +71,9 @@ def test_terzaghi_loads():
     assert p_w - 10 * 36.6 == pytest.approx(10 * h0)
     assert q1w == pytest.approx(0.5 * 10 * h0 + 10 * 36.6)
     assert L.active_coefficient(30) == pytest.approx(1 / 3)
+
+
+def test_grout_window_under_a_river():
+    lo, hi = L.grout_window(12, 19, -12.5)  # 12 m of chalk under 12.5 m of river at high water
+    assert lo == pytest.approx(10 * 24.5)
+    assert hi == pytest.approx(min(19 * 12 + 125, 245 + 69))

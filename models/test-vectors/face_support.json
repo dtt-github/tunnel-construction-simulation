@@ -154,6 +154,37 @@
      "feasible": true
     }
    }
+  },
+  {
+   "in": {
+    "diameter": 7,
+    "cover": 10,
+    "gamma": 20,
+    "phi_deg": 35,
+    "c": 0,
+    "water_depth": -8,
+    "q": 0,
+    "k_wedge": null
+   },
+   "out": {
+    "support": {
+     "s_eff": 8.060506754696819,
+     "theta_deg": 66.08370103153166,
+     "wedge_length": 2.751163567897501,
+     "silo_stress": 16.964511345959778,
+     "u_crown": 180.0,
+     "u_axis": 215.0,
+     "side": 6.203588478169306
+    },
+    "window": {
+     "p_min_axis": 237.84076013204523,
+     "p_max_axis": 294.0,
+     "p_min_crown": 195.84076013204523,
+     "p_max_crown": 252.0,
+     "overburden_crown": 280.0,
+     "feasible": true
+    }
+   }
   }
  ],
  "silo": [

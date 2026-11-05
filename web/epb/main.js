@@ -1005,7 +1005,9 @@ function nearestBorehole(ch) {
   return `${b.id} at chainage ${fmt(b.chainage, 0)} m, ${fmt(Math.abs(b.offset), 0)} m ${b.offset >= 0 ? "north" : "south"} of the line`;
 }
 function sectionSvg() {
-  const Wd = 320, Hd = 170, L = SCN.length, top = 22, bot = -48;
+  const Wd = 320, Hd = 170, L = SCN.length;
+  const lv = SCN.boreholes.map((b) => b.ground_level).concat(SCN.data.river ? SCN.data.river.level.map((p) => p[1]) : []);
+  const top = Math.ceil(Math.max(...lv) / 5) * 5 + 2, bot = Math.floor((Math.min(...SCN.data.alignment.axis_level.map((p) => p[1])) - R - 12) / 5) * 5;
   const X = (ch) => 6 + (ch / L) * (Wd - 12), Y = (lv) => 6 + ((top - lv) / (top - bot)) * (Hd - 30);
   let g = "";
   for (let ch = 0; ch < L; ch += 20) {
@@ -1014,20 +1016,30 @@ function sectionSvg() {
       if (y1 > y0) g += `<rect x="${X(ch).toFixed(1)}" y="${y0.toFixed(1)}" width="${(X(ch + 20) - X(ch) + 0.4).toFixed(1)}" height="${(y1 - y0).toFixed(1)}" fill="${SCN.units[l.unit].color}"/>`;
     }
   }
+  const rv = SCN.data.river;
+  if (rv) { // river water above the bed
+    const pts = [];
+    for (let c = Math.max(rv.from, 0); c <= Math.min(rv.to, L); c += 10) pts.push([c, SCN.surfaceAt(c)]);
+    const lvl = (c) => interpPts(rv.level, c);
+    g += `<polygon points="${pts.map(([c, z]) => `${X(c).toFixed(1)},${Y(z).toFixed(1)}`).join(" ")} ${pts.slice().reverse().map(([c]) => `${X(c).toFixed(1)},${Y(lvl(c)).toFixed(1)}`).join(" ")}" fill="#3a6f9e" opacity="0.75"/>`;
+  }
   const line = (f, attrs) => `<polyline points="${Array.from({ length: 44 }, (_, i) => (i * L) / 43).map((c) => `${X(c).toFixed(1)},${Y(f(c)).toFixed(1)}`).join(" ")}" fill="none" ${attrs}/>`;
-  g += line((c) => SCN.axisAt(c) + R, 'stroke="#e7e9ec" stroke-width="1"') + line((c) => SCN.axisAt(c) - R, 'stroke="#e7e9ec" stroke-width="1"');
+  { // the tunnel as a dark band between crown and invert
+    const cs = Array.from({ length: 44 }, (_, i) => (i * L) / 43);
+    g += `<polygon points="${cs.map((c) => `${X(c).toFixed(1)},${Y(SCN.axisAt(c) + R).toFixed(1)}`).join(" ")} ${cs.slice().reverse().map((c) => `${X(c).toFixed(1)},${Y(SCN.axisAt(c) - R).toFixed(1)}`).join(" ")}" fill="#15171a" fill-opacity="0.55" stroke="#e7e9ec" stroke-width="0.8"/>`;
+  }
   g += line((c) => SCN.waterAt(c), 'stroke="#5aa0e6" stroke-dasharray="4 3"');
-  if (SCN.data.groundwater.deep_head) g += line((c) => interpDeep(c), 'stroke="#5aa0e6" stroke-dasharray="1 3"');
+  if (SCN.data.groundwater.deep_head) g += line((c) => interpPts(SCN.data.groundwater.deep_head, c), 'stroke="#5aa0e6" stroke-dasharray="1 3"');
   for (const b of SCN.boreholes) g += `<line x1="${X(Math.max(b.chainage, 0)).toFixed(1)}" x2="${X(Math.max(b.chainage, 0)).toFixed(1)}" y1="${Y(b.ground_level).toFixed(1)}" y2="${Y(Math.max(b.base_level, bot)).toFixed(1)}" stroke="#15171a" stroke-width="1.2"/>`;
   g += `<line id="faceLine" x1="0" x2="0" y1="4" y2="${Hd - 24}" stroke="#f2b43a" stroke-width="2"/>`;
-  for (const lv of [20, 0, -20, -40]) g += `<text x="${Wd - 4}" y="${Y(lv) + 3}" text-anchor="end">${lv} m OD</text>`;
+  for (let l = Math.ceil(bot / 10) * 10; l <= top; l += 10) g += `<text x="${Wd - 4}" y="${Y(l) + 3}" text-anchor="end">${l} m OD</text>`;
   const used = [...new Set(SCN.order.filter((u) => SCN.boreholes.some((b) => u in b.tops)))];
+  const ends = SCN.data.alignment.ends ?? ["start", "end"];
   const legend = used.map((u) => `<span style="--c:${SCN.units[u].color}">${SCN.units[u].name.replace(/ \(.*\)/, "")}</span>`).join("");
-  return `<svg viewBox="0 0 ${Wd} ${Hd}" role="img" aria-label="Geological long section along the drive">${g}<text x="6" y="${Hd - 8}">Farringdon</text><text x="${Wd - 6}" y="${Hd - 8}" text-anchor="end">Liverpool Street</text></svg>
-    <div class="legend">${legend}<span style="--c:#5aa0e6">water table (dashed), deep head (dotted)</span><span style="--c:#15171a">boreholes</span></div>`;
+  return `<svg viewBox="0 0 ${Wd} ${Hd}" role="img" aria-label="Geological long section along the drive">${g}<text x="6" y="${Hd - 8}">${ends[0]}</text><text x="${Wd - 6}" y="${Hd - 8}" text-anchor="end">${ends[1]}</text></svg>
+    <div class="legend">${legend}${rv ? '<span style="--c:#3a6f9e">river (high water)</span>' : ""}<span style="--c:#5aa0e6">water table (dashed)${SCN.data.groundwater.deep_head ? ", deep head (dotted)" : ""}</span><span style="--c:#15171a">tunnel, boreholes</span></div>`;
 }
-function interpDeep(ch) {
-  const d = SCN.data.groundwater.deep_head;
+function interpPts(d, ch) {
   if (ch <= d[0][0]) return d[0][1];
   for (let i = 0; i + 1 < d.length; i++) if (ch <= d[i + 1][0]) return d[i][1] + ((d[i + 1][1] - d[i][1]) * (ch - d[i][0])) / (d[i + 1][0] - d[i][0]);
   return d.at(-1)[1];
