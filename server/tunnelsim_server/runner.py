@@ -15,7 +15,7 @@ from pathlib import Path
 from . import UNCALIBRATED
 from .materials import PHASE0_SAND, Soil, drained_sand, undrained_clay
 from .runrecord import gpu_snapshot, record
-from .scenes import collapse, common, face, face_sand, k0, rankine, tunnel_2d
+from .scenes import chamber, collapse, common, face, face_sand, k0, rankine, tunnel_2d
 
 RESULTS = Path(__file__).resolve().parent.parent / "results"
 # Face soils (WP2): rigid-plastic Drucker-Prager, mu = sin phi' (WP1)
@@ -31,12 +31,14 @@ FACE_SOILS = {
 
 
 def _packing(args) -> dict:
-    return {"critical_fraction": args.critical_fraction, "radius_over_h": args.radius}
+    return {"critical_fraction": args.critical_fraction, "radius_over_h": args.radius, "strain_basis": args.strain_basis or "P0"}
 
 
 def run(args) -> dict:
     common.CRITICAL_FRACTION = args.critical_fraction
     common.RADIUS = args.radius
+    if args.strain_basis:
+        common.SOLVER_OPTIONS["strain_basis"] = args.strain_basis
     gpu = gpu_snapshot()
     if args.scene == "face":
         cfg = face.FaceConfig(diameter=args.diameter, cover=args.cover, voxel=args.voxel, iterations=args.iterations, seed=args.seed)
@@ -60,6 +62,12 @@ def run(args) -> dict:
                                        settle=args.settle)
         result, _ = tunnel_2d.run(cfg, soil)
         return record("tunnel_2d", {**tunnel_2d.params(cfg, soil), **_packing(args)}, result, UNCALIBRATED, gpu)
+    if args.scene == "chamber":
+        cfg = chamber.ChamberConfig(voxel=args.voxel, iterations=args.iterations, seed=args.seed, target_kpa=args.target_kpa,
+                                    advance_mm_min=args.advance, cutter_rpm=args.cutter_rpm, excavate_s=args.excavate_s,
+                                    paste_friction=args.paste_friction, paste_cohesion=args.paste_cohesion)
+        result, _ = chamber.run(cfg)
+        return record("chamber", {**chamber.params(cfg), **_packing(args)}, result, UNCALIBRATED, gpu)
     if args.scene == "k0":
         soil = drained_sand("element-test sand", 1600.0, args.phi, args.E, "element test (assumed values)", k0=args.k0)
         cfg = k0.K0Config(voxel=args.voxel, iterations=args.iterations, seed=args.seed)
@@ -82,13 +90,14 @@ def run(args) -> dict:
 def main() -> None:
     p = argparse.ArgumentParser()
     sub = p.add_subparsers(dest="scene", required=True)
-    for name, voxel in (("face", 0.1), ("face_sand", 0.0), ("tunnel_2d", 0.0), ("k0", 0.1), ("rankine", 0.1), ("collapse", 0.005)):
+    for name, voxel in (("face", 0.1), ("face_sand", 0.0), ("tunnel_2d", 0.0), ("k0", 0.1), ("rankine", 0.1), ("collapse", 0.005), ("chamber", 0.15)):
         s = sub.add_parser(name)
         s.add_argument("--voxel", type=float, default=voxel)
         s.add_argument("--iterations", type=int, default=50)
         s.add_argument("--seed", type=int, default=0)
         s.add_argument("--name", type=str, default=None)
         s.add_argument("--critical-fraction", type=float, default=0.0, help="Newton packing constraint (0 = off, as WP0-WP3)")
+        s.add_argument("--strain-basis", type=str, default=None, help="Newton strain basis (default P0; P1d locks, see mpm-clay.md)")
         s.add_argument("--radius", type=float, default=0.7, help="particle radius / spacing (WP0b default 0.7; 0.5 = nominal packing 1, as WP0-WP3)")
         if name == "face":
             s.add_argument("--diameter", type=float, default=2.0)
@@ -120,6 +129,13 @@ def main() -> None:
             s.add_argument("--mu", type=float, default=0.5592)
             s.add_argument("--phi", type=float, default=34.0, help="with --psi: Mohr-Coulomb friction angle")
             s.add_argument("--psi", type=float, default=None, help="dilation angle; maps (phi, psi) to Newton (WP1b)")
+        if name == "chamber":
+            s.add_argument("--target-kpa", type=float, default=200.0, help="axis pressure set point")
+            s.add_argument("--advance", type=float, default=60.0, help="advance rate, mm/min")
+            s.add_argument("--cutter-rpm", type=float, default=2.0)
+            s.add_argument("--excavate-s", type=float, default=20.0)
+            s.add_argument("--paste-friction", type=float, default=0.35, help="assumed")
+            s.add_argument("--paste-cohesion", type=float, default=2000.0, help="Pa, assumed")
         if name == "collapse":
             s.add_argument("--run", type=str, default="B00")
             s.add_argument("--gate-speed", type=float, default=1.0, help="m/s (assumed); 0 removes the gate at once")

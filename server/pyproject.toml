@@ -10,6 +10,7 @@ dependencies = [
     "warp-lang==1.19.0",
     "numpy",
     "websockets==17.4",
+    "tunnelsim-models",  # the analytical models (models/py): screw, chamber, thrust for the WP4 chamber
 ]
 
 [dependency-groups]
@@ -21,3 +22,6 @@ markers = ["gpu: needs a CUDA GPU (skipped without one)"]
 
 [tool.uv]
 package = false
+
+[tool.uv.sources]
+tunnelsim-models = { path = "../models/py", editable = true }

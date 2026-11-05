@@ -6,6 +6,11 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ### Added
 
+- **Phase 2, WP4: EPB chamber under pressure, first runs, blocked** ([results](docs/validation/mpm-chamber.md)):
+  - a chamber scene for the Crossrail EPB (7.08 m) with the paste's bulk modulus from the analytical chamber model, an analytical screw sink and a PI screw controller; the server now uses `models/py` directly;
+  - open validation data: Bezuijen et al. (2005), Botlek Rail Tunnel, vertical gradients on the bulkhead high while excavating (10–20+ kPa/m) and lower at standstill;
+  - Newton's default element loses the paste's volume once the cutterhead turns (2 bar falls to about 0.3 bar); P1d keeps the pressure but locks and gives no vertical gradient. The chamber stays analytical on the console.
+
 - **Phase 2, WP0b: particle packing** ([details](docs/validation/mpm-clay.md#wp0b-correction-5-nov-2026)):
   - Newton's effective cohesion and stiffness scale with the particle fill of each cell (shown with a Tresca Rankine wall). Scenes now use particle radius 0.7 h with yield stress and stiffness divided by the packing, which cuts the start-up compaction from 2.7 % to 0.8 %;
   - WP1 repeats within 0.5 % and WP2 within 1–6 %; the face servo is slowed to 0.01 D/s; the golden face test is re-pinned (settled pressure 8.22 → 7.61 kPa, limit unchanged);

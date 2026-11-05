@@ -1269,12 +1269,23 @@ wheels = [
 ]
 
 [[package]]
+name = "tunnelsim-models"
+version = "0.1.0"
+source = { editable = "../models/py" }
+
+[package.metadata]
+
+[package.metadata.requires-dev]
+dev = [{ name = "pytest", specifier = ">=8" }]
+
+[[package]]
 name = "tunnelsim-server"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
     { name = "newton", extra = ["examples"] },
     { name = "numpy" },
+    { name = "tunnelsim-models" },
     { name = "warp-lang" },
     { name = "websockets" },
 ]
@@ -1288,6 +1299,7 @@ dev = [
 requires-dist = [
     { name = "newton", extras = ["examples"], specifier = "==1.7.0" },
     { name = "numpy" },
+    { name = "tunnelsim-models", editable = "../models/py" },
     { name = "warp-lang", specifier = "==1.19.0" },
     { name = "websockets", specifier = "==17.4" },
 ]

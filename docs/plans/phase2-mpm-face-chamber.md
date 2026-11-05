@@ -195,6 +195,15 @@ Each package ends with a check. A package is done only when its check passes, or
 - The chamber holds a target within the demo's control band. That band (±0.2–0.3 bar) is still marked unverified in the research survey; it needs a source before this check is final.
 - Torque from mixing stays below the installed 9.8 MNm.
 
+**Status (5 Nov 2026): first runs, blocked** ([results](../validation/mpm-chamber.md)).
+- **In place:**
+  - the chamber scene, with the paste stiffness taken from the analytical chamber model;
+  - a PI screw controller with an analytical screw sink;
+  - an open gradient source in place of the unverified band: Bezuijen et al. (2005), Botlek.
+- **P0 (default) fails:** it loses the paste's volume once the cutterhead shears it, so 2 bar falls to about 0.3 bar with nothing discharged.
+- **P1d holds the pressure, but:** the vertical gradient is near zero or negative (Botlek 10–20+ kPa/m), the material is too strong, and the pressure swings ±45 kPa.
+- **Same block as WP3:** volume-preserving plastic flow in Newton. A draft issue for the Newton developers is ready.
+
 ### WP5: screw conveyor (about 3 weeks)
 
 - **Resolved inlet:** at least 8 voxels across the screw, with local refinement in the casing. Walls at least one voxel thick, as Phase 0 learnt.
