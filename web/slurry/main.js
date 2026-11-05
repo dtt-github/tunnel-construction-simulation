@@ -30,7 +30,7 @@ const M = {
   workingChamber: 1.6, // m behind the submerged wall, assumed
   ringWidth: 1.6, // m, sourced
   ringOD: 6.8, ringID: 6.2, // ID sourced, 300 mm segments assumed
-  buildMin: 35, // min per ring (same assumption as the EPB page)
+  buildMin: 32, // min per ring, Crossrail average (Tunnels & Tunnelling, 25 Feb 2021, "Lord of the rings")
   shieldWeight: 4000, backupWeight: 6000, tailSeal: 500, // kN, assumed
   nTools: 80, toolForce: 4, // kN tangential each, assumed
   pipe: 0.3, // DN300 feed and discharge lines, sourced
@@ -574,6 +574,8 @@ const ids = ["adv", "rpm", "disMode", "target", "dis", "feed", "tau", "vl", "ts"
 const ui = Object.fromEntries(ids.map((id) => [id, document.getElementById(id)]));
 const val = (id) => +ui[id].value;
 if (SCN?.data.settlement) { ui.vl.min = 0.1; ui.vl.value = SCN.data.settlement.volume_loss; }
+// Two 12 h shifts a day, seven days a week, on the Crossrail tunnelling contracts other than the west (King et al. 2017)
+if (SCN) ui.shift.value = "2x12h_maintenance_per_cycle";
 
 // ---------------------------------------------------------------- simulation
 let S;
@@ -1207,6 +1209,9 @@ function scheduleForecast() {
   clearTimeout(forecastTimer);
   forecastTimer = setTimeout(runForecast, 250);
 }
+// Crossrail Thames Tunnel, drive H, rings/day of 1.6 m: Sophia (first bore) and Mary (King, Thomas & Stenning 2017,
+// Table 3); "6 to 7" and "10" rings a day on the Plumstead - Woolwich stretch (Cheng & Mikulski 2014)
+const DRIVE_H = { exclDelays: ["7.9", "10.0"], inclDelays: ["4.4", "4.6"], bestDay: [16, 17], bestWeek: [91, 100] };
 const SHARE_COLORS = { boring: "#3987e5", ring_build: "#d95926", general: "#199e70", train_delay: "#b07ad9", maintenance_per_cycle: "#c9a227", intervention: "#ff7a45", maintenance_shift_and_idle: "#4b5560" };
 const SHARE_NAMES = { boring: "boring", ring_build: "ring build", general: "general activities", train_delay: "train delays", maintenance_per_cycle: "maintenance per cycle", intervention: "tool interventions", maintenance_shift_and_idle: "maintenance shift" };
 function forecastHtml() {
@@ -1219,6 +1224,7 @@ function forecastHtml() {
     <dt>Utilisation (boring / calendar time)</dt><dd>${fmt(FC.util * 100, 0)} %</dd>
     <dt>Mean advance</dt><dd>${fmt(FC.day, 1)} m/day · ${fmt(FC.week, 0)} m/week</dd>
     <dt>40-EPB survey for comparison (Roby & Willis 2014)</dt><dd>${fmt(sv.mean, 0)} ± ${fmt(sv.sd, 0)} m/week</dd>
+    ${SCN ? `<dt>Crossrail Thames Tunnel, Sophia and Mary (King et al. 2017)</dt><dd>${DRIVE_H.exclDelays.join("–")} rings a day without delays; ${DRIVE_H.inclDelays.join("–")} over the whole drive; best day ${DRIVE_H.bestDay.join("–")} rings, best week ${DRIVE_H.bestWeek.join("–")}. This forecast: ${fmt(FC.day / W, 1)} rings a day</dd>` : ""}
     <dt>Best day</dt><dd>${fmt(FC.bestDay, 1)} m ${flag(FC.check.day)}</dd>
     <dt>Best week</dt><dd>${fmt(FC.bestWeek, 0)} m ${flag(FC.check.week)}</dd>
     <dt>Best month (30 days)</dt><dd>${fmt(FC.bestMonth, 0)} m ${flag(FC.check.month)}</dd>
@@ -1226,7 +1232,7 @@ function forecastHtml() {
   </dl>
   <div class="shares">${sh.map(([k, v]) => `<i title="${SHARE_NAMES[k]} ${fmt(v * 100, 0)} %" style="width:${v * 100}%;background:${SHARE_COLORS[k]}"></i>`).join("")}</div>
   <div class="legend">${sh.map(([k, v]) => `<span style="--c:${SHARE_COLORS[k]}">${SHARE_NAMES[k]} ${fmt(v * 100, 0)} %</span>`).join("")}</div>
-  <p class="note">20 runs × 90 days at the current speed, shift pattern and haulage. Best values are medians over the runs. Downtime distributions from a 6.88 m metro EPB (Moosazadeh et al. 2018), applied to this slurry machine as an assumption.</p>`;
+  <p class="note">20 runs × 90 days at the current speed, shift pattern and haulage. Best values are medians over the runs. Downtime distributions from a 6.88 m metro EPB (Moosazadeh et al. 2018), applied to this slurry machine as an assumption; separation-plant stops are not modelled.</p>`;
 }
 
 ui.pause.onclick = () => { S.paused = !S.paused; ui.pause.textContent = S.paused ? "Resume" : "Pause"; };
