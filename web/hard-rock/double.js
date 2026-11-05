@@ -16,18 +16,21 @@ export const M = {
   title: "Hard-rock double shield TBM · Ø 9.9 m",
   D: 9.9, // m, Follo Line machines (Herrenknecht reference, verified)
   torque: 11115, power: 4550, // kNm, kW (Follo, verified)
-  nCutters: 60, centre: 4, gauge: 10, // 19-inch discs: 4 double centre, 46 face, 10 gauge (10.65 m Brenner machine, Maggio 2020)
+  nCutters: 71, centre: 4, gauge: 10, // 71 x 19-inch discs (Follo, Hansen 2018 Table 2.4); centre and gauge split drawn after the Brenner machine (Maggio 2020)
+  thrustDefault: 18000, // kN on the cutters: Follo TBM1 mean 21217 kN less 3200 kN shield drag (Hansen 2018 Table 5.1)
+  rpmDefault: 5.1, // rpm, Follo TBM1 mean 5.08 (Hansen 2018 Table 5.1)
   stroke: 1.8, // m: one ring width per stroke (Follo rings 1.8 m, verified)
   regripMin: 10, // min: "a few minutes" (Herrenknecht) to 15-30 min (Maggio 2020) per regrip
   ringBuildMin: 30, // min per ring, assumed (no open source; Follo's 14-20 rings a day bounds the whole cycle)
-  segThick: 0.32, // m, Guadarrama value from a search snippet (unverified)
+  segThick: 0.32, // m, Guadarrama (press: publico.es); Follo not found
   doubleModeMinRmr: 50, // below: single-shield mode (as in the support-downtime model)
   shieldLength: 13.7, // m, sum of the Brenner shield lengths
   overcut: 0.10, // m radial gap between bore and shield, assumed (Ramoni & Anagnostou's example uses 5-15 cm)
   thrustInstalled: 150, // MN, low end of "up to 150-200 MN" for ~10 m shielded TBMs (Ramoni & Anagnostou, VSS 1341)
   utilMachine: () => "double",
   limits: [
-    "Machine diameter, torque, power and ring width are the Follo values (verified); shield lengths and cutter layout come from the 10.65 m Brenner machines. Thrust, gripper force and strokes for a 10 m machine are not published; the stroke is taken equal to the ring width.",
+    "Machine diameter, torque, power, 71 discs and ring width are the Follo values; the default thrust and speed are the logged Follo TBM1 means (Hansen 2018). Shield lengths come from the 10.65 m Brenner machines. Gripper force and strokes are not published; the stroke is taken equal to the ring width.",
+    "Penetration (CSM) reproduces Follo TBM1: 6.4 against 6.32 mm/rev measured. With Follo's cutter changes the downtime model gives 13–15 m/day against the 14.1 m/day average (Follo, including probing and grouting). Utilisation is not published for any of the reference projects.",
     "Ring-build time (30 min) and segment thickness (320 mm) are assumptions; single-shield mode below RMR 50 follows the support-downtime model, not project data.",
   ],
 };

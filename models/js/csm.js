@@ -16,7 +16,7 @@ export const DEFAULT_CUTTER = Object.freeze({
   diameter_mm: 482.6,
   tip_width_mm: 19.0,
   spacing_mm: 85.0,
-  psi: 0.1,
+  psi: -0.1, // back-analysed on Follo TBM1, Hansen (2018); see csm.py
   max_load_kn: 311.0, // 19" rated load, Robbins disc-cutter spec sheet
 });
 

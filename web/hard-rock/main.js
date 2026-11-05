@@ -61,6 +61,10 @@ const val = (id) => +ui[id].value;
 ui.machine.value = KIND;
 ui.machine.onchange = () => { location.search = `?machine=${ui.machine.value}`; };
 ui.rpm.max = RPM_MAX.toFixed(1);
+ui.thrust.value = M.thrustDefault;
+ui.rpm.value = M.rpmDefault;
+// CSM spacing as cutterhead radius / number of discs, the definition under which psi was back-analysed (csm.js)
+const CUTTER = { ...DEFAULT_CUTTER, spacing_mm: (1000 * M.D) / 2 / M.nCutters };
 
 const NAMES = { tbm_breakdown: "TBM repairs", backup: "backup", cutters: "cutter changes", support: KIND === "double" ? "segments and support" : "rock support",
   maintenance: "maintenance", transport: "transport", utilities: "utility extension", survey: "survey", other: "other", regrip: "regrip", boring: "boring" };
@@ -116,7 +120,7 @@ function substep(dt) {
   const zone = zoneAt(S.chainage);
   ctx.zone = zone;
   S.rpm = Math.min(val("rpm"), RPM_MAX);
-  S.perf = tbmPerformance({ thrust_kn: val("thrust"), rpm: S.rpm, n_cutters: M.nCutters, head_diameter_m: M.D, ucs_mpa: zone.ucs, bts_mpa: zone.bts,
+  S.perf = tbmPerformance({ thrust_kn: val("thrust"), rpm: S.rpm, n_cutters: M.nCutters, head_diameter_m: M.D, ucs_mpa: zone.ucs, bts_mpa: zone.bts, cutter: CUTTER,
     max_torque_knm: M.torque, max_power_kw: M.power, max_penetration_mm: PRACTICAL_MAX_PENETRATION_MM });
   S.util = utilAt(zone, S.perf.rop_m_h);
   S.simTime += dt;

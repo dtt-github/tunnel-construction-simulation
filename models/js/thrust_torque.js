@@ -10,7 +10,7 @@ export const REFERENCE_MACHINES = Object.freeze([
   Object.freeze({"project": "Crossrail, London", "type": "slurry", "diameter": 7.08, "torque_knm": 3709.0, "thrust_kn": null, "power_kw": 1120.0, "torque_kind": "installed", "verified": true, "source": "https://herrenknecht.com/en/references/referencesdetail/crossrail-london"}),
   Object.freeze({"project": "Tuen Mun-Chek Lap Kok, Hong Kong", "type": "slurry", "diameter": 17.63, "torque_knm": 27722.0, "thrust_kn": null, "power_kw": 5600.0, "torque_kind": "installed", "verified": false, "source": "https://herrenknecht.com/en/references/referencesdetail/hong-kong-tuen-mun-chek-lap-kok-link"}),
   Object.freeze({"project": "Niagara Tunnel", "type": "gripper", "diameter": 14.4, "torque_knm": 18670.0, "thrust_kn": 18462.0, "power_kw": null, "torque_kind": "installed", "verified": false, "source": "https://www.robbinstbm.com/projects/niagara-tunnel-project/"}),
-  Object.freeze({"project": "Gotthard Base Tunnel", "type": "gripper", "diameter": 9.33, "torque_knm": 5290.0, "thrust_kn": 27488.0, "power_kw": 3500.0, "torque_kind": "installed", "verified": false, "source": "trade press via search (Tunnelbuilder)"}),
+  Object.freeze({"project": "Gotthard Base Tunnel", "type": "gripper", "diameter": 9.33, "torque_knm": 5290.0, "thrust_kn": 27488.0, "power_kw": 3500.0, "torque_kind": "installed", "verified": true, "source": "Tunnels & Tunnelling, Oct 2006, https://tunnelsandtunnelling.com/?p=5739"}),
 ]);
 
 /** Vertical stress at `depth` (kPa); effective by default. */
