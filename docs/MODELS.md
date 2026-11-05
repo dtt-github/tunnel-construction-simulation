@@ -14,7 +14,7 @@ Every model exists twice: a Python reference in [`models/py/tunnelsim_models/`](
 | [Slurry shield (Mixshield)](#slurry-shield-mixshield) | `slurry.py` | `slurry.js` | Reproduces the DAUB worked example; air cushion is this project's derivation |
 | [Thrust and torque](#thrust-and-torque) | `thrust_torque.py` | `thrust_torque.js` | Shield and rim friction fitted on open field data; thrust within about ±25 % on three EPB projects, torque high in conditioned clays ([validation](validation/epb-open-data.md)) |
 | [Hard-rock drive](#hard-rock-drive) | `hard_rock.py` | `hard_rock.js` | Reproduces Farrokh's worked example within 3 %; support curve digitised |
-| [Ground response and squeezing](#ground-response-and-squeezing) | `ground_response.py` | `ground_response.js` | Reproduces Hoek's and Hoek & Marinos's worked examples; shield friction a screening estimate |
+| [Ground response and squeezing](#ground-response-and-squeezing) | `ground_response.py` | `ground_response.js` | Reproduces Hoek's and Hoek & Marinos's worked examples; consistent with measured convergence in an Albanian flysch tunnel ([validation](validation/sem-convergence.md)); shield friction a screening estimate |
 | [SEM / NATM sprayed concrete lining](#sem--natm-sprayed-concrete-lining) | `sem.py` | `sem.js` | Checked against Brenner shotcrete data and Oreste's trends; Sulem parameters from one site |
 | [Segment lining](#segment-lining) | `lining.py` | `lining.js` | Reproduces ITA WG2 (2000) Design Example 1 and its jacking check |
 | [Drill & blast](#drill--blast) | `drill_blast.py` | `drill_blast.js` | Reproduces Yilmaz's worked example, SS 460 48 66 tables and NFF cycle figures; Norwegian pattern fitted to published hole counts |
@@ -264,6 +264,12 @@ Convergence–confinement around a circular tunnel, squeezing classes, and two m
 - the equivalent Mohr–Coulomb parameters, checked by hand;
 - the LDP limits and the continuity of the ground reaction curve at p_cr.
 - Shield friction against Ramoni & Anagnostou's worked example (D 10 m, σ0 10 MPa): normalised thrust 0.23 / 0.04 / 0 against 0.26 / 0.08 / 0 for overcuts of 5 / 10 / 15 cm.
+
+**Against field data** ([validation](validation/sem-convergence.md)): 14 monitored sections of a headrace tunnel in weak flysch, Albania (Terron-Almenara & Panthi 2025, CC BY 4.0).
+
+- Unsupported, the chain gives a median 1.77× the measured convergence after the station.
+- Every reading is reproduced with 1–51 % of the installed support capacity (median 11–19 %).
+- The result is consistent, but it cannot separate rock stiffness from mobilised support.
 
 **Limits:**
 

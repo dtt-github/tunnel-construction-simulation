@@ -19,5 +19,6 @@ Reviewed 4 Nov 2026. Status: ✅ meets the rule · ⚠️ partly, gap listed · 
 ## Before the next publish
 
 - [ ] Rock-specific SEM cycle times from a primary source.
-- [ ] Convergence time parameters from a site in comparable rock.
+- [x] Ground-response magnitudes checked against 14 monitored sections in weak flysch ([validation](../validation/sem-convergence.md)). The readings are reproduced within the installed support capacity.
+- [ ] Convergence time parameters from a site in comparable rock. The Albanian data have one reading per section, not a time series.
 - [ ] The final cast-in-place lining stage, with its formwork traveller and waterproofing membrane.
