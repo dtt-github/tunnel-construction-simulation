@@ -5,7 +5,9 @@
   - [`server/tunnelsim_server/scenes/tunnel_2d.py`](../../server/tunnelsim_server/scenes/tunnel_2d.py), a plane-strain tunnel with a closing ring of segments;
   - [`face_sand.py`](../../server/tunnelsim_server/scenes/face_sand.py) with the kaolin soil;
   - records `t2d_*` and `fc_*` in [`server/results/`](../../server/results/).
-- **Status:** **blocked, cause found.** The MPM clay tunnel collapses at about half the stability ratio measured by Kimura & Mair (1981), in 2D and 3D alike. The cause is Newton's packing constraint (`critical_fraction`), which was off in every scene so far. Without it the soil never stops compacting and never becomes static. With it on, the plane-strain tunnel comes close to Kimura (see [diagnosis](#diagnosis-5-nov-2026)). A clean set-up and a re-baseline of WP1–WP3 come next.
+- **Status:** **blocked, cause not yet found.** The MPM clay tunnel collapses at about half the stability ratio measured by Kimura & Mair (1981), in 2D and 3D alike.
+  - The first diagnosis blamed Newton's packing constraint (`critical_fraction`). WP0b withdrew it: that apparent gain came from compaction (see [WP0b correction](#wp0b-correction-5-nov-2026)).
+  - The clay piling up against the ring is the tunnel-scale sign of a numerical volume loss in yielding clay. It comes from the default element (Q1 velocities, P0 strains), not from the colliders. The one element that removes it locks (see [piling](#the-piling-investigated-5-nov-2026)).
 - **Run on:** 5 Nov 2026
 
 ## Data: Kimura & Mair (1981)
@@ -71,7 +73,7 @@ The diagnostic scripts are in [`server/diagnostics/`](../../server/diagnostics/)
 - With the ring held still, it keeps sinking at about 29 mm/s. After 6 s of settling, N is unchanged (2.0–2.7).
 - During the closure the surface falls about three times faster than the lost tunnel area explains, so the soil is compacting by about 1 % of its volume as well. Undrained clay is incompressible.
 
-**5. The cause: Newton's packing constraint.**
+**5. Newton's packing constraint (withdrawn by WP0b, see [below](#wp0b-correction-5-nov-2026)).**
 - **What it is:** `SolverImplicitMPM.Config.critical_fraction` ("fraction for particles under which the yield surface collapses"). Above 0 it turns on a void-fraction unilateral incompressibility offset.
 - **How it was set:** 0, off, in Phase 0 and every WP0–WP3 scene.
 - **Effect on the clay tunnel** (plane strain, C/D 2, D/10, 3 s settling):
@@ -84,14 +86,110 @@ The diagnostic scripts are in [`server/diagnostics/`](../../server/diagnostics/)
 | 0.8 | 2.6 m | yes (1.3 mm/s) | 3.0 |
 | 0.9 | 3.5 m | yes (0.3 mm/s) | 3.7 |
 
-**With the constraint active the clay becomes static, and N approaches Kimura's.** But the soil first compacts by 13–17 % of its height.
+With the constraint active the clay became static and N approached Kimura's, but the soil first compacted by 13–17 % of its height. WP0b showed that the compaction itself, not the constraint, raised N.
 
 **Why the start compacts.** Newton takes a particle's volume as (2r)³, so the nominal packing is 1.0. The fraction it measures per grid node is noisy at 8 particles per cell, so nodes below the critical fraction lose their strength and compact. The overburden by weight is unchanged, but the cover shrinks: C/D 2 becomes about 1.2 at 0.9, where Kimura's N is 3.5. So N ≈ 3.7 still sits on the measured values.
 
-## Next step (proposed): WP0b, packing
+## WP0b correction (5 Nov 2026)
 
-1. **Find a start that does not compact:** more particles per cell to cut the noise, and particles packed at the critical fraction. The check is a static soil with less than 1 % settling before loading, and a fixed critical fraction.
-2. **Re-baseline:** repeat the WP1 element tests, the WP2 sand face and WP3 with the constraint on. It changes the at-rest state too, so WP1's failed K0 check may change.
-3. **Fix it for all later work** in `scenes/common.py`, and re-pin the golden tests on purpose.
+The scripts are [`diagnostics/packing.py`](../../server/diagnostics/packing.py) and [`diagnostics/cohesion_scale.py`](../../server/diagnostics/cohesion_scale.py).
 
-Until then, WP3 is blocked and the clay face is not used anywhere. The sand results (WP1, WP2) were also run without the constraint and will be repeated in WP0b.
+**1. Newton's cohesion and stiffness scale with particle volume.**
+- Newton takes a particle's volume as (2r)³ and works with stresses per unit of particle volume in each grid cell.
+- The effective cohesion and Young's modulus are therefore the input values times the fill of the cell: the nominal packing k = (2r/h)³ inside the soil, less in part-filled cells.
+- Friction is a ratio and does not change.
+- The Rankine wall in Tresca clay (cu/γH 0.06; theory K = 1 − 4cu/γH = 0.76) shows it:
+
+| Particle radius | Cohesion input | K_active |
+|---|---|---|
+| 0.5 h (k = 1) | cu | 0.771 |
+| 0.7 h (k = 2.744) | cu | 0.366 (theory with 2.744 cu: 0.341) |
+| 0.7 h | cu / 2.744 | 0.773 |
+
+**2. This explains the critical-fraction result.**
+- At `critical_fraction` 0.8–0.9 the cells compacted to 1.3–1.5 times their initial fill, so the clay there carried 1.3–1.5 times the cohesion.
+- The cover also became shallower.
+- Both raised N. The constraint itself did not strengthen the clay.
+
+**3. A larger radius stops the start-up compaction.** In a 10 m clay column between frictionless walls:
+
+| Radius | critical_fraction | Settlement in 3 s (% of H) |
+|---|---|---|
+| 0.5 h | 0 | 2.7 |
+| 0.5 h | 0.9 | 10.5 |
+| 0.6 h | 0.9 | 1.8 |
+| 0.7 h | 0.9 | 0.8 |
+
+- With the radius at 0.7 h, `critical_fraction` makes no measurable difference (Rankine, K0, tunnel).
+
+**4. The new default** (all scenes, from WP0b on):
+- radius 0.7 h;
+- yield stress and Young's modulus divided by 2.744 when particles are built, so the soil behaves as specified;
+- particle stresses multiplied by 2.744 when read out;
+- `critical_fraction` 0.
+
+Checks with this default:
+- the sand Rankine wall is unchanged (K_a 0.302 against 0.301);
+- K0 stresses add up to the weight (σv/γz 0.993);
+- the Phase 0 golden face keeps its limit pressure (1.642 against 1.629 kPa).
+
+**5. The clay tunnel is still about twice too weak.** At plane strain, C/D 2, D/10, with the correct cohesion, N at 5 % of R is 2.0 with the constraint on or off. Kimura measured ≈ 4.3.
+
+**6. The clay piles up against the ring.** The ring is held still for 6 s, yet the slab keeps creeping at 15–25 mm/s.
+- **The shell next to the ring fills up:** the 0.25 m shell outside the ring holds 75 % more particles than at the start, and about 240 particles have passed inside the ring.
+- **The fastest particles** are all at the ring.
+
+## The piling, investigated (5 Nov 2026)
+
+The script is [`diagnostics/ringpile.py`](../../server/diagnostics/ringpile.py).
+- **Set-up:** the plane-strain slab (C/D 2, D/10) held for 4 s with the lining still.
+- **Readings:** surface drop and mean speed; particle counts in shells round the lining; density by height.
+
+| Case | Mean speed at 4 s (mm/s) | Surface drop (m) | Shell next to the lining (particles) | Particles inside the lining |
+|---|---|---|---|---|
+| 24-segment ring, kaolin cu 26 kPa | 15 | 0.96 | 308 → 542 | 1145 |
+| Solid cylinder, kaolin | 25 | 0.62 | 308 → 519 | 85 |
+| Solid cylinder, kaolin, lining friction 0.5 | 14 | 0.52 | 308 → 362 | 33 |
+| Solid cylinder, kaolin, D/20 | 32 | 1.36 | 1114 → 2400 | 692 |
+| Solid cylinder, kaolin with E = 500 cu | 40 | 0.74 | 308 → 534 | 87 |
+| Solid cylinder, kaolin, 250 iterations | 14 | 0.35 | 308 → 473 | 64 |
+| 24-segment ring, cu 2.6 MPa (never yields) | 0.6 | 0.03 | 308 → 302 | 0 |
+
+**What this shows:**
+- **Yielding causes it, not the colliders.**
+  - A clay that does not yield comes to rest with no piling.
+  - A smooth cylinder piles up as much as the segment ring; its gaps only add leakage.
+- **The volume loss is spread through the slab.** The density rises 2–7 % at every depth, not only at the lining. The pile at the lining is only about a tenth of the volume lost at the surface.
+- **It is numerical.**
+  - Newton's flow rule cannot compact under pressure: plastic volume change is only allowed where the normal stress is zero.
+  - The loss shrinks with more solver iterations.
+  - It grows with finer grids, so it does not converge away.
+  - It is the particle-level volume error of the Q1–P0 element in plastic flow.
+
+**Other elements Newton offers** (kaolin, solid cylinder or ring, D/10):
+
+| Strain basis / velocity basis | Slab at 4 s | Clay tunnel N at 5 % R (C/D 1.2 / 2.0 / 2.8) | Sand Rankine K_a (theory 0.283) | Tresca Rankine K (theory 0.76) | Sand face p at 5 % D (kPa) |
+|---|---|---|---|---|---|
+| P0 / Q1 (default) | 25 mm/s, drop 0.62 m | 2.4 / 1.9 / 1.8 | 0.302 | 0.773 | 8.7 |
+| P1d / Q1 | at rest (0.1 mm/s), drop 0.27 m | 3.0 / 3.4 / 3.6 | 0.256 | 0.708 | 5.5 |
+| pic8 / Q1 | nearly at rest (3 mm/s), drop 0.26 m | – / 3.8 / – | 0.246 | 0.684 | not run |
+| P0 / B2 | 3 mm/s, drop 0.87 m | not run | not run | not run | not run |
+| Q1 / Q1 | 168 mm/s, drop 2.7 m | not run | not run | not run | not run |
+
+- **P1d** brings the clay tunnel to 0.79–0.86 of Kimura's N, but the element tests show why:
+  - it makes the soil too strong: about 10 % on friction and about 20 % on cohesion;
+  - its N falls as the grid is refined (3.4 at D/10, 3.1 at D/20).
+  - That is volumetric locking, not a correct incompressible solution.
+  - It also moves the sand face to Idinger's measured range for the wrong reason.
+- **pic8**, a strain basis per particle, gets the closest (N 3.8 at C/D 2), but it locks even more: about 13 % on friction and about 30 % on cohesion.
+- **Neither is adopted.** P0 stays: it is the element that passes the element tests.
+
+## Where this leaves WP3
+
+- The clay tunnel's low N comes with a numerical volume loss in yielding clay, about 5 % in a few seconds, which no undrained clay can have.
+- Neither element on offer gives incompressible plastic flow without locking.
+- **Possible routes:**
+  1. Ask the Newton developers about volume-preserving plastic flow (P0 with a particle-density correction, or a stabilised P1d).
+  2. Accept clay as out of scope for the MPM and keep the analytical clay models.
+
+Until then WP3 stays blocked and the clay face is not used anywhere.

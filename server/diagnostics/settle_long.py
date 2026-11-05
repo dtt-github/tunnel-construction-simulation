@@ -1,12 +1,13 @@
 """WP3 diagnostic: does the clay come to rest before the ring closes? Surface height and mean |vz| every second.
-Usage: python diagnostics/settle_long.py <settle frames> [critical_fraction]
+Usage: python diagnostics/settle_long.py <settle frames> [critical_fraction] [radius/h]
 Result (5 Nov 2026): with critical_fraction 0 the clay creeps at about 29 mm/s indefinitely; with 0.8-0.9 it comes to
-rest after compacting 13-17 %."""
+rest after compacting 13-17 %. WP0b: that compaction, not the constraint, raised N (docs/validation/mpm-clay.md)."""
 import sys, numpy as np
 sys.path.insert(0, str(__import__("pathlib").Path(__file__).resolve().parent.parent))
 import newton.solvers as ns
 import tunnelsim_server.scenes.common as common
 common.CRITICAL_FRACTION = float(sys.argv[2]) if len(sys.argv) > 2 else 0.0
+common.RADIUS = float(sys.argv[3]) if len(sys.argv) > 3 else 0.5
 from tunnelsim_server.scenes import tunnel_2d as t2
 from tunnelsim_server import materials as m
 settle = int(sys.argv[1])

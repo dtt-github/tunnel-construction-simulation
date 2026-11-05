@@ -30,13 +30,18 @@ FACE_SOILS = {
 }
 
 
+def _packing(args) -> dict:
+    return {"critical_fraction": args.critical_fraction, "radius_over_h": args.radius}
+
+
 def run(args) -> dict:
     common.CRITICAL_FRACTION = args.critical_fraction
+    common.RADIUS = args.radius
     gpu = gpu_snapshot()
     if args.scene == "face":
         cfg = face.FaceConfig(diameter=args.diameter, cover=args.cover, voxel=args.voxel, iterations=args.iterations, seed=args.seed)
         result, _ = face.run(cfg, PHASE0_SAND)
-        return record("face", face.params(cfg, PHASE0_SAND), result, UNCALIBRATED, gpu)
+        return record("face", {**face.params(cfg, PHASE0_SAND), **_packing(args)}, result, UNCALIBRATED, gpu)
     if args.scene == "face_sand":
         soil = FACE_SOILS[args.soil]
         if args.psi or args.match != "plane_strain":  # WP1b: dilation (Bolton 1986); cone matched in plane strain or triaxial
@@ -48,18 +53,18 @@ def run(args) -> dict:
         cfg = face_sand.FaceSandConfig(diameter=args.diameter, cover=args.cover, retract_over_d=args.retract, voxel_per_d=args.vpd, control=args.control, target_kpa=args.target_kpa, rate_over_d=args.rate,
                                        iterations=args.iterations, seed=args.seed)
         result, _ = face_sand.run(cfg, soil)
-        return record("face_sand", face_sand.params(cfg, soil), result, UNCALIBRATED, gpu)
+        return record("face_sand", {**face_sand.params(cfg, soil), **_packing(args)}, result, UNCALIBRATED, gpu)
     if args.scene == "tunnel_2d":
         soil = FACE_SOILS[args.soil]
         cfg = tunnel_2d.Tunnel2DConfig(diameter=args.diameter, cover=args.cover, voxel_per_d=args.vpd, iterations=args.iterations, seed=args.seed,
                                        settle=args.settle)
         result, _ = tunnel_2d.run(cfg, soil)
-        return record("tunnel_2d", {**tunnel_2d.params(cfg, soil), "critical_fraction": args.critical_fraction}, result, UNCALIBRATED, gpu)
+        return record("tunnel_2d", {**tunnel_2d.params(cfg, soil), **_packing(args)}, result, UNCALIBRATED, gpu)
     if args.scene == "k0":
         soil = drained_sand("element-test sand", 1600.0, args.phi, args.E, "element test (assumed values)", k0=args.k0)
         cfg = k0.K0Config(voxel=args.voxel, iterations=args.iterations, seed=args.seed)
         result, _ = k0.run(cfg, soil)
-        return record("k0", k0.params(cfg, soil), result, UNCALIBRATED, gpu)
+        return record("k0", {**k0.params(cfg, soil), **_packing(args)}, result, UNCALIBRATED, gpu)
     if args.scene == "rankine":
         if args.psi is not None:  # WP1b: (phi', psi) through the plane-strain mapping
             soil = drained_sand("element-test sand", 1600.0, args.phi, 1.0e15, "element test (assumed values)", psi_deg=args.psi)
@@ -67,11 +72,11 @@ def run(args) -> dict:
             soil = Soil("element-test sand", 1600.0, args.mu, "element test (assumed values)")
         cfg = rankine.RankineConfig(voxel=args.voxel, iterations=args.iterations, seed=args.seed)
         result, _ = rankine.run(cfg, soil)
-        return record("rankine", rankine.params(cfg, soil), result, UNCALIBRATED, gpu)
+        return record("rankine", {**rankine.params(cfg, soil), **_packing(args)}, result, UNCALIBRATED, gpu)
     gate = args.gate_speed if args.gate_speed and args.gate_speed > 0 else None  # 0: remove the gate at once
     cfg = collapse.CollapseConfig(run=args.run, gate_speed=gate, voxel=args.voxel, iterations=args.iterations, seed=args.seed)
     result, _ = collapse.run(cfg)
-    return record("collapse", collapse.params(cfg), result, UNCALIBRATED, gpu)
+    return record("collapse", {**collapse.params(cfg), **_packing(args)}, result, UNCALIBRATED, gpu)
 
 
 def main() -> None:
@@ -84,6 +89,7 @@ def main() -> None:
         s.add_argument("--seed", type=int, default=0)
         s.add_argument("--name", type=str, default=None)
         s.add_argument("--critical-fraction", type=float, default=0.0, help="Newton packing constraint (0 = off, as WP0-WP3)")
+        s.add_argument("--radius", type=float, default=0.7, help="particle radius / spacing (WP0b default 0.7; 0.5 = nominal packing 1, as WP0-WP3)")
         if name == "face":
             s.add_argument("--diameter", type=float, default=2.0)
             s.add_argument("--cover", type=float, default=1.0)

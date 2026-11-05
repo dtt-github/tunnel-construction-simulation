@@ -1,10 +1,13 @@
 """Golden test: the Phase 0 face run (D = 2 m, C/D = 1, voxel D/10, tan phi 0.75) must keep its numbers. Newton 1.7 has
 changed MPM material scaling before; a failure here means recalibrating on purpose, not editing the numbers.
 
-Pinned 5 Nov 2026 with newton 1.7.0 / warp 1.19.0 (phase0/RESULTS.md table b, first row; repeated by server/runner)."""
+Pinned 5 Nov 2026 with newton 1.7.0 / warp 1.19.0 (phase0/RESULTS.md table b, first row; repeated by server/runner).
+Re-pinned 5 Nov 2026 for WP0b (particle radius 0.7 h, cohesion and stiffness divided by the packing): the settled
+pressure fell from 8.216 to 7.611 kPa; the limit pressure (1.629 -> 1.642) and the Vermeer ratio (0.5287 -> 0.5329)
+hardly moved."""
 import pytest
 
-PINNED = {"particles": 208068, "p_settled_kPa": 8.216, "p_limit_kPa": 1.629, "ratio_sim_over_vermeer": 0.5287}
+PINNED = {"particles": 208068, "p_settled_kPa": 7.611, "p_limit_kPa": 1.642, "ratio_sim_over_vermeer": 0.5329}
 TOL = 0.02  # relative
 
 

@@ -20,6 +20,7 @@ import numpy as np
 
 from ..materials import PHASE0_SAND, Soil
 from ..probes import collider_forces
+from .common import RADIUS, _attributes
 
 G = 9.81
 
@@ -96,7 +97,7 @@ def run(cfg: FaceConfig, soil: Soil = PHASE0_SAND) -> tuple[dict, dict]:
     sand_builder = newton.ModelBuilder()
     SolverImplicitMPM.register_custom_attributes(sand_builder)
     sand_builder.add_particles(pos=[wp.vec3(*q) for q in pts], vel=[wp.vec3(0.0)] * n, mass=[float(h**3 * soil.density)] * n,
-                               radius=[h * 0.5] * n, custom_attributes=soil.custom_attributes(n))
+                               radius=[h * RADIUS] * n, custom_attributes=_attributes(soil, n))
     sand_model = sand_builder.finalize()
 
     scfg = SolverImplicitMPM.Config()

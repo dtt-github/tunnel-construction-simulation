@@ -165,6 +165,21 @@ Each package ends with a check. A package is done only when its check passes, or
 - Fix `critical_fraction` for all scenes.
 - Repeat WP1, WP2 and WP3 with it, and re-pin the golden tests on purpose.
 
+**Status (5 Nov 2026): done; the premise was wrong** ([details](../validation/mpm-clay.md#wp0b-correction-5-nov-2026)).
+- **Newton's stresses act per unit of particle volume.** Its effective cohesion and stiffness are the input values times the cell's fill. The critical-fraction gain in WP3 came from compaction, not from the constraint.
+- **New default for all scenes:**
+  - particle radius 0.7 h (packing 2.744);
+  - yield stress and Young's modulus divided by the packing;
+  - stress read-out multiplied by it;
+  - `critical_fraction` 0.
+- **Compaction:** the confined column now settles 0.8 % of H, against 2.7 %.
+- **Re-baseline:**
+  - WP1 is unchanged within 0.5 %;
+  - WP2 face pressures move 1–6 %;
+  - the servo is slowed to 0.01 D/s;
+  - the golden face's settled pressure moves 8.22 → 7.61 kPa with the limit unchanged, and is re-pinned.
+- **WP3 is still blocked.** The clay's low N comes with a numerical volume loss in yielding clay from the Q1–P0 element. The P1d and pic8 strain bases remove it but lock (10–30 % too strong in the element tests).
+
 ### WP4: EPB chamber with a pressure-controlled shove (about 3 weeks)
 
 - The shield and face advance under a **thrust**, not a fixed speed. Thrust balances chamber pressure, face resistance and shield friction from the analytical thrust model.

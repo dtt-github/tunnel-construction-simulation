@@ -6,6 +6,9 @@
 - **Solver:** Newton 1.7.0 implicit MPM, rigid-plastic Drucker–Prager with μ = sin φ′ and no dilation (the [WP1 mapping](mpm-element-tests.md)).
 - **Status:** **uncalibrated, bracketed.** After WP1b, Idinger's measured pressures lie between the two Drucker–Prager cone matches at every cover. No single cone matches pressure, wedge and settlement together (see below).
 - **Run on:** 5 Nov 2026
+- **WP0b re-baseline (5 Nov 2026):**
+  - The new packing default (particle radius 0.7 h, cohesion and stiffness divided by the packing; see [mpm-clay](mpm-clay.md#wp0b-correction-5-nov-2026)) moves the face pressures at 5 % of D by 1–6 % (records `*_r07`). The tables below keep the WP2 numbers.
+  - The servo is slower: at most 0.01 D/s over 5 s.
 
 ## Set-up
 
@@ -65,7 +68,11 @@ At C/D 1.0 the 5 % pressure is 8.6 kPa at D/10, 10.3 at D/20 and 10.3 at D/30 (2
 | 1.0 | 4.9 | 0.17D | 68.9° | ≈ 0 |
 | Idinger, measured | 4.5–6.0 | 0.5D | 66.5° | 0.010 |
 
-### Pressure control (C/D 1.0, D/10, retract-only servo, 2 s)
+### Pressure control (C/D 1.0, D/10, retract-only servo, 2 s; WP0b: 0.01 D/s, 5 s)
+
+- **WP0b change:** with the new packing, the servo at 0.025 D/s outran the soil and cycled between about 2 and 25 kPa.
+- **New default:** at most 0.01 D/s over 5 s. At 12 kPa the face holds after 0.0017 D (p 11.8 kPa); at 6 kPa it gives way to 0.05 D (p 9.2 kPa).
+- **The table** keeps the WP2 runs.
 
 | Target (kPa) | Face movement / D | Final soil pressure (kPa) |
 |---|---|---|

@@ -91,7 +91,10 @@ def run(cfg: Tunnel2DConfig, soil: Soil) -> tuple[dict, dict]:
     n_move = int(round(cfg.contract_over_r / cfg.rate_over_r * cfg.fps))
     area = 2 * math.pi * R * T
     log, times = [], []
+    top0, top_settled = float(np.percentile(pts[:, 2], 99.5)), None
     for f in range(cfg.settle + n_move):
+        if f == cfg.settle:
+            top_settled = float(np.percentile(s.particle_q.numpy()[: len(pts), 2], 99.5))
         if f >= cfg.settle:
             u = min((f - cfg.settle + 1) * cfg.rate_over_r * R * dt, cfg.contract_over_r * R)
             q = q0.copy()
@@ -121,7 +124,8 @@ def run(cfg: Tunnel2DConfig, soil: Soil) -> tuple[dict, dict]:
     gamma = soil.density * G
     sz = gamma * (zs - zc) + cfg.surcharge_kpa * 1e3
     res = {"diameter_m": D, "cover_over_D": cfg.cover, "voxel_per_D": cfg.voxel_per_d, "particles": len(pts),
-           "p_settled_kPa": round(float(np.mean(log[cfg.settle - 10:cfg.settle, 1])) / 1e3, 2), "sigma_z_axis_kPa": round(sz / 1e3, 2)}
+           "p_settled_kPa": round(float(np.mean(log[cfg.settle - 10:cfg.settle, 1])) / 1e3, 2), "sigma_z_axis_kPa": round(sz / 1e3, 2),
+           "surface_drop_settle_m": round(top0 - top_settled, 3)}
     for frac in (0.02, 0.05, 0.1):
         p = p_at(frac)
         res[f"p_{int(frac * 100)}pctR_kPa"] = None if p is None else round(p, 2)

@@ -6,11 +6,16 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ### Added
 
+- **Phase 2, WP0b: particle packing** ([details](docs/validation/mpm-clay.md#wp0b-correction-5-nov-2026)):
+  - Newton's effective cohesion and stiffness scale with the particle fill of each cell (shown with a Tresca Rankine wall). Scenes now use particle radius 0.7 h with yield stress and stiffness divided by the packing, which cuts the start-up compaction from 2.7 % to 0.8 %;
+  - WP1 repeats within 0.5 % and WP2 within 1–6 %; the face servo is slowed to 0.01 D/s; the golden face test is re-pinned (settled pressure 8.22 → 7.61 kPa, limit unchanged);
+  - the WP3 diagnosis is corrected: `critical_fraction` is not the cause. The clay's low stability ratio comes with a numerical volume loss in yielding clay (Q1–P0 element). The P1d and pic8 bases remove it but lock, so clay stays blocked.
+
 - **Phase 2, WP3: undrained clay, blocked** ([status](docs/validation/mpm-clay.md)):
   - Kimura & Mair's (1981) centrifuge data digitised from their figures; the kaolin's unit weight derived from Figs 6 and 10 (γD/cu ≈ 2.5);
   - a plane-strain tunnel scene with a closing ring;
   - the MPM clay tunnel collapses at about half the measured stability ratio in 2D and 3D alike, below the plasticity lower bound. Cohesion scaling, stress level, leakage, friction, rate, convergence, resolution, the yield condition and equilibrium are ruled out;
-  - the cause is Newton's packing constraint (`critical_fraction`), off in every scene since Phase 0: the soil never stops compacting. With it on, the clay comes to rest and N approaches Kimura's, after an initial compaction that a WP0b set-up has to remove. Clay is not used until then.
+  - a first diagnosis blamed Newton's packing constraint (`critical_fraction`); WP0b withdrew it (see above). Clay is not used anywhere.
 
 - **Phase 2, WP1b: dilatancy** ([element tests](docs/validation/mpm-element-tests.md#dilatancy-wp1b), [face](docs/validation/mpm-face-sand.md#prediction-with-dilation-from-bolton-wp1b)):
   - Newton's dilatancy factor derived from its flow rule: a Drucker–Prager potential with β = θμ. The plane-strain mapping now takes (φ′, ψ), and an element test reproduces ψ within 0.5°;

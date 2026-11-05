@@ -8,6 +8,7 @@
 - **Tests:** [`server/tests/`](../../server/tests/), including two GPU checks pinned on the results below.
 - **Solver:** Newton 1.7.0 implicit MPM, Warp 1.19.0, on the DGX Spark. The GPU was shared during these runs, so timings are lower bounds. The physics does not depend on GPU load.
 - **Run on:** 5 Nov 2026
+- **WP0b re-baseline (5 Nov 2026):** with the new packing default (particle radius 0.7 h, cohesion and stiffness divided by the packing; see [mpm-clay](mpm-clay.md#wp0b-correction-5-nov-2026)), every result below repeats within 0.5 % (records `*_r07`). K0 still fails, at 0.765. A Tresca Rankine wall (cu/γH 0.06) gives K 0.773 against 0.76.
 
 ## The material model
 

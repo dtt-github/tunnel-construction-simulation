@@ -1,0 +1,88 @@
+{
+  "scene": "face_sand",
+  "time": "2026-11-05T20:19:45",
+  "git": "61b0c3a+dirty",
+  "versions": {
+    "newton": "1.7.0",
+    "warp": "1.19.0",
+    "numpy": "2.5.4",
+    "python": "3.12.3"
+  },
+  "params": {
+    "diameter": 5.0,
+    "cover": 0.5,
+    "voxel_per_d": 10.0,
+    "ppc": 2,
+    "control": "displacement",
+    "retract_over_d": 0.05,
+    "rate_over_d": 0.025,
+    "target_kpa": 0.0,
+    "servo_gain": 0.05,
+    "servo_max_rate_over_d": 0.01,
+    "duration": 5.0,
+    "steel_friction": 0.3,
+    "fps": 60.0,
+    "settle": 60,
+    "iterations": 50,
+    "seed": 0,
+    "moving_threshold_over_d": 0.002,
+    "soil": {
+      "name": "Idinger et al. (2011) dry sand",
+      "density": 1500.0,
+      "friction": 0.5591929034707469,
+      "source": "Idinger, Aklik, Wu & Borja (2011), doi:10.1007/s11440-011-0139-2: rho_d 1.5 t/m3, phi 34 deg (direct shear), c' 0",
+      "yield_stress": 0.0,
+      "young_modulus": 1000000000000000.0,
+      "poisson_ratio": 0.30594456231587785,
+      "dilatancy": 0.0,
+      "phi_deg": 34.0,
+      "cohesion": 0.0,
+      "match": "plane_strain",
+      "extra": {
+        "k0": 0.4408070965292531,
+        "psi_deg": 0.0
+      }
+    },
+    "critical_fraction": 0.0,
+    "radius_over_h": 0.7
+  },
+  "gpu_before": {
+    "name": "NVIDIA GB10",
+    "utilisation_percent": 93,
+    "driver": "580.178.04",
+    "other_processes": [
+      "python",
+      "python",
+      "python",
+      "python",
+      "python",
+      "python",
+      "python"
+    ]
+  },
+  "timing_valid_for_decisions": false,
+  "timing_note": "GPU shared with other processes: timings are lower bounds",
+  "calibration": "uncalibrated",
+  "result": {
+    "diameter_m": 5.0,
+    "cover_over_D": 0.5,
+    "voxel_per_D": 10.0,
+    "particles": 83951,
+    "control": "displacement",
+    "p_settled_kPa": 26.701,
+    "p_1pct_kPa": 9.421,
+    "p_3pct_kPa": 7.708,
+    "p_5pct_kPa": 8.146,
+    "p_min_kPa": 3.367,
+    "face_displacement_over_D": 0.05,
+    "p_final_kPa": 8.175,
+    "zone_top_above_crown_over_D": 0.481,
+    "zone_reaches_surface": true,
+    "wedge_inclination_deg": 52.0,
+    "max_settlement_over_D": 0.08063,
+    "max_settlement_ahead_of_face_over_D": 0.414,
+    "p_vermeer_kPa": 8.441,
+    "gamma_kN_m3": 14.715,
+    "ms_per_frame": 95.53
+  }
+}

@@ -42,8 +42,10 @@ class FaceSandConfig:
     rate_over_d: float = 0.025  # retraction speed / D per second
     target_kpa: float = 0.0  # pressure control: target support pressure on the face
     servo_gain: float = 0.05  # pressure control: plate speed (D/s) per unit (p - target) / (gamma D)
-    servo_max_rate_over_d: float = 0.025  # pressure control: fastest plate movement, D/s (as the displacement-controlled rate)
-    duration: float = 2.0  # s of control after settling
+    # pressure control: fastest plate movement, D/s. At 0.025 D/s (the displacement-controlled rate) the plate outruns
+    # the soil at packing 2.744 and the loop cycles between about 2 and 25 kPa; 0.01 holds (WP0b).
+    servo_max_rate_over_d: float = 0.01
+    duration: float = 5.0  # s of control after settling (up to 0.05 D at the fastest rate)
     steel_friction: float = 0.3
     fps: float = 60.0
     settle: int = 60
