@@ -12,6 +12,7 @@ Start with the [project README](../README.md) for the live demo and quick start.
 | Check what a tunnelling method really looks like before building or reviewing a demo | [Methods reference](research/methods-reference.md) |
 | Find literature, open-source engines, standards and datasets | [Research survey](research/research-survey.md) |
 | Find machine specifications, guidance systems and record advance rates | [Industry survey](research/industry-survey.md) |
+| See what every demo and model is checked against, and what is still assumed | [Validation report](validation/REPORT.md) |
 | See the GPU benchmark results | [Phase 0 results](../phase0/RESULTS.md) |
 | Contribute code, models or data | [Contributing](../CONTRIBUTING.md) |
 
@@ -23,6 +24,7 @@ Start with the [project README](../README.md) for the live demo and quick start.
 | [ARCHITECTURE.md](ARCHITECTURE.md) | Physics by scale (alignment, machine, face and chamber, cutter); browser and GPU-server split; the model library contract |
 | [ROADMAP.md](ROADMAP.md) | Realism rules for every demo; Phase 0 to 5; the method-by-method slices of Phase 1 |
 | [MODELS.md](MODELS.md) | One section per implemented model: what it computes, files, references, validation, known limits |
+| [validation/REPORT.md](validation/REPORT.md) | Validation report: every check by demo and by model, its kind (independent, calibrated, consistency, bracket), and the ranked gaps |
 | [validation/settlement.md](validation/settlement.md) | Settlement trough against measured Crossrail settlement (Hyde Park, Thames chalk); the demo defaults |
 | [validation/sem-convergence.md](validation/sem-convergence.md) | Ground-response chain against measured convergence in a weak-rock tunnel (Albania, CC BY 4.0), and against measured crown settlement in the Farringdon platform tunnels |
 | [validation/drill-blast-cycle.md](validation/drill-blast-cycle.md) | Drill & blast round cycle against logged Ulvin rounds, a T10.5 contractor estimate and Tunnelbyggetid |
@@ -32,6 +34,7 @@ Start with the [project README](../README.md) for the live demo and quick start.
 | [validation/mpm-element-tests.md](validation/mpm-element-tests.md) | GPU MPM (Phase 2) element tests: material mapping, at-rest stress, Rankine wall, Rousseau column collapse |
 | [validation/mpm-face-sand.md](validation/mpm-face-sand.md) | GPU MPM (Phase 2) tunnel face in dry sand against Idinger et al. (2011) and Wang et al. (2024); still uncalibrated |
 | [validation/mpm-clay.md](validation/mpm-clay.md) | GPU MPM (Phase 2) tunnel in undrained clay against Kimura & Mair (1981): blocked, about half the measured stability ratio |
+| [validation/mpm-chamber.md](validation/mpm-chamber.md) | GPU MPM (Phase 2) EPB chamber under pressure against Bezuijen et al. (2005), Botlek: blocked |
 | [validation/epb-open-data.md](validation/epb-open-data.md) | EPB thrust and torque models against open field data (Changsha Metro Line 4, Guangzhou–Foshan), CC BY 4.0 |
 | [realism/drill-blast-heading.md](realism/drill-blast-heading.md) | Realism checklist for the drill & blast road tunnel demo |
 | [realism/slurry-mixshield.md](realism/slurry-mixshield.md) | Realism checklist for the urban slurry shield (Mixshield) demo |

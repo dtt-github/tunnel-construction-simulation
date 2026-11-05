@@ -206,7 +206,7 @@ Demo: [web/drill-blast/](../web/drill-blast/) ([live](https://dtt-github.github.
 
 ## Phase 4: fidelity and validation (ongoing)
 
-- [ ] Validation report per model and per slice, against published case histories
+- [x] Validation report per model and per slice, against published case histories ([report](validation/REPORT.md)); kept up to date with each validation page
 - [ ] Calibration on open datasets (RMRE 2025 synthetic datasets) and partner data. The Yinsong hard-rock dataset is not open (on request only); Follo TBM1 sections are used instead ([validation](validation/hard-rock-projects.md)).
 - [ ] Surrogates from Kratos staged-excavation runs and DEM cutter–rock runs
 - [ ] Uncertainty: random fields of GSI and UCS
