@@ -38,6 +38,52 @@ The CSM model predicts penetration from the net thrust on the cutters (gross 21,
 - **Now:** ψ is the pressure-distribution exponent, which Rostami gives as −0.2 to +0.2. ψ = −0.1 reproduces the 4.5 km mean, so it is now the default.
 - **One project only:** this is one tunnel in strong gneiss. Hansen's own CSM run, with inputs not stated in the thesis, was 8.9 % high.
 
+## Penetration section by section: Follo TBM1
+
+**The Yinsong dataset is not open.** The roadmap planned this test on the Yinsong (Jilin) hard-rock TBM dataset. Its two reviews in *Underground Space* (2023) are CC BY-NC-ND. The papers that use the data give it only "on reasonable request", for example [Sci. Rep. 13:10420 (2023)](https://doi.org/10.1038/s41598-023-37306-7), which is CC BY. That paper publishes the machine (7.93 m open TBM, 56 discs, 89 mm spacing, 23,260 kN) and property ranges by rock class, but no thrust, rpm or penetration per class. So the test uses Follo instead.
+
+**Data.** Hansen's thesis plots 18 sections of 219–316 m. Its PDF draws the charts as vector graphics, so the values can be read exactly rather than by eye:
+- UCS and BTS per section (Figs 5.10–5.11). There is one laboratory test per section, and BTS is derived from UCS by Hansen's Eq. 4.9.
+- The total fracturing factor (Fig. 5.2).
+- The median cutter thrust, rpm and net penetration rate (box plots, Figs 5.12–5.14).
+
+Weighted by section length, these give UCS 152.1 MPa, BTS 10.35 MPa, 301 kN/cutter, 5.11 rpm and 1.93 m/h, against Table 5.1's 152.45, 10.38, 298.83, 5.08 and 1.92.
+
+| Section | Length (m) | UCS (MPa) | ks | Thrust (kN/cutter) | rpm | Measured (mm/rev) | Predicted (mm/rev) | Predicted / measured |
+|---|---|---|---|---|---|---|---|---|
+| 1 | 219 | 179 | 0.75 | 295 | 4.68 | 5.74 | 3.79 | 0.66 |
+| 2 | 270 | 144 | 0.76 | 303 | 4.97 | 6.68 | 7.92 | 1.18 |
+| 3 | 316 | 148 | 0.81 | 300 | 5.12 | 6.64 | 7.04 | 1.06 |
+| 4 | 270 | 124 | 0.69 | 318 | 5.07 | 6.64 | 11.86 | 1.79 |
+| 5 | 231 | 208 | 0.74 | 309 | 4.87 | 6.60 | 2.87 | 0.43 |
+| 6 | 220 | 200 | 0.60 | 303 | 5.20 | 4.99 | 2.97 | 0.60 |
+| 7 | 270 | 200 | 0.77 | 307 | 5.05 | 5.17 | 3.15 | 0.61 |
+| 8 | 226 | 102 | 0.68 | 315 | 5.15 | 5.10 | 14.73 | 2.89 |
+| 9 | 226 | 124 | 0.69 | 313 | 5.12 | 5.25 | 11.78 | 2.24 |
+| 10 | 224 | 124 | 0.65 | 315 | 5.14 | 5.91 | 11.72 | 1.98 |
+| 11 | 226 | 142 | 0.61 | 314 | 5.16 | 5.97 | 9.31 | 1.56 |
+| 12 | 270 | 142 | 0.70 | 300 | 5.14 | 6.44 | 7.94 | 1.23 |
+| 13 | 225 | 154 | 0.77 | 297 | 5.15 | 6.72 | 6.09 | 0.91 |
+| 14 | 316 | 130 | 0.87 | 288 | 5.17 | 7.06 | 8.86 | 1.25 |
+| 15 | 225 | 129 | 0.70 | 284 | 5.21 | 6.91 | 8.63 | 1.25 |
+| 16 | 270 | 128 | 1.20 | 272 | 5.23 | 7.26 | 7.60 | 1.05 |
+| 17 | 225 | 165 | 0.87 | 292 | 5.21 | 6.58 | 4.67 | 0.71 |
+| 18 | 270 | 201 | 0.94 | 296 | 5.24 | 6.66 | 2.70 | 0.41 |
+
+| Rock input | ψ | Weighted measured (mm/rev) | Weighted predicted (mm/rev) | RMS of ln(pred/meas) | Correlation with UCS |
+|---|---|---|---|---|---|
+| section UCS and BTS | −0.1 | 6.28 | 7.42 | 0.54 | −0.94 |
+| section UCS and BTS | −0.15 | 6.28 | 6.48 | 0.58 | −0.93 |
+| tunnel-mean UCS and BTS | −0.1 | 6.28 | 6.57 | 0.24 | +0.05 |
+| tunnel-mean UCS and BTS | −0.15 | 6.28 | 5.52 | 0.26 | +0.05 |
+
+**What this shows:**
+
+- **The model does not follow section-to-section changes.** With each section's own UCS, predictions range from 0.41× to 2.89× the measurement. The error follows UCS almost exactly (correlation −0.94), while the measured penetration barely moves (5.0–7.3 mm/rev for UCS of 102–208 MPa).
+- **The strength input is the main cause.** Each section has one lab test, and BTS is derived from UCS rather than measured. With the tunnel-mean strength and each section's own thrust and speed, the error drops to 0.24 (about ±27 %). The crew's thrust and speed, which follow the ground, carry more of the information than a single core does. That is a limit of the inputs as much as of CSM.
+- **ψ depends on how it is fitted.** Fitting the length-weighted mean of the section predictions gives ψ ≈ −0.15. Fitting the tunnel means gives −0.1. Both are inside Rostami's range. The demos feed zone-average rock values, so the default stays at −0.1. A user should read CSM penetration as about ±30 % at best, and much less certain where the rock strength comes from a single test.
+- **Fracturing does not explain the remaining scatter.** The CSM model has no fracturing term, and ks varies little here (0.6–1.2, mostly 0.6–0.9).
+
 ## Advance: Follo
 
 The downtime model is fed the measured net penetration rate (1.92 m/h) and Follo's cutter changes (442 per km at Farrokh's 66 min each). Rock support is from RMR 71, using RMR = 9 ln Q + 44 with Q 21.2.
@@ -85,7 +131,7 @@ None of these publish the rock and machine inputs needed to run the model sectio
 
 ## Limits
 
-- **Penetration** is fitted to one mean over 4.5 km of one project. Section-by-section scatter (Hansen's standard deviation is 0.87 mm/rev) is not tested.
+- **Penetration** is fitted to one project. Section by section it follows the operator's thrust and speed well (±27 %) with mean rock strength, but not single-test UCS (0.4–2.9×). Other rock types are untested, because the Yinsong data is not open.
 - **Advance at Follo** used the measured penetration and cutter changes, so it tests the downtime model, not the whole chain. With the demo's own CAI wear model, cutter changes are about 40 % fewer than at Follo.
 - **Fault zones:** in the fault zone (RMR 22) the demos give about 12–13 m/day, because Farrokh's support curve at that RMR is about 1,000 h/km. Niagara's 3 m/day with spiling was in a 14.4 m bore with up to 3 m of overbreak, so it is not a direct test; no open source gives a like-for-like fault-zone rate.
 - **Gotthard and Niagara** publish calendar-day averages over whole drives. The model's working-day rate excludes holidays and long stoppages.

@@ -38,7 +38,8 @@ Disc-cutter forces, penetration from thrust, rate of penetration, cutterhead tor
   - Speed limit from the gauge-cutter linear speed: rpm = V_L / (π D), with V_L = 165 m/min for 17″ and 200 m/min for 19″ discs (Rostami & Chang 2017, [doi:10.1016/j.eng.2017.12.009](https://doi.org/10.1016/j.eng.2017.12.009)).
   - Optional penetration cap. The practical maximum is 15 mm/rev, the lower end of the 15–20 mm/rev "brief maximum before the conveyor overloads" (Macias & Barton 2022).
   - The limit that binds is reported (thrust, penetration, torque or power), together with the thrust actually carried by the cutters.
-- **Limits:** ψ is fitted to one project mean in strong gneiss; scatter between sections and other rock types (the Yinsong dataset) are not yet tested.
+- **Section by section** (18 Follo sections, digitised from the thesis's vector charts): with each section's single-test UCS the prediction is 0.41–2.89× the measurement, and the error follows UCS (r = −0.94). With the tunnel-mean UCS and each section's thrust and rpm, it is within about ±27 % (RMS of ln ratio 0.24). Fitted on section averages, ψ would be about −0.15.
+- **Limits:** one project in strong gneiss. The Yinsong dataset, planned for other rock types, is not open (data on request only).
 
 ## Hoek–Brown rock mass
 

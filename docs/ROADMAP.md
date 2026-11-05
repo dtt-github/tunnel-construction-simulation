@@ -152,7 +152,7 @@ Demo: [web/epb/](../web/epb/) ([live](https://dtt-github.github.io/tunnel-constr
   - fault zones cut penetration and utilisation;
   - they need heavy support (ribs at 1 m, shotcrete);
   - they raise the jamming risk (model 8).
-- [~] Check against reference projects ([validation](validation/hard-rock-projects.md)): Follo penetration and average advance reproduced (CSM ψ back-analysed); Gotthard machine data verified; Guadarrama, Brenner and Niagara bracket the rates. Open: utilisation and downtime by cause from a primary source; a section-by-section test (Yinsong dataset).
+- [~] Check against reference projects ([validation](validation/hard-rock-projects.md)): Follo penetration and average advance reproduced (CSM ψ back-analysed); Gotthard machine data verified; Guadarrama, Brenner and Niagara bracket the rates. Follo section by section done: ±27 % with mean rock strength, 0.4–2.9× with single-test UCS. Open: utilisation and downtime by cause from a primary source; other rock types (the Yinsong dataset is not open).
 
 ### Slice C: slurry / Mixshield
 
@@ -207,7 +207,7 @@ Demo: [web/drill-blast/](../web/drill-blast/) ([live](https://dtt-github.github.
 ## Phase 4: fidelity and validation (ongoing)
 
 - [ ] Validation report per model and per slice, against published case histories
-- [ ] Calibration on open datasets (Yinsong hard-rock TBM dataset; RMRE 2025 synthetic datasets) and partner data
+- [ ] Calibration on open datasets (RMRE 2025 synthetic datasets) and partner data. The Yinsong hard-rock dataset is not open (on request only); Follo TBM1 sections are used instead ([validation](validation/hard-rock-projects.md)).
 - [ ] Surrogates from Kratos staged-excavation runs and DEM cutter–rock runs
 - [ ] Uncertainty: random fields of GSI and UCS
 

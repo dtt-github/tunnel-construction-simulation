@@ -12,6 +12,7 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
   - double shield demo: 71 discs as at Follo; default thrust and speed are the logged Follo means. In gneiss it gives 6.85 mm/rev and 15.6 m/day (was 12.6 mm/rev and about 21 m/day);
   - gripper demo: the Gotthard 9.58 m machine data (8,526 kNm, 3,500 kW, 58 discs at 26 t, 2 m stroke), replacing a torque that belonged to the 9.33 m S-210;
   - Guadarrama, Brenner, Gotthard and Niagara averages listed as brackets; no open source gives their utilisation.
+  - Follo section by section (18 sections read from the thesis's vector charts): CSM is within about ±27 % with mean rock strength and each section's thrust and speed, but 0.4–2.9× with single-test UCS. The Yinsong dataset turned out not to be open.
 
 - **SEM demo on real London ground** ([checklist](docs/realism/sem-heading.md), [validation](docs/validation/sem-convergence.md#farringdon-platform-tunnels-undrained-ground-london-clays)):
   - the SEM demo now opens on the Crossrail Farringdon platform tunnel: an 11 m sprayed-concrete enlargement of a 6.2 m TBM pilot, on the Farringdon – Liverpool Street scenario, with Crossrail's undrained design lines;
