@@ -11,7 +11,7 @@
 import {
   equivalentMohrCoulomb, groundReaction, ldp, squeezingStrain, squeezingClass, shotcreteModulus, shotcreteStrength,
   earlyStrengthClass, liningInteraction, SEM_ROCK_CLASSES, CYCLE, ringClosureOk, sulemConvergence, SULEM_EXAMPLE, triggerLevel,
-  FINAL_LINING_RATE_MM_PER_MONTH, SHOTCRETE, Rng, scenario as loadScenario,
+  FINAL_LINING_RATE_MM_PER_MONTH, SHOTCRETE, Rng, scenario as loadScenario, crownSettlement, WHOLE_BODY_SETTLEMENT,
 } from "../../models/js/index.js";
 import { THREE, createScene, label, placeLabels, mat, box, fmt, dl } from "../hard-rock/common.js";
 
@@ -44,6 +44,7 @@ const ROCK_ZONES = [
 //   VAL  Crossrail Farringdon Station SCL tunnels: delivering value through innovation and best practice
 //   TEMP Temporary sprayed concrete lining tunnels in Farringdon Crossrail Station
 //   CG   Gakis, Grau & Schwind (2016) Tunnel deformations caused by compensation grouting at Crossrail Farringdon Station
+//   WCH  Staerk et al., Analyses of convergence and utilisation of SCL-tunnels during excavation (Whitechapel)
 // Undrained design lines, z = depth below the top of the London Clay [TEMP Table 1; CG Table 2]: cu kPa, E MPa.
 const DESIGN = {
   LC: { name: "London Clay", cu: (z) => 85 + 6.5 * z, e: (z) => 40 + 3.7 * z, color: 0x6e6658 },
@@ -55,7 +56,9 @@ const CLOSURE_X = 7.5; // m behind the face: ring closed 3-5 days after a sectio
 const RATE_PLATFORM = 1.1, RATE_LENS = 0.5; // m/day: platform enlargements, sand-lens zones [VAL 4.6]
 // Water-bearing sand lens in the crown: 83 m long, 3-4 m thick, 100 kPa (Lens B, PTE) [SAND]; position illustrative.
 const LENS = { from: 150, to: 233, spile: 4, hours: 4 }; // 4 m grouted spiles every second top heading; hours assumed
-const MEASURED_CROWN = { min: 10.3, max: 18.9, meanOut: 13.6 }; // mm, platform tunnels PTW/PTE [CG Table 1]
+// mm, platform tunnels PTW/PTE outside the concurrent compensation grouting [CG Table 1]; design 2D FE without grouting [CG Table 4]
+const MEASURED_CROWN = { min: 10.3, max: 16.5, meanOut: 13.6, fe: 10 };
+const WHOLE_BODY = (WHOLE_BODY_SETTLEMENT[0] + WHOLE_BODY_SETTLEMENT[1]) / 2; // m, whole-ring settlement 2-3 mm [WCH]
 const SCN = FARR ? loadScenario(await (await fetch("../../models/scenarios/london-farringdon-liverpool-street.json")).json()) : null;
 
 function farringdonZones() {
@@ -67,7 +70,7 @@ function farringdonZones() {
     const sv = f.gamma * f.axis_depth, u = f.u_axis; // kPa
     const lens = ch + 5 >= LENS.from && ch + 5 < LENS.to;
     out.push({ name: `${d.name} at the axis`, from: ch, to: ch + 10, sch, clay, z, cu: d.cu(z) / 1000, e: d.e(z), shares: f.units_on_face,
-      sv, u, depth: f.axis_depth, p0Deform: (sv + K0_DEFORM * (sv - u) + u) / 2000, p0Load: (sv + K0_LOAD * (sv - u) + u) / 2000,
+      sv, u, depth: f.axis_depth, kDeform: (K0_DEFORM * (sv - u) + u) / sv, p0Deform: (sv + K0_DEFORM * (sv - u) + u) / 2000, p0Load: (sv + K0_LOAD * (sv - u) + u) / 2000,
       th: 1.0, bench: 2.0, invert: 2.0, lining: 0.4, benchLag: 3, canopy: false, lens, color: d.color,
       rate: (lens ? RATE_LENS : RATE_PLATFORM) / 24 });
   }
@@ -104,7 +107,9 @@ function rockGround(zone, shot) {
 }
 // Undrained (phi = 0, Tresca) ground reaction with Crossrail's design lines. The lining is taken to carry load once the
 // ring is closed (CLOSURE_X behind the face); the open top-heading arch before that is treated as no support. Crown
-// settlement is read from the first survey of the section, sprayed at the top heading one round behind the face.
+// settlement is read from the first survey of the section, sprayed at the top heading one round behind the face. The
+// ring gives the mean radial movement; the crown takes it times the Kirsch factor for the total-stress ratio (Brady &
+// Brown), plus 2-3 mm settlement of the ring as a whole, measured in the Whitechapel enlargements [WCH].
 function soilGround(zone, shot) {
   const mc = { phi_deg: 0, c: zone.cu, e_rm: zone.e, sigma_cm: 2 * zone.cu };
   const free = groundReaction(zone.p0Deform, 0, R, zone.e, NU_CLAY, 0, zone.cu);
@@ -113,7 +118,8 @@ function soilGround(zone, shot) {
   const uSurvey = free.u * ldp(zone.th, R, free.r_p);
   // Broms & Bennermark (1967) stability ratio at the open face, N = sigma_v / cu (no face pressure); about 6 is the limit
   const n = zone.sv / 1000 / zone.cu;
-  return { mc, free, rate: zone.rate, li, liD, n, predictedMm: Math.max(liD.u_final - uSurvey, 0) * 1000 };
+  return { mc, free, rate: zone.rate, li, liD, n, ringMm: Math.max(liD.u_final - uSurvey, 0) * 1000,
+    predictedMm: crownSettlement(liD.u_final, uSurvey, zone.kDeform, NU_CLAY, WHOLE_BODY) * 1000 };
 }
 
 // ---------------------------------------------------------------- scene
@@ -290,12 +296,12 @@ const FARR_TEXT = {
   closure: "Close the ring within one diameter (FHWA)",
   limits: [
     "Ground from the Farringdon – Liverpool Street scenario (BGS boreholes F32R, F6, F14): one zone per 10 m, demo chainage 0 = scenario chainage 360 m. Strength and stiffness are Crossrail's undrained design lines; the clay at the axis sets them, even where Thanet Sand is in the invert.",
-    "The 11.4 × 10.6 m section is a circle of radius 5.5 m, and the ground is in plane strain around it (undrained, Tresca). The TBM pilot tunnel, gravity across the section and creep or consolidation are not modelled.",
-    "The lining is taken to carry load only once the ring is closed, 7.5 m behind the face. Predicted crown settlement is about half the measured 10–19 mm: the open top heading and the time-dependent part are missing.",
+    "The 11.4 × 10.6 m section is a circle of radius 5.5 m, and the ground is in plane strain around it (undrained, Tresca). The ring solution gives the mean radial movement; the crown takes it times the elastic (Kirsch) factor for unequal stresses, so in undrained clay it follows the vertical stress. The TBM pilot tunnel the platform is enlarged from is not modelled.",
+    "The lining is taken to carry load only once the ring is closed, 7.5 m behind the face. The 2–3 mm settlement of the ring as a whole is taken from the Whitechapel enlargements (London Clay), not computed. The prediction (about 10–14 mm) sits in the measured 10.3–16.5 mm, mostly below the 13.6 mm mean; Crossrail's design FE gave 10 mm.",
     "The sand lens is placed illustratively; its length, thickness, pressure and treatment are those of Lens B under PTE. Time per metre beyond the Stepney Green cycle is set so the heading keeps the published 1.1 m/day (0.5 m/day in the lens); that work is not itemised in the sources. Spile drilling time is assumed.",
-    "Readings use the distance-to-face term of Sulem et al. (1987) scaled to the prediction, with ±20 % scatter between sections (illustrative). Consolidation and creep after the face has passed are not modelled.",
+    "Readings use the distance-to-face term of Sulem et al. (1987) scaled to the prediction, with ±20 % scatter between sections (illustrative). At Farringdon the readings levelled out 3–5 days after ring closure (CG), so no time term is added; long-term consolidation above the tunnels, which continued for years at Whitechapel, is a surface effect and not shown.",
   ],
-  credits: `Ground: Crossrail Learning Legacy papers on the Farringdon SCL tunnels: <a href="https://learninglegacy.crossrail.co.uk/documents/geotechnical-risk-management-for-sprayed-concrete-lining-tunnels-in-farringdon-crossrail-station/">risk management</a>, <a href="https://learninglegacy.crossrail.co.uk/documents/tunnelling-sand-farringdon-crossrail-station/">tunnelling in sand</a>, <a href="https://learninglegacy.crossrail.co.uk/documents/farringdon-station-scl-design-reducing-risk-at-the-heart-of-crossrail/">design</a>, <a href="https://learninglegacy.crossrail.co.uk/documents/crossrail-farringdon-station-scl-tunnels-delivering-value-through-innovation-and-best-practice/">value</a>, <a href="https://learninglegacy.crossrail.co.uk/documents/temporary-sprayed-concrete-lining-tunnels-farringdon-crossrail-station/">temporary tunnels</a>, <a href="https://learninglegacy.crossrail.co.uk/documents/tunnel-deformations-caused-compensation-grouting-crossrail-farringdon-station/">compensation grouting</a>; BGS boreholes. Models: undrained ground reaction (Duncan Fama limit), shotcrete ageing and lining interaction (Oreste 2003), face stability (Broms & Bennermark 1967), convergence law (Sulem et al. 1987), trigger levels (Crossrail). Method card in the <a href="https://github.com/dtt-github/tunnel-construction-simulation/blob/main/docs/research/methods-reference.md">methods reference</a>.`,
+  credits: `Ground: Crossrail Learning Legacy papers on the Farringdon SCL tunnels: <a href="https://learninglegacy.crossrail.co.uk/documents/geotechnical-risk-management-for-sprayed-concrete-lining-tunnels-in-farringdon-crossrail-station/">risk management</a>, <a href="https://learninglegacy.crossrail.co.uk/documents/tunnelling-sand-farringdon-crossrail-station/">tunnelling in sand</a>, <a href="https://learninglegacy.crossrail.co.uk/documents/farringdon-station-scl-design-reducing-risk-at-the-heart-of-crossrail/">design</a>, <a href="https://learninglegacy.crossrail.co.uk/documents/crossrail-farringdon-station-scl-tunnels-delivering-value-through-innovation-and-best-practice/">value</a>, <a href="https://learninglegacy.crossrail.co.uk/documents/temporary-sprayed-concrete-lining-tunnels-farringdon-crossrail-station/">temporary tunnels</a>, <a href="https://learninglegacy.crossrail.co.uk/documents/tunnel-deformations-caused-compensation-grouting-crossrail-farringdon-station/">compensation grouting</a>; Whitechapel <a href="https://learninglegacy.crossrail.co.uk/documents/analyses-convergence-utilisation-scl-tunnels-excavation/">convergence</a> (whole-ring settlement); BGS boreholes. Models: undrained ground reaction (Duncan Fama limit), crown factor (Kirsch, Brady & Brown 2006), shotcrete ageing and lining interaction (Oreste 2003), face stability (Broms & Bennermark 1967), convergence law (Sulem et al. 1987), trigger levels (Crossrail). Method card in the <a href="https://github.com/dtt-github/tunnel-construction-simulation/blob/main/docs/research/methods-reference.md">methods reference</a>.`,
 };
 if (FARR) {
   ui.title.textContent = FARR_TEXT.title;
@@ -484,8 +490,8 @@ function hud() {
       ...shotRows(1),
       ["Lining load (K0 1.2, ring closed)", `${fmt(g.li.p_final, 2)} MPa long term (Oreste)`],
       ["Lining safety (strength / stress)", `${fmt(g.li.min_safety, 1)} at minimum`],
-      ["Predicted crown settlement", `${fmt(g.predictedMm, 1)} mm after the top heading is sprayed (K0 ${K0_DEFORM}, ring closed ${CLOSURE_X} m back)`],
-      ["Measured, platform tunnels", `${MEASURED_CROWN.min}–${MEASURED_CROWN.max} mm, mean ${MEASURED_CROWN.meanOut} mm outside compensation grouting (CG Table 1)`],
+      ["Predicted crown settlement", `${fmt(g.predictedMm, 1)} mm after the top heading is sprayed: ring ${fmt(g.ringMm, 1)} mm × Kirsch crown factor + ${fmt(WHOLE_BODY * 1000, 1)} mm whole ring (ring closed ${CLOSURE_X} m back)`],
+      ["Measured, platform tunnels", `${MEASURED_CROWN.min}–${MEASURED_CROWN.max} mm, mean ${MEASURED_CROWN.meanOut} mm outside compensation grouting (CG Table 1); Crossrail design FE ${MEASURED_CROWN.fe} mm`],
     ]);
   } else {
     dl(ui.sequence, [

@@ -98,3 +98,9 @@ export function triggerLevel(measured, predicted) {
   for (const [name, f] of TRIGGERS) if (measured >= f * predicted) level = name;
   return level;
 }
+
+// In-tunnel crown settlement in undrained clay: Kirsch crown factor (Brady & Brown 2006) and whole-ring settlement
+// measured at Crossrail Whitechapel (Staerk et al.).
+export const kirschCrownFactor = (k, nu) => 1 + ((1 - k) * (3 - 4 * nu)) / (1 + k);
+export const WHOLE_BODY_SETTLEMENT = Object.freeze([0.002, 0.003]);
+export const crownSettlement = (uFinal, uSurvey, k, nu, wholeBody = 0.0025) => Math.max(uFinal - uSurvey, 0) * kirschCrownFactor(k, nu) + wholeBody;
