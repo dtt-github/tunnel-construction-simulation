@@ -65,6 +65,7 @@ What it computes:
 **Validated against:**
 
 - a hand calculation: D 6 m, z₀ 20 m, VL 1 % → S_max 11.3 mm;
+- measured Crossrail settlement ([validation](validation/settlement.md)): Hyde Park reproduced (8.1 mm against 8.3 mm). In the Thames chalk the published volume losses give 1.1–3.1× less than the measured Smax with K 0.5; the volume loss that fits is 0.11–0.81 %, median 0.35 %, the demo default there;
 - numerical integration equals V_s, also for asymmetric troughs;
 - one component at the face gives half the final settlement at the face; a tail-only component gives Φ(−L/i);
 - the closed-face preset leaves 0.1–0.2 of the final trough at the face; a narrower longitudinal width lowers it without changing the final trough;

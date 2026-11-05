@@ -94,6 +94,15 @@ ALIGNMENT = {
 }
 
 
+SETTLEMENT = {
+    "volume_loss": 0.35, "k": 0.5, "range": [0.1, 0.8], "measured_smax_mm": [3, 10],
+    "source": "Cheng & Mikulski (2014), Crossrail Learning Legacy, Ground settlement behaviour in chalk due to TBM excavations, Table 1: 17 sections "
+              "Plumstead - Woolwich, Smax 3-10 mm, back-analysed VL 0.10-0.35 % with K fixed at 0.5. With the Gaussian trough of this project the "
+              "measured Smax needs VL 0.11-0.81 %, median 0.35 % (docs/validation/settlement.md).",
+    "notes": "Crossrail designed for 1 % (0.5 % in controlled zones). No data under the river.",
+}
+
+
 def build() -> dict:
     ids = [PREFIX + s for s in HOLES.values()]
     g = bgs.fetch(ids, HERE / ".cache", "thames")
@@ -123,6 +132,7 @@ def build() -> dict:
         "ground_surface": [[h["chainage"], h["ground_level"]] for h in holes],
         "groundwater": GROUNDWATER,
         "river": RIVER,
+        "settlement": SETTLEMENT,
         "boreholes": holes,
         "build": "models/scenarios/build_thames.py",
     }

@@ -13,6 +13,10 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
   - thrust and torque breakdown;
   - surface settlement with Burland categories for buildings.
   - Assumptions and gaps are listed in its [realism checklist](docs/realism/epb-slice-a.md).
+- **Real buildings and measured settlement** ([buildings](docs/SCENARIOS.md), [settlement](docs/validation/settlement.md)):
+  - both London scenarios carry the buildings within 60 m of the line: OS OpenMap Local footprints, Environment Agency LIDAR heights, Historic England listing (all OGL), built by `models/scenarios/build_buildings.py`;
+  - the EPB and Mixshield demos place them at their real footprints, follow the face with the settlement surface, and list the most affected buildings near the face;
+  - default volume loss and trough width from measured Crossrail settlement: Thames 0.35 %, K 0.5; Farringdon – Liverpool Street 0.5 %, K 0.43 (from Hyde Park). The trough reproduces Hyde Park (8.1 mm against 8.3 mm); in the Thames chalk the published volume losses do not reproduce the published Smax, and the volume loss that does is used.
 - **Thames crossing for the Mixshield** ([sources](docs/SCENARIOS.md)): the Crossrail Thames Tunnel, Plumstead to North Woolwich, from 15 BGS/Crossrail boreholes (four over the river; OGL) and the OpenStreetMap line, built by `models/scenarios/build_thames.py`. The Mixshield demo drives through it by default, with the river in the long section. Under the river the support window is 2.96–3.57 bar (Crossrail: above 3 bar). The scenario format gains `river`, `d10` per unit and `ends`.
 - **River above the ground:** the DAUB support window and the grout window now add the river column to the total overburden when the water level is above the ground surface.
 - **Ground scenarios and real London geology** ([format and sources](docs/SCENARIOS.md)):

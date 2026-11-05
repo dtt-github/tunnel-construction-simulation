@@ -239,6 +239,16 @@
   "source": "Water strikes in the BGS/Crossrail borehole logs (WSTG/WSTD); Environment Agency (2022), Management of the London Basin Chalk Aquifer, status report, https://www.gov.uk/government/publications/london-basin-chalk-aquifer-annual-status-report (OGL)",
   "notes": "Strike readings, not equilibrium levels. London Clay pore pressure 0.9 x hydrostatic on the upper table."
  },
+ "settlement": {
+  "volume_loss": 0.5,
+  "k": 0.43,
+  "range": [
+   0.3,
+   1.2
+  ],
+  "source": "Transferred from the Hyde Park greenfield site (Crossrail western running tunnels, 7.1 m EPBs, London Clay, axis about 34.5 m): first bore VL 0.44-0.78 %, K 0.43 (Wan, Standing, Potts & Burland 2017, Geotechnique 67(5), doi:10.1680/jgeot.16.P.099, Tables 1-2, Fig. 15); western drive generally below 0.5 % (Lazarus & Jung 2018, The Structural Engineer 96(7)); second bore 0.8-1.2 % incremental.",
+  "notes": "No greenfield VL or K is published for Farringdon - Liverpool Street; Crossrail designed for 1 % (0.5 % in controlled zones)."
+ },
  "boreholes": [
   {
    "id": "RT131",
@@ -495,5 +505,1108 @@
    }
   }
  ],
- "build": "models/scenarios/build_london.py"
+ "build": "models/scenarios/build_london.py",
+ "buildings": [
+  {
+   "id": "994C5561-1EBF-45BE-A78D-BF64C92FE22F",
+   "chainage": -64.1,
+   "offset": -19.9,
+   "ch_min": -99.2,
+   "ch_max": -29.3,
+   "off_min": -55.3,
+   "off_max": 13.3,
+   "area": 2618.0,
+   "ground_level": 20.06,
+   "height": 20.8,
+   "height_source": "lidar"
+  },
+  {
+   "id": "8CAE64B6-9101-4D6A-A06A-9B92E8FE3A09",
+   "chainage": -61.7,
+   "offset": 23.8,
+   "ch_min": -69.5,
+   "ch_max": -53.9,
+   "off_min": 14.4,
+   "off_max": 33.1,
+   "area": 190.0,
+   "ground_level": 20.16,
+   "height": 11.8,
+   "height_source": "lidar"
+  },
+  {
+   "id": "F593503A-B2CA-40F7-AB54-B28340B4BF41",
+   "chainage": -50.2,
+   "offset": 109.4,
+   "ch_min": -98.7,
+   "ch_max": -1.0,
+   "off_min": 33.1,
+   "off_max": 179.0,
+   "area": 10647.0,
+   "ground_level": 19.71,
+   "height": 28.3,
+   "height_source": "lidar",
+   "listed": [
+    [
+     "II*",
+     "PRUDENTIAL ASSURANCE BUILDING"
+    ]
+   ]
+  },
+  {
+   "id": "93AF557E-E165-436D-952D-D7913B4AD8F4",
+   "chainage": -34.8,
+   "offset": 15.4,
+   "ch_min": -47.6,
+   "ch_max": -21.5,
+   "off_min": 3.5,
+   "off_max": 27.0,
+   "area": 399.0,
+   "ground_level": 19.91,
+   "height": 22.9,
+   "height_source": "lidar"
+  },
+  {
+   "id": "38787996-F70F-44CF-9909-B8FFC012886E",
+   "chainage": 3.5,
+   "offset": -29.1,
+   "ch_min": -45.9,
+   "ch_max": 50.1,
+   "off_min": -101.5,
+   "off_max": 45.5,
+   "area": 6687.0,
+   "ground_level": 18.37,
+   "height": 27.3,
+   "height_source": "lidar"
+  },
+  {
+   "id": "8803FB21-330C-4684-8E3F-34FA0201B5FD",
+   "chainage": 47.6,
+   "offset": 125.1,
+   "ch_min": 2.3,
+   "ch_max": 95.1,
+   "off_min": 41.2,
+   "off_max": 187.0,
+   "area": 6592.0,
+   "ground_level": 17.61,
+   "height": 41.4,
+   "height_source": "lidar"
+  },
+  {
+   "id": "B16233DA-FD4E-4DE8-9741-5CB3988A6BCF",
+   "chainage": 71.3,
+   "offset": -52.0,
+   "ch_min": 24.7,
+   "ch_max": 118.4,
+   "off_min": -125.1,
+   "off_max": 20.8,
+   "area": 6480.0,
+   "ground_level": 16.4,
+   "height": 23.6,
+   "height_source": "lidar",
+   "listed": [
+    [
+     "II",
+     "31 Hatton Garden"
+    ],
+    [
+     "II",
+     "ST ANDREWS PAROCHIAL SCHOOLS WREN HOUSE AND ATTACHED RAILINGS"
+    ]
+   ]
+  },
+  {
+   "id": "2CE7087E-56A3-478A-AC5E-2ED5ED9EB79D",
+   "chainage": 114.9,
+   "offset": 83.9,
+   "ch_min": 69.7,
+   "ch_max": 150.6,
+   "off_min": 5.5,
+   "off_max": 177.0,
+   "area": 7255.0,
+   "ground_level": 15.89,
+   "height": 23.7,
+   "height_source": "lidar",
+   "listed": [
+    [
+     "I",
+     "ROMAN CATHOLIC CHURCH OF ST ETHELDREDA AND ATTACHED WALLS AND PIERS"
+    ],
+    [
+     "II",
+     "10 AND 11, GREVILLE STREET"
+    ],
+    [
+     "II",
+     "13 and 14 Ely Place and attached railings"
+    ],
+    [
+     "II",
+     "5, HATTON GARDEN"
+    ],
+    [
+     "II",
+     "NUMBERS 7, 8 AND 9 AND ATTACHED RAILINGS AND LAMP HOLDER"
+    ],
+    [
+     "II",
+     "TREASURE HOUSE"
+    ],
+    [
+     "II",
+     "YE OLDE MITRE PUBLIC HOUSE"
+    ]
+   ]
+  },
+  {
+   "id": "021E24FF-FA15-480F-8F6B-D7186A2F56D2",
+   "chainage": 133.0,
+   "offset": -60.7,
+   "ch_min": 90.2,
+   "ch_max": 182.2,
+   "off_min": -136.9,
+   "off_max": -0.2,
+   "area": 4966.0,
+   "ground_level": 15.37,
+   "height": 21.8,
+   "height_source": "lidar"
+  },
+  {
+   "id": "CAE5C6FD-27E0-4E55-8DBB-9FA635EB0782",
+   "chainage": 166.1,
+   "offset": -102.8,
+   "ch_min": 114.5,
+   "ch_max": 211.9,
+   "off_min": -175.2,
+   "off_max": -23.3,
+   "area": 5566.0,
+   "ground_level": 12.39,
+   "height": 23.8,
+   "height_source": "lidar"
+  },
+  {
+   "id": "99CEE6D3-3693-4252-9AD1-09C51C382159",
+   "chainage": 194.6,
+   "offset": 62.3,
+   "ch_min": 137.1,
+   "ch_max": 254.4,
+   "off_min": -25.3,
+   "off_max": 145.7,
+   "area": 10318.0,
+   "ground_level": 12.79,
+   "height": 28.1,
+   "height_source": "lidar",
+   "listed": [
+    [
+     "II",
+     "25 AND 27, FARRINGDON ROAD"
+    ],
+    [
+     "II",
+     "NUMBER 21 AND 25 AND ATTACHED RAILINGS"
+    ],
+    [
+     "II",
+     "NUMBERS 26-34 AND ATTACHED RAILINGS"
+    ],
+    [
+     "II",
+     "ST ANDREW'S HOUSE"
+    ]
+   ]
+  },
+  {
+   "id": "CEA87E81-DE92-4224-9F8B-42263A686BFA",
+   "chainage": 227.6,
+   "offset": -140.6,
+   "ch_min": 133.4,
+   "ch_max": 299.0,
+   "off_min": -263.3,
+   "off_max": -50.6,
+   "area": 10893.0,
+   "height": 10.0,
+   "height_source": "assumed",
+   "listed": [
+    [
+     "II",
+     "FARRINGDON LONDON REGIONAL TRANSPORT UNDERGROUND STATION"
+    ]
+   ]
+  },
+  {
+   "id": "930F3FDD-77EC-4AF6-A5B2-86EEDB687C6F",
+   "chainage": 303.2,
+   "offset": -7.7,
+   "ch_min": 234.1,
+   "ch_max": 406.0,
+   "off_min": -91.6,
+   "off_max": 78.4,
+   "area": 12669.0,
+   "ground_level": 6.24,
+   "height": 41.9,
+   "height_source": "lidar",
+   "listed": [
+    [
+     "II",
+     "51-53, CHARTERHOUSE STREET"
+    ]
+   ]
+  },
+  {
+   "id": "1883E65B-2C59-424B-AEA0-C554724AFB27",
+   "chainage": 400.3,
+   "offset": -81.5,
+   "ch_min": 367.0,
+   "ch_max": 451.2,
+   "off_min": -94.5,
+   "off_max": -56.7,
+   "area": 1527.0,
+   "ground_level": 14.35,
+   "height": 21.7,
+   "height_source": "lidar"
+  },
+  {
+   "id": "C6CD2799-A38C-40D8-AEB3-338F809C9943",
+   "chainage": 413.8,
+   "offset": -56.6,
+   "ch_min": 401.2,
+   "ch_max": 426.3,
+   "off_min": -61.2,
+   "off_max": -52.1,
+   "area": 202.0,
+   "ground_level": 12.5,
+   "height": 17.3,
+   "height_source": "lidar"
+  },
+  {
+   "id": "6325A7F1-018F-4BD5-99AA-61426F9032C0",
+   "chainage": 446.3,
+   "offset": 37.8,
+   "ch_min": 277.1,
+   "ch_max": 634.9,
+   "off_min": -115.2,
+   "off_max": 203.7,
+   "area": 33548.0,
+   "ground_level": 15.94,
+   "height": 14.4,
+   "height_source": "lidar",
+   "listed": [
+    [
+     "II*",
+     "East building of Central Market"
+    ],
+    [
+     "II",
+     "K2 TELEPHONE KIOSK IN CENTRAL MARKET K2 TELEPHONE KIOSK IN CENTRAL MARKETS"
+    ],
+    [
+     "II",
+     "K6 TELEPHONE KIOSK IN CENTRAL MARKETS"
+    ],
+    [
+     "II",
+     "K6 TELEPHONE KIOSK IN CENTRAL MARKETS"
+    ],
+    [
+     "II",
+     "K6 TELEPHONE KIOSK IN CENTRAL MARKETS"
+    ],
+    [
+     "II",
+     "PAIR OF K2 TELEPHONE KIOSKS IN CENTRAL MARKETS"
+    ],
+    [
+     "II",
+     "SMITHFIELD POULTRY MARKET"
+    ]
+   ]
+  },
+  {
+   "id": "2896E99F-90F7-4F55-9DF9-AE5EB4EB19E9",
+   "chainage": 447.9,
+   "offset": -52.8,
+   "ch_min": 411.4,
+   "ch_max": 481.8,
+   "off_min": -85.9,
+   "off_max": -18.6,
+   "area": 1620.0,
+   "ground_level": 15.38,
+   "height": 21.6,
+   "height_source": "lidar",
+   "listed": [
+    [
+     "II",
+     "67-77, CHARTERHOUSE STREET EC1"
+    ],
+    [
+     "II",
+     "79-83, CHARTERHOUSE STREET"
+    ],
+    [
+     "II",
+     "THE HOPE PUBLIC HOUSE"
+    ]
+   ]
+  },
+  {
+   "id": "813A7869-CB1B-4CC8-9626-4D62293C24A4",
+   "chainage": 592.9,
+   "offset": 22.2,
+   "ch_min": 575.0,
+   "ch_max": 611.3,
+   "off_min": 4.4,
+   "off_max": 40.4,
+   "area": 569.0,
+   "ground_level": 16.5,
+   "height": 21.6,
+   "height_source": "lidar"
+  },
+  {
+   "id": "26BDBD6C-03BE-430C-A78A-01A2F4CFA532",
+   "chainage": 608.3,
+   "offset": 5.3,
+   "ch_min": 590.6,
+   "ch_max": 624.3,
+   "off_min": -19.1,
+   "off_max": 26.5,
+   "area": 626.0,
+   "ground_level": 17.1,
+   "height": 16.5,
+   "height_source": "lidar",
+   "listed": [
+    [
+     "II",
+     "43, 44, 45, 46 and 51 Cloth Fair"
+    ]
+   ]
+  },
+  {
+   "id": "47170265-82BF-48EB-8A51-74C4DEB2B16F",
+   "chainage": 617.6,
+   "offset": 43.5,
+   "ch_min": 605.8,
+   "ch_max": 629.3,
+   "off_min": 31.2,
+   "off_max": 55.5,
+   "area": 285.0,
+   "ground_level": 16.79,
+   "height": 24.1,
+   "height_source": "lidar",
+   "listed": [
+    [
+     "II",
+     "ST BARTHOLOMEW HOUSE"
+    ]
+   ]
+  },
+  {
+   "id": "B69A4E76-C6F0-489A-9B9A-0BA6D0694107",
+   "chainage": 624.1,
+   "offset": -0.1,
+   "ch_min": 612.4,
+   "ch_max": 635.1,
+   "off_min": -11.8,
+   "off_max": 13.3,
+   "area": 283.0,
+   "ground_level": 17.36,
+   "height": 13.9,
+   "height_source": "lidar",
+   "listed": [
+    [
+     "II*",
+     "Nos. 41 and 42, CLOTH FAIR"
+    ],
+    [
+     "II",
+     "39 AND 40, CLOTH FAIR EC1"
+    ]
+   ]
+  },
+  {
+   "id": "E3806B6C-4AF6-4E62-B995-B0907FBC68B7",
+   "chainage": 637.2,
+   "offset": -96.6,
+   "ch_min": 605.4,
+   "ch_max": 667.4,
+   "off_min": -134.9,
+   "off_max": -57.9,
+   "area": 2129.0,
+   "ground_level": 16.81,
+   "height": 29.4,
+   "height_source": "lidar"
+  },
+  {
+   "id": "1708DD4B-666D-4A3E-9F8E-C428E93ACE0C",
+   "chainage": 669.3,
+   "offset": -45.3,
+   "ch_min": 623.4,
+   "ch_max": 743.9,
+   "off_min": -103.1,
+   "off_max": -5.2,
+   "area": 1518.0,
+   "ground_level": 17.51,
+   "height": 14.9,
+   "height_source": "lidar",
+   "listed": [
+    [
+     "II",
+     "Nos. 74 and 75, LONG LANE"
+    ]
+   ]
+  },
+  {
+   "id": "6DE60372-EF2F-4C32-9BA7-7689DF3618F8",
+   "chainage": 674.0,
+   "offset": 50.5,
+   "ch_min": 627.8,
+   "ch_max": 716.9,
+   "off_min": -26.4,
+   "off_max": 131.9,
+   "area": 4882.0,
+   "ground_level": 15.9,
+   "height": 31.7,
+   "height_source": "lidar",
+   "listed": [
+    [
+     "I",
+     "CHURCH OF ST BARTHOLOMEW THE GREAT"
+    ]
+   ],
+   "name": "St Bartholomew the Great Church"
+  },
+  {
+   "id": "8A4998BE-D243-4AAB-83AE-71BD85A514EB",
+   "chainage": 703.4,
+   "offset": -24.0,
+   "ch_min": 687.0,
+   "ch_max": 720.7,
+   "off_min": -40.2,
+   "off_max": -10.3,
+   "area": 334.0,
+   "ground_level": 17.46,
+   "height": 17.4,
+   "height_source": "lidar",
+   "listed": [
+    [
+     "II",
+     "Founders' Hall including 39-40 Bartholomew Close"
+    ]
+   ]
+  },
+  {
+   "id": "E25FE4A5-D151-40DD-9455-96863A306B24",
+   "chainage": 716.7,
+   "offset": -71.7,
+   "ch_min": 686.9,
+   "ch_max": 749.2,
+   "off_min": -95.4,
+   "off_max": -50.2,
+   "area": 533.0,
+   "ground_level": 17.76,
+   "height": 15.4,
+   "height_source": "lidar"
+  },
+  {
+   "id": "9B3DC2F4-313E-41F2-9B01-5042B9B93969",
+   "chainage": 729.1,
+   "offset": 31.1,
+   "ch_min": 697.9,
+   "ch_max": 756.0,
+   "off_min": -9.1,
+   "off_max": 76.2,
+   "area": 2465.0,
+   "ground_level": 16.91,
+   "height": 23.5,
+   "height_source": "lidar"
+  },
+  {
+   "id": "04215BE1-321A-4C69-9AC5-4867F0A4AF2C",
+   "chainage": 730.0,
+   "offset": -58.9,
+   "ch_min": 699.1,
+   "ch_max": 762.0,
+   "off_min": -83.5,
+   "off_max": -33.0,
+   "area": 1166.0,
+   "ground_level": 17.85,
+   "height": 19.2,
+   "height_source": "lidar",
+   "listed": [
+    [
+     "II",
+     "Hand and Shears Public House"
+    ],
+    [
+     "II",
+     "Nos. 4, 4A and 5, MIDDLE STREET"
+    ]
+   ]
+  },
+  {
+   "id": "CA319EF4-BE06-4E94-8CB7-962AE376C652",
+   "chainage": 766.0,
+   "offset": 3.8,
+   "ch_min": 755.2,
+   "ch_max": 774.4,
+   "off_min": -7.9,
+   "off_max": 20.1,
+   "area": 226.0,
+   "ground_level": 16.96,
+   "height": 15.4,
+   "height_source": "lidar"
+  },
+  {
+   "id": "5582CA2A-F06F-4ABE-BD05-AFAAA4BC3037",
+   "chainage": 784.2,
+   "offset": 55.2,
+   "ch_min": 715.6,
+   "ch_max": 859.1,
+   "off_min": -117.3,
+   "off_max": 201.4,
+   "area": 18532.0,
+   "ground_level": 16.47,
+   "height": 53.6,
+   "height_source": "lidar"
+  },
+  {
+   "id": "7586AEEF-2C38-444F-AB24-54419095CD7E",
+   "chainage": 892.9,
+   "offset": 23.1,
+   "ch_min": 889.0,
+   "ch_max": 896.8,
+   "off_min": 20.3,
+   "off_max": 25.9,
+   "area": 28.0,
+   "ground_level": 12.65,
+   "height": 7.5,
+   "height_source": "lidar"
+  },
+  {
+   "id": "8B5B9E04-8B0A-4E42-960F-A29E81586D70",
+   "chainage": 906.8,
+   "offset": 85.1,
+   "ch_min": 836.2,
+   "ch_max": 970.3,
+   "off_min": 30.7,
+   "off_max": 153.3,
+   "area": 8387.0,
+   "ground_level": 14.62,
+   "height": 22.4,
+   "height_source": "lidar",
+   "listed": [
+    [
+     "II",
+     "Ironmongers' Hall, excluding Ferroners' House"
+    ]
+   ],
+   "name": "Unknown"
+  },
+  {
+   "id": "289049D8-1DEE-466F-995A-8B45975E568B",
+   "chainage": 1007.1,
+   "offset": 58.5,
+   "ch_min": 994.6,
+   "ch_max": 1019.6,
+   "off_min": 41.4,
+   "off_max": 75.6,
+   "area": 566.0,
+   "ground_level": 13.66,
+   "height": 19.0,
+   "height_source": "lidar"
+  },
+  {
+   "id": "1F1055D2-E007-4326-969C-04867965FA87",
+   "chainage": 1012.5,
+   "offset": -78.3,
+   "ch_min": 789.7,
+   "ch_max": 1269.5,
+   "off_min": -265.1,
+   "off_max": 45.1,
+   "area": 25287.0,
+   "ground_level": 13.27,
+   "height": 34.5,
+   "height_source": "lidar",
+   "listed": [
+    [
+     "II",
+     "Barbican"
+    ]
+   ]
+  },
+  {
+   "id": "7BBF344C-DE75-48E3-BD96-275570A49807",
+   "chainage": 1054.8,
+   "offset": -18.1,
+   "ch_min": 1031.7,
+   "ch_max": 1078.4,
+   "off_min": -35.1,
+   "off_max": -1.7,
+   "area": 917.0,
+   "ground_level": 15.36,
+   "height": 13.6,
+   "height_source": "lidar",
+   "listed": [
+    [
+     "I",
+     "CHURCH OF ST GILES"
+    ]
+   ],
+   "name": "St Giles's Church"
+  },
+  {
+   "id": "8104D45D-C26A-44B3-AB6D-FC7364250D61",
+   "chainage": 1063.4,
+   "offset": 99.0,
+   "ch_min": 999.6,
+   "ch_max": 1111.4,
+   "off_min": 47.4,
+   "off_max": 137.6,
+   "area": 4696.0,
+   "ground_level": 15.04,
+   "height": 83.4,
+   "height_source": "lidar"
+  },
+  {
+   "id": "25D2A7C3-F9D4-4963-9760-9997AD883B8B",
+   "chainage": 1130.0,
+   "offset": 77.0,
+   "ch_min": 1102.3,
+   "ch_max": 1165.0,
+   "off_min": 55.5,
+   "off_max": 99.5,
+   "area": 1654.0,
+   "ground_level": 14.11,
+   "height": 76.5,
+   "height_source": "lidar"
+  },
+  {
+   "id": "70C6E623-9391-44DD-AE42-8ABD2EA3AE88",
+   "chainage": 1146.8,
+   "offset": 25.8,
+   "ch_min": 1107.9,
+   "ch_max": 1197.7,
+   "off_min": 5.5,
+   "off_max": 48.2,
+   "area": 1755.0,
+   "ground_level": 13.24,
+   "height": 33.4,
+   "height_source": "lidar",
+   "listed": [
+    [
+     "II",
+     "THE SALTERS' HALL"
+    ]
+   ]
+  },
+  {
+   "id": "A69E2200-B35A-4FA5-B6C5-A5A64FDB4364",
+   "chainage": 1218.3,
+   "offset": -70.6,
+   "ch_min": 1201.3,
+   "ch_max": 1235.2,
+   "off_min": -117.3,
+   "off_max": -23.8,
+   "area": 1232.0,
+   "ground_level": 13.56,
+   "height": 11.8,
+   "height_source": "lidar"
+  },
+  {
+   "id": "874D6DC6-1FAA-42FD-929B-C9D5C8E0D5CD",
+   "chainage": 1250.1,
+   "offset": 58.9,
+   "ch_min": 1196.3,
+   "ch_max": 1318.3,
+   "off_min": 26.5,
+   "off_max": 87.6,
+   "area": 4586.0,
+   "ground_level": 13.79,
+   "height": 55.9,
+   "height_source": "lidar"
+  },
+  {
+   "id": "1076D24C-AEE9-4438-B21F-3608093602EE",
+   "chainage": 1335.2,
+   "offset": -58.0,
+   "ch_min": 1258.2,
+   "ch_max": 1413.2,
+   "off_min": -171.1,
+   "off_max": 40.7,
+   "area": 17020.0,
+   "ground_level": 13.41,
+   "height": 92.6,
+   "height_source": "lidar"
+  },
+  {
+   "id": "06BE7CA0-CDE2-4C81-8888-431442C232DA",
+   "chainage": 1357.3,
+   "offset": 41.1,
+   "ch_min": 1327.8,
+   "ch_max": 1391.2,
+   "off_min": 13.4,
+   "off_max": 67.1,
+   "area": 2314.0,
+   "ground_level": 13.45,
+   "height": 82.1,
+   "height_source": "lidar"
+  },
+  {
+   "id": "2B355850-E52B-4F8F-9389-51D59A11E1FB",
+   "chainage": 1417.8,
+   "offset": 20.2,
+   "ch_min": 1398.8,
+   "ch_max": 1436.5,
+   "off_min": -21.2,
+   "off_max": 61.1,
+   "area": 1710.0,
+   "ground_level": 13.74,
+   "height": 15.4,
+   "height_source": "lidar",
+   "listed": [
+    [
+     "II",
+     "2, MOORFIELDS (See details for further address information)"
+    ],
+    [
+     "II",
+     "4, MOORFIELDS"
+    ],
+    [
+     "II",
+     "8, MOORFIELDS"
+    ],
+    [
+     "II",
+     "87, MOORGATE"
+    ],
+    [
+     "II",
+     "FORMER FOX'S UMBRELLAS"
+    ],
+    [
+     "II",
+     "THE GLOBE PUBLIC HOUSE"
+    ]
+   ]
+  },
+  {
+   "id": "55558637-6831-4B90-978C-8B63F4F77049",
+   "chainage": 1440.4,
+   "offset": -80.2,
+   "ch_min": 1421.3,
+   "ch_max": 1459.8,
+   "off_min": -130.4,
+   "off_max": -29.2,
+   "area": 1859.0,
+   "ground_level": 14.03,
+   "height": 29.3,
+   "height_source": "lidar",
+   "listed": [
+    [
+     "II",
+     "MOORGATE UNDERGROUND STATION"
+    ]
+   ]
+  },
+  {
+   "id": "9CDF9410-08E9-4A79-A5FA-7C5D1E7ECDEE",
+   "chainage": 1489.0,
+   "offset": 63.3,
+   "ch_min": 1437.1,
+   "ch_max": 1554.3,
+   "off_min": 10.1,
+   "off_max": 104.2,
+   "area": 5637.0,
+   "ground_level": 11.4,
+   "height": 31.8,
+   "height_source": "lidar",
+   "listed": [
+    [
+     "II",
+     "Business School, London Metropolitan University"
+    ]
+   ]
+  },
+  {
+   "id": "4921A447-8BC3-4BA0-B75A-6F9F6F01C963",
+   "chainage": 1544.6,
+   "offset": 36.6,
+   "ch_min": 1538.7,
+   "ch_max": 1550.4,
+   "off_min": 31.6,
+   "off_max": 41.7,
+   "area": 53.0,
+   "ground_level": 13.53,
+   "height": 16.1,
+   "height_source": "lidar"
+  },
+  {
+   "id": "5C17F99B-0A09-4493-9500-5686EA9A192F",
+   "chainage": 1577.8,
+   "offset": -45.9,
+   "ch_min": 1457.4,
+   "ch_max": 1720.3,
+   "off_min": -111.2,
+   "off_max": 20.4,
+   "area": 13921.0,
+   "ground_level": 11.73,
+   "height": 41.7,
+   "height_source": "lidar",
+   "listed": [
+    [
+     "II*",
+     "LUTYENS HOUSE"
+    ],
+    [
+     "II",
+     "PARK HOUSE AND GARDEN HOUSE"
+    ]
+   ]
+  },
+  {
+   "id": "F8736F73-63B7-45F9-812A-4EDEFC99E7B6",
+   "chainage": 1632.5,
+   "offset": 77.5,
+   "ch_min": 1575.1,
+   "ch_max": 1686.0,
+   "off_min": 34.2,
+   "off_max": 112.5,
+   "area": 4147.0,
+   "ground_level": 10.22,
+   "height": 35.8,
+   "height_source": "lidar",
+   "listed": [
+    [
+     "II",
+     "FINSBURY HOUSE"
+    ],
+    [
+     "II",
+     "LONDON WALL BUILDINGS"
+    ]
+   ]
+  },
+  {
+   "id": "4A9E4BE2-3ED6-457D-BF29-C4140F95A41D",
+   "chainage": 1701.4,
+   "offset": -98.3,
+   "ch_min": 1656.7,
+   "ch_max": 1749.7,
+   "off_min": -156.8,
+   "off_max": -47.5,
+   "area": 6170.0,
+   "ground_level": 14.2,
+   "height": 34.9,
+   "height_source": "lidar"
+  },
+  {
+   "id": "7AEF387D-C358-4248-8169-0142A908628C",
+   "chainage": 1747.0,
+   "offset": 76.6,
+   "ch_min": 1682.0,
+   "ch_max": 1799.4,
+   "off_min": 54.3,
+   "off_max": 97.9,
+   "area": 3379.0,
+   "ground_level": 12.27,
+   "height": 28.8,
+   "height_source": "lidar"
+  },
+  {
+   "id": "310A2C37-E2A3-433A-B740-27ADCC57B278",
+   "chainage": 1758.4,
+   "offset": 0.4,
+   "ch_min": 1749.9,
+   "ch_max": 1766.9,
+   "off_min": -5.6,
+   "off_max": 6.5,
+   "area": 159.0,
+   "ground_level": 12.29,
+   "height": 6.5,
+   "height_source": "lidar"
+  },
+  {
+   "id": "7D00FEEF-2353-4BD2-A2C5-CFB5CECD8871",
+   "chainage": 1773.3,
+   "offset": 47.7,
+   "ch_min": 1758.3,
+   "ch_max": 1788.4,
+   "off_min": 42.8,
+   "off_max": 52.5,
+   "area": 212.0,
+   "ground_level": 10.56,
+   "height": 12.5,
+   "height_source": "lidar"
+  },
+  {
+   "id": "46F7075F-D94D-4DD4-995F-19D259D70D3F",
+   "chainage": 1792.3,
+   "offset": 35.7,
+   "ch_min": 1770.6,
+   "ch_max": 1803.9,
+   "off_min": 22.4,
+   "off_max": 53.8,
+   "area": 454.0,
+   "ground_level": 12.12,
+   "height": 18.8,
+   "height_source": "lidar",
+   "listed": [
+    [
+     "II",
+     "76-80, OLD BROAD STREET EC2"
+    ]
+   ]
+  },
+  {
+   "id": "A72FD7CC-BF19-4C67-8A23-BA3B4D0D19B0",
+   "chainage": 1798.5,
+   "offset": -58.3,
+   "ch_min": 1740.9,
+   "ch_max": 1846.6,
+   "off_min": -132.3,
+   "off_max": 0.7,
+   "area": 7292.0,
+   "ground_level": 14.44,
+   "height": 52.4,
+   "height_source": "lidar"
+  },
+  {
+   "id": "94573AAF-0446-4CE0-9539-1AD3E4F2E9C5",
+   "chainage": 1875.1,
+   "offset": 59.2,
+   "ch_min": 1811.8,
+   "ch_max": 1950.7,
+   "off_min": 29.8,
+   "off_max": 92.1,
+   "area": 3585.0,
+   "ground_level": 14.55,
+   "height": 34.2,
+   "height_source": "lidar"
+  },
+  {
+   "id": "1D595C53-47E5-4872-A9AF-B39DDC1735FC",
+   "chainage": 1938.2,
+   "offset": -116.2,
+   "ch_min": 1831.2,
+   "ch_max": 2045.6,
+   "off_min": -288.0,
+   "off_max": 54.4,
+   "area": 41933.0,
+   "ground_level": 12.7,
+   "height": 62.1,
+   "height_source": "lidar",
+   "listed": [
+    [
+     "II*",
+     "Former Great Eastern Hotel"
+    ],
+    [
+     "II",
+     "Great Eastern Railway War Memorial, Liverpool Street Station"
+    ],
+    [
+     "II",
+     "Liverpool Street Station"
+    ],
+    [
+     "II",
+     "London Society of East Anglians War Memorial, Liverpool Street Station"
+    ]
+   ],
+   "name": "British Transport Police"
+  },
+  {
+   "id": "07C48C86-9292-4D2A-8E64-9D5F15BE5AF7",
+   "chainage": 1966.6,
+   "offset": -6.7,
+   "ch_min": 1957.3,
+   "ch_max": 1975.9,
+   "off_min": -15.1,
+   "off_max": 1.7,
+   "area": 223.0,
+   "ground_level": 14.92,
+   "height": 9.1,
+   "height_source": "lidar",
+   "name": "British Transport Police"
+  },
+  {
+   "id": "5C53115A-F064-4B0D-AE06-C746086C1CE9",
+   "chainage": 2073.3,
+   "offset": -20.2,
+   "ch_min": 2004.6,
+   "ch_max": 2142.9,
+   "off_min": -70.3,
+   "off_max": 40.3,
+   "area": 7623.0,
+   "ground_level": 14.45,
+   "height": 24.9,
+   "height_source": "lidar",
+   "listed": [
+    [
+     "II",
+     "5-7, NEW STREET EC2"
+    ]
+   ]
+  },
+  {
+   "id": "4B3CE193-C289-41A9-B3A0-8C94576B7294",
+   "chainage": 2126.3,
+   "offset": 53.5,
+   "ch_min": 1980.7,
+   "ch_max": 2241.7,
+   "off_min": -30.2,
+   "off_max": 147.3,
+   "area": 16703.0,
+   "height": 10.0,
+   "height_source": "assumed",
+   "listed": [
+    [
+     "II",
+     "12 AND 13, DEVONSHIRE SQUARE EC2"
+    ],
+    [
+     "II",
+     "162 AND 164, BISHOPSGATE EC2"
+    ],
+    [
+     "II",
+     "HOUSE TO EAST OF ENTRANCE TO PORT OF LONDON AUTHORITY'S WAREHOUSES"
+    ],
+    [
+     "II",
+     "PAIR OF HOUSES OT NORTH OF ENTRANCE OT PORT OF LONDON AUTHORITY'S WAREHOUSES"
+    ],
+    [
+     "II",
+     "PORT OF LONDON AUTHORITY'S WAREHOUSES AND BOUNDARY WALLS TO MIDDLESEX STREET AND NEW STREET"
+    ],
+    [
+     "II",
+     "SHIELD HOUSE"
+    ],
+    [
+     "II",
+     "WALL TO REAR OF NUMBERS 4 TO 18 (EVEN) WHICH ARE NOT OF SPECIAL ARCHITECTURAL OR HISTORICAL INTEREST"
+    ]
+   ]
+  },
+  {
+   "id": "4011D404-50E3-4C68-9AC8-539AFBA11B3F",
+   "chainage": 2157.4,
+   "offset": -61.4,
+   "ch_min": 2121.5,
+   "ch_max": 2186.5,
+   "off_min": -79.5,
+   "off_max": -36.3,
+   "area": 1361.0,
+   "ground_level": 13.8,
+   "height": 21.5,
+   "height_source": "lidar"
+  }
+ ],
+ "buildings_meta": {
+  "selection": "OS OpenMap Local footprints within 60 m of the alignment",
+  "licence": "Buildings: OS OpenMap Local, contains OS data (c) Crown copyright and database right 2026; heights from Environment Agency LIDAR Composite 1 m DSM/DTM, (c) Environment Agency copyright and/or database right; listing from the National Heritage List for England, (c) Historic England 2026. All under the Open Government Licence v3.0.",
+  "fields": "chainage/offset of the centroid; ch_min..ch_max, off_min..off_max of the footprint (m); height (m, lidar or assumed 10 m); ground_level (m OD, LIDAR terrain); listed: [grade, name]",
+  "build": "models/scenarios/build_buildings.py"
+ }
 }

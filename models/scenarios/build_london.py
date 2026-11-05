@@ -130,6 +130,15 @@ def parse(text: str, groups: dict) -> None:
             groups[group].append(dict(zip(heading, row[1:])))
 
 
+SETTLEMENT = {
+    "volume_loss": 0.5, "k": 0.43, "range": [0.3, 1.2],
+    "source": "Transferred from the Hyde Park greenfield site (Crossrail western running tunnels, 7.1 m EPBs, London Clay, axis about 34.5 m): "
+              "first bore VL 0.44-0.78 %, K 0.43 (Wan, Standing, Potts & Burland 2017, Geotechnique 67(5), doi:10.1680/jgeot.16.P.099, Tables 1-2, "
+              "Fig. 15); western drive generally below 0.5 % (Lazarus & Jung 2018, The Structural Engineer 96(7)); second bore 0.8-1.2 % incremental.",
+    "notes": "No greenfield VL or K is published for Farringdon - Liverpool Street; Crossrail designed for 1 % (0.5 % in controlled zones).",
+}
+
+
 def build() -> dict:
     g = fetch()
     by_bgs = {r["BGS_LOCA_ID"]: r for r in g["LOCA"]}
@@ -163,6 +172,7 @@ def build() -> dict:
         "alignment": ALIGNMENT,
         "ground_surface": [[h["chainage"], h["ground_level"]] for h in holes],
         "groundwater": GROUNDWATER,
+        "settlement": SETTLEMENT,
         "boreholes": holes,
         "build": "models/scenarios/build_london.py",
     }

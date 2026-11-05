@@ -18,6 +18,8 @@ A scenario file describes the ground along a tunnel alignment. The demos load it
 | `ground_surface` | `[[chainage, level], …]` |
 | `groundwater` | `level`: the upper water table as `[[chainage, level], …]`. Optionally `deep_head`: the piezometric level of a lower aquifer. Also `source` and `notes`. |
 | `river` | Optional. `from`, `to` (chainage), `level` as `[[chainage, level], …]`: free water above the ground surface, which is then the river bed. Under a river the upper water level should equal the river level. |
+| `settlement` | Optional default `volume_loss` (%), trough width `k` and its `source`; the demos start from these. |
+| `buildings` | Optional. Footprints along the line: `chainage`, `offset` (centroid), `ch_min`/`ch_max`, `off_min`/`off_max`, `area`, `height` and `height_source`, `ground_level`, `listed` (`[grade, name]`), `scheduled_monument`, `name`; `buildings_meta` gives the selection rule and licences. |
 | `boreholes` | `id`, `chainage`, `offset`, `ground_level` (the river bed for over-water holes), optionally `base_level` (bottom of the hole) and `over_water`, and `tops`: the level of the top of each unit logged in the hole. |
 
 Each unit has these fields:
@@ -48,6 +50,23 @@ Each unit has these fields:
   - the pore pressure at the axis, from the unit's water system.
 
   Models that take a water depth get the depth of a water table that gives the same pore pressure. Under a river that depth is negative; the face-support window and the grout window then add the river column to the pore pressure and to the total overburden.
+
+## Buildings and settlement defaults (both scenarios)
+
+[`build_buildings.py`](../models/scenarios/build_buildings.py) adds the buildings within 60 m of each line to the scenario files:
+
+- **Footprints:** OS OpenMap Local, tile TQ (Contains OS data © Crown copyright and database right 2026; OGL). OS merges terraces into blocks.
+- **Heights:** the 90th percentile of the Environment Agency LIDAR Composite 1 m DSM minus DTM inside each footprint (© Environment Agency; OGL). Two buildings per corridor without enough LIDAR pixels get an assumed 10 m.
+- **Listed buildings and scheduled monuments:** the National Heritage List for England (© Historic England 2026; OGL).
+
+| Scenario | Buildings | LIDAR heights | Listed | Examples |
+|---|---|---|---|---|
+| Farringdon – Liverpool Street | 60 | 58 | 28 | Smithfield market buildings (II*), St Bartholomew the Great (I), Cloth Fair, the Barbican, Moorgate, Liverpool Street station |
+| Thames crossing | 59 | 57 | 7 | Royal Arsenal (Brass Foundry I, Dial Arch II*), Middlegate House, North Woolwich Old Station |
+
+The settlement defaults (volume loss and trough width) come from measured Crossrail settlement. See [validation/settlement.md](validation/settlement.md).
+
+An OpenStreetMap version (individual buildings, 307 and 100) was considered. It would make the data in the repository share-alike under ODbL, so the OGL Ordnance Survey footprints are used instead.
 
 ## Scenario: Thames crossing, Plumstead – North Woolwich
 
