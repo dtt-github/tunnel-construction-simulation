@@ -65,6 +65,9 @@ ui.thrust.value = M.thrustDefault;
 ui.rpm.value = M.rpmDefault;
 // CSM spacing as cutterhead radius / number of discs, the definition under which psi was back-analysed (csm.js)
 const CUTTER = { ...DEFAULT_CUTTER, spacing_mm: (1000 * M.D) / 2 / M.nCutters };
+// Scatter of CSM penetration over 18 Follo TBM1 sections with mean rock strength: rms of ln(pred/meas) 0.24
+// (docs/validation/hard-rock-projects.md), shown as a band around the prediction.
+const CSM_SCATTER = Math.exp(0.24);
 
 const NAMES = { tbm_breakdown: "TBM repairs", backup: "backup", cutters: "cutter changes", support: KIND === "double" ? "segments and support" : "rock support",
   maintenance: "maintenance", transport: "transport", utilities: "utility extension", survey: "survey", other: "other", regrip: "regrip", boring: "boring" };
@@ -149,7 +152,7 @@ function hud() {
   const zone = zoneAt(S.chainage), p = S.perf, cls = rmrClass(zone.rmr);
   const LIMIT = { thrust: "thrust", penetration: `penetration cap ${PRACTICAL_MAX_PENETRATION_MM} mm/rev (muck handling)`, torque: "installed torque", power: "installed power" };
   dl(ui.cutting, [
-    ["Penetration", `${fmt(p.penetration_mm_rev, 2)} mm/rev`],
+    ["Penetration", p.limited_by === "thrust" ? `${fmt(p.penetration_mm_rev, 2)} mm/rev (Follo check: ${fmt(p.penetration_mm_rev / CSM_SCATTER, 1)}–${fmt(p.penetration_mm_rev * CSM_SCATTER, 1)})` : `${fmt(p.penetration_mm_rev, 2)} mm/rev`],
     ["Penetration rate", `${fmt(p.rop_m_h, 2)} m/h`],
     ["Limited by", LIMIT[p.limited_by]],
     ["Load per cutter", `${fmt(p.normal_per_cutter_kn, 0)} kN (rated ${DEFAULT_CUTTER.max_load_kn})`],
