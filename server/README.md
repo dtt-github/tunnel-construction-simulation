@@ -34,9 +34,27 @@ Results go to `results/<name>.json`, with a run record:
 | `tests/test_materials.py`, `tests/test_element_gpu.py` | The Mohr–Coulomb mapping; Rankine and B00 collapse pinned on the GPU | WP1 |
 | `tunnelsim_server/scenes/tunnel_2d.py` | Plane-strain tunnel with a closing ring of segments; the clay investigation ([status](../docs/validation/mpm-clay.md)) | WP3 (blocked) |
 | `tunnelsim_server/scenes/face_sand.py`, `tests/test_face_sand_gpu.py` | Face in dry sand, half-model, displacement or pressure (servo) control, mechanism and settlement outputs ([results](../docs/validation/mpm-face-sand.md)) | WP2 |
+| `tunnelsim_server/scenes/chamber.py` | EPB chamber under pressure with an analytical screw sink and a PI screw controller ([results](../docs/validation/mpm-chamber.md)) | WP4 (blocked) |
+| `tunnelsim_server/live.py` | Live dry-sand face over a WebSocket for the EPB demo's "Ground physics" panel (`web/epb/ground.js`); local only | WP6 (face only) |
+| `diagnostics/` | One-off investigation scripts (packing, cohesion scaling, ring piling, equilibrium), each with its result in the docstring | WP0b, WP3 |
 | `gpu_reservations.json` | GPU windows reserved for this project on the shared Spark (local time) | WP0 |
 
-Still to come: `scenes/chamber.py` and `scenes/screw.py` (WP4, WP5) and `live.py` (WP6, local only).
+Still to come: `scenes/screw.py` (WP5), and the chamber in the live view once WP4 is unblocked.
+
+## Live view (local only)
+
+```bash
+cd server
+.venv-server/bin/python -m tunnelsim_server.live            # ws://127.0.0.1:8765, Idinger dry-sand face, C/D 1, D/10
+cd .. && python3 -m http.server 8741 --bind 127.0.0.1         # in a second terminal
+```
+
+Open `http://127.0.0.1:8741/web/epb/index.html?ground=ws://127.0.0.1:8765`. The EPB demo then shows a "Ground physics" panel. Without the `ground` parameter, the demo is unchanged.
+
+- **What it shows:** the MPM section through the face, coloured by movement, with its own support-pressure slider (0–30 kPa).
+- **What it does:** above the limit the face holds; below it the face gives way and the chimney rises to the surface. "Reset the face" rebuilds the scene.
+- **Readouts:** the face pressure, with the measured limit, the MPM bracket and the analytical value beside it, and the real-time factor.
+- **What it is not:** this is the WP2 benchmark face, not the demo's own ground.
 
 ## GPU time
 

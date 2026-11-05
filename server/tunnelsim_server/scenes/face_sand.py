@@ -54,85 +54,112 @@ class FaceSandConfig:
     moving_threshold_over_d: float = 0.002  # displacement that marks the failure zone, / D
 
 
+class Face:
+    """The face scene, built once and stepped one frame at a time (by run() below, or live by tunnelsim_server.live)."""
+
+    def __init__(self, cfg: FaceSandConfig, soil: Soil):
+        import warp as wp
+
+        import newton
+
+        wp.init()
+        D, R = cfg.diameter, cfg.diameter / 2
+        dx = D / cfg.voxel_per_d
+        zc = R + 0.75 * D
+        zs = zc + R + cfg.cover * D
+        x_back, x_front, half_w = 0.75 * D, 2.5 * D, 1.5 * D
+        t = max(0.025 * D, dx)  # walls at least one voxel thick (Phase 0)
+
+        b = newton.ModelBuilder()
+        tube = b.add_body(xform=wp.transform_identity(), mass=1.0, is_kinematic=True)
+        side = b.add_body(xform=wp.transform_identity(), mass=1.0, is_kinematic=True)
+        n_seg, tube_len = 32, x_back + 0.1 * D
+        for k in range(n_seg):
+            th = 2 * math.pi * k / n_seg
+            c = wp.vec3(-tube_len / 2, (R + t / 2) * math.cos(th), zc + (R + t / 2) * math.sin(th))
+            q = wp.quat_from_axis_angle(wp.vec3(1.0, 0.0, 0.0), th - math.pi / 2)
+            b.add_shape_box(tube, xform=wp.transform(c, q), hx=tube_len / 2, hy=1.08 * R * math.tan(math.pi / n_seg), hz=t / 2)
+        w = 0.5 * D
+        add_walls(b, side, [((-x_back - w, half_w / 2, zs / 2), (w, half_w, zs)), ((x_front + w, half_w / 2, zs / 2), (w, half_w, zs)),
+                            ((0.5 * (x_front - x_back), -w, zs / 2), (x_front + x_back, w, zs)),  # symmetry plane y = 0
+                            ((0.5 * (x_front - x_back), half_w + w, zs / 2), (x_front + x_back, w, zs))])
+        b.add_ground_plane()
+        plate = b.add_body(xform=wp.transform(wp.vec3(-t / 2, 0.0, zc), wp.quat_identity()), mass=100.0, is_kinematic=True)
+        b.add_shape_cylinder(plate, xform=wp.transform(wp.vec3(0.0), wp.quat_from_axis_angle(wp.vec3(0.0, 1.0, 0.0), math.pi / 2)),
+                             radius=R - 0.25 * t, half_height=t / 2)
+        cm = b.finalize()
+
+        h = dx / cfg.ppc
+        rng = np.random.default_rng(cfg.seed)
+        gx, gy, gz = np.arange(-x_back + h / 2, x_front, h), np.arange(h / 2, half_w, h), np.arange(h / 2, zs, h)
+        X, Y, Z = np.meshgrid(gx, gy, gz, indexing="ij")
+        pts = np.stack([X.ravel(), Y.ravel(), Z.ravel()], axis=1)
+        pts += rng.uniform(-0.25 * h, 0.25 * h, pts.shape)
+        pts[:, 1] = np.abs(pts[:, 1])
+        r_axis = np.hypot(pts[:, 1], pts[:, 2] - zc)
+        pts = pts[~((pts[:, 0] < h / 2) & (r_axis < R + t + h / 2))].astype(np.float32)
+        pm = make_particles(pts, h, soil).finalize()
+        solver = make_solver(pm, cm, dx, cfg.iterations, {-1: 0.5, tube: cfg.steel_friction, side: 0.0, plate: cfg.steel_friction})
+        st = cm.state()
+        s = pm.state()
+        s.body_q, s.body_qd, s.body_f = wp.clone(st.body_q), wp.zeros_like(st.body_qd), wp.zeros_like(st.body_f)
+        body_index = solver.collider_body_index.numpy()
+
+        dt = 1.0 / cfg.fps
+        q = s.body_q.numpy()
+        qd = np.zeros((cm.body_count, 6), dtype=np.float32)
+        area = 0.5 * math.pi * (R - 0.25 * t) ** 2  # half model
+        gamma = soil.density * G
+
+        self.cfg, self.soil, self.D, self.R, self.zc, self.zs, self.t, self.h = cfg, soil, D, R, zc, zs, t, h
+        self.pts, self.solver, self.s, self.cm, self.plate, self.body_index = pts, solver, s, cm, plate, body_index
+        self.dt, self.q, self.qd, self.area, self.gamma = dt, q, qd, area, gamma
+        self.box = (np.array([-x_back, 0.0, 0.0]), np.array([x_front, half_w, zs]))
+
+    def servo_speed(self, log: list, target_kpa: float) -> float:
+        """Retract-only servo: the face gives way while the soil presses harder than the target, and stops otherwise.
+        Retract-only: pushing the plate back into the soil spikes the pressure and makes the loop oscillate."""
+        cfg = self.cfg
+        p_avg = float(np.mean([e[1] for e in log[-6:]])) if log else 0.0  # average over 0.1 s: the probe is noisy
+        vmax = cfg.servo_max_rate_over_d * self.D
+        return float(np.clip(cfg.servo_gain * self.D * (p_avg - target_kpa * 1e3) / (self.gamma * self.D) * cfg.fps, 0.0, vmax))
+
+    def step(self, v: float) -> tuple[float, float, float]:
+        """Move the plate back at v (m/s) for one frame and step the soil. Returns (plate retraction m, face pressure
+        Pa, step time s)."""
+        import warp as wp
+
+        s, q, qd, dt, plate = self.s, self.q, self.qd, self.dt, self.plate
+        q[plate, 0] -= v * dt
+        s.body_q.assign(q)
+        qd[plate, 0] = -v
+        s.body_qd.assign(qd)
+        wp.synchronize()
+        t0 = time.perf_counter()
+        self.solver.step(s, s, contacts=None, control=None, dt=dt)
+        wp.synchronize()
+        elapsed = time.perf_counter() - t0
+        fx = float(collider_forces(self.solver, s, self.body_index, dt).get(plate, np.zeros(3))[0])
+        delta = max(0.0, -(q[plate, 0] - (-self.t / 2)))
+        return delta, fx / self.area, elapsed
+
+
 def run(cfg: FaceSandConfig, soil: Soil) -> tuple[dict, dict]:
-    import warp as wp
-
-    import newton
-
-    wp.init()
-    D, R = cfg.diameter, cfg.diameter / 2
+    face = Face(cfg, soil)
+    D, R, zc, zs, h, pts, s, gamma = face.D, face.R, face.zc, face.zs, face.h, face.pts, face.s, face.gamma
     dx = D / cfg.voxel_per_d
-    zc = R + 0.75 * D
-    zs = zc + R + cfg.cover * D
-    x_back, x_front, half_w = 0.75 * D, 2.5 * D, 1.5 * D
-    t = max(0.025 * D, dx)  # walls at least one voxel thick (Phase 0)
-
-    b = newton.ModelBuilder()
-    tube = b.add_body(xform=wp.transform_identity(), mass=1.0, is_kinematic=True)
-    side = b.add_body(xform=wp.transform_identity(), mass=1.0, is_kinematic=True)
-    n_seg, tube_len = 32, x_back + 0.1 * D
-    for k in range(n_seg):
-        th = 2 * math.pi * k / n_seg
-        c = wp.vec3(-tube_len / 2, (R + t / 2) * math.cos(th), zc + (R + t / 2) * math.sin(th))
-        q = wp.quat_from_axis_angle(wp.vec3(1.0, 0.0, 0.0), th - math.pi / 2)
-        b.add_shape_box(tube, xform=wp.transform(c, q), hx=tube_len / 2, hy=1.08 * R * math.tan(math.pi / n_seg), hz=t / 2)
-    w = 0.5 * D
-    add_walls(b, side, [((-x_back - w, half_w / 2, zs / 2), (w, half_w, zs)), ((x_front + w, half_w / 2, zs / 2), (w, half_w, zs)),
-                        ((0.5 * (x_front - x_back), -w, zs / 2), (x_front + x_back, w, zs)),  # symmetry plane y = 0
-                        ((0.5 * (x_front - x_back), half_w + w, zs / 2), (x_front + x_back, w, zs))])
-    b.add_ground_plane()
-    plate = b.add_body(xform=wp.transform(wp.vec3(-t / 2, 0.0, zc), wp.quat_identity()), mass=100.0, is_kinematic=True)
-    b.add_shape_cylinder(plate, xform=wp.transform(wp.vec3(0.0), wp.quat_from_axis_angle(wp.vec3(0.0, 1.0, 0.0), math.pi / 2)),
-                         radius=R - 0.25 * t, half_height=t / 2)
-    cm = b.finalize()
-
-    h = dx / cfg.ppc
-    rng = np.random.default_rng(cfg.seed)
-    gx, gy, gz = np.arange(-x_back + h / 2, x_front, h), np.arange(h / 2, half_w, h), np.arange(h / 2, zs, h)
-    X, Y, Z = np.meshgrid(gx, gy, gz, indexing="ij")
-    pts = np.stack([X.ravel(), Y.ravel(), Z.ravel()], axis=1)
-    pts += rng.uniform(-0.25 * h, 0.25 * h, pts.shape)
-    pts[:, 1] = np.abs(pts[:, 1])
-    r_axis = np.hypot(pts[:, 1], pts[:, 2] - zc)
-    pts = pts[~((pts[:, 0] < h / 2) & (r_axis < R + t + h / 2))].astype(np.float32)
-    pm = make_particles(pts, h, soil).finalize()
-    solver = make_solver(pm, cm, dx, cfg.iterations, {-1: 0.5, tube: cfg.steel_friction, side: 0.0, plate: cfg.steel_friction})
-    st = cm.state()
-    s = pm.state()
-    s.body_q, s.body_qd, s.body_f = wp.clone(st.body_q), wp.zeros_like(st.body_qd), wp.zeros_like(st.body_f)
-    body_index = solver.collider_body_index.numpy()
-
-    dt = 1.0 / cfg.fps
-    q = s.body_q.numpy()
-    qd = np.zeros((cm.body_count, 6), dtype=np.float32)
-    area = 0.5 * math.pi * (R - 0.25 * t) ** 2  # half model
-    gamma = soil.density * G
     n_ctrl = int(round(cfg.duration * cfg.fps)) if cfg.control == "pressure" else int(round(cfg.retract_over_d / cfg.rate_over_d * cfg.fps))
 
-    log, times, x0, ref = [], [], 0.0, None
+    log, times, ref = [], [], None
     for f in range(cfg.settle + n_ctrl):
         if f == cfg.settle:
             ref = s.particle_q.numpy().copy()  # positions when control starts: the displacement field is measured from here
+        v = 0.0
         if f >= cfg.settle:
-            if cfg.control == "displacement":
-                v = cfg.rate_over_d * D
-            else:  # servo: the face gives way (retracts) while the soil presses harder than the target, and stops otherwise.
-                # Retract-only: pushing the plate back into the soil spikes the pressure and makes the loop oscillate.
-                p_avg = float(np.mean([e[1] for e in log[-6:]])) if log else 0.0  # average over 0.1 s: the probe is noisy
-                vmax = cfg.servo_max_rate_over_d * D
-                v = float(np.clip(cfg.servo_gain * D * (p_avg - cfg.target_kpa * 1e3) / (gamma * D) * cfg.fps, 0.0, vmax))
-            q[plate, 0] -= v * dt
-            s.body_q.assign(q)
-            qd[plate, 0] = -v
-            s.body_qd.assign(qd)
-        wp.synchronize()
-        t0 = time.perf_counter()
-        solver.step(s, s, contacts=None, control=None, dt=dt)
-        wp.synchronize()
-        times.append(time.perf_counter() - t0)
-        fx = float(collider_forces(solver, s, body_index, dt).get(plate, np.zeros(3))[0])
-        delta = max(0.0, -(q[plate, 0] - (-t / 2)))
-        log.append((delta, fx / area))
+            v = cfg.rate_over_d * D if cfg.control == "displacement" else face.servo_speed(log, cfg.target_kpa)
+        delta, p, elapsed = face.step(v)
+        times.append(elapsed)
+        log.append((delta, p))
 
     log = np.array(log)
     ctrl = log[cfg.settle:]

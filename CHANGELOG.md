@@ -6,6 +6,11 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ### Added
 
+- **Phase 2, WP6 (face only, local): live ground physics** (`server/tunnelsim_server/live.py`, `web/epb/ground.js`):
+  - a WebSocket server runs the WP2 dry-sand face on the GPU; the EPB demo opened with `?ground=ws://…` shows a "Ground physics" panel with the face section coloured by movement, a support-pressure control, and the measured (Idinger), MPM-bracket and analytical (Vermeer) values beside the calibration label;
+  - below the limit the face gives way and the chimney reaches the surface; raising the pressure stops it. About 0.2× real time on the shared GPU. The public demo is unchanged;
+  - `face_sand.py` now builds the scene once and steps it frame by frame (same numbers as before).
+
 - **Phase 2, WP4: EPB chamber under pressure, first runs, blocked** ([results](docs/validation/mpm-chamber.md)):
   - a chamber scene for the Crossrail EPB (7.08 m) with the paste's bulk modulus from the analytical chamber model, an analytical screw sink and a PI screw controller; the server now uses `models/py` directly;
   - open validation data: Bezuijen et al. (2005), Botlek Rail Tunnel, vertical gradients on the bulkhead high while excavating (10–20+ kPa/m) and lower at standstill;

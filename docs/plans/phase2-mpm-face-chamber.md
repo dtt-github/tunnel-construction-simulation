@@ -227,6 +227,15 @@ Discharge against rpm has no open measured data. It stays labelled "checked agai
 - An operator can drop the support pressure below the WP2 limit and see the face move. Raising it stops the movement.
 - The chamber gauges in both views agree within the WP4 tolerance.
 
+**Status (5 Nov 2026): face only, local** (`server/tunnelsim_server/live.py`, `web/epb/ground.js`; how to run in `server/README.md`).
+- **The server:** runs the WP2 dry-sand face, Idinger's prototype at C/D 1 and D/10, with the pressure servo. It streams a section through the axis (TSP0, about 19,000 of 103,000 particles) and the probes at 20 Hz.
+- **The panel:** the EPB demo shows a "Ground physics" panel when opened with `?ground=ws://…`. It carries its own support-pressure control, the calibration label, and the measured, MPM-bracket and analytical values side by side.
+- **Check 1, passed:** at 3 kPa (below the limit) the face gave way to 8 % of D, with the chimney rising to the surface. Back at 20 kPa it stopped (no movement in the next 20 s).
+- **Speed:** 0.2–0.25× real time on the shared GPU, shown in the panel.
+- **Not done:**
+  - coupling to the demo's own ground and chamber, and check 2 (chamber gauges), both of which wait on WP3/WP4;
+  - the recording fallback (WP7).
+
 ### WP7: recordings for the public site (about 1 week)
 
 - Short recorded runs, each with its calibration label and settings:
