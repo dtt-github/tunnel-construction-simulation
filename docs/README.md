@@ -25,6 +25,7 @@ Start with the [project README](../README.md) for the live demo and quick start.
 | [MODELS.md](MODELS.md) | One section per implemented model: what it computes, files, references, validation, known limits |
 | [validation/settlement.md](validation/settlement.md) | Settlement trough against measured Crossrail settlement (Hyde Park, Thames chalk); the demo defaults |
 | [validation/sem-convergence.md](validation/sem-convergence.md) | Ground-response chain against measured convergence in a weak-rock tunnel (Albania, CC BY 4.0), and against measured crown settlement in the Farringdon platform tunnels |
+| [validation/drill-blast-cycle.md](validation/drill-blast-cycle.md) | Drill & blast round cycle against logged Ulvin rounds, a T10.5 contractor estimate and Tunnelbyggetid |
 | [validation/hard-rock-projects.md](validation/hard-rock-projects.md) | Hard-rock TBM penetration and advance against Follo, Gotthard, Guadarrama, Brenner and Niagara |
 | [validation/epb-open-data.md](validation/epb-open-data.md) | EPB thrust and torque models against open field data (Changsha Metro Line 4, Guangzhou–Foshan), CC BY 4.0 |
 | [realism/drill-blast-heading.md](realism/drill-blast-heading.md) | Realism checklist for the drill & blast road tunnel demo |

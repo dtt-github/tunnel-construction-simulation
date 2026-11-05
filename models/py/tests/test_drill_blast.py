@@ -69,8 +69,13 @@ def test_cycle_against_nff():
     good = db.round_cycle(rd, 10.6, 2.9, "I")
     d_c_b = sum(h for a, h in good.steps if a in ("Drilling", "Charging", "Connect and blast"))
     assert 4.0 <= d_c_b <= 5.0  # NFF Publication 14: drill, charge and blast 4-5 h
-    assert 10 <= good.total_h <= 12.5  # about 12 h per round
-    assert 40 <= good.m_per_week <= 80  # 40-80 m per week per face (NFF Publication 23)
+    assert 11.5 <= good.total_h <= 13.5  # "approximately 12 h" per round (NFF Publication 14), downtime included
+    # NFF's ~12 h and ~50 m/week imply about 120 h/week; at the Tunnelbyggetid basis of 101 h the advance is lower
+    assert 40 <= db.round_cycle(rd, 10.6, 2.9, "I", hours_per_week=120).m_per_week <= 80  # 40-80 m/week (Publication 23)
+    assert db.HOURS_PER_WEEK == 101 and 35 <= good.m_per_week <= 45
+    down = dict(good.steps)["Downtime and waiting"]
+    assert down / good.total_h == pytest.approx(0.13)  # Ulvin: 2.46 of 19.02 h per round (Messelt 2013, Table 4)
+    assert 639.8 / db.RATES["muck_m3_per_h"] == pytest.approx(2.90, abs=0.02)  # Ulvin mucking 2.90 h for 639.8 m^3
     weeks = [db.round_cycle(rd, 10.6, 2.9, c).m_per_week for c in ("I", "II", "III", "IV")]
     assert weeks == sorted(weeks, reverse=True)
     assert db.overbreak_percent(86.0, 74.6) == pytest.approx(15.28, abs=0.01)

@@ -205,8 +205,10 @@ export const SPOT_BOLTS_PER_ROUND = 4;
 
 export const RATES = Object.freeze({
   drill_m_per_min: 2.0, move_min_per_hole: 0.5, reamer_min_per_hole: 8.0, booms: 3, charge_min_per_hole: 0.6, connect_blast_h: 0.5,
-  ventilation_h: 0.5, scaling_h: 1.0, muck_m3_per_h: 200.0, bolts_per_h: 12.0, shotcrete_m3_per_h: 6.0, rrs_h: 3.0, survey_h: 0.3,
+  ventilation_h: 1 / 3, scaling_h: 1.5, muck_m3_per_h: 220.0, bolts_per_h: 12.0, shotcrete_m3_per_h: 6.0, rrs_h: 3.0, survey_h: 0.3,
+  downtime_fraction: 0.13, // Ulvin logged rounds; see drill_blast.py
 });
+export const HOURS_PER_WEEK = 101; // Tunnelbyggetid production basis
 
 export function supportQuantities(width, wallHeight, pull, cls) {
   const c = SUPPORT_CLASSES[cls];
@@ -217,7 +219,7 @@ export function supportQuantities(width, wallHeight, pull, cls) {
   return { bolts: Math.ceil(bolts), shotcrete: (roofLen * c.roof_sc + wallLen * c.wall_sc) * pull, rrs: c.rrs };
 }
 
-export function roundCycle(rd, width, wallHeight, cls, { overbreak = 0.15, hoursPerWeek = 110, rates = {} } = {}) {
+export function roundCycle(rd, width, wallHeight, cls, { overbreak = 0.15, hoursPerWeek = HOURS_PER_WEEK, rates = {} } = {}) {
   const k = { ...RATES, ...rates };
   const drilled = rd.holes.filter((h) => h.kind !== "empty").length;
   const nEmpty = rd.holes.length - drilled;
@@ -236,6 +238,8 @@ export function roundCycle(rd, width, wallHeight, cls, { overbreak = 0.15, hours
     ["Bolting", sup.bolts / k.bolts_per_h],
     ["Sprayed concrete", (sup.shotcrete * (1 + overbreak)) / k.shotcrete_m3_per_h + (sup.rrs ? k.rrs_h : 0)],
   ];
+  const work = steps.reduce((a, [, h]) => a + h, 0);
+  steps.push(["Downtime and waiting", (work * k.downtime_fraction) / (1 - k.downtime_fraction)]);
   const total = steps.reduce((a, [, h]) => a + h, 0);
   return { steps, total_h: total, pull: rd.pull, m_per_week: (hoursPerWeek / total) * rd.pull, muck_m3: muck };
 }

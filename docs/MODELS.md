@@ -18,7 +18,7 @@ Every model exists twice: a Python reference in [`models/py/tunnelsim_models/`](
 | [SEM / NATM sprayed concrete lining](#sem--natm-sprayed-concrete-lining) | `sem.py` | `sem.js` | Checked against Brenner shotcrete data and Oreste's trends; Sulem parameters from one site |
 | [Ground scenarios](#ground-scenarios) | `scenario.py` | `scenario.js` | Interpolation, water systems and river unit-tested; two scenarios from open BGS boreholes ([format and sources](SCENARIOS.md)) |
 | [Segment lining](#segment-lining) | `lining.py` | `lining.js` | Reproduces ITA WG2 (2000) Design Example 1 and its jacking check |
-| [Drill & blast](#drill--blast) | `drill_blast.py` | `drill_blast.js` | Reproduces Yilmaz's worked example, SS 460 48 66 tables and NFF cycle figures; Norwegian pattern fitted to published hole counts |
+| [Drill & blast](#drill--blast) | `drill_blast.py` | `drill_blast.js` | Reproduces Yilmaz's worked example, SS 460 48 66 tables and NFF cycle figures; Norwegian pattern fitted to published hole counts; cycle checked against logged Ulvin rounds and a T10.5 contractor estimate |
 | [Utilisation and downtime](#utilisation-and-downtime) | `utilisation.py` | `utilisation.js` | Deterministic limits hand-checked; default EPB inside a 40-EPB survey; one-project distributions |
 
 Also: [machine class presets](#machine-class-presets) and [where default parameters come from](#default-parameter-sources).
@@ -389,7 +389,7 @@ What it computes:
 - Kuz-Ram mean fragment size, uniformity index and Rosin–Rammler passing;
 - peak particle velocity v = A (R/√Q)^B (Stockholm Northern Link fit) and the largest charge per delay for a vibration limit; SS 460 48 66 guide values with the distance factor per ground;
 - Norwegian road-tunnel support classes I–IV (bolt spacing, sprayed concrete, reinforced ribs) and the bolts and sprayed concrete per round;
-- the round cycle activity by activity and the advance per week.
+- the round cycle activity by activity, downtime as a share of the round, and the advance per week (101 h, the Tunnelbyggetid basis).
 
 **References:**
 
@@ -408,12 +408,12 @@ What it computes:
 - SS 460 48 66 guide values 51 / 43 / 26 mm/s at 20 / 30 / 100 m on rock;
 - the Northern Link fit: 14.2 kg per delay at 50 m for 20 mm/s;
 - a T10.5 round: 134 charged holes and 45 contour holes (published 126–158 and 45–50);
-- the cycle: drill, charge and blast 4–5 h, about 11 h per round and 40–80 m per week in class I (NFF).
+- the cycle: drill, charge and blast 4–5 h and about 12 h per round in class I (NFF); every T10.5 activity inside one contractor's P5–P95 estimate; mucking (220 m³/h) and downtime (13 %) as logged at Ulvin; 37–39 m/week in classes I–II at 101 h, against about 48 m/week for a Tunnelbyggetid model case ([validation](validation/drill-blast-cycle.md)).
 
 **Limits:**
 
 - the Norwegian pattern factors are fitted, not a design rule;
-- charging, positioning, reamer and RRS times are assumed; activities do not overlap;
+- charging, positioning, reamer and RRS times are assumed; activities do not overlap; weekly advance by support class is not published openly;
 - one vibration fit; Langefors' burden formula and the NTNU advance-rate model are not used (no open copy).
 
 ## Utilisation and downtime

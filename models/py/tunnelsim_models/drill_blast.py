@@ -339,9 +339,17 @@ SUPPORT_CLASSES = {
 }
 SPOT_BOLTS_PER_ROUND = 4  # assumed for spot bolting
 
-# Contract "equivalent time" standard capacities (NFF Publication 26, 2017, p. 45): scaling 1 h per hour, bolts up
-# to 5 m 12 per hour, sprayed concrete 6 m^3/h. Other rates from NFF Publication 14 (2004, section 7.5): drill rate up
-# to 3 m/min per drill (logged 1.8-2.0 m/min in Publication 28), ventilation about 0.5 h, mucking 190-220 m^3 solid/h.
+# Contract "equivalent time" standard capacities (NFF Publication 26, 2017, p. 45): bolts up to 5 m 12 per hour,
+# sprayed concrete 6 m^3/h (logged elsewhere: 4-12 bolts/h and 3-7 m^3/h from weekly records, Lau 2020, NTNU,
+# https://hdl.handle.net/11250/2779502; 8-13 m^3/h gross in time studies, Anderssen & Olsen 2022, NTNU,
+# https://hdl.handle.net/11250/3013947). Drill rate up to 3 m/min per drill (NFF Publication 14, 2004, section 7.5;
+# 1.8-2.0 m/min in a Publication 28 MWD log).
+# Checked against logged rounds at the Ulvin rail tunnel (120 m^2, 200 x 5.2 m holes, three booms, 105 h/week; Messelt
+# 2013, NMBU, Table 4, https://hdl.handle.net/11250/189202): mucking 220.6 m^3 solid/h, downtime 2.46 of 19.02 h per round
+# (13 %), ventilation off the critical path; and a contractor's estimate for T10.5 (Furunes & Strype 2022, NTNU, Table 4.3,
+# https://hdl.handle.net/11250/3020752): ventilation 20 min, scaling 90 min (60-180) median. 101 h/week is the production
+# basis of Tunnelbyggetid (EBA, Statens vegvesen, Bane NOR, NTNU, guidance v2.0, 2024). See
+# docs/validation/drill-blast-cycle.md.
 RATES = {
     "drill_m_per_min": 2.0,  # per boom, net
     "move_min_per_hole": 0.5,  # positioning and collaring per hole, assumed
@@ -349,14 +357,16 @@ RATES = {
     "booms": 3,
     "charge_min_per_hole": 0.6,  # emulsion, two charging lines together, assumed; fits the NFF 4-5 h drill-charge-blast
     "connect_blast_h": 0.5,  # tie-in, clear the tunnel, fire, assumed
-    "ventilation_h": 0.5,
-    "scaling_h": 1.0,
-    "muck_m3_per_h": 200.0,  # solid
+    "ventilation_h": 1 / 3,  # contractor median for T10.5 (Furunes & Strype); off the critical path at Ulvin
+    "scaling_h": 1.5,  # contractor median for T10.5, 60-180 min (Furunes & Strype); Ulvin 3.3 h at 120 m^2
+    "muck_m3_per_h": 220.0,  # solid, logged at Ulvin (Messelt 2013)
     "bolts_per_h": 12.0,
     "shotcrete_m3_per_h": 6.0,
     "rrs_h": 3.0,  # one RRS arch per round including the extra sprayed layer, assumed
     "survey_h": 0.3,  # marking the next round, assumed
+    "downtime_fraction": 0.13,  # of the round, logged at Ulvin: 2.46 of 19.02 h (breakdowns, waiting, hose bursts)
 }
+HOURS_PER_WEEK = 101.0  # production basis of Tunnelbyggetid (about 30 recent Norwegian projects); Ulvin 105 h
 
 
 def support_quantities(width: float, wall_height: float, pull: float, cls: str) -> dict:
@@ -383,11 +393,11 @@ class Cycle:
     muck_m3: float  # solid, including overbreak
 
 
-def round_cycle(rd: Round, width: float, wall_height: float, cls: str, overbreak: float = 0.15, hours_per_week: float = 110.0,
+def round_cycle(rd: Round, width: float, wall_height: float, cls: str, overbreak: float = 0.15, hours_per_week: float = HOURS_PER_WEEK,
                 rates: dict | None = None) -> Cycle:
-    """Time of one round, activity by activity, done one after another at the face, and the weekly advance for
-    `hours_per_week` of production (2 x 10 h, 5.5 days by default; E6 Nordnes example). `overbreak` is the area
-    fraction above the theoretical profile (smooth blasting 9-23 % median at Vastlanken)."""
+    """Time of one round, activity by activity, done one after another at the face, plus downtime as a share of the
+    round, and the weekly advance for `hours_per_week` of production. `overbreak` is the area fraction above the
+    theoretical profile (smooth blasting 9-23 % median at Vastlanken)."""
     k = {**RATES, **(rates or {})}
     drilled = [h for h in rd.holes if h.kind != "empty"]
     n_empty = len(rd.holes) - len(drilled)
@@ -408,5 +418,7 @@ def round_cycle(rd: Round, width: float, wall_height: float, cls: str, overbreak
         ("Bolting", sup["bolts"] / k["bolts_per_h"]),
         ("Sprayed concrete", sup["shotcrete"] * (1 + overbreak) / k["shotcrete_m3_per_h"] + (k["rrs_h"] if sup["rrs"] else 0)),
     ]
+    work = sum(h for _, h in steps)
+    steps.append(("Downtime and waiting", work * k["downtime_fraction"] / (1 - k["downtime_fraction"])))
     total = sum(h for _, h in steps)
     return Cycle(steps, total, rd.pull, hours_per_week / total * rd.pull, muck)

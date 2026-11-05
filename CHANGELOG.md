@@ -6,6 +6,12 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ### Added
 
+- **Drill & blast cycle checked against Norwegian data** ([validation](docs/validation/drill-blast-cycle.md)):
+  - logged rounds at the Ulvin rail tunnel (Messelt 2013): mucking 220 m³/h and downtime 13 % of the round are now in the model, which had no downtime;
+  - a contractor's T10.5 estimate (Furunes & Strype 2022): ventilation 20 min and scaling 1.5 h, replacing assumed 0.5 h and 1 h. Every activity of the demo's round is inside the estimate's P5–P95;
+  - 101 production hours a week (Tunnelbyggetid basis, was 110);
+  - class I is now 12.7 h per round and 39 m/week (was 10.9 h and 50 m/week), against NFF's "about 12 h" and a Tunnelbyggetid model case of about 48 m/week.
+
 - **Second bore** ([settlement](docs/validation/settlement.md)):
   - the twin-trough model takes the second bore's trough width away from the first bore as well as towards it;
   - Hyde Park (Wan et al. 2017): the second bore is 16.2 m away, read from the paper's vector figure, with 1.5–1.9× the first bore's volume loss, Ky 0.44 towards the first bore and 0.33 away;
