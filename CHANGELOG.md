@@ -6,6 +6,10 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ### Added
 
+- **Mixshield demo checked against the Thames Tunnel drive** ([validation](docs/validation/slurry-thames-advance.md)):
+  - ring build 32 min (Crossrail average), was 35 min; two 12 h shifts by default on the Thames route; the 80 mm/min advance limit now sourced (T&T 2014);
+  - the forecast panel shows drive H (Sophia and Mary, King et al. 2017) beside the model. The working day is 7–58 % fast (10.7–12.5 against 7.9–10.0 rings), the best week close (77–92 against 91–100); separation-plant stops are not modelled and no open source quantifies them.
+
 - **EPB demo checked against the Crossrail drives** ([validation](docs/validation/epb-crossrail-advance.md)):
   - the ring is now Crossrail's: 1.6 m, 7 segments + small key, 300 mm (King, Thomas & Stenning 2017). It was 1.2 m and 6 + key, taken from a Moscow metro source;
   - ring build 32 min, the Crossrail average (Tunnels & Tunnelling 2021), was 35 min; shield 12 m (Crossrail station-transits paper), was an assumed 9.5 m, which raises the shield-friction thrust;

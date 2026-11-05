@@ -33,7 +33,9 @@
     "IDDENG-2019": "https://nva.sikt.no/registration/0198e6b19388-e58a5658-5843-49c9-8b5e-13171b80cf86",
     "KING-2017": "https://learninglegacy.crossrail.co.uk/wp-content/uploads/2017/04/Machine-driven-tunnels-on-the-Elizabeth-line-London.pdf",
     "TNT-RING-BUILD": "https://www.tunnelsandtunnelling.com/?p=9006",
-    "CRL-TRANSITS": "https://learninglegacy.crossrail.co.uk/documents/tbm-station-transits/"
+    "CRL-TRANSITS": "https://learninglegacy.crossrail.co.uk/documents/tbm-station-transits/",
+    "TNT-C310": "https://tunnelsandtunnelling.com/?p=7323",
+    "CHENG-MIKULSKI-2014": "https://learninglegacy.crossrail.co.uk/documents/ground-settlement-behaviour-in-chalk-due-to-tbm-excavations/"
   },
   "presets": [
     {
@@ -229,10 +231,41 @@
           "verified": true
         },
         "ring_width": {
-          "value": null,
+          "value": 1.6,
           "unit": "m",
-          "source": null,
-          "verified": false
+          "source": "KING-2017",
+          "verified": true,
+          "note": "7 segments + small key, 300 mm, 6.2 m ID (Crossrail running tunnels)"
+        },
+        "ring_build_time": {
+          "value": 32,
+          "unit": "min",
+          "source": "TNT-RING-BUILD",
+          "verified": true,
+          "note": "Crossrail average"
+        },
+        "advance_speed_max": {
+          "value": 80,
+          "unit": "mm/min",
+          "source": "TNT-C310",
+          "verified": true,
+          "note": "Thames Tunnel Mixshields; 1,600 m3/h of slurry to treat at that rate"
+        },
+        "production_rings_per_day": {
+          "value": [
+            7.9,
+            10.0
+          ],
+          "unit": "rings/d",
+          "source": "KING-2017",
+          "verified": true,
+          "note": "drive H (Sophia, Mary) excluding delays, Table 3; 4.4-4.6 including delays; best day 16-17 rings, best week 91-100; 6-7 and 10 rings/d on Plumstead - Woolwich (CHENG-MIKULSKI-2014)"
+        },
+        "shift_pattern": {
+          "value": "2 x 12 h, 7 days",
+          "unit": null,
+          "source": "KING-2017",
+          "verified": true
         }
       }
     },
