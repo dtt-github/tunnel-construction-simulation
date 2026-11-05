@@ -48,7 +48,7 @@ if (SCN) {
       key: `b${i}`, from: i * BIN, to: (i + 1) * BIN,
       name: shares.map(([u, sh]) => `${SCN.units[u].name.replace(/ \(.*\)/, "")}${shares.length > 1 ? ` ${Math.round(sh * 100)} %` : ""}`).join(", "),
       gamma: f.gamma, phi: f.phi, c: f.c, k0: f.k0, Es: f.e_soil, z0: f.axis_depth, water: f.water_depth_equiv, u: f.u_axis,
-      k: shares.reduce((a, [u, sh]) => a + sh * (GRANULAR.has(u) ? 0.35 : 0.5), 0),
+      k: SCN.data.settlement?.k ?? shares.reduce((a, [u, sh]) => a + sh * (GRANULAR.has(u) ? 0.35 : 0.5), 0),
       unit: f.unit_at_axis, color: parseInt(SCN.units[f.unit_at_axis].color.slice(1), 16),
     });
   }
@@ -61,12 +61,20 @@ if (SCN) {
 }
 const zoneAt = (ch) => ZONES.find((z) => ch >= z.from && ch < z.to) ?? ZONES.at(-1);
 const Z0 = Math.round(zoneAt(0).z0); // axis depth for the scene and the surface view; the physics uses each zone's own
-const BUILDINGS = [
+// Buildings: the scenario's OS OpenMap Local footprints with LIDAR heights and listed status (OGL), or three
+// illustrative blocks. x spans the footprint across the line (offset, + to the right of the drive), cz is its middle
+// chainage; strain is checked across the full width at the centroid chainage.
+const BUILDINGS = SCN?.data.buildings
+  ? SCN.data.buildings.map((b) => ({
+    name: b.name ?? b.listed?.[0]?.[1]?.replace(/\b\w+/g, (w) => w[0] + w.slice(1).toLowerCase()) ?? `Building at ch ${Math.round(b.chainage)}`,
+    grade: b.listed?.[0]?.[0] ?? null, listed: b.listed ?? [], ch: b.chainage, cz: (b.ch_min + b.ch_max) / 2, xmin: b.off_min, xmax: b.off_max,
+    x: (b.off_min + b.off_max) / 2, w: Math.min(b.off_max - b.off_min, 150), d: Math.max(b.ch_max - b.ch_min, 3), h: b.height, hSource: b.height_source,
+  }))
+  : [
   { name: "Building A", x: -4, ch: 45, w: 14, d: 10, h: 12 },
   { name: "Building B", x: 13, ch: 95, w: 12, d: 16, h: 18 },
   { name: "Building C", x: -20, ch: 150, w: 16, d: 12, h: 9 },
-];
-
+].map((b) => ({ ...b, cz: b.ch, xmin: b.x - b.w / 2, xmax: b.x + b.w / 2, listed: [] }));
 const CH = makeChamber(Math.PI * R * R * M.chamberLength);
 const SCREW = makeScrew({ diameter: 0.9, shaftDiameter: 0.3, pitch: 0.7, length: 11, efficiency: 0.6, decayLength: 3 });
 const SCREW_ANGLE = (22 * Math.PI) / 180;
@@ -89,7 +97,7 @@ const VIEWS = {
   machine: { pos: [18, 5.5, -2], target: [0, -0.6, 6] },
   chamber: { pos: [7.0, 1.6, -3.2], target: [0, -0.4, 0.9] },
   tail: { pos: [10.5, 1.8, 2.5], target: [0, -0.8, 9.5] },
-  surface: { pos: [85, 72, -35], target: [0, Z0, 18] },
+  surface: { pos: [150, Z0 + 140, -150], target: [0, Z0, 30] },
 };
 let camAnim = null, currentView = "machine";
 // camera position for a view; on portrait screens the camera backs off so the machine still fits
@@ -510,13 +518,15 @@ function ramp(t) {
 }
 const CAT_COLORS = [0x57c38a, 0x9ccc65, 0xf2b43a, 0xff7a45, 0xd84343];
 for (const b of BUILDINGS) {
-  b.mesh = box(b.w, b.h, b.d, new THREE.MeshStandardMaterial({ color: CAT_COLORS[0], roughness: 0.8 }));
-  b.mesh.position.set(b.x, Z0 + b.h / 2, -b.ch);
+  b.mesh = box(b.w, b.h, b.d, new THREE.MeshStandardMaterial({ color: CAT_COLORS[0], roughness: 0.8, transparent: true, opacity: 0.55, depthWrite: false }));
+  b.mesh.position.set(b.x, Z0 + b.h / 2, -b.cz);
   world.add(b.mesh);
-  b.label = label(b.name, b.mesh, [0, b.h / 2 + 1.5, 0], true);
+  const notable = !SCN || b.grade === "I" || b.grade === "II*" || /station|hall|market|church|house/i.test(b.name);
+  b.label = notable ? label(b.name, b.mesh, [0, b.h / 2 + 1.5, 0], true) : null;
 }
-const tunnelLine = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.05, SURF.c1), new THREE.MeshBasicMaterial({ color: 0x5b8db8 }));
-tunnelLine.position.set(0, Z0 + 0.05, -SURF.c1 / 2);
+const LINE_LEN = SCN ? SCN.length : SURF.c1;
+const tunnelLine = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.05, LINE_LEN), new THREE.MeshBasicMaterial({ color: 0x5b8db8 }));
+tunnelLine.position.set(0, Z0 + 0.05, -LINE_LEN / 2);
 world.add(tunnelLine);
 const faceMarker = new THREE.Mesh(new THREE.ConeGeometry(0.8, 2.5, 4), new THREE.MeshBasicMaterial({ color: 0xf2b43a }));
 faceMarker.rotation.x = Math.PI;
@@ -529,6 +539,7 @@ const ids = ["adv", "rpm", "screwMode", "target", "screw", "fir", "fer", "vl", "
   "pause", "reset", "gauge", "chamber", "alarms", "cycle", "bars", "ground", "showLabels", "shift", "haulage", "interventions", "skip", "forecast", "lining", "section", "groundSel"];
 const ui = Object.fromEntries(ids.map((id) => [id, document.getElementById(id)]));
 const val = (id) => +ui[id].value;
+if (SCN?.data.settlement) { ui.vl.min = 0.1; ui.vl.value = SCN.data.settlement.volume_loss; }
 
 // ---------------------------------------------------------------- simulation
 let S;
@@ -782,6 +793,9 @@ function tunnelFraction(t, c, ch) {
 let surfaceMax = 0;
 function updateSurface() {
   const vl = val("vl"), c = S.chainage;
+  // the surface grid covers 260 m of chainage; it follows the face in 50 m steps
+  const surfOff = Math.max(Math.floor((c - 60) / 50) * 50, 0);
+  surface.position.z = -surfOff;
   const pos = surfGeo.attributes.position, col = surfGeo.attributes.color;
   let smax = 0;
   const settle = (x, ch) => {
@@ -789,7 +803,7 @@ function updateSurface() {
     return t.settlement(x) * tunnelFraction(t, c, ch);
   };
   for (let k = 0; k < pos.count; k++) {
-    const x = pos.getX(k), ch = -pos.getZ(k);
+    const x = pos.getX(k), ch = -pos.getZ(k) + surfOff;
     const s = settle(x, ch);
     smax = Math.max(smax, s);
     pos.setY(k, -s * 150); // vertical exaggeration x150 so the trough is visible
@@ -801,19 +815,20 @@ function updateSurface() {
   surfaceMax = smax;
   for (const b of BUILDINGS) {
     // greenfield horizontal strain under the footprint at the building's chainage: u = -(x/z0) S, eps = du/dx
-    let emax = 0;
-    for (let x = b.x - b.w / 2; x <= b.x + b.w / 2; x += 0.25) {
+    let emax = 0, smaxB = 0;
+    for (let x = b.xmin, dx = Math.max((b.xmax - b.xmin) / 200, 0.25); x <= b.xmax; x += dx) {
       const e = -(settle(x + 0.05, b.ch) * (x + 0.05) - settle(x - 0.05, b.ch) * (x - 0.05)) / (zoneAt(b.ch).z0 * 0.1);
       emax = Math.max(emax, e);
+      smaxB = Math.max(smaxB, settle(x, b.ch));
     }
     b.strain = emax * 100;
-    b.settle = settle(b.x, b.ch);
+    b.settle = smaxB; // largest settlement under the footprint
     const [cat, name] = burlandCategory(b.strain);
     b.cat = cat;
     b.catName = name;
     b.mesh.material.color.setHex(CAT_COLORS[cat]);
     b.mesh.position.y = Z0 + b.h / 2 - b.settle * 150;
-    b.label.el.textContent = `${b.name}: cat. ${cat} ${name}`;
+    if (b.label) b.label.el.textContent = `${b.name}: cat. ${cat} ${name}`;
   }
 }
 
@@ -931,7 +946,7 @@ function hud() {
   if (val("fir") === 0) alarms.push("No foam: unconditioned soil makes the chamber stiff and pressure hard to control");
   if (S.screwRpm >= 21.9) alarms.push("Screw at maximum speed");
   if (S.mode === "INTERVENTION") alarms.push("Cutting-tool intervention: drive stopped, chamber held under compressed air");
-  for (const b of BUILDINGS) if (b.cat >= 2) alarms.push(`${b.name}: Burland category ${b.cat} (${b.catName})`);
+  for (const b of BUILDINGS.filter((x) => x.cat >= 2).sort((p, q) => q.cat - p.cat || q.strain - p.strain).slice(0, 3)) alarms.push(`${b.name}: Burland category ${b.cat} (${b.catName})`);
   const lin = liningRows(zoneAt(S.chainage));
   dl(ui.lining, lin.rows);
   alarms.push(...lin.alarms);
@@ -992,7 +1007,10 @@ function hud() {
     ["Pore pressure at axis", `${fmt(fs.u_axis / 100, 2)} bar`],
     ["Final Smax (this zone)", `${fmt(t.s_max * 1000, 1)} mm`],
     ["Surface settlement now", `${fmt(surfaceMax * 1000, 1)} mm max`],
-    ...BUILDINGS.map((b) => [b.name, `${fmt((b.settle ?? 0) * 1000, 1)} mm, ε ${fmt(b.strain ?? 0, 3)} %, cat. ${b.cat ?? 0}`]),
+    ...(SCN?.data.settlement ? [["Volume loss, trough width (default)", `${SCN.data.settlement.volume_loss} %, K ${SCN.data.settlement.k} (measured on Crossrail${SCN.data.settlement.measured_smax_mm ? `; Smax ${SCN.data.settlement.measured_smax_mm.join("–")} mm measured` : ", Hyde Park"})`]] : []),
+    ["Buildings within 60 m", `${BUILDINGS.length}${SCN ? `, ${BUILDINGS.filter((b) => b.listed.length).length} listed` : ""}; category 2 or worse: ${BUILDINGS.filter((b) => b.cat >= 2).length}`],
+    ...BUILDINGS.filter((b) => Math.abs(b.ch - S.chainage) < 150).sort((p, q) => (q.cat ?? 0) - (p.cat ?? 0) || (q.settle ?? 0) - (p.settle ?? 0)).slice(0, 6)
+      .map((b) => [`${b.name}${b.grade ? ` (Grade ${b.grade})` : ""}`, `ch ${fmt(b.ch, 0)} m, ${fmt(b.h, 0)} m high: ${fmt((b.settle ?? 0) * 1000, 1)} mm, ε ${fmt(b.strain ?? 0, 3)} %, cat. ${b.cat ?? 0}`]),
     ["Surface heights", "exaggerated ×150"],
   ]);
   placeFace();
