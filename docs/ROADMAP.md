@@ -167,6 +167,7 @@ Demo: [web/slurry/](../web/slurry/) ([live](https://dtt-github.github.io/tunnel-
 Demo: [web/sem/](../web/sem/) ([live](https://dtt-github.github.io/tunnel-construction-simulation/web/sem/)). Realism checklist: [realism/sem-heading.md](realism/sem-heading.md).
 
 - [x] Heading, bench and invert sequence, lattice girders, mesh and spiles, sprayed shotcrete, temporary invert, optical targets, convergence monitoring
+- [x] Real ground: the Farringdon platform tunnels on the London scenario, undrained (Tresca) ground response with Crossrail's design lines, prediction checked against measured crown settlement ([validation](validation/sem-convergence.md#farringdon-platform-tunnels-undrained-ground-london-clays))
 - [ ] Membrane and cast-in-place inner lining with a formwork traveller, cast once convergence is below 1 mm/month
 
 ### Slice E: drill & blast
@@ -179,7 +180,7 @@ Demo: [web/drill-blast/](../web/drill-blast/) ([live](https://dtt-github.github.
 
 ### Cross-cutting client work
 
-- [~] Ground scenario files (JSON, [format](SCENARIOS.md)) with a loader in Python and JS; real alignments from open BGS boreholes: Farringdon – Liverpool Street (EPB demo) and the Thames crossing Plumstead – North Woolwich (Mixshield demo). Open: a geology editor, scenarios for the other methods, a method picker restricted by the DAUB and FHWA pairing
+- [~] Ground scenario files (JSON, [format](SCENARIOS.md)) with a loader in Python and JS; real alignments from open BGS boreholes: Farringdon – Liverpool Street (EPB demo) and the Thames crossing Plumstead – North Woolwich (Mixshield demo). The SEM demo runs on the London scenario at the Farringdon platform tunnels. Open: a geology editor, scenarios for drill & blast and the hard-rock TBMs, a method picker restricted by the DAUB and FHWA pairing
 - [ ] Logistics: muck removal capacity (belt or trains), segment and grout supply, ventilation
 - [ ] Guidance loop:
   - total station and active target;

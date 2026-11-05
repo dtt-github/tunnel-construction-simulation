@@ -29,7 +29,8 @@ export function groundReaction(p0, pi, r0, e, nu, phiDeg, c) {
   const pCr = (2 * p0 - scm) / (1 + k);
   let u, rp;
   if (pi >= pCr) { u = (r0 * (1 + nu) * (p0 - pi)) / e; rp = r0; } else {
-    rp = r0 * ((2 * (p0 * (k - 1) + scm)) / ((1 + k) * ((k - 1) * pi + scm))) ** (1 / (k - 1));
+    rp = k - 1 < 1e-9 ? r0 * Math.exp((p0 - c - pi) / (2 * c)) // phi = 0 (undrained, Tresca): the Duncan Fama limit
+      : r0 * ((2 * (p0 * (k - 1) + scm)) / ((1 + k) * ((k - 1) * pi + scm))) ** (1 / (k - 1));
     u = ((r0 * (1 + nu)) / e) * (2 * (1 - nu) * (p0 - pCr) * (rp / r0) ** 2 - (1 - 2 * nu) * (p0 - pi));
   }
   return { u, r_p: rp, p_cr: Math.max(pCr, 0), strain_percent: (100 * u) / r0 };

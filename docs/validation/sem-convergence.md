@@ -63,3 +63,68 @@ They are Tables 5 and 9 of Terron-Almenara & Panthi (2025), *Rock Mechanics and 
 - **Still open for the SEM demo:**
   - convergence time series from a site in comparable rock, to test the Sulem law;
   - a measured share of support mobilisation, for example from lining strain gauges, to test the lining interaction.
+
+## Farringdon platform tunnels: undrained ground, London clays
+
+- **Script:** [`models/py/validation/sem_farringdon.py`](../../models/py/validation/sem_farringdon.py). It prints the table below.
+- **Demo:** the [SEM demo](../realism/sem-heading.md) runs on this ground by default.
+
+### Data
+
+The Crossrail platform tunnels at Farringdon are sprayed-concrete enlargements of a 6.2 m TBM pilot tunnel. The finished section is about 11.4 m wide by 10.6 m high, with a 400 mm steel-fibre primary lining. The axis is about 30 m below street level, mostly in the Lambeth Group, with London Clay above. Sources are the Crossrail Learning Legacy papers; their numbers are quoted here, not redistributed.
+
+- **Measured crown settlement, platform tunnels PTW and PTE:**
+  - 10.3–18.9 mm overall;
+  - mean 13.5 / 13.7 mm outside the compensation-grouting zone, 15.9 / 16.4 mm inside it.
+  - Source: Gakis, Grau & Schwind (2016), [Tunnel deformations caused by compensation grouting at Crossrail Farringdon Station](https://learninglegacy.crossrail.co.uk/documents/tunnel-deformations-caused-compensation-grouting-crossrail-farringdon-station/), Table 1.
+- **Undrained design lines** (z is the depth below the top of the London Clay):
+  - London Clay: cu = 85 + 6.5z kPa, E = 40 + 3.7z MPa;
+  - Lambeth Group: cu = 95 + 10z kPa, E = 36 + 5.9z MPa;
+  - ν 0.495.
+  - K0 0.6 gave realistic deformations; K0 1.2 governed lining stress.
+  - Source: [Temporary sprayed concrete lining tunnels in Farringdon Crossrail Station](https://learninglegacy.crossrail.co.uk/documents/temporary-sprayed-concrete-lining-tunnels-farringdon-crossrail-station/), Table 1.
+- **Ring closure:** 3–5 days after a monitoring section was installed, at 1.5–2 m/day (Gakis et al. 2016), so about 5–10 m behind the face.
+- **Advance:** the platform enlargements advanced at 1.1 m/day ([delivering value](https://learninglegacy.crossrail.co.uk/documents/crossrail-farringdon-station-scl-tunnels-delivering-value-through-innovation-and-best-practice/), section 4.6).
+- **Ground along the line:** depth, unit at the axis and pore pressure come from the [Farringdon – Liverpool Street scenario](../SCENARIOS.md), at scenario chainage 360–660 m.
+
+### Set-up
+
+- The section is an 11 m circle.
+- The ground is undrained Tresca (φ = 0, c = cu). The ground reaction is the φ → 0 limit of Duncan Fama: p_cr = p0 − cu and R_p = a·exp((p0 − cu − p_i) / 2cu).
+- p0 is the mean of the total vertical and total horizontal stress at the axis.
+- The ring is taken to carry load only once it is closed. The open top-heading arch before that counts as no support.
+- The compared quantity is the crown movement after the first survey, one 1 m round behind the face. Lining: 400 mm, Kielder shotcrete ageing, 1.1 m/day.
+
+### Results
+
+Predicted crown settlement after the first survey (mm):
+
+| Scenario chainage | Clay at the axis | z below LC top (m) | cu (kPa) | E (MPa) | K0 | Ring closed 1 m back | 5 m back | 7.5 m back | 10 m back |
+|---|---|---|---|---|---|---|---|---|---|
+| 360 | LG | 23.5 | 330 | 175 | 0.6 | 0.4 | 5.3 | 6.8 | 7.8 |
+| 360 | LG | 23.5 | 330 | 175 | 1.2 | 0.0 | 6.4 | 9.5 | 11.8 |
+| 480 | LG | 26.8 | 363 | 194 | 0.6 | 0.6 | 5.0 | 6.4 | 7.3 |
+| 480 | LG | 26.8 | 363 | 194 | 1.2 | 0.0 | 6.2 | 8.8 | 10.7 |
+| 600 | LG | 28.2 | 377 | 203 | 0.6 | 0.6 | 5.0 | 6.3 | 7.2 |
+| 600 | LG | 28.2 | 377 | 203 | 1.2 | 0.0 | 6.1 | 8.7 | 10.5 |
+| 660 | LC | 28.4 | 270 | 145 | 0.6 | 0.0 | 6.3 | 9.8 | 12.3 |
+| 660 | LC | 28.4 | 270 | 145 | 1.2 | 0.0 | 7.1 | 12.8 | 17.2 |
+
+The script prints every 60 m; the rows at 420 and 540 m lie between their neighbours.
+
+**What this shows:**
+
+- **Ring support at the face:** if the ring carried load from the face, the model would predict almost no crown settlement (under 1 mm). The measured 10–19 mm rules that out. Ring closure is what lets most of the movement happen.
+- **Ring closed 5–10 m back:** the model gives 5–8 mm at K0 0.6 and 6–12 mm at K0 1.2 in the Lambeth Group, against a measured mean of about 13.6 mm. That is the right order, but low by about 1.3–2.7×.
+- **What is missing:**
+  - the open top heading settles as an arch, under gravity, before closure, which a plane-strain ring cannot represent;
+  - consolidation and creep continue for weeks after the face has passed;
+  - the ground was already disturbed by the pilot tunnel;
+  - the measurements include some effect of compensation grouting nearby.
+- **Not a tight test:** these are design lines and published averages, not a section-by-section back-analysis.
+
+### Consequences for the demo
+
+- The SEM demo uses K0 0.6 for the deformation prediction and K0 1.2 for the lining load, as Crossrail's design did. The ring is closed 7.5 m back, the middle of the published range.
+- The demo shows the measured 10.3–18.9 mm beside the prediction.
+- In the Model limits panel it says the prediction is about half of what was measured, and why.

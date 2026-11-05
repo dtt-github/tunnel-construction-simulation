@@ -28,12 +28,18 @@
 
 <aside id="console">
   <header>
-    <h1>SEM / NATM heading in weak rock · 10 m</h1>
+    <h1 id="title">SEM / NATM heading in weak rock · 10 m</h1>
     <span id="fidelity" title="Which physics drives the numbers">Analytical (browser)</span>
   </header>
 
   <section>
     <h2>Operator</h2>
+    <label>Ground
+      <select id="groundSel">
+        <option value="farringdon">Farringdon platform tunnel (London Clay, Lambeth Group)</option>
+        <option value="rock">Illustrative weak rock with a fault zone</option>
+      </select>
+    </label>
     <label>Start at
       <select id="start">
         <option value="0">Chainage 0 m: siltstone, moderately jointed</option>
@@ -47,7 +53,7 @@
         <option value="oreste_example">Oreste example (E 12 GPa, 27 MPa; faster stiffening)</option>
       </select>
     </label>
-    <label class="chk2"><input type="checkbox" id="closure" checked> Close the ring within one diameter in the fault zone (FHWA)</label>
+    <label class="chk2"><input type="checkbox" id="closure" checked> <span id="closureText">Close the ring within one diameter in the fault zone (FHWA)</span></label>
     <label>Time scale <output id="tsOut"></output><input id="ts" type="range" min="60" max="7200" step="60" value="1800"></label>
     <div class="buttons"><button id="pause">Pause</button><button id="reset">Reset</button></div>
   </section>
@@ -74,7 +80,7 @@
 
   <section>
     <h2>Model limits</h2>
-    <ul class="limits">
+    <ul class="limits" id="limits">
       <li>Geology is illustrative (siltstone and a crushed fault zone under 100 m of cover). The horseshoe section is treated as a circle of radius 5 m for the ground response.</li>
       <li>Lining load from Oreste's (2003) method for a closed ring: in the siltstone, where the ring is not closed early, the load and safety factor are those of a closed ring.</li>
       <li>Convergence readings use the time law of Sulem et al. (1987) with parameters fitted at one claystone site, scaled to the predicted closure, with ±20 % scatter between sections (illustrative).</li>
@@ -82,7 +88,7 @@
     </ul>
   </section>
 
-  <footer>
+  <footer id="credits">
     Models: Hoek–Brown and ground reaction curve (Hoek), shotcrete ageing and lining interaction (Oreste 2003), sequence by ground class (FHWA 2009), convergence law (Sulem et al. 1987), trigger levels (Crossrail). Method card in the <a href="https://github.com/dtt-github/tunnel-construction-simulation/blob/main/docs/research/methods-reference.md">methods reference</a>.
   </footer>
 </aside>

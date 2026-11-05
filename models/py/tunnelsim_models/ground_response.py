@@ -84,7 +84,8 @@ def mc_strength(phi_deg: float, c: float) -> tuple[float, float]:
 
 
 def ground_reaction(p0: float, pi: float, r0: float, e: float, nu: float, phi_deg: float, c: float) -> GroundReaction:
-    """Duncan Fama (1993) wall displacement at support pressure pi (Hoek, Tunnels in weak rock, eqs 1-7)."""
+    """Duncan Fama (1993) wall displacement at support pressure pi (Hoek, Tunnels in weak rock, eqs 1-7). With phi = 0
+    (undrained clay, Tresca) the plastic radius is the limit R_p = r0 exp((p0 - c - pi) / 2c)."""
     if not 0 <= pi <= p0:
         raise ValueError("support pressure must be between 0 and p0")
     scm, k = mc_strength(phi_deg, c)
@@ -92,7 +93,10 @@ def ground_reaction(p0: float, pi: float, r0: float, e: float, nu: float, phi_de
     if pi >= p_cr:
         u, rp = r0 * (1 + nu) * (p0 - pi) / e, r0
     else:
-        rp = r0 * (2 * (p0 * (k - 1) + scm) / ((1 + k) * ((k - 1) * pi + scm))) ** (1 / (k - 1))
+        if k - 1 < 1e-9:  # phi = 0 (undrained, Tresca): the limit of Duncan Fama, p_cr = p0 - c
+            rp = r0 * math.exp((p0 - c - pi) / (2 * c))
+        else:
+            rp = r0 * (2 * (p0 * (k - 1) + scm) / ((1 + k) * ((k - 1) * pi + scm))) ** (1 / (k - 1))
         u = r0 * (1 + nu) / e * (2 * (1 - nu) * (p0 - p_cr) * (rp / r0) ** 2 - (1 - 2 * nu) * (p0 - pi))
     return GroundReaction(u=u, r_p=rp, p_cr=max(p_cr, 0.0), strain_percent=100 * u / r0)
 

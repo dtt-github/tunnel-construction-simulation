@@ -249,7 +249,7 @@ Cutter wear and changes, rock support by class, and utilisation as downtime per 
 Convergence–confinement around a circular tunnel, squeezing classes, and two machine checks for hard-rock TBMs.
 
 - **Rock mass:** equivalent Mohr–Coulomb φ′ and c′ from Hoek–Brown, for the stress range of a deep tunnel (σ′3max). Source: Hoek, Carranza-Torres & Corkum 2002, eqs 12–18.
-- **Ground reaction curve:** closure and plastic radius against support pressure, for an elastic–perfectly plastic Mohr–Coulomb rock mass (Duncan Fama 1993, as given in Hoek, *Practical Rock Engineering*, "Tunnels in weak rock", eqs 1–7). Includes the inverse, the pressure needed to hold a given closure.
+- **Ground reaction curve:** closure and plastic radius against support pressure, for an elastic–perfectly plastic Mohr–Coulomb rock mass (Duncan Fama 1993, as given in Hoek, *Practical Rock Engineering*, "Tunnels in weak rock", eqs 1–7). Includes the inverse, the pressure needed to hold a given closure. For undrained clay (φ = 0) it uses the Tresca limit of the same solution: p_cr = p0 − c and R_p = r0·exp((p0 − c − p_i)/2c).
 - **Longitudinal displacement profile:** closure ahead of and behind the face (Vlachopoulos & Diederichs 2009, [doi:10.1007/s00603-009-0176-4](https://doi.org/10.1007/s00603-009-0176-4)).
 - **Squeezing:** strain and classes A–E (Hoek & Marinos 2000).
 - **Support curves and equilibrium:**
@@ -265,9 +265,12 @@ Convergence–confinement around a circular tunnel, squeezing classes, and two m
 - the Hoek & Marinos example: 1.33 %, class B;
 - the equivalent Mohr–Coulomb parameters, checked by hand;
 - the LDP limits and the continuity of the ground reaction curve at p_cr.
+- the Tresca branch against the general formula at φ = 10⁻⁴ (p_cr = p0 − c, R_p = r0·e^((p0 − c)/2c) for p_i = 0).
 - Shield friction against Ramoni & Anagnostou's worked example (D 10 m, σ0 10 MPa): normalised thrust 0.23 / 0.04 / 0 against 0.26 / 0.08 / 0 for overcuts of 5 / 10 / 15 cm.
 
 **Against field data** ([validation](validation/sem-convergence.md)): 14 monitored sections of a headrace tunnel in weak flysch, Albania (Terron-Almenara & Panthi 2025, CC BY 4.0).
+
+- **Farringdon platform tunnels** ([validation](validation/sem-convergence.md#farringdon-platform-tunnels-undrained-ground-london-clays)): with Crossrail's undrained design lines and the ring closed 5–10 m behind the face, the predicted crown settlement is 5–12 mm, against 10.3–18.9 mm measured (mean about 13.6 mm). That is the right order, but low by about 1.3–2.7×.
 
 - Unsupported, the chain gives a median 1.77× the measured convergence after the station.
 - Every reading is reproduced with 1–51 % of the installed support capacity (median 11–19 %).

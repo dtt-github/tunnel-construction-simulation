@@ -24,7 +24,7 @@ Start with the [project README](../README.md) for the live demo and quick start.
 | [ROADMAP.md](ROADMAP.md) | Realism rules for every demo; Phase 0 to 5; the method-by-method slices of Phase 1 |
 | [MODELS.md](MODELS.md) | One section per implemented model: what it computes, files, references, validation, known limits |
 | [validation/settlement.md](validation/settlement.md) | Settlement trough against measured Crossrail settlement (Hyde Park, Thames chalk); the demo defaults |
-| [validation/sem-convergence.md](validation/sem-convergence.md) | Ground-response chain against measured convergence in a weak-rock tunnel (Albania, CC BY 4.0) |
+| [validation/sem-convergence.md](validation/sem-convergence.md) | Ground-response chain against measured convergence in a weak-rock tunnel (Albania, CC BY 4.0), and against measured crown settlement in the Farringdon platform tunnels |
 | [validation/epb-open-data.md](validation/epb-open-data.md) | EPB thrust and torque models against open field data (Changsha Metro Line 4, Guangzhou–Foshan), CC BY 4.0 |
 | [realism/drill-blast-heading.md](realism/drill-blast-heading.md) | Realism checklist for the drill & blast road tunnel demo |
 | [realism/slurry-mixshield.md](realism/slurry-mixshield.md) | Realism checklist for the urban slurry shield (Mixshield) demo |

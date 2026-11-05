@@ -86,3 +86,12 @@ def test_shield_friction_against_ramoni_anagnostou():
 def test_gripper_pressure():
     # gripper force 2.0-3.5 x installed thrust (VSS 1341); 27.5 MN on 16.6 m^2 of shoes at factor 2 -> 3.3 MPa
     assert gripper_pressure(27.5, 16.6) == pytest.approx(3.31, abs=0.01)
+
+
+def test_undrained_tresca_limit():
+    # phi = 0 matches the general solution at a very small friction angle, and the Tresca plastic radius
+    a = ground_reaction(0.6, 0.0, 5.5, 180.0, 0.495, 0.0, 0.3)
+    b = ground_reaction(0.6, 0.0, 5.5, 180.0, 0.495, 1e-4, 0.3)
+    assert a.u == pytest.approx(b.u, rel=1e-3) and a.r_p == pytest.approx(b.r_p, rel=1e-3)
+    assert a.p_cr == pytest.approx(0.3)
+    assert a.r_p == pytest.approx(5.5 * math.exp((0.6 - 0.3) / 0.6))
