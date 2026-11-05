@@ -76,6 +76,11 @@ Each package ends with a check. A package is done only when its check passes, or
 
 **Check:** the Phase 0 face run is reproduced within 2 % on an idle GPU, and its golden test passes.
 
+**Status (5 Nov 2026):**
+- `server/` package with run records, the GPU-load check and the ported face scene.
+- **Reproduction:** D/10 gives 1.629 kPa limit and 8.216 kPa settled (0.529 of Vermeer). D/20 gives 0.785. Identical to Phase 0 and between repeated runs. The golden test passes.
+- **Still open:** the GPU windows have not yet been agreed with the sister project, so no timing has been taken on an idle, reserved GPU.
+
 ### WP1: material model and element tests (about 2 weeks)
 
 - Map φ′, c′ (or cu), E, ν, ψ and γ to Newton's `friction`, `yield_stress`, `yield_pressure`, `tensile_yield_ratio`, `dilatancy`, `young_modulus`, `poisson_ratio` and `hardening`. The mapping, with its derivation, goes in `materials.py` and `docs/MODELS.md`.

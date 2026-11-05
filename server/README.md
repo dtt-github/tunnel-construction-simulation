@@ -1,16 +1,54 @@
-# Server (Phase 2)
+# Server (Phase 2): GPU ground physics
 
-Python simulation server for the NVIDIA DGX Spark: NVIDIA Newton 1.7 / Warp 1.19 on CUDA 13.
+Newton implicit MPM scenes for the tunnel face, the EPB chamber and the screw conveyor, run on the NVIDIA DGX Spark (Newton 1.7.0 / Warp 1.19.0 on CUDA 13). The plan, its calibration targets and checks are in [docs/plans/phase2-mpm-face-chamber.md](../docs/plans/phase2-mpm-face-chamber.md).
 
-Planned:
+Every result is **uncalibrated** until it passes the checks named in the plan. The label travels with the result.
 
-- **Face, EPB chamber, screw conveyor, muck:** `SolverImplicitMPM`.
-- **Machine:** `SolverMuJoCo` / Kamino, coupled to the soil.
-- **Transport:** binary WebSocket stream to `web/` at 20–30 Hz.
-- **Cross-checks:** `models/py` is used for the analytical comparisons.
-
-The environment follows the sister project ([construction-site-simulation](https://github.com/dtt-github/construction-site-simulation), `phase0/RESULTS.md`):
+## Set up and run
 
 ```bash
-uv venv .venv-newton && uv pip install -p .venv-newton "newton[examples]" websockets
+cd server
+UV_PROJECT_ENVIRONMENT=.venv-server uv sync
+UV_PROJECT_ENVIRONMENT=.venv-server uv run pytest -q
+.venv-server/bin/python -m tunnelsim_server.runner face --voxel 0.2 --name face_v0.2
 ```
+
+Results go to `results/<name>.json`, with a run record:
+- the git commit and the Newton, Warp and NumPy versions;
+- the parameters, seed and resolution;
+- the GPU load before the run;
+- whether the timing counts for decisions;
+- the calibration status.
+
+## Layout
+
+| Path | What it holds | Work package |
+|---|---|---|
+| `tunnelsim_server/scenes/face.py` | Tunnel face in dry sand under a retracting plate, ported unchanged from `phase0/face_bench.py` | WP0; WP2 adds pressure control |
+| `tunnelsim_server/materials.py` | Soil parameters and their mapping to Newton's material | WP0 (friction only); WP1 adds the elastoplastic mapping |
+| `tunnelsim_server/probes.py` | Forces on collider bodies from the contact impulses | WP0 |
+| `tunnelsim_server/runrecord.py` | Run records and the GPU load and reservation check | WP0 |
+| `tunnelsim_server/runner.py` | Batch runs to JSON | WP0 |
+| `tests/test_golden_face.py` | Golden test: the Phase 0 face numbers must not drift | WP0 |
+| `gpu_reservations.json` | GPU windows reserved for this project on the shared Spark (local time) | WP0 |
+
+Still to come: `scenes/chamber.py` and `scenes/screw.py` (WP4, WP5) and `live.py` (WP6, local only).
+
+## GPU time
+
+The Spark is shared with the sister project ([construction-site-simulation](https://github.com/dtt-github/construction-site-simulation)).
+- A run's timing counts for decisions only inside a window in `gpu_reservations.json` and with no other process on the GPU.
+- Every other timing is recorded as a lower bound.
+- Physics results do not depend on GPU load: the golden runs give identical numbers on a busy and on an idle GPU.
+
+## Golden test
+
+`tests/test_golden_face.py` pins the Phase 0 face run (D 2 m, C/D 1, voxel D/10, tan φ 0.75):
+- 208,068 particles;
+- settled pressure 8.216 kPa;
+- limit 1.629 kPa, 0.529 of Vermeer;
+- tolerance ±2 %.
+
+The D/20 run also reproduces Phase 0: 0.785 of Vermeer.
+
+If a Newton or Warp upgrade breaks the test, recalibrate on purpose and re-pin with a note. Don't just edit the numbers. The test is skipped where there is no CUDA GPU, as in CI.

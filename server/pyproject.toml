@@ -1,0 +1,23 @@
+[project]
+name = "tunnelsim-server"
+version = "0.1.0"
+description = "GPU ground physics (Newton implicit MPM) for the tunnel construction simulator: face, chamber and screw"
+requires-python = ">=3.12,<3.13"
+license = "Apache-2.0"
+# Pinned: Newton 1.7 changed MPM material scaling once; the golden tests catch the next change.
+dependencies = [
+    "newton[examples]==1.7.0",
+    "warp-lang==1.19.0",
+    "numpy",
+    "websockets==17.4",
+]
+
+[dependency-groups]
+dev = ["pytest"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = ["gpu: needs a CUDA GPU (skipped without one)"]
+
+[tool.uv]
+package = false
