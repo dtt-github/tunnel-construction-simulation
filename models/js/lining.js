@@ -80,9 +80,8 @@ export function burstingForce(force, thickness, pad, edge = 0.03, method = "daub
 export const annulusVolume = (dExcavated, dRingOuter, ringWidth) => (Math.PI / 4) * (dExcavated ** 2 - dRingOuter ** 2) * ringWidth;
 
 export function groutWindow(depthCrown, gamma, waterDepth, gammaW = 10, maxOverWater = 69) {
-  const hw = Math.min(Math.max(waterDepth, 0), depthCrown);
-  const u = gammaW * Math.max(depthCrown - hw, 0);
-  return [u, Math.min(gamma * depthCrown, u + maxOverWater)];
+  const u = gammaW * Math.max(depthCrown - waterDepth, 0);
+  return [u, Math.min(gamma * depthCrown + gammaW * Math.max(-waterDepth, 0), u + maxOverWater)];
 }
 
 export function taper(dOuter, ringWidth, curveRadius, offsetDeg = null) {

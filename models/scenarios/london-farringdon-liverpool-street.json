@@ -131,6 +131,10 @@
   }
  },
  "alignment": {
+  "ends": [
+   "Farringdon",
+   "Liverpool Street"
+  ],
   "length": 2129,
   "start": {
    "E": 531300.0,

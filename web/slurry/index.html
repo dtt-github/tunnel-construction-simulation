@@ -35,6 +35,12 @@
 
   <section>
     <h2>Operator</h2>
+    <label>Ground
+      <select id="groundSel">
+        <option value="thames">Thames crossing: Plumstead – North Woolwich (open BGS boreholes)</option>
+        <option value="illustrative">Illustrative: dense sand, then sandy gravel</option>
+      </select>
+    </label>
     <label>Advance speed <output id="advOut"></output><input id="adv" type="range" min="0" max="80" step="1" value="60"></label>
     <label>Cutterhead speed <output id="rpmOut"></output><input id="rpm" type="range" min="0" max="3.2" step="0.1" value="2.0"></label>
     <label>Support pressure target, axis (air regulator) <output id="targetOut"></output><input id="target" type="range" min="100" max="350" step="5" value="200"></label>
@@ -100,6 +106,12 @@
     <h2>Segment lining</h2>
     <dl id="lining"></dl>
     <p class="note">Ring forces by the elastic equation method (ITA WG2 2000) with Wood's joint reduction; jacking, bursting and grout checks after ITA (2000, 2019) and DAUB (2024). Ground stiffness, concrete modulus and the shoe pad are assumed.</p>
+  </section>
+
+  <section>
+    <h2>Geological long section</h2>
+    <div id="section"></div>
+    <p class="note">15 Crossrail boreholes from the British Geological Survey, four over the river (Open Government Licence v3.0; contains British Geological Survey materials © UKRI 2026). Line © OpenStreetMap contributors (ODbL). River at mean high water from the Environment Agency Charlton gauge (estimate). Unit parameters from open sources, some assumed, grain sizes assumed; the tunnel level is assumed within the published cover. Details: <a href="https://github.com/dtt-github/tunnel-construction-simulation/blob/main/docs/SCENARIOS.md">scenario format and sources</a>.</p>
   </section>
 
   <section>

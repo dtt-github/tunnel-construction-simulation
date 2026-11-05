@@ -74,8 +74,9 @@ export function scenario(data) {
     const [c] = weighted(ch, crown, invert, "c");
     const [e] = weighted(ch, crown, invert, "E");
     const unit = unitAt(ch, ax), u = porePressure(ch, ax);
+    const d10s = Object.keys(shares).filter((k) => "d10" in units[k]).map((k) => +units[k].d10);
     return { unit_at_axis: unit, units_on_face: shares, gamma, phi, c, k0: +units[unit].k0, e_soil: e, cover: surf - crown, axis_depth: surf - ax,
-      water_depth: Math.max(surf - waterAt(ch), 0), u_axis: u, water_depth_equiv: surf - ax - u / 10 };
+      water_depth: Math.max(surf - waterAt(ch), 0), u_axis: u, water_depth_equiv: surf - ax - u / 10, d10: d10s.length ? Math.max(...d10s) : null };
   }
   return { data, units, order, length: +data.alignment.length, boreholes: bhs, surfaceAt, waterAt, axisAt, column, unitAt, porePressure, face };
 }

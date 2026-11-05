@@ -1,0 +1,708 @@
+{
+ "format": "tunnelsim-scenario/1",
+ "name": "Thames crossing, Plumstead - North Woolwich (Crossrail Thames Tunnel), London",
+ "description": "Ground along the 2.3 km bored Thames Tunnel of the Elizabeth line from 15 open BGS/Crossrail boreholes, four of them over the river.",
+ "method": "slurry",
+ "crs": "EPSG:27700",
+ "datum": "m OD (ground levels of the logs; river-bed level for the over-water holes)",
+ "licence": "Borehole data: Open Government Licence v3.0. Contains British Geological Survey materials (c) UKRI 2026. Contains public sector information licensed under the Open Government Licence v3.0. Line (c) OpenStreetMap contributors, ODbL.",
+ "units": {
+  "MG": {
+   "name": "Made Ground",
+   "gamma": 18,
+   "phi": 25,
+   "c": 0,
+   "k0": 0.58,
+   "E": 10000,
+   "d10": 0.0001,
+   "color": "#8a7f72",
+   "source": "Chandegra & Kokkinou (2016), Crossrail Learning Legacy, Design of the deep cut-and-cover Crossrail Paddington Station, Table 1, https://learninglegacy.crossrail.co.uk/documents/design-deep-cut-cover-crossrail-paddington-station-using-finite-element-method/",
+   "assumed": [
+    "d10"
+   ],
+   "notes": "As the London scenario."
+  },
+  "AL": {
+   "name": "Alluvium",
+   "gamma": 17,
+   "phi": 20,
+   "c": 0,
+   "k0": 0.6,
+   "E": 5000,
+   "d10": 2e-06,
+   "color": "#6f7a5a",
+   "source": "Lawrence et al. (2015), Crossrail Learning Legacy, Variation in permeability and dewatering performance for part of the Crossrail route in east London, https://learninglegacy.crossrail.co.uk/documents/variation-permeability-dewatering-performance-part-crossrail-route-east-london-2/",
+   "assumed": [
+    "gamma",
+    "phi",
+    "c",
+    "k0",
+    "E",
+    "d10"
+   ],
+   "notes": "Clay, silt and peat; k 1e-9 to 1e-8 m/s (Lawrence 4.3). No open strength or grading; assumed."
+  },
+  "RTD": {
+   "name": "River Terrace Deposits (gravel)",
+   "gamma": 20,
+   "phi": 36,
+   "c": 0,
+   "k0": 0.41,
+   "E": 60000,
+   "d10": 0.0003,
+   "color": "#b59a62",
+   "source": "Chandegra & Kokkinou (2016), Crossrail Learning Legacy, Design of the deep cut-and-cover Crossrail Paddington Station, Table 1, https://learninglegacy.crossrail.co.uk/documents/design-deep-cut-cover-crossrail-paddington-station-using-finite-element-method/; permeability Lawrence et al. (2015), Crossrail Learning Legacy, Variation in permeability and dewatering performance for part of the Crossrail route in east London, https://learninglegacy.crossrail.co.uk/documents/variation-permeability-dewatering-performance-part-crossrail-route-east-london-2/",
+   "assumed": [
+    "d10"
+   ],
+   "notes": "Sandy gravel up to about 5 m thick, k about 1e-3 m/s (Lawrence 2.3, 4.3). d10 assumed for a sandy gravel; no grading in the open logs."
+  },
+  "LG": {
+   "name": "Lambeth Group (Upnor Formation)",
+   "gamma": 20,
+   "phi": 33,
+   "c": 8,
+   "k0": 1.0,
+   "E": 80000,
+   "d10": 6e-05,
+   "color": "#8c6a5a",
+   "source": "Entwisle et al. (2013), BGS OR/13/006, Engineering Geology of British Rocks and Soils: Lambeth Group, Table 6.7, https://nora.nerc.ac.uk/id/eprint/503110/",
+   "assumed": [
+    "k0",
+    "E",
+    "d10"
+   ],
+   "notes": "Upnor sand, shear box c' 8 kPa, phi' 33 deg (Table 6.7)."
+  },
+  "TS": {
+   "name": "Thanet Sand Formation",
+   "gamma": 18.6,
+   "phi": 37,
+   "c": 0,
+   "k0": 0.8,
+   "E": 150000,
+   "d10": 3e-05,
+   "color": "#c2ad7a",
+   "source": "Menkiti et al. (2015), Crossrail Learning Legacy, Geology and geotechnical properties of the Thanet Sand Formation, https://learninglegacy.crossrail.co.uk/documents/geology-geotechnical-properties-thanet-sand-formation-update-crossrail-project-2/",
+   "assumed": [
+    "k0",
+    "E",
+    "d10"
+   ],
+   "notes": "Bulk density 1.88-1.9 Mg/m3, peak phi' 37-39 deg at 400-700 kPa, c' 0 (4.1-4.2); fines 0-70 % (3), d10 assumed for a silty fine sand."
+  },
+  "CK": {
+   "name": "Chalk (Seaford Chalk Formation)",
+   "gamma": 19,
+   "phi": 31,
+   "c": 20,
+   "k0": 0.6,
+   "E": 300000,
+   "d10": 2e-06,
+   "color": "#d9d6c8",
+   "source": "Lawrence et al. (2015), Crossrail Learning Legacy, Variation in permeability and dewatering performance for part of the Crossrail route in east London, https://learninglegacy.crossrail.co.uk/documents/variation-permeability-dewatering-performance-part-crossrail-route-east-london-2/ (formation, grades, permeability); Vinck et al. (2023), OSIG, Monotonic characterisation of low- to medium-density chalk, https://discovery.ucl.ac.uk/id/eprint/10200111/ (Seaford/Margate Chalk in Kent, analogue) (phi', K0)",
+   "assumed": [
+    "gamma",
+    "c",
+    "E",
+    "d10"
+   ],
+   "notes": "Weak to moderately weak fractured chalk with flint bands (Seaford, CIRIA grades A to Dc/Dm). Critical-state phi' about 31 deg and K0 0.6 in the analogue tests. Excavated chalk is mostly finer than 40 um (T&T 2014); d10 2 um assumed. The fractured mass, not the grains, governs slurry loss at the face."
+  }
+ },
+ "alignment": {
+  "ends": [
+   "Plumstead",
+   "North Woolwich"
+  ],
+  "length": 2302,
+  "polyline_bng": [
+   [
+    545108.3,
+    178880.7
+   ],
+   [
+    545027.9,
+    178886.0
+   ],
+   [
+    544961.4,
+    178894.9
+   ],
+   [
+    544914.2,
+    178902.7
+   ],
+   [
+    544872.3,
+    178911.2
+   ],
+   [
+    544826.6,
+    178918.1
+   ],
+   [
+    544701.3,
+    178939.4
+   ],
+   [
+    544645.8,
+    178947.0
+   ],
+   [
+    544604.6,
+    178949.4
+   ],
+   [
+    544431.7,
+    178964.1
+   ],
+   [
+    544371.3,
+    178967.8
+   ],
+   [
+    544344.1,
+    178967.8
+   ],
+   [
+    544313.8,
+    178965.1
+   ],
+   [
+    544275.3,
+    178960.2
+   ],
+   [
+    544231.8,
+    178952.8
+   ],
+   [
+    544196.8,
+    178947.7
+   ],
+   [
+    544174.3,
+    178945.2
+   ],
+   [
+    544149.4,
+    178943.4
+   ],
+   [
+    544125.0,
+    178942.4
+   ],
+   [
+    544106.3,
+    178945.7
+   ],
+   [
+    544094.7,
+    178947.8
+   ],
+   [
+    543831.0,
+    179030.6
+   ],
+   [
+    543821.9,
+    179033.4
+   ],
+   [
+    543796.0,
+    179041.2
+   ],
+   [
+    543754.2,
+    179055.5
+   ],
+   [
+    543740.5,
+    179061.2
+   ],
+   [
+    543712.2,
+    179072.8
+   ],
+   [
+    543677.8,
+    179090.1
+   ],
+   [
+    543650.7,
+    179105.7
+   ],
+   [
+    543630.0,
+    179122.0
+   ],
+   [
+    543607.7,
+    179141.6
+   ],
+   [
+    543574.6,
+    179175.2
+   ],
+   [
+    543551.7,
+    179205.4
+   ],
+   [
+    543537.7,
+    179230.4
+   ],
+   [
+    543532.2,
+    179241.4
+   ],
+   [
+    543519.5,
+    179266.4
+   ],
+   [
+    543518.7,
+    179267.9
+   ],
+   [
+    543514.5,
+    179276.1
+   ],
+   [
+    543499.5,
+    179314.9
+   ],
+   [
+    543489.5,
+    179349.2
+   ],
+   [
+    543469.1,
+    179425.6
+   ],
+   [
+    543457.5,
+    179473.7
+   ],
+   [
+    543440.9,
+    179550.4
+   ],
+   [
+    543430.7,
+    179585.7
+   ],
+   [
+    543417.2,
+    179620.9
+   ],
+   [
+    543393.3,
+    179669.0
+   ],
+   [
+    543367.6,
+    179712.2
+   ],
+   [
+    543339.2,
+    179752.7
+   ],
+   [
+    543322.6,
+    179773.3
+   ],
+   [
+    543311.8,
+    179784.9
+   ],
+   [
+    543301.5,
+    179794.3
+   ],
+   [
+    543298.1,
+    179797.2
+   ],
+   [
+    543287.5,
+    179806.3
+   ]
+  ],
+  "diameter": 7.08,
+  "axis_level": [
+   [
+    0,
+    -13.0
+   ],
+   [
+    400,
+    -17.5
+   ],
+   [
+    1500,
+    -21.5
+   ],
+   [
+    1900,
+    -25.0
+   ],
+   [
+    2150,
+    -25.0
+   ],
+   [
+    2302,
+    -17.0
+   ]
+  ],
+  "source": "Assumed. Cover under the river 10-12 m and support above 3 bar under the river (Tunnels & Tunnelling (2014), Crossrail C310, https://tunnelsandtunnelling.com/?p=7323); the drive starts in gravel and Thanet Sand and meets Chalk about 100 m from launch, about 80 % in Chalk (Tunnels & Tunnelling (2014), Crossrail C310, https://tunnelsandtunnelling.com/?p=7323)."
+ },
+ "ground_surface": [
+  [
+   -18.5,
+   3.23
+  ],
+  [
+   249.2,
+   3.49
+  ],
+  [
+   530.4,
+   6.27
+  ],
+  [
+   774.9,
+   5.41
+  ],
+  [
+   933.5,
+   6.34
+  ],
+  [
+   1130.3,
+   6.61
+  ],
+  [
+   1425.6,
+   10.53
+  ],
+  [
+   1621.8,
+   9.0
+  ],
+  [
+   1761.3,
+   5.21
+  ],
+  [
+   1883.0,
+   -5.06
+  ],
+  [
+   1954.6,
+   -9.56
+  ],
+  [
+   2065.7,
+   -9.89
+  ],
+  [
+   2131.2,
+   -6.89
+  ],
+  [
+   2308.2,
+   4.41
+  ],
+  [
+   2592.9,
+   1.38
+  ]
+ ],
+ "groundwater": {
+  "level": [
+   [
+    0,
+    0.5
+   ],
+   [
+    1800,
+    0.5
+   ],
+   [
+    1840,
+    3.2
+   ],
+   [
+    2200,
+    3.2
+   ],
+   [
+    2240,
+    0.5
+   ],
+   [
+    2400,
+    0.5
+   ]
+  ],
+  "source": "Lawrence et al. (2015), Crossrail Learning Legacy, Variation in permeability and dewatering performance for part of the Crossrail route in east London, https://learninglegacy.crossrail.co.uk/documents/variation-permeability-dewatering-performance-part-crossrail-route-east-london-2/; Tunnels & Tunnelling (2014), Crossrail C310, https://tunnelsandtunnelling.com/?p=7323",
+  "notes": "Design groundwater 96.5-104.5 mATD, average 100.5 mATD (+0.5 m OD) (T&T). All units follow one water system. Tidal swing in the ground 0.4-0.7 m at North Woolwich, under 0.1 m at Plumstead (Lawrence 3.1, 3.4)."
+ },
+ "river": {
+  "from": 1840,
+  "to": 2200,
+  "level": [
+   [
+    1840,
+    3.2
+   ],
+   [
+    2200,
+    3.2
+   ]
+  ],
+  "notes": "Mean high water about +3.2 m OD and mean low water about -2.0 m OD at the Environment Agency Charlton gauge 0003 (about 3 km upstream; OGL), from one month of 15-minute readings, Oct-Nov 2026: estimates, not official MHWS/MLWS. The tide changed the face pressure by about 0.8 bar on the drive (Tunnels & Tunnelling (2014), Crossrail C310, https://tunnelsandtunnelling.com/?p=7323).",
+  "source": "https://environment.data.gov.uk/flood-monitoring/id/stations/0003"
+ },
+ "boreholes": [
+  {
+   "id": "WP117R",
+   "bgs_loca_id": "2020020611421301599",
+   "E": 545126.762,
+   "N": 178879.934,
+   "chainage": -18.5,
+   "offset": 0.5,
+   "ground_level": 3.23,
+   "base_level": -57.57,
+   "tops": {
+    "MG": 3.23,
+    "AL": 0.63,
+    "RTD": -2.17,
+    "TS": -9.17,
+    "CK": -12.32
+   }
+  },
+  {
+   "id": "WP45R",
+   "bgs_loca_id": "2020020611421301514",
+   "E": 544863.204,
+   "N": 178924.505,
+   "chainage": 249.2,
+   "offset": 11.8,
+   "ground_level": 3.49,
+   "base_level": -29.51,
+   "tops": {
+    "MG": 3.49,
+    "RTD": 0.39,
+    "TS": -9.61,
+    "CK": -12.31
+   }
+  },
+  {
+   "id": "WP116R",
+   "bgs_loca_id": "2020020611421301598",
+   "E": 544582.767,
+   "N": 178946.707,
+   "chainage": 530.4,
+   "offset": -4.5,
+   "ground_level": 6.27,
+   "base_level": -54.73,
+   "tops": {
+    "MG": 6.27,
+    "RTD": 4.12,
+    "TS": -1.93,
+    "CK": -12.79
+   }
+  },
+  {
+   "id": "WP41R",
+   "bgs_loca_id": "2020020611421301510",
+   "E": 544338.249,
+   "N": 178979.906,
+   "chainage": 774.9,
+   "offset": 12.6,
+   "ground_level": 5.41,
+   "base_level": -26.29,
+   "tops": {
+    "MG": 5.41,
+    "LG": 4.91,
+    "TS": 1.89,
+    "CK": -12.07
+   }
+  },
+  {
+   "id": "WP115R",
+   "bgs_loca_id": "2020020611421301596",
+   "E": 544182.801,
+   "N": 178941.075,
+   "chainage": 933.5,
+   "offset": -5.0,
+   "ground_level": 6.34,
+   "base_level": -53.66,
+   "tops": {
+    "MG": 6.34,
+    "LG": 4.49,
+    "TS": -6.16,
+    "CK": -10.78
+   }
+  },
+  {
+   "id": "WP38R",
+   "bgs_loca_id": "2020020611421301507",
+   "E": 544000.701,
+   "N": 179011.301,
+   "chainage": 1130.3,
+   "offset": 32.4,
+   "ground_level": 6.61,
+   "base_level": -44.19,
+   "tops": {
+    "MG": 6.61,
+    "TS": 4.41,
+    "CK": -11.06
+   }
+  },
+  {
+   "id": "WP4R",
+   "bgs_loca_id": "2020020611421301474",
+   "E": 543711.382,
+   "N": 179074.407,
+   "chainage": 1425.6,
+   "offset": 1.1,
+   "ground_level": 10.53,
+   "base_level": -38.07,
+   "tops": {
+    "MG": 10.53,
+    "TS": 7.53,
+    "CK": -6.89
+   }
+  },
+  {
+   "id": "WP113R",
+   "bgs_loca_id": "2020020611421301594",
+   "E": 543576.82,
+   "N": 179207.811,
+   "chainage": 1621.8,
+   "offset": 21.5,
+   "ground_level": 9.0,
+   "base_level": -56.5,
+   "tops": {
+    "MG": 9.0,
+    "LG": 6.4,
+    "TS": 5.1,
+    "CK": -7.65
+   }
+  },
+  {
+   "id": "WP1R",
+   "bgs_loca_id": "2020020611421301471",
+   "E": 543474.347,
+   "N": 179312.469,
+   "chainage": 1761.3,
+   "offset": -24.8,
+   "ground_level": 5.21,
+   "base_level": -51.79,
+   "tops": {
+    "MG": 5.21,
+    "TS": -2.69,
+    "CK": -6.06
+   }
+  },
+  {
+   "id": "TRC4",
+   "bgs_loca_id": "2020020611421301396",
+   "E": 543470.448,
+   "N": 179437.902,
+   "chainage": 1883.0,
+   "offset": 4.2,
+   "ground_level": -5.06,
+   "base_level": -42.56,
+   "tops": {
+    "RTD": -5.06,
+    "CK": -5.56
+   },
+   "over_water": true
+  },
+  {
+   "id": "TRC3",
+   "bgs_loca_id": "2020020611421301395",
+   "E": 543455.814,
+   "N": 179507.875,
+   "chainage": 1954.6,
+   "offset": 5.6,
+   "ground_level": -9.56,
+   "base_level": -42.06,
+   "tops": {
+    "CK": -9.56
+   },
+   "over_water": true
+  },
+  {
+   "id": "TRC2",
+   "bgs_loca_id": "2020020611421301394",
+   "E": 543425.777,
+   "N": 179615.557,
+   "chainage": 2065.7,
+   "offset": 6.1,
+   "ground_level": -9.89,
+   "base_level": -42.84,
+   "tops": {
+    "AL": -9.89,
+    "RTD": -13.39,
+    "CK": -17.89
+   },
+   "over_water": true
+  },
+  {
+   "id": "TRC1",
+   "bgs_loca_id": "2020020611421301393",
+   "E": 543399.386,
+   "N": 179676.963,
+   "chainage": 2131.2,
+   "offset": 9.3,
+   "ground_level": -6.89,
+   "base_level": -41.94,
+   "tops": {
+    "MG": -6.89,
+    "RTD": -9.09,
+    "CK": -11.89
+   },
+   "over_water": true
+  },
+  {
+   "id": "NW63R",
+   "bgs_loca_id": "202002061142130589",
+   "E": 543288.672,
+   "N": 179817.35,
+   "chainage": 2308.2,
+   "offset": 9.1,
+   "ground_level": 4.41,
+   "base_level": -36.74,
+   "tops": {
+    "MG": 4.41,
+    "AL": 1.51,
+    "RTD": -4.19,
+    "CK": -10.19
+   }
+  },
+  {
+   "id": "NW15R",
+   "bgs_loca_id": "202002061142130539",
+   "E": 543039.648,
+   "N": 179964.354,
+   "chainage": 2592.9,
+   "offset": -41.5,
+   "ground_level": 1.38,
+   "base_level": -34.62,
+   "tops": {
+    "MG": 1.38,
+    "AL": 0.88,
+    "RTD": -3.22,
+    "CK": -9.32
+   }
+  }
+ ],
+ "build": "models/scenarios/build_thames.py"
+}

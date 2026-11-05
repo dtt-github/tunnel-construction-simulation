@@ -91,7 +91,8 @@ export function daubWindow(fs, diameter, cover, gamma, {
 } = {}) {
   const gsub = gammaSub ?? gamma - GAMMA_W;
   const hw = Math.min(Math.max(waterDepth, 0), cover);
-  const sigmaCrown = q + gamma * hw + (gsub + GAMMA_W) * (cover - hw);
+  // a negative water depth is free water above the ground (a river): its weight adds to the total overburden
+  const sigmaCrown = q + gamma * hw + (gsub + GAMMA_W) * (cover - hw) + GAMMA_W * Math.max(-waterDepth, 0);
   const dz = (diameter / 2) * supportUnitWeight;
   const pMinAxis = etaEarth * Math.max(fs.s_eff, 0) + etaWater * fs.u_axis;
   const pMaxCrown = maxFraction * sigmaCrown;
