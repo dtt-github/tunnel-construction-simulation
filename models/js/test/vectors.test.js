@@ -62,7 +62,7 @@ test("method presets match python", () => {
 test("twin troughs match python", () => {
   for (const { in: i, out } of vec("settlement").twin) {
     const tw = twinTroughs(i.diameter_m, i.axis_depth_m, i.spacing_m, i.volume_loss_first, i.volume_loss_second, i.k,
-      { secondVlFactor: i.second_vl_factor, secondInnerK: i.second_inner_k });
+      { secondVlFactor: i.second_vl_factor, secondInnerK: i.second_inner_k, secondOuterK: i.second_outer_k });
     for (const s of out.samples) close({ s: tw.settlement(s.x), u: tw.horizontal(s.x) }, { s: s.s, u: s.u }, `twin x=${s.x}`);
   }
 });

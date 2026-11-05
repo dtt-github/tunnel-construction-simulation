@@ -12,7 +12,7 @@ import {
   wedgeSilo, daubWindow, shieldThrust, cutterheadTorque, toolTorque,
   infiltration as slurryInfiltration, cushion as makeCushion, facePressure, dischargeDensity, drySolidsFlow, theoreticalDryFlow,
   durandVelocity, pipeVelocity, CONTROL_TOLERANCE,
-  verticalStress, presetTrough, burlandCategory, referenceInstalled, erf,
+  verticalStress, presetTrough, twinTroughs, burlandCategory, referenceInstalled, erf,
   Rng, sample as sampleDist, DIST, SHIFT_PATTERNS, PER_CYCLE_MAINTENANCE_MIN, simulateDrive, recordCheck, EPB_WEEKLY_SURVEY,
   scenario as loadScenario, jsceRing, woodInertia, subgradeModulus, terzaghiLoads, activeCoefficient, sectionStresses, jackingStress, burstingForce, annulusVolume, groutWindow, ITA2000_ALLOWABLE,
 } from "../../models/js/index.js";
@@ -535,6 +535,12 @@ surfGeo.setAttribute("color", new THREE.BufferAttribute(new Float32Array(surfGeo
 const surface = new THREE.Mesh(surfGeo, new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 1 }));
 surface.position.y = Z0;
 world.add(surface);
+// The second bore, shown only with "after both drives": a plain tube at its offset under the surface grid.
+const bore2Tube = new THREE.Mesh(alongZ(new THREE.CylinderGeometry(M.D / 2, M.D / 2, SURF.c1 - SURF.c0, 40, 1, true)),
+  new THREE.MeshStandardMaterial({ color: 0x8c96a0, transparent: true, opacity: 0.35, side: THREE.DoubleSide, depthWrite: false }));
+bore2Tube.position.set(SCN?.data.settlement?.second_bore?.offset_m ?? 0, -Z0, -(SURF.c0 + SURF.c1) / 2);
+bore2Tube.visible = false;
+surface.add(bore2Tube);
 const SETTLE_RAMP = [[0, [0.80, 0.78, 0.72]], [0.25, [0.93, 0.80, 0.52]], [0.6, [0.86, 0.52, 0.22]], [1, [0.55, 0.20, 0.10]]];
 function ramp(t) {
   t = Math.min(Math.max(t, 0), 1);
@@ -564,7 +570,7 @@ label("Face position", faceMarker, [0, 1.8, 0], true);
 
 // ---------------------------------------------------------------- UI
 const ids = ["adv", "rpm", "disMode", "target", "dis", "feed", "tau", "vl", "ts", "advOut", "rpmOut", "targetOut", "disOut", "feedOut", "tauOut", "vlOut", "tsOut",
-  "pause", "reset", "gauge", "chamber", "alarms", "cycle", "bars", "ground", "showLabels", "shift", "haulage", "interventions", "skip", "forecast", "lining", "cake", "circuit", "section", "groundSel"];
+  "pause", "reset", "gauge", "chamber", "alarms", "cycle", "bars", "ground", "showLabels", "shift", "haulage", "interventions", "skip", "forecast", "lining", "cake", "circuit", "section", "groundSel", "bore2"];
 const ui = Object.fromEntries(ids.map((id) => [id, document.getElementById(id)]));
 const val = (id) => +ui[id].value;
 if (SCN?.data.settlement) { ui.vl.min = 0.1; ui.vl.value = SCN.data.settlement.volume_loss; }
@@ -577,6 +583,18 @@ function trough(zone, vl) {
   if (!troughCache.has(key)) troughCache.set(key, presetTrough("closed_face_sand", M.D, zone.z0, { shieldLengthM: M.shieldLength, volumeLoss: vl / 100, k: zone.k }));
   return troughCache.get(key);
 }
+// Second bore, driven after this one (scenario settlement.second_bore): its own trough at offset_m, with the published
+// volume-loss ratio and trough widths towards / away from this bore (Hyde Park, Wan et al. 2017; Thames, Cheng & Mikulski 2014).
+const BORE2 = SCN?.data.settlement?.second_bore ?? null;
+const bothBores = () => BORE2 !== null && ui.bore2.value === "both";
+const trough2Cache = new Map();
+function trough2(zone, vl) {
+  const key = `${zone.key}|${vl}`;
+  if (!trough2Cache.has(key)) trough2Cache.set(key, twinTroughs(M.D, zone.z0, BORE2.offset_m, vl / 100, null, zone.k,
+    { secondVlFactor: BORE2.vl_ratio, secondInnerK: BORE2.k_inner, secondOuterK: BORE2.k_outer }).second);
+  return trough2Cache.get(key);
+}
+if (BORE2) ui.bore2.closest("label").hidden = false;
 function windowFor(zone, pasteWeight) {
   const cover = zone.z0 - R;
   const fs = wedgeSilo(M.D, cover, zone.gamma, zone.phi, zone.c, { waterDepth: zone.water });
@@ -825,6 +843,12 @@ function tunnelFraction(t, c, ch) {
 
 // Surface settlement and building categories.
 let surfaceMax = 0;
+function bothSmax(zone) {
+  const t = trough(zone, val("vl")), t2 = trough2(zone, val("vl"));
+  let m = 0;
+  for (let x = -20; x <= BORE2.offset_m + 20; x += 0.25) m = Math.max(m, t.settlement(x) + t2.settlement(x - BORE2.offset_m));
+  return m;
+}
 function updateSurface() {
   const vl = val("vl"), c = S.chainage;
   // the surface grid covers 260 m of chainage; it follows the face in 50 m steps
@@ -832,9 +856,12 @@ function updateSurface() {
   surface.position.z = -surfOff;
   const pos = surfGeo.attributes.position, col = surfGeo.attributes.color;
   let smax = 0;
+  const both = bothBores();
+  bore2Tube.visible = both;
+  // after both drives every trough is final; otherwise this bore's trough grows with the face
   const settle = (x, ch) => {
-    const t = trough(zoneAt(ch), vl);
-    return t.settlement(x) * tunnelFraction(t, c, ch);
+    const zone = zoneAt(ch), t = trough(zone, vl);
+    return both ? t.settlement(x) + trough2(zone, vl).settlement(x - BORE2.offset_m) : t.settlement(x) * tunnelFraction(t, c, ch);
   };
   for (let k = 0; k < pos.count; k++) {
     const x = pos.getX(k), ch = -pos.getZ(k) + surfOff;
@@ -1075,6 +1102,7 @@ function hud() {
     ["Required effective support", fs.s_eff > 0 ? `${fmt(fs.s_eff / 100, 2)} bar` : "none (self-supporting)"],
     ["Pore pressure at axis", `${fmt(fs.u_axis / 100, 2)} bar`],
     ["Final Smax (this zone)", `${fmt(t.s_max * 1000, 1)} mm`],
+    ...(BORE2 ? [["Second bore", `${fmt(BORE2.offset_m, 1)} m away, VL ×${BORE2.vl_ratio} (${fmt(val("vl") * BORE2.vl_ratio, 2)} %), K ${BORE2.k_inner} towards this bore, ${BORE2.k_outer} away; final Smax of both ${fmt(bothSmax(zone) * 1000, 1)} mm${bothBores() ? " (shown)" : ""}`]] : []),
     ["Surface settlement now", `${fmt(surfaceMax * 1000, 1)} mm max`],
     ...(SCN?.data.settlement ? [["Volume loss, trough width (default)", `${SCN.data.settlement.volume_loss} %, K ${SCN.data.settlement.k} (measured on Crossrail${SCN.data.settlement.measured_smax_mm ? `; Smax ${SCN.data.settlement.measured_smax_mm.join("–")} mm measured` : ", Hyde Park"})`]] : []),
     ["Buildings within 60 m", `${BUILDINGS.length}${SCN ? `, ${BUILDINGS.filter((b) => b.listed.length).length} listed` : ""}; category 2 or worse: ${BUILDINGS.filter((b) => b.cat >= 2).length}`],

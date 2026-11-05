@@ -6,6 +6,12 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ### Added
 
+- **Second bore** ([settlement](docs/validation/settlement.md)):
+  - the twin-trough model takes the second bore's trough width away from the first bore as well as towards it;
+  - Hyde Park (Wan et al. 2017): the second bore is 16.2 m away, read from the paper's vector figure, with 1.5–1.9× the first bore's volume loss, Ky 0.44 towards the first bore and 0.33 away;
+  - Thames chalk: reading the table's "WB & EB" column as the second bore's own volume loss reproduces the 17 measured Smax values (median ratio 1.10, was 1.57), so the first-bore default drops from 0.35 % to 0.25 %, with the second bore 17 m away at 1.2×;
+  - the EPB and Mixshield demos have a "Second bore" choice: "after both drives" shows the final settlement of both bores over the buildings, with the second tunnel drawn at its offset.
+
 - **Hard-rock TBMs checked against real projects** ([validation](docs/validation/hard-rock-projects.md)):
   - the CSM disc-cutter model over-predicted the Follo Line TBM1 mean penetration by 1.9×. Its pressure-distribution exponent ψ is now −0.1, inside Rostami's range, which reproduces 6.32 mm/rev (6.36);
   - with Follo's measured penetration and cutter changes, the downtime model gives 12.9–14.9 m/day against the measured 14.1 m/day average;

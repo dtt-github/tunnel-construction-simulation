@@ -72,11 +72,13 @@ for method, dia, z0, length, il in [("open_face_stiff_clay", 4.85, 20.0, None, N
                     "out": trough_out(t, [0.0, 5.0, t.i], ys)})
 
 twins = []
-for dia, z0, sp, vl1, vl2, k, f, kin in [(5.0, 19.5, 26.0, 0.006, None, 0.5, 1.0, None), (5.0, 19.5, 26.0, 0.006, 0.006, 0.5, 1.3, 0.8), (6.0, 20.0, -15.0, 0.01, 0.008, 0.45, 1.1, 0.6)]:
-    tw = twin_troughs(dia, z0, sp, vl1, vl2, k, second_vl_factor=f, second_inner_k=kin)
+for dia, z0, sp, vl1, vl2, k, f, kin, kout in [(5.0, 19.5, 26.0, 0.006, None, 0.5, 1.0, None, None), (5.0, 19.5, 26.0, 0.006, 0.006, 0.5, 1.3, 0.8, None),
+                                              (6.0, 20.0, -15.0, 0.01, 0.008, 0.45, 1.1, 0.6, None), (7.1, 34.5, 16.2, 0.005, None, 0.43, 1.7, 0.44, 0.33),
+                                              (7.1, 20.0, -17.0, 0.0025, None, 0.5, 1.2, None, 0.4)]:
+    tw = twin_troughs(dia, z0, sp, vl1, vl2, k, second_vl_factor=f, second_inner_k=kin, second_outer_k=kout)
     xs = [-30.0, -10.0, 0.0, sp / 2, sp, sp + 10.0]
     twins.append({"in": {"diameter_m": dia, "axis_depth_m": z0, "spacing_m": sp, "volume_loss_first": vl1, "volume_loss_second": vl2, "k": k,
-                         "second_vl_factor": f, "second_inner_k": kin},
+                         "second_vl_factor": f, "second_inner_k": kin, "second_outer_k": kout},
                   "out": {"samples": [{"x": x, "s": tw.settlement(x), "u": tw.horizontal(x)} for x in xs]}})
 
 write("settlement", {"symmetric": st, "asymmetric": asym, "presets": presets, "twin": twins})

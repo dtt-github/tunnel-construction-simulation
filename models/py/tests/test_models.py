@@ -132,6 +132,15 @@ def test_presets_order_fraction_at_face():
         assert lo <= p["volume_loss"] <= hi
 
 
+def test_twin_hyde_park_second_bore():
+    # Wan et al. (2017) X-line, second bore incremental: VL 1.18 %, Ky 0.467 towards the first bore; 16.2 m apart
+    tw = twin_troughs(7.1, 34.5, 16.2, 0.0078, 0.0118, 0.44, second_inner_k=0.467, second_outer_k=0.38)
+    v2 = 0.0118 * math.pi * 7.1**2 / 4
+    assert tw.second.s_max == pytest.approx(2 * v2 / (math.sqrt(2 * math.pi) * (0.467 + 0.38) * 34.5))
+    assert tw.second.settlement(-5) > tw.second.settlement(5)  # wider towards the first bore (x < 0 from the second)
+    assert tw.second.volume_m3_per_m == pytest.approx(v2, rel=1e-9)
+
+
 def test_twin_superposition_and_interaction():
     plain = twin_troughs(5, 19.5, 26, 0.006)
     a = gaussian_trough(5, 19.5, 0.006)

@@ -136,6 +136,13 @@ SETTLEMENT = {
               "first bore VL 0.44-0.78 %, K 0.43 (Wan, Standing, Potts & Burland 2017, Geotechnique 67(5), doi:10.1680/jgeot.16.P.099, Tables 1-2, "
               "Fig. 15); western drive generally below 0.5 % (Lazarus & Jung 2018, The Structural Engineer 96(7)); second bore 0.8-1.2 % incremental.",
     "notes": "No greenfield VL or K is published for Farringdon - Liverpool Street; Crossrail designed for 1 % (0.5 % in controlled zones).",
+    "second_bore": {
+        "offset_m": 16.2, "vl_ratio": 1.7, "k_inner": 0.44, "k_outer": 0.33,
+        "source": "Hyde Park, Crossrail western running tunnels (Wan, Standing, Potts & Burland (2017), Geotechnique 67(5), "
+                  "doi:10.1680/jgeot.16.P.099, Table 2, Fig. 13): second bore 16.2 m from the first (Fig. 13), incremental VL 1.5-1.9 x the "
+                  "first bore's on the same lines (median 1.7), Ky towards the first bore 0.42-0.47 (mean 0.44), away from it 0.29-0.43 "
+                  "(mean 0.33). Transferred; the spacing and side are not published for Farringdon - Liverpool Street.",
+    },
 }
 
 

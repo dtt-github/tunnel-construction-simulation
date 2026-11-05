@@ -18,7 +18,7 @@ A scenario file describes the ground along a tunnel alignment. The demos load it
 | `ground_surface` | `[[chainage, level], …]` |
 | `groundwater` | `level`: the upper water table as `[[chainage, level], …]`. Optionally `deep_head`: the piezometric level of a lower aquifer. Also `source` and `notes`. |
 | `river` | Optional. `from`, `to` (chainage), `level` as `[[chainage, level], …]`: free water above the ground surface, which is then the river bed. Under a river the upper water level should equal the river level. |
-| `settlement` | Optional default `volume_loss` (%), trough width `k` and its `source`; the demos start from these. |
+| `settlement` | Optional default `volume_loss` (%), trough width `k` and its `source`; the demos start from these. Optional `second_bore`: `offset_m` (distance to the second bore), `vl_ratio` (its volume loss over the first's), `k_inner` / `k_outer` (its trough width towards / away from the first bore) and `source`. |
 | `buildings` | Optional. Footprints along the line: `chainage`, `offset` (centroid), `ch_min`/`ch_max`, `off_min`/`off_max`, `area`, `height` and `height_source`, `ground_level`, `listed` (`[grade, name]`), `scheduled_monument`, `name`; `buildings_meta` gives the selection rule and licences. |
 | `boreholes` | `id`, `chainage`, `offset`, `ground_level` (the river bed for over-water holes), optionally `base_level` (bottom of the hole) and `over_water`, and `tops`: the level of the top of each unit logged in the hole. |
 

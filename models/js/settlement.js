@@ -123,16 +123,17 @@ export function presetTrough(method, diameterM, axisDepthM, { shieldLengthM = nu
 /**
  * Two parallel tunnels, the second at x = spacing (either sign), driven after the first. Defaults give plain
  * superposition; secondVlFactor scales the second tunnel's volume loss and secondInnerK widens the arm of its
- * trough that faces the first tunnel (Addenbrooke & Potts 2001).
+ * trough that faces the first tunnel (Addenbrooke & Potts 2001); secondOuterK sets the arm facing away (Wan et al. 2017).
  */
 export function twinTroughs(diameterM, axisDepthM, spacingM, volumeLossFirst, volumeLossSecond = null, k = 0.5,
-  { secondVlFactor = 1, secondInnerK = null } = {}) {
+  { secondVlFactor = 1, secondInnerK = null, secondOuterK = null } = {}) {
   const vl2 = (volumeLossSecond ?? volumeLossFirst) * secondVlFactor;
   const first = gaussianTrough(diameterM, axisDepthM, volumeLossFirst, k);
   let second;
-  if (secondInnerK === null) second = gaussianTrough(diameterM, axisDepthM, vl2, k);
-  else if (spacingM >= 0) second = gaussianTrough(diameterM, axisDepthM, vl2, k, { kLeft: secondInnerK, kRight: k });
-  else second = gaussianTrough(diameterM, axisDepthM, vl2, k, { kLeft: k, kRight: secondInnerK });
+  const kIn = secondInnerK ?? k, kOut = secondOuterK ?? k;
+  if (secondInnerK === null && secondOuterK === null) second = gaussianTrough(diameterM, axisDepthM, vl2, k);
+  else if (spacingM >= 0) second = gaussianTrough(diameterM, axisDepthM, vl2, k, { kLeft: kIn, kRight: kOut });
+  else second = gaussianTrough(diameterM, axisDepthM, vl2, k, { kLeft: kOut, kRight: kIn });
   return {
     first,
     second,

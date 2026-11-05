@@ -55,7 +55,7 @@ What it computes:
 - the Gaussian transverse trough, symmetric or asymmetric, with horizontal displacement;
 - the longitudinal profile, built from face, shield, tail-void and behind-the-tail volume-loss components, with an optional longitudinal width;
 - excavation-method presets (volume loss and K);
-- twin-tunnel interaction;
+- twin tunnels: the second bore's trough at its own volume loss, with separate widths towards and away from the first bore;
 - Burland damage categories.
 
 **References:**
@@ -63,12 +63,16 @@ What it computes:
 - Peck (1969); O'Reilly & New (1982); Attewell & Woodman (1982);
 - Mair & Taylor (1997);
 - Addenbrooke & Potts (2001), [doi:10.1061/(ASCE)1532-3641(2001)1:2(249)](https://doi.org/10.1061/(ASCE)1532-3641(2001)1:2(249));
+- Wan, Standing, Potts & Burland (2017), [doi:10.1680/jgeot.16.P.099](https://doi.org/10.1680/jgeot.16.P.099) (second bore at Hyde Park);
 - Burland (1995).
 
 **Validated against:**
 
 - a hand calculation: D 6 m, z₀ 20 m, VL 1 % → S_max 11.3 mm;
-- measured Crossrail settlement ([validation](validation/settlement.md)): Hyde Park reproduced (8.1 mm against 8.3 mm). In the Thames chalk the published volume losses give 1.1–3.1× less than the measured Smax with K 0.5; the volume loss that fits is 0.11–0.81 %, median 0.35 %, the demo default there;
+- measured Crossrail settlement ([validation](validation/settlement.md)):
+  - Hyde Park reproduced (8.1 mm against 8.3 mm).
+  - In the Thames chalk, the published per-bore volume losses reproduce the 17 measured Smax values (median ratio 1.10). This reads the "WB & EB" column as the second bore's own VL; read as both bores together, they were 1.6× low. The first-bore VL that fits has a median of 0.25 %, the demo default there.
+- the second bore: Hyde Park gives 1.5–1.9× the first bore's volume loss, Ky 0.44 towards the first bore and 0.33 away, 16.2 m apart; the Thames table gives a ratio of 1.2 at a median of 17 m. These are the scenario defaults;
 - numerical integration equals V_s, also for asymmetric troughs;
 - one component at the face gives half the final settlement at the face; a tail-only component gives Φ(−L/i);
 - the closed-face preset leaves 0.1–0.2 of the final trough at the face; a narrower longitudinal width lowers it without changing the final trough;

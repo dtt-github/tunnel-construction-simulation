@@ -12,6 +12,10 @@ References
   typical VL by method and ground.)
 - Addenbrooke, T.I., Potts, D.M. (2001). Twin tunnel interaction: surface and subsurface effects. Int. J. Geomechanics
   1(2), 249-271, doi:10.1061/(ASCE)1532-3641(2001)1:2(249). (Second-tunnel trough larger and shifted towards the first.)
+- Wan, M.S.P., Standing, J.R., Potts, D.M., Burland, J.B. (2017). Measured short-term ground surface response to EPBM
+  tunnelling in London Clay. Geotechnique 67(5), 420-445, doi:10.1680/jgeot.16.P.099, Tables 1-2, Figs 10-13 (Hyde Park:
+  second bore 16.2 m from the first, incremental VL 1.5-1.9 x the first bore's, Ky 0.42-0.47 towards the first bore
+  and 0.29-0.43 away from it).
 - Burland, J.B. (1995). Assessment of risk of damage to buildings due to tunnelling and excavation. Proc. 1st IC Earthquake Geotech. Eng.
 
     i      = K * z0                       trough width (inflection point); i_left / i_right for an asymmetric trough
@@ -199,22 +203,25 @@ def twin_troughs(
     *,
     second_vl_factor: float = 1.0,
     second_inner_k: float | None = None,
+    second_outer_k: float | None = None,
 ) -> TwinTroughs:
     """Two parallel tunnels, the second at x = spacing (either sign), driven after the first.
 
     With the defaults this is plain superposition. Addenbrooke & Potts (2001) found the second tunnel's trough is
     larger and shifted towards the first tunnel, because it passes through ground already disturbed by the first.
     second_vl_factor scales the second tunnel's volume loss; second_inner_k widens the arm of its trough that faces
-    the first tunnel (the volume is kept, so the trough's centroid moves towards the first tunnel).
+    the first tunnel (the volume is kept, so the trough's centroid moves towards the first tunnel); second_outer_k sets
+    the arm facing away (Hyde Park: narrower than the first bore's trough, Wan et al. 2017).
     """
     vl2 = (volume_loss_first if volume_loss_second is None else volume_loss_second) * second_vl_factor
     first = gaussian_trough(diameter_m, axis_depth_m, volume_loss_first, k)
-    if second_inner_k is None:
+    k_in, k_out = (k if second_inner_k is None else second_inner_k), (k if second_outer_k is None else second_outer_k)
+    if second_inner_k is None and second_outer_k is None:
         second = gaussian_trough(diameter_m, axis_depth_m, vl2, k)
     elif spacing_m >= 0:  # first tunnel lies to the left of the second
-        second = gaussian_trough(diameter_m, axis_depth_m, vl2, k, k_left=second_inner_k, k_right=k)
+        second = gaussian_trough(diameter_m, axis_depth_m, vl2, k, k_left=k_in, k_right=k_out)
     else:
-        second = gaussian_trough(diameter_m, axis_depth_m, vl2, k, k_left=k, k_right=second_inner_k)
+        second = gaussian_trough(diameter_m, axis_depth_m, vl2, k, k_left=k_out, k_right=k_in)
     return TwinTroughs(first=first, second=second, spacing=spacing_m)
 
 

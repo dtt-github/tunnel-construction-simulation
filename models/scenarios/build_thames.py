@@ -95,11 +95,17 @@ ALIGNMENT = {
 
 
 SETTLEMENT = {
-    "volume_loss": 0.35, "k": 0.5, "range": [0.1, 0.8], "measured_smax_mm": [3, 10],
+    "volume_loss": 0.25, "k": 0.5, "range": [0.1, 0.8], "measured_smax_mm": [3, 10],
     "source": "Cheng & Mikulski (2014), Crossrail Learning Legacy, Ground settlement behaviour in chalk due to TBM excavations, Table 1: 17 sections "
-              "Plumstead - Woolwich, Smax 3-10 mm, back-analysed VL 0.10-0.35 % with K fixed at 0.5. With the Gaussian trough of this project the "
-              "measured Smax needs VL 0.11-0.81 %, median 0.35 % (docs/validation/settlement.md).",
+              "Plumstead - Woolwich, Smax 3-10 mm, back-analysed VL 0.10-0.35 % with K fixed at 0.5. Reading the 'WB & EB' column as the second "
+              "bore's own VL, the first-bore VL that reproduces each measured Smax has median 0.25 % (range 0.10-0.54 %; docs/validation/settlement.md).",
     "notes": "Crossrail designed for 1 % (0.5 % in controlled zones). No data under the river.",
+    "second_bore": {
+        "offset_m": 17.0, "vl_ratio": 1.2, "k_inner": 0.5, "k_outer": 0.5,
+        "source": "Cheng & Mikulski (2014), Crossrail Learning Legacy, Table 1: distance between the two tunnels 10-37 m (median 17 m), "
+                  "second-bore VL 1.0-2.5 x the first bore's (median 1.2), reading the 'WB & EB' column as the second bore's own VL "
+                  "(docs/validation/settlement.md). Side of the second bore assumed; no data under the river.",
+    },
 }
 
 
