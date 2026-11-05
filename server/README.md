@@ -35,6 +35,7 @@ Results go to `results/<name>.json`, with a run record:
 | `tunnelsim_server/scenes/tunnel_2d.py` | Plane-strain tunnel with a closing ring of segments; the clay investigation ([status](../docs/validation/mpm-clay.md)) | WP3 (blocked) |
 | `tunnelsim_server/scenes/face_sand.py`, `tests/test_face_sand_gpu.py` | Face in dry sand, half-model, displacement or pressure (servo) control, mechanism and settlement outputs ([results](../docs/validation/mpm-face-sand.md)) | WP2 |
 | `tunnelsim_server/scenes/chamber.py` | EPB chamber under pressure with an analytical screw sink and a PI screw controller ([results](../docs/validation/mpm-chamber.md)) | WP4 (blocked) |
+| `tunnelsim_server/record.py`, `replay.py` | Records the live face through a scripted pressure timeline into a TSR0 replay for the demo (format from Phase 0) | WP7 |
 | `tunnelsim_server/live.py` | Live dry-sand face over a WebSocket for the EPB demo's "Ground physics" panel (`web/epb/ground.js`); local only | WP6 (face only) |
 | `diagnostics/` | One-off investigation scripts (packing, cohesion scaling, ring piling, equilibrium), each with its result in the docstring | WP0b, WP3 |
 | `gpu_reservations.json` | GPU windows reserved for this project on the shared Spark (local time) | WP0 |
@@ -55,6 +56,12 @@ Open `http://127.0.0.1:8741/web/epb/index.html?ground=ws://127.0.0.1:8765`. The 
 - **What it does:** above the limit the face holds; below it the face gives way and the chimney rises to the surface. "Reset the face" rebuilds the scene.
 - **Readouts:** the face pressure, with the measured limit, the MPM bracket and the analytical value beside it, and the real-time factor.
 - **What it is not:** this is the WP2 benchmark face, not the demo's own ground.
+
+**Recording (WP7).** Without the `ground` parameter, the panel plays `web/epb/recordings/face-sand-cd1.tsr.gz`. To record it again (about a minute on the GPU), after committing so the run record names a clean commit:
+
+```bash
+.venv-server/bin/python -m tunnelsim_server.record
+```
 
 ## GPU time
 

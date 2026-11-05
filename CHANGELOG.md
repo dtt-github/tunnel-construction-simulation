@@ -6,6 +6,10 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ### Added
 
+- **Phase 2, WP7: recorded GPU sand face in the EPB demo** (`server/tunnelsim_server/record.py`, `web/epb/recordings/face-sand-cd1.tsr.gz`):
+  - the WP2 dry-sand face recorded on the GPU through a scripted support-pressure timeline: it holds at 20 kPa, gives way at 3 kPa with the chimney reaching the surface, and stops when the pressure is raised again;
+  - the "Ground physics" panel now plays the recording in real time when no live server is given (TSR0 replay, 0.4 MB), with the calibration label, the measured and analytical references, and a link to the validation page.
+
 - **Phase 2, WP6 (face only, local): live ground physics** (`server/tunnelsim_server/live.py`, `web/epb/ground.js`):
   - a WebSocket server runs the WP2 dry-sand face on the GPU; the EPB demo opened with `?ground=ws://…` shows a "Ground physics" panel with the face section coloured by movement, a support-pressure control, and the measured (Idinger), MPM-bracket and analytical (Vermeer) values beside the calibration label;
   - below the limit the face gives way and the chimney reaches the surface; raising the pressure stops it. About 0.2× real time on the shared GPU. The public demo is unchanged;

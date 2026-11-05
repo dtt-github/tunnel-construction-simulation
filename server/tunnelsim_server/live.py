@@ -56,8 +56,9 @@ def references(cover: float) -> dict:
 
 
 class Session:
-    def __init__(self, cover: float, vpd: float, target_kpa: float):
+    def __init__(self, cover: float, vpd: float, target_kpa: float, slice_over_d: float = 0.3):
         self.cfg = FaceSandConfig(cover=cover, voxel_per_d=vpd, control="pressure")
+        self.slice_over_d = slice_over_d
         self.target_kpa = target_kpa
         self.reset_requested = False
         self.build()
@@ -68,7 +69,7 @@ class Session:
         self.log: list = []
         self.frame = 0
         self.ref = None
-        self.slice = f.pts[:, 1] < 0.3 * f.D  # particles near the symmetry plane: the section through the axis
+        self.slice = f.pts[:, 1] < self.slice_over_d * f.D  # particles near the symmetry plane: the section through the axis
         lo, hi = f.box
         self.lo, self.hi = lo.astype(np.float32), hi.astype(np.float32)
         D, phi = f.D, f.soil.phi_deg
@@ -98,9 +99,12 @@ class Session:
         return encode(self.frame, pts, attr, self.lo, self.hi)
 
     def probe(self, rtf: float) -> str:
+        return json.dumps(self.probe_dict(rtf))
+
+    def probe_dict(self, rtf: float) -> dict:
         f = self.face
         p = float(np.mean([e[1] for e in self.log[-6:]])) / 1e3 if self.log else 0.0
-        return json.dumps({
+        return {
             "type": "probe", "t": round(self.frame * f.dt, 3), "settling": self.frame < self.cfg.settle,
             "p_face_kPa": round(p, 2), "target_kPa": self.target_kpa,
             "retraction_mm": round(self.log[-1][0] * 1000, 1) if self.log else 0.0,
@@ -109,10 +113,11 @@ class Session:
             "scene": {"name": "Dry-sand face, Idinger et al. (2011) prototype", "diameter_m": f.D, "cover_over_D": self.cfg.cover,
                       "voxel_per_D": self.cfg.voxel_per_d, "phi_deg": f.soil.phi_deg, "gamma_kN_m3": round(f.gamma / 1e3, 2),
                       "axis_z_m": round(float(f.zc), 3), "surface_z_m": round(float(f.zs), 3), "wall_m": round(float(f.t), 3),
-                      "spacing_m": round(float(f.h), 4)},
+                      "spacing_m": round(float(f.h), 4),
+                      "box_m": [[round(float(v), 3) for v in f.box[0]], [round(float(v), 3) for v in f.box[1]]]},
             "label": LABEL, "validation": "docs/validation/mpm-face-sand.md",
             "references": {**references(self.cfg.cover), "vermeer_kPa": round(self.vermeer_kpa, 2)},
-        })
+        }
 
 
 async def serve(args):

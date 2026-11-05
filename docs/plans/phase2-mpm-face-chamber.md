@@ -246,6 +246,17 @@ Discharge against rpm has no open measured data. It stays labelled "checked agai
 
 **Check:** each recording links to its validation page. The landing card says which checks it passed.
 
+**Status (5 Nov 2026): sand face recorded** (`server/tunnelsim_server/record.py`, `web/epb/recordings/face-sand-cd1.tsr.gz`, 0.4 MB).
+- **The recording:** the WP2 dry-sand face (Idinger's prototype, C/D 1, D/10), recorded on the GPU through a scripted timeline:
+  - 20 kPa: the face holds;
+  - 3 kPa from 4 s: it gives way, and the chimney reaches the surface;
+  - 20 kPa from 12 s: it stops, at 403 mm (8 % of D).
+- **Contents:** a section along the axis (9,600 of 103,000 particles) at 15 Hz. The metadata carries the label, the references, the settings, the git commit and the software versions.
+- **Where it plays:** the EPB demo's "Ground physics" panel plays it in real time whenever no live server is given. So the public demo will show it, with its label and a link to the validation page.
+- **Not recorded yet:**
+  - the clay collapse and the chamber with screw step, which wait on WP3/WP4;
+  - the landing-page card, still on the Phase 0 replays until gh-pages is updated.
+
 ### WP8: documentation (throughout)
 
 - `docs/validation/mpm-face.md`, `mpm-chamber.md` and `mpm-screw.md`, in the same form as the other validation pages: data, set-up, results, limits.
