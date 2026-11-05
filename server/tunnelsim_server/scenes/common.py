@@ -34,13 +34,34 @@ def make_particles(pts: np.ndarray, h: float, soil):
     return b
 
 
+def make_particles_multi(groups):
+    """One particle builder with several materials: groups of (points, spacing h, soil)."""
+    import warp as wp
+
+    import newton
+    from newton.solvers import SolverImplicitMPM
+
+    b = newton.ModelBuilder()
+    SolverImplicitMPM.register_custom_attributes(b)
+    for pts, h, soil in groups:
+        n = len(pts)
+        b.add_particles(pos=[wp.vec3(*q) for q in pts], vel=[wp.vec3(0.0)] * n, mass=[float(h**3 * soil.density)] * n,
+                        radius=[h * 0.5] * n, custom_attributes=soil.custom_attributes(n))
+    return b
+
+
+# Newton's packing constraint ("fraction for particles under which the yield surface collapses"; > 0 enables the void-
+# fraction unilateral incompressibility offset). 0 (off) is what Phase 0 and WP0-WP3 used; WP3 diagnostics test it.
+CRITICAL_FRACTION = 0.0
+
+
 def make_solver(particle_model, collider_model, voxel: float, iterations: int, friction_by_body: dict, gravity=None):
     from newton.solvers import SolverImplicitMPM
 
     cfg = SolverImplicitMPM.Config()
     cfg.voxel_size = voxel
     cfg.max_iterations = iterations
-    cfg.critical_fraction = 0.0
+    cfg.critical_fraction = CRITICAL_FRACTION
     cfg.strain_basis = "P0"
     solver = SolverImplicitMPM(particle_model, config=cfg)
     solver.setup_collider(model=collider_model)

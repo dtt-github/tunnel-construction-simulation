@@ -14,7 +14,7 @@ import numpy as np
 
 from ..materials import Soil
 from ..probes import collider_forces
-from .common import add_walls, fill_box, make_particles, make_solver
+from .common import add_walls, fill_box, make_particles, make_particles_multi, make_solver
 
 G = 9.81
 
@@ -35,6 +35,8 @@ class Tunnel2DConfig:
     settle: int = 60
     iterations: int = 50
     seed: int = 0
+    surcharge_kpa: float = 0.0  # > 0: a heavy frictionless, cohesionless fluid layer on the surface applies this pressure
+    surcharge_thickness_over_d: float = 0.5
 
 
 def run(cfg: Tunnel2DConfig, soil: Soil) -> tuple[dict, dict]:
@@ -71,7 +73,13 @@ def run(cfg: Tunnel2DConfig, soil: Soil) -> tuple[dict, dict]:
     h = dx / cfg.ppc
     pts = fill_box((-hw, 0.0, 0.0), (hw, T, zs), h, cfg.seed)
     pts = pts[np.hypot(pts[:, 0], pts[:, 2] - zc) > R + 0.5 * h]
-    pm = make_particles(pts, h, soil).finalize()
+    if cfg.surcharge_kpa > 0:  # weightless benchmark: surcharge as a heavy fluid layer (friction 0, cohesion 0)
+        ts = cfg.surcharge_thickness_over_d * D
+        fluid = Soil("surcharge fluid", cfg.surcharge_kpa * 1e3 / (G * ts), 0.0, "surcharge layer")
+        top = fill_box((-hw, 0.0, zs), (hw, T, zs + ts), h, cfg.seed + 1)
+        pm = make_particles_multi([(pts, h, soil), (top, h, fluid)]).finalize()
+    else:
+        pm = make_particles(pts, h, soil).finalize()
     fr = {fixed: 0.0, -1: 0.5, **{s: 0.0 for s in segs}}  # smooth tunnel wall (as a pressurised bag)
     solver = make_solver(pm, cm, dx, cfg.iterations, fr)
     st = cm.state()
@@ -111,7 +119,7 @@ def run(cfg: Tunnel2DConfig, soil: Soil) -> tuple[dict, dict]:
         return None if i >= len(ctrl) else float(np.mean(ctrl[max(i - 3, 0):i + 4, 1]) / 1e3)
 
     gamma = soil.density * G
-    sz = gamma * (zs - zc)
+    sz = gamma * (zs - zc) + cfg.surcharge_kpa * 1e3
     res = {"diameter_m": D, "cover_over_D": cfg.cover, "voxel_per_D": cfg.voxel_per_d, "particles": len(pts),
            "p_settled_kPa": round(float(np.mean(log[cfg.settle - 10:cfg.settle, 1])) / 1e3, 2), "sigma_z_axis_kPa": round(sz / 1e3, 2)}
     for frac in (0.02, 0.05, 0.1):

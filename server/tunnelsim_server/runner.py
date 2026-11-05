@@ -15,7 +15,7 @@ from pathlib import Path
 from . import UNCALIBRATED
 from .materials import PHASE0_SAND, Soil, drained_sand, undrained_clay
 from .runrecord import gpu_snapshot, record
-from .scenes import collapse, face, face_sand, k0, rankine, tunnel_2d
+from .scenes import collapse, common, face, face_sand, k0, rankine, tunnel_2d
 
 RESULTS = Path(__file__).resolve().parent.parent / "results"
 # Face soils (WP2): rigid-plastic Drucker-Prager, mu = sin phi' (WP1)
@@ -31,6 +31,7 @@ FACE_SOILS = {
 
 
 def run(args) -> dict:
+    common.CRITICAL_FRACTION = args.critical_fraction
     gpu = gpu_snapshot()
     if args.scene == "face":
         cfg = face.FaceConfig(diameter=args.diameter, cover=args.cover, voxel=args.voxel, iterations=args.iterations, seed=args.seed)
@@ -50,9 +51,10 @@ def run(args) -> dict:
         return record("face_sand", face_sand.params(cfg, soil), result, UNCALIBRATED, gpu)
     if args.scene == "tunnel_2d":
         soil = FACE_SOILS[args.soil]
-        cfg = tunnel_2d.Tunnel2DConfig(diameter=args.diameter, cover=args.cover, voxel_per_d=args.vpd, iterations=args.iterations, seed=args.seed)
+        cfg = tunnel_2d.Tunnel2DConfig(diameter=args.diameter, cover=args.cover, voxel_per_d=args.vpd, iterations=args.iterations, seed=args.seed,
+                                       settle=args.settle)
         result, _ = tunnel_2d.run(cfg, soil)
-        return record("tunnel_2d", tunnel_2d.params(cfg, soil), result, UNCALIBRATED, gpu)
+        return record("tunnel_2d", {**tunnel_2d.params(cfg, soil), "critical_fraction": args.critical_fraction}, result, UNCALIBRATED, gpu)
     if args.scene == "k0":
         soil = drained_sand("element-test sand", 1600.0, args.phi, args.E, "element test (assumed values)", k0=args.k0)
         cfg = k0.K0Config(voxel=args.voxel, iterations=args.iterations, seed=args.seed)
@@ -81,6 +83,7 @@ def main() -> None:
         s.add_argument("--iterations", type=int, default=50)
         s.add_argument("--seed", type=int, default=0)
         s.add_argument("--name", type=str, default=None)
+        s.add_argument("--critical-fraction", type=float, default=0.0, help="Newton packing constraint (0 = off, as WP0-WP3)")
         if name == "face":
             s.add_argument("--diameter", type=float, default=2.0)
             s.add_argument("--cover", type=float, default=1.0)
@@ -89,6 +92,7 @@ def main() -> None:
             s.add_argument("--diameter", type=float, default=4.5)
             s.add_argument("--cover", type=float, default=2.0)
             s.add_argument("--vpd", type=float, default=10.0)
+            s.add_argument("--settle", type=int, default=60, help="frames before the ring closes")
         if name == "face_sand":
             s.add_argument("--soil", choices=["idinger", "wang33", "kaolin"], default="idinger")
             s.add_argument("--diameter", type=float, default=5.0)

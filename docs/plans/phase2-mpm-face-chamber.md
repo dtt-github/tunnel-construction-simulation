@@ -154,7 +154,16 @@ Each package ends with a check. A package is done only when its check passes, or
 **Status (5 Nov 2026, [clay](../validation/mpm-clay.md)): blocked.**
 - **The gap:** the MPM clay tunnel collapses at about half Kimura & Mair's stability ratio. That is N 2.0–2.8 against 3.5–4.3 in plane strain, below the weightless plasticity lower bound, and 3.8–4.3 against 7.05–9.0 for the heading at P/D 0.
 - **Ruled out:** cohesion scaling, stress level, leakage, friction, rate, solver convergence, resolution and the yield condition itself.
-- **What remains:** the soil is at yield almost everywhere, with a mean stress below the weight above. The next steps are a weightless benchmark and an equilibrium check. The London Clay route waits.
+- **Diagnosis (same day):**
+  - **Withdrawn:** equilibrium holds, so the earlier "weight not carried" explanation is withdrawn.
+  - **Not possible:** the weightless benchmark cannot be built in Newton.
+  - **The cause:** Newton's packing constraint (`critical_fraction`) was off in every scene, so the soil never stops compacting. With it at 0.8–0.9 the clay comes to rest and N rises to 3.0–3.7, near Kimura's 4.3, after a 13–17 % initial compaction.
+
+### WP0b: packing (added 5 Nov 2026)
+
+- Choose particles per cell and initial packing so that the constraint is active with less than 1 % settling before loading.
+- Fix `critical_fraction` for all scenes.
+- Repeat WP1, WP2 and WP3 with it, and re-pin the golden tests on purpose.
 
 ### WP4: EPB chamber with a pressure-controlled shove (about 3 weeks)
 
