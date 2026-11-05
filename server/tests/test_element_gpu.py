@@ -37,3 +37,14 @@ def test_collapse_b00_rousseau():
     r, _ = collapse.run(collapse.CollapseConfig(run="B00", gate_speed=1.0))
     assert r["Hf_sim"] == pytest.approx(0.11, rel=0.05)  # measured 0.11 m
     assert r["runout_sim_5mm"] == pytest.approx(0.18, rel=0.10)  # measured 0.18 m
+
+
+@pytest.mark.gpu
+@gpu
+def test_rankine_dilation_angle():
+    from tunnelsim_server.scenes import rankine
+
+    soil = m.drained_sand("t", 1600.0, 34.0, 1.0e15, "test", psi_deg=10.0)
+    r, _ = rankine.run(rankine.RankineConfig(voxel=0.2), soil)
+    assert r["psi_measured_deg"] == pytest.approx(10.0, abs=2.0)  # 9.57 when pinned
+    assert r["K_active"] == pytest.approx(m.rankine_ka(34.0), rel=0.1)

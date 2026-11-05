@@ -6,6 +6,11 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ### Added
 
+- **Phase 2, WP1b: dilatancy** ([element tests](docs/validation/mpm-element-tests.md#dilatancy-wp1b), [face](docs/validation/mpm-face-sand.md#prediction-with-dilation-from-bolton-wp1b)):
+  - Newton's dilatancy factor derived from its flow rule: a Drucker–Prager potential with β = θμ. The plane-strain mapping now takes (φ′, ψ), and an element test reproduces ψ within 0.5°;
+  - ψ from Bolton (1986) for Idinger's loose sand (4.7°): face settlement halves and pressure falls about 10 %, but the chimney still reaches the surface;
+  - the remaining gap is the round Drucker–Prager cone. Idinger's face pressures lie between its plane-strain and triaxial matches at every cover, so the face is reported as that bracket and stays uncalibrated.
+
 - **Phase 2, WP2: tunnel face in dry sand on the GPU** ([results](docs/validation/mpm-face-sand.md)), still **uncalibrated**:
   - half-model with displacement control (as the experiments) and a retract-only pressure servo (as the live view will need); the servo holds above the limit pressure and gives way below it;
   - face pressure within ±25 % of Wang et al. (2024) at D/10, but 40–100 % above Idinger et al.'s (2011) measured range at C/D ≤ 1; finer grids add about 20 % and converge at D/20–D/30;

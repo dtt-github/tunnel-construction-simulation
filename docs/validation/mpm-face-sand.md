@@ -4,7 +4,7 @@
 - **Code:** [`server/tunnelsim_server/scenes/face_sand.py`](../../server/tunnelsim_server/scenes/face_sand.py). Runs with `python -m tunnelsim_server.runner face_sand ...`; one JSON record per run in [`server/results/`](../../server/results/) (`fs_*`).
 - **Tests:** `server/tests/test_face_sand_gpu.py`.
 - **Solver:** Newton 1.7.0 implicit MPM, rigid-plastic Drucker–Prager with μ = sin φ′ and no dilation (the [WP1 mapping](mpm-element-tests.md)).
-- **Status:** **uncalibrated.** The face pressure passes one of the two pressure checks; the mechanism and settlement fail (see below).
+- **Status:** **uncalibrated, bracketed.** After WP1b, Idinger's measured pressures lie between the two Drucker–Prager cone matches at every cover. No single cone matches pressure, wedge and settlement together (see below).
 - **Run on:** 5 Nov 2026
 
 ## Set-up
@@ -98,11 +98,48 @@ At C/D 1.0 the 5 % pressure is 8.6 kPa at D/10, 10.3 at D/20 and 10.3 at D/30 (2
 | Production resolution | D/10 runs at about 1× real time with a shared GPU (27–35 ms per 16.7 ms frame); D/20 at about 0.13× |
 | Pressure control holds above the limit and gives way below | **Met** |
 
-## Next step (proposed)
+## Prediction with dilation from Bolton (WP1b)
 
-**WP1b: dilatancy.** Derive the meaning of Newton's `dilatancy` factor from the solver (`solve_flow_rule_aniso`), the way the friction mapping was derived. Check it with an element test that measures volume change in shear. Set it for each soil from an independent relation (Bolton 1986: ψ from relative density and stress level). Then repeat WP2 as a prediction against Idinger and Wang et al.
+WP1b derived Newton's dilatancy factor and checked it ([element tests](mpm-element-tests.md#dilatancy-wp1b)). The WP2 runs were then repeated with ψ = 4.7° from Bolton (1986) for Idinger's sand (Dr 0.30): μ 0.551, θ 0.148. Nothing was tuned to Idinger.
 
-Until then, the face view stays labelled **uncalibrated**. Its pressure can be quoted only with the D/10 Wang comparison beside it.
+| C/D | Pressure at 5 % D (kPa), D/10 / D/20 | Before (ψ 0), D/10 | Measured | Settlement / D, D/10 (before) | Measured | Zone to the surface (Idinger) | Wedge (Idinger) |
+|---|---|---|---|---|---|---|---|
+| 0.5 | 7.6 / 9.9 | 8.0 | 3.0–6.0 | 0.063 (0.076) | 0.055 | yes (yes) | 54° (64°) |
+| 1.0 | 7.5 / 9.7 | 8.6 | 4.5–6.0 | 0.030 (0.057) | 0.010 | yes (no) | 55° (66.5°) |
+| 1.5 | 7.9 / 9.7 | 8.7 | 6.5–9.5 | 0.018 (0.039) | 0.0095 | yes (no) | 54° (68°) |
+
+**Bolton's range** (C/D 1.0, D/10): ψ 3.2° gives 7.7 kPa and 0.037D; ψ 7.1° gives 7.3 kPa and 0.022D.
+
+**What dilation explains:**
+- **Settlement:** it halves, and comes within 1.1× (C/D 0.5) to 3× (C/D 1.0) of the measurements.
+- **Pressure:** it drops by about 10 %, and is still 25–70 % above Idinger at C/D ≤ 1.
+- **Mechanism:** the chimney still reaches the surface, and the wedge stays at 54–56°.
+
+### The remaining gap: the shape of the Drucker–Prager cone
+
+A Drucker–Prager cone is round in the deviatoric plane, while Mohr–Coulomb's is a hexagon. It can match φ′ in one stress state only:
+- **matched in plane strain** (the WP1 mapping, μ = sin φ′), φ′ = 34° is only 24.6° in triaxial compression;
+- **matched in triaxial compression** (μ = 0.794), the same φ′ is 52° in plane strain.
+
+A 3D face has zones close to both. The two matches therefore bracket the face, without anything being tuned (D/10, ψ 0):
+
+| C/D | Pressure, triaxial match / plane-strain match (kPa) | Idinger, measured | Wedge, triaxial / plane-strain match | Idinger | Settlement / D, triaxial match |
+|---|---|---|---|---|---|
+| 0.5 | 4.0 / 8.0 | 3.0–6.0 | 61.8° / 53.8° | 64.0° | 0.099 |
+| 1.0 | 4.1 / 8.6 | 4.5–6.0 | 62.0° / 53.6° | 66.5° | 0.078 |
+| 1.5 | 4.4 / 8.7 | 6.5–9.5 | 66.4° / 53.8° | 68.0° | 0.065 |
+
+- **Pressure:** Idinger's measurements lie inside the bracket at every cover.
+- **Wedge:** the triaxial match gets it close (62–66° against 64–68°).
+- **Settlement:** neither match without dilation comes close. With Bolton's dilation the plane-strain match is nearest.
+
+**Consequence.** Newton offers only this cone. A single cone cannot match a sand's face pressure, wedge and settlement at once, and choosing a cone between the two matches to fit Idinger would be tuning.
+
+**For the live view:**
+- report the face pressure as the bracket (triaxial match to plane-strain match), with the plane-strain match as the conservative upper value;
+- use Bolton's dilation.
+
+A Mohr–Coulomb (Lode-angle) yield surface would need a change to the solver's yield kernel. That is a possible later step, not done here.
 
 ## Limits
 

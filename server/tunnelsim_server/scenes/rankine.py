@@ -69,7 +69,12 @@ def run(cfg: RankineConfig, soil: Soil) -> tuple[dict, dict]:
     qd[wall, 0] = cfg.speed
     n_move = int(round(cfg.move / cfg.speed * cfg.fps))
     log, times = [], []
+    P0 = P1 = None
     for f in range(cfg.settle + n_move):
+        if f == cfg.settle:
+            P0 = s.particle_q.numpy().copy()
+        if P1 is None and f >= cfg.settle and (f - cfg.settle) * cfg.speed / cfg.fps >= 0.03 * H:
+            P1 = s.particle_q.numpy().copy()
         if f >= cfg.settle:
             q[wall, 0] += cfg.speed * dt
             s.body_q.assign(q)
@@ -90,9 +95,43 @@ def run(cfg: RankineConfig, soil: Soil) -> tuple[dict, dict]:
     d = log[cfg.settle:, 0]
     plateau = (d >= 0.005 * H) & (d <= 0.03 * H)
     k_active = float(-log[cfg.settle:, 1][plateau].mean() / norm)
-    return {"particles": len(pts), "K_settled": round(-k_settled, 4), "K_active": round(k_active, 4),
+    psi = _dilation_angle(P0, P1 if P1 is not None else s.particle_q.numpy(), dx, L, W, H)
+    return {"particles": len(pts), "K_settled": round(-k_settled, 4), "K_active": round(k_active, 4), **psi,
             "ms_per_frame": round(float(np.mean(times[5:]) * 1000), 2)}, {"force_log": log}
 
 
 def params(cfg: RankineConfig, soil: Soil) -> dict:
     return {**asdict(cfg), "soil": asdict(soil)}
+
+
+def _dilation_angle(P0: np.ndarray, P1: np.ndarray, dx: float, L: float, W: float, H: float, gamma_min: float = 0.02) -> dict:
+    """Dilation angle in the shear zone between the start of the wall movement and 3 % of H. Newton does not update the
+    particle deformation gradient here (it stays the identity), so the strain comes from the particle motion: the
+    displacements are averaged per grid cell (the solver's voxel) and differentiated (small strain). In the plane x-z
+    (plane strain across y): eps_v = du_x/dx + du_y/dy + du_z/dz, gamma = eps_1 - eps_3 = sqrt((e_xx - e_zz)^2 + 4 e_xz^2),
+    sin(psi) = eps_v / gamma over cells sheared more than gamma_min. Rigid-plastic soil, so all of it is plastic."""
+    n = (int(np.ceil(L / dx)), max(int(np.ceil(W / dx)), 1), int(np.ceil(H / dx)))
+    idx = np.floor(P0 / dx).astype(int)
+    ok = (idx >= 0).all(axis=1) & (idx[:, 0] < n[0]) & (idx[:, 1] < n[1]) & (idx[:, 2] < n[2])
+    flat = np.ravel_multi_index(tuple(idx[ok].T), n)
+    cnt = np.bincount(flat, minlength=np.prod(n)).reshape(n)
+    u = np.stack([np.bincount(flat, weights=(P1 - P0)[ok, k], minlength=np.prod(n)).reshape(n) for k in range(3)], axis=-1)
+    full = cnt >= 4
+    u[full] /= cnt[full][:, None]
+    g = [np.gradient(u[..., k], dx, axis=(0, 1, 2)) if n[1] > 1 else [np.gradient(u[..., k], dx, axis=0), np.zeros(n), np.gradient(u[..., k], dx, axis=2)] for k in range(3)]
+    exx, eyy, ezz = g[0][0], g[1][1], g[2][2]
+    exz = 0.5 * (g[0][2] + g[2][0])
+    ev = exx + eyy + ezz
+    gam = np.sqrt((exx - ezz) ** 2 + 4 * exz**2)
+    inner = np.zeros(n, bool)
+    inner[1:-1, :, 1:-1] = True  # one cell away from walls, base and surface
+    nb = full.copy()
+    for ax in (0, 2):
+        nb &= np.roll(full, 1, axis=ax) & np.roll(full, -1, axis=ax)
+    sel = inner & nb & (gam > gamma_min)
+    if not sel.any():
+        return {"psi_measured_deg": None, "sheared_cells": 0}
+    ratio = np.clip(ev[sel] / gam[sel], -1.0, 1.0)
+    return {"psi_measured_deg": round(float(np.degrees(np.arcsin(np.median(ratio)))), 2),
+            "psi_p25_p75_deg": [round(float(np.degrees(np.arcsin(np.percentile(ratio, q)))), 2) for q in (25, 75)],
+            "sheared_cells": int(sel.sum())}

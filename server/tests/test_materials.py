@@ -30,3 +30,22 @@ def test_soils():
     assert clay.friction == 0.0 and clay.yield_stress == 100e3
     # the Phase 0 sand keeps Newton's defaults, so the golden face test is unchanged
     assert m.PHASE0_SAND.young_modulus == 1.0e15 and m.PHASE0_SAND.yield_stress == 0.0
+
+
+def test_dilatancy_mapping_round_trip():
+    # (phi', psi) -> (mu, theta) -> (phi', psi); psi = 0 is the WP1 mapping
+    for phi, psi in ((34.0, 0.0), (34.0, 4.7), (30.0, 10.0), (40.0, 20.0)):
+        mu, theta = m.plane_strain_dp(phi, psi)
+        back = m.plane_strain_mc(mu, theta)
+        assert back[0] == pytest.approx(phi, abs=1e-6) and back[1] == pytest.approx(psi, abs=1e-6)
+    assert m.plane_strain_dp(34.0, 0.0) == (pytest.approx(math.sin(math.radians(34))), 0.0)
+    # theta = 1 (associated) with mu 0.5592 is phi = psi = 36.2 deg, not 34 deg
+    phi, psi = m.plane_strain_mc(0.5592, 1.0)
+    assert phi == pytest.approx(psi) and phi == pytest.approx(36.22, abs=0.01)
+
+
+def test_bolton_idinger():
+    # Idinger et al. (2011): e 0.77, emin 0.61, emax 0.84 -> Dr 0.304; p' about 69 kPa at the axis
+    assert m.bolton_psi(0.304, 69.0) == pytest.approx(4.71, abs=0.01)
+    assert m.bolton_psi(0.0, 100.0) == 0.0  # I_R clipped at 0
+    assert m.bolton_psi(1.0, 1.0) == pytest.approx(25.0)  # I_R clipped at 4

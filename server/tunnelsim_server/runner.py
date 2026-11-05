@@ -35,6 +35,10 @@ def run(args) -> dict:
         return record("face", face.params(cfg, PHASE0_SAND), result, UNCALIBRATED, gpu)
     if args.scene == "face_sand":
         soil = FACE_SOILS[args.soil]
+        if args.psi or args.match != "plane_strain":  # WP1b: dilation (Bolton 1986); cone matched in plane strain or triaxial
+            soil = drained_sand(soil.name + f", psi {args.psi} deg, {args.match} match", soil.density, soil.phi_deg, soil.young_modulus,
+                                soil.source + f"; psi {args.psi} deg (Bolton 1986); cone matched in {args.match}", psi_deg=args.psi,
+                                match=args.match)
         if args.dilatancy:  # sensitivity only (WP2): not a calibrated parameter
             soil = dataclasses.replace(soil, dilatancy=args.dilatancy, name=soil.name + f", dilatancy {args.dilatancy}")
         cfg = face_sand.FaceSandConfig(cover=args.cover, voxel_per_d=args.vpd, control=args.control, target_kpa=args.target_kpa, rate_over_d=args.rate,
@@ -47,7 +51,10 @@ def run(args) -> dict:
         result, _ = k0.run(cfg, soil)
         return record("k0", k0.params(cfg, soil), result, UNCALIBRATED, gpu)
     if args.scene == "rankine":
-        soil = Soil("element-test sand", 1600.0, args.mu, "element test (assumed values)")
+        if args.psi is not None:  # WP1b: (phi', psi) through the plane-strain mapping
+            soil = drained_sand("element-test sand", 1600.0, args.phi, 1.0e15, "element test (assumed values)", psi_deg=args.psi)
+        else:
+            soil = Soil("element-test sand", 1600.0, args.mu, "element test (assumed values)")
         cfg = rankine.RankineConfig(voxel=args.voxel, iterations=args.iterations, seed=args.seed)
         result, _ = rankine.run(cfg, soil)
         return record("rankine", rankine.params(cfg, soil), result, UNCALIBRATED, gpu)
@@ -77,12 +84,17 @@ def main() -> None:
             s.add_argument("--target-kpa", type=float, default=0.0)
             s.add_argument("--dilatancy", type=float, default=0.0, help="Newton dilatancy factor 0-1 (sensitivity only)")
             s.add_argument("--rate", type=float, default=0.025, help="retraction speed, D per second (displacement control)")
+            s.add_argument("--psi", type=float, default=0.0, help="dilation angle (deg), mapped with phi (WP1b)")
+            s.add_argument("--match", choices=["plane_strain", "triaxial"], default="plane_strain",
+                           help="Drucker-Prager cone matched to phi in plane strain (weakest) or triaxial compression (strongest)")
         if name == "k0":
             s.add_argument("--phi", type=float, default=34.0)
             s.add_argument("--E", type=float, default=5e6)
             s.add_argument("--k0", type=float, default=None)
         if name == "rankine":
             s.add_argument("--mu", type=float, default=0.5592)
+            s.add_argument("--phi", type=float, default=34.0, help="with --psi: Mohr-Coulomb friction angle")
+            s.add_argument("--psi", type=float, default=None, help="dilation angle; maps (phi, psi) to Newton (WP1b)")
         if name == "collapse":
             s.add_argument("--run", type=str, default="B00")
             s.add_argument("--gate-speed", type=float, default=1.0, help="m/s (assumed); 0 removes the gate at once")

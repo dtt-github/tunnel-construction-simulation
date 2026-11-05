@@ -134,6 +134,13 @@ Each package ends with a check. A package is done only when its check passes, or
 
 **Check:** the element test gives the intended dilation angle within ±2°. Then the WP2 checks again, unchanged.
 
+**Status (5 Nov 2026):**
+- **Mapping:** derived from the solver (β = θμ; sin ψ = β/√(1 − β²/3); strength also depends on β).
+- **Element test:** ψ within 0.5° of target for 0–20°.
+- **Prediction with Bolton's ψ = 4.7° for Idinger's sand:** settlement halves (now 1.1–3× Idinger), pressure falls about 10 % (still 25–70 % above at C/D ≤ 1), and the chimney still reaches the surface.
+- **The remaining gap is the shape of the Drucker–Prager cone.** Idinger's pressures lie between the plane-strain and triaxial matches at every cover, and the triaxial match gives the wedge (62–66° against 64–68°).
+- **The face stays uncalibrated, reported as a bracket.** A Mohr–Coulomb yield surface would need a change to the solver.
+
 ### WP3: undrained clay face (about 2 weeks)
 
 - Tresca-like material (friction 0, `yield_stress` = cu, finite E), as on the SEM page.

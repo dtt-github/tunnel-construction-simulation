@@ -104,6 +104,54 @@ The runout is the distance from the gate to where the deposit is thinner than 5 
 - **B20:** had not come to rest after 4 s.
 - **The front threshold matters for thin tails.** At 2.5 mm the steep bead runouts come out much longer (0.53 against 0.31 m for B10). The 5 mm figure matches the measured profiles, but the threshold was not stated by the source, so both are kept in the records.
 
+## Dilatancy (WP1b)
+
+### From the solver
+
+Newton's flow rule is `solve_sliding_aniso` in `rheology_solver_kernels.py`. In the orthonormal stress basis, the plastic strain rate has a normal part u_N = θ·μ_s·|u_T|:
+- θ is `dilatancy`, clamped to 0–1;
+- μ_s is the slope of the cone in that basis.
+
+In ordinary terms this is a Drucker–Prager flow potential √J2 − β·p with β = θ·μ, so ε̇_v = 2β·√(ė:ė/2). θ = 1 is associated flow and θ = 0 no volume change.
+
+Working through plane strain gives two relations:
+- **Dilation:** sin ψ = β / √(1 − β²/3)
+- **Strength:** sin φ′ = μ·√(1 − β²/3) / (1 − μβ/3), so dilation also raises the strength
+
+To match a Mohr–Coulomb soil (φ′, ψ): **β = sin ψ / √(1 + sin²ψ/3), μ = sin φ′ / (√(1 − β²/3) + β sin φ′/3), θ = β/μ.** At ψ = 0 this is the WP1 mapping.
+
+This explains the WP2 sensitivity runs. θ = 1 with μ = 0.559 was φ′ = ψ = 36.2°, and θ = 0.3 was φ′ = 35.1° with ψ = 9.7°. Neither was φ′ = 34° with a little dilation.
+
+### Element test: Rankine wall, dilation measured
+
+Newton does not update the particle deformation gradient here; it stays the identity. So the strain is taken from the particle motion:
+- the displacements are averaged per voxel between the start of the wall movement and 3 % of H, then differentiated;
+- ψ = arcsin(ε_v / (ε₁ − ε₃)), taken over the cells sheared by more than 2 %.
+
+φ′ = 34° throughout:
+
+| Target ψ | μ | θ | ψ measured, median (interquartile) | K_a (Rankine 0.283) | Voxel |
+|---|---|---|---|---|---|
+| 0° | 0.559 | 0 | −0.4° (−3.9 to 3.6) | 0.301 | H/20 |
+| 4.7° | 0.551 | 0.148 | 4.2° | 0.293 | H/20 |
+| 10° | 0.544 | 0.317 | 9.7° (6.4 to 13.6) | 0.284 | H/20 |
+| 10° | 0.544 | 0.317 | 9.6° | 0.269 | H/10 |
+| 20° | 0.536 | 0.626 | 20.5° (16.8 to 24.5) | 0.271 | H/20 |
+
+**Results:**
+- **Dilation:** ψ is reproduced within 0.5° (check: ±2°).
+- **Strength:** K_a stays within −5 % to +6 % of Rankine for φ′ = 34° whatever ψ is, so the strength half of the mapping holds too.
+
+### Dilation for a soil: Bolton (1986)
+
+Bolton, *Géotechnique* 36(1):65–78, [doi:10.1680/geot.1986.36.1.65](https://doi.org/10.1680/geot.1986.36.1.65):
+- I_R = Dr(10 − ln p′) − 1, with p′ in kPa and 0 ≤ I_R ≤ 4;
+- in plane strain, φ′_max − φ′_crit = 5·I_R = 0.8·ψ.
+
+**Idinger's sand:** e 0.77, e_min 0.61, e_max 0.84, so Dr = 0.30. At p′ ≈ 69 kPa at the axis (σv ≈ 110 kPa, K0 0.44), **ψ = 4.7°**; the range is 3.2–7.1° for p′ of 150 down to 20 kPa.
+
+**Liu et al.'s sand (Wang et al.):** no relative density is published, so ψ stays 0, as Wang et al. used.
+
 ## Status of the WP1 checks
 
 | Check (plan) | Result |
@@ -111,6 +159,7 @@ The runout is the distance from the gate to where the deposit is thinner than 5 
 | K0 within ±10 % of 1 − sin φ′, independent of resolution | **Failed.** 0.74–0.86, independent of ν. The at-rest state comes from the analytical model (plan fallback) |
 | Friction mapping fixed | **Done.** μ = sin φ′ (plane strain, ψ = 0): within ±6 % of Rankine for φ′ ≤ 34° at H/10–H/20; weaker at high friction and on finer grids |
 | Column runout within the experimental scatter | **Met** for 7 of 8 runs (±17 %), matching the source's own simulation; G10 is an outlier for both |
+| Dilatancy: the element test gives the intended ψ within ±2° (WP1b) | **Met** (within 0.5° for ψ 0–20°; K_a unchanged within −5 % to +6 %) |
 
 ## Limits
 
