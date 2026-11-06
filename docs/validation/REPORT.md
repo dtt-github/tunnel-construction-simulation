@@ -42,6 +42,8 @@
 | Smax, Thames chalk, 17 twin-bore sections | Cheng & Mikulski (2014), Table 1 | Median 1.10 (0.80–2.38) | Calibrated: VL 0.25 % fitted to these sections. The paper doesn't state how its table should be read; the reading that agrees was chosen |
 | Second bore, Hyde Park | Wan et al. (2017) | VL ratio median 1.7, Ky 0.44 → 0.33 | Calibrated parameters, then transferred to Farringdon |
 | Farringdon – Liverpool Street | none on this stretch | VL 0.5 %, K 0.43 transferred from Hyde Park | Untested |
+| Thames chalk defaults at North Woolwich (not one of the 17) | Liew (2016), Crossrail Learning Legacy | First bore 5.6 against 9 mm (0.63×), second 6.8 against 5 mm (1.35×). Measured VL 0.32 / 0.165 %, K 0.40 / 0.39 | Independent in place, same machines: VL consistent, K 0.5 wide, second bore half the first, not 1.2× |
+| Chalk volume loss and K, CTRL Contract 220 | Wongsaroj et al. (2006), Table 4 | VL 0.28 % (0.18–0.53), K 0.43 (0.4–0.5) against 0.25 % and 0.5 | Bracket: EPB, Thanet Sand over chalk |
 
 ### Thrust and torque ([EPB field data](epb-open-data.md))
 
@@ -155,8 +157,8 @@ A calibrated parameter is trustworthy only once data it was not fitted on confir
 |---|---|---|
 | Shield friction 0.17, rim 0.07 | Changsha, 281 rings | Mashhad and Sofia: thrust yes; torque at Mashhad 1.3 bar yes, Sofia no |
 | CSM ψ = −0.1 | Follo 4.5 km mean | Follo sections: not followed; Queens Water Tunnel (gneiss, 10 stations): median 1.02×, scatter 0.71–1.82× |
-| Thames volume loss 0.25 %, K 0.5 | 17 Thames sections | Nothing independent yet |
-| Second-bore ratio 1.7, Ky 0.44 → 0.33 | Hyde Park | Thames ratios 1.0–2.5 (median 1.2): consistent, not a test |
+| Thames volume loss 0.25 %, K 0.5 | 17 Thames sections | North Woolwich (Liew 2016): VL 0.165–0.32 % (consistent), K 0.40 (narrower); CTRL chalk/sand VL 0.28 %, K 0.43 (bracket) |
+| Second-bore ratio 1.7, Ky 0.44 → 0.33 | Hyde Park | Thames ratios 1.0–2.5 (median 1.2): consistent, not a test. North Woolwich chalk: 0.52, the other way |
 | Ulvin mucking rate and downtime share | Ulvin | T10.5 contractor estimate: inside the range |
 | Norwegian contour spacing 0.47 m, burden 0.75 B | Published T10.5 hole counts | Nothing else |
 | MPM friction mapping μ = sin φ′ | Rankine wall | Column collapse (yes); face pressure (bracket only) |

@@ -6,6 +6,11 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ### Changed
 
+- **Thames chalk settlement defaults tested on data not used to set them** (script `models/py/validation/settlement_chalk_independent.py`):
+  - at the Store Road Inlet, North Woolwich ([Liew 2016](https://learninglegacy.crossrail.co.uk/documents/observations-tunnelling-effects-large-diameter-jointed-concrete-pipe-crossrail-contract-c310-north-woolwich-newham-london/), same slurry shields, chalk face, not one of the 17 calibration sections), the defaults give 5.6 mm against 9 mm for the first bore and 6.8 against 5 mm for the second;
+  - the measured volume loss (0.32 % and 0.165 %) is consistent with 0.25 %, and so is CTRL Contract 220's 0.28 % in sand over chalk ([Wongsaroj et al. 2006](https://www.issmge.org/uploads/publications/6/11/2005_044.pdf)); both sites give K about 0.4, narrower than the default 0.5;
+  - the second bore lost about half the first's volume there, against the demo's 1.2×: the Thames second-bore setting is now marked unconfirmed. One site is not enough to refit, so no defaults change.
+
 - **Slurry drive checked on a second project** ([Betuweroute, Jonker 2004](https://www.cementonline.nl/artikelen/boortunnels-in-de-betuweroute); script `models/py/validation/slurry_betuweroute_advance.py`):
   - on the Sophia and PanKan slurry tunnels (8.65 m, Dutch sand), the drive model with each tunnel's published boring and ring-build times gives 0.78–0.98× the measured whole-drive advance, so the Thames drive's 2× shortfall is that drive's own (river crossing, interventions, one TBM at a time);
   - with the day-to-day variation fitted on Crossrail, best days come out 37–45 m against 36 and best weeks 180–215 m against 213–216: a second independent test of it;
