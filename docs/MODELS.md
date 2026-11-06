@@ -486,7 +486,9 @@ Outputs: utilisation (boring time / calendar time); mean advance per day and wee
 
 - the distributions come from one project;
 - locomotive travel time growing with tunnel length is not modelled: on the source project's own settings the model gives about 19 % utilisation against the paper's 14 %;
-- no learning curve, breakdowns by subsystem, station transits or ground-related stops besides tool interventions;
+- no breakdowns by subsystem, station transits or ground-related stops besides tool interventions;
+- the learning curve is optional (`learning_days`): about three months to average speed from [Barcelona Line 9](https://www.mdpi.com/2071-1050/17/9/3966), with a linear ramp from half speed that is assumed;
+- Barcelona Line 9, a second project, also runs about 30 % faster than the model on average and 3.5–4× on its best day ([validation](validation/epb-crossrail-advance.md#a-second-project-barcelona-metro-line-9));
 - no day-to-day correlation of ring times, so best days and weeks are too low;
 - on the Thames Tunnel Mixshields (drive H) the working day is 7–58 % fast (10.7–12.5 against 7.9–10.0 rings), with no separation-plant stops in the model ([validation](validation/slurry-thames-advance.md));
 - hard-rock terms (stroke, regrip, rock support, cutter changes per cutter) are still to come.

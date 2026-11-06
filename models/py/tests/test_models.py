@@ -227,3 +227,17 @@ def test_practice_specific_charge():
     assert practice_specific_charge(74.59, road_only=False)[0] < 2.1  # the urban tunnel with blasting limits
     # the demo's Norwegian-practice round charges less than the road tunnels logged in 2021-2024
     assert design_round(10.6, 2.9, 5.2).specific_charge < 0.7 * lo
+
+
+def test_learning_curve():
+    from tunnelsim_models.utilisation import LEARNING_DAYS_BARCELONA, DriveSettings, simulate_drive
+
+    kw = {"shift_pattern": "2x12h_maintenance_per_cycle", "boring_min": 26.7, "ring_length": 1.6,
+          "ring_build": {"kind": "fixed", "value": 32.0}, "interventions": False}
+    steady = simulate_drive(DriveSettings(**kw), days=180, seed=3)
+    learn = simulate_drive(DriveSettings(**kw, learning_days=LEARNING_DAYS_BARCELONA), days=180, seed=3)
+    # a slower start, the same steady rate once learnt (no randomness without interventions and with fixed times)
+    assert learn.metres < steady.metres
+    first = simulate_drive(DriveSettings(**kw, learning_days=LEARNING_DAYS_BARCELONA), days=30, seed=3)
+    assert first.mean_m_per_day < 0.7 * steady.mean_m_per_day
+    assert learn.best_day == pytest.approx(steady.best_day, rel=0.15)

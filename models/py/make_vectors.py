@@ -179,6 +179,12 @@ for sp, hl, bore, iv, days, seed in [("2x10h_plus_4h_maintenance", "conveyor", N
     r = simulate_drive(DriveSettings(shift_pattern=sp, haulage=hl, boring_min=bore, interventions=iv), days=days, seed=seed)
     util["drives"].append({"in": {"shift_pattern": sp, "haulage": hl, "boring_min": bore, "interventions": iv, "days": days, "seed": seed},
                            "out": asdict(r) | {"check": record_check(7.08, r.best_day, r.best_week, r.best_month)}})
+util["learning"] = []
+for ld, ls, days, seed in [(90.0, 0.5, 120, 2), (30.0, 0.3, 60, 5)]:
+    r = simulate_drive(DriveSettings(shift_pattern="2x12h_maintenance_per_cycle", boring_min=26.7, ring_length=1.6,
+                                     ring_build={"kind": "fixed", "value": 32.0}, interventions=True, learning_days=ld, learning_start=ls),
+                       days=days, seed=seed)
+    util["learning"].append({"in": {"learning_days": ld, "learning_start": ls, "days": days, "seed": seed}, "out": asdict(r)})
 write("utilisation", util)
 from tunnelsim_models import max_rpm  # noqa: E402
 from tunnelsim_models.hard_rock import cutter_change_h_per_km, hard_rock_utilisation, rmr_class, support_downtime  # noqa: E402

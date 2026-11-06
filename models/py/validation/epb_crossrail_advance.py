@@ -11,6 +11,10 @@ Data (open sources, read and cited, not redistributed):
 - 12 m shield: Crossrail Learning Legacy, TBM station transits,
   https://learninglegacy.crossrail.co.uk/documents/tbm-station-transits/
 - About 110 m a week under Hyde Park (drive X, London Clay): Wan et al. (2017), Geotechnique 67(5), p. 421.
+- Second project: Barcelona Metro Line 9, 9.40 m EPBs, 1.5 m rings (Sustainability 17(9), 3966, 2025, CC BY,
+  https://www.mdpi.com/2071-1050/17/9/3966): Hades TBM 26.37 m/day (about 18 rings) over more than 8 km and Section 1D
+  28.5 m/day (19 rings), both excluding stationary periods; best days 72 m (48 rings) and 90 m (60 rings); face advance
+  speed kept within 80 mm/min; the first machine took "a little over three months to reach average speed".
 
 The model's downtime distributions come from a 6.88 m metro EPB in Tabriz (Moosazadeh et al. 2018); push time per ring
 is not published for Crossrail, so the advance speed is varied.
@@ -36,10 +40,13 @@ TABLE3 = (("Phyllis", "X", 519, 358, 9.0, 13.1, 33, 179), ("Ada", "X", 522, 313,
 SHIFTS = (("2x12h_maintenance_per_cycle", "2 x 12 h, maintenance in each cycle"), ("2x10h_plus_4h_maintenance", "2 x 10 h + 4 h maintenance shift"))
 
 
-def forecast(shift: str, adv_mm_min: float, interventions: bool, runs: int = 20, days: int = 90) -> dict:
-    rs = [simulate_drive(DriveSettings(ring_length=RING, boring_min=RING / (adv_mm_min / 1000), ring_build={"kind": "fixed", "value": BUILD},
-                                       shift_pattern=shift, haulage="conveyor", interventions=interventions), days, seed) for seed in range(1, runs + 1)]
-    return {"rings_day": st.mean(r.mean_m_per_day for r in rs) / RING, "best_day": st.median(r.best_day for r in rs) / RING,
+def forecast(shift: str, adv_mm_min: float, interventions: bool, runs: int = 20, days: int = 90, ring: float = RING,
+             learning_days: float = 0.0) -> dict:
+    rs = [simulate_drive(DriveSettings(ring_length=ring, boring_min=ring / (adv_mm_min / 1000), ring_build={"kind": "fixed", "value": BUILD},
+                                       shift_pattern=shift, haulage="conveyor", interventions=interventions, learning_days=learning_days),
+                         days, seed) for seed in range(1, runs + 1)]
+    return {"m_day": st.mean(r.mean_m_per_day for r in rs), "best_day_m": st.median(r.best_day for r in rs),
+            "rings_day": st.mean(r.mean_m_per_day for r in rs) / ring, "best_day": st.median(r.best_day for r in rs) / RING,
             "best_week": st.median(r.best_week for r in rs) / RING, "util": st.mean(r.utilisation for r in rs)}
 
 
@@ -61,3 +68,17 @@ if __name__ == "__main__":
             for iv in (False, True):
                 f = forecast(shift, adv, iv)
                 print(f"| {label} | {adv} | {'yes' if iv else 'no'} | {f['rings_day']:.1f} | {f['best_day']:.0f} | {f['best_week']:.0f} | {f['util'] * 100:.0f} % |")
+
+    print("\n### Barcelona Line 9 (Sustainability 2025, CC BY): 1.5 m rings, 32 min build (Crossrail value, assumed), 2 x 12 h, no interventions\n")
+    print("| Advance speed (mm/min) | Model m/day | Model rings/day | Model best day (m) | Barcelona, excluding stationary periods | Barcelona best day |")
+    print("|---|---|---|---|---|---|")
+    for adv in (60, 80):
+        f = forecast("2x12h_maintenance_per_cycle", adv, False, ring=1.5)
+        print(f"| {adv} | {f['m_day']:.1f} | {f['rings_day']:.1f} | {f['best_day_m']:.0f} | 26.4-28.5 m/day (18-19 rings) | 72-90 m (48-60 rings) |")
+    print("\n### Learning curve (about three months to average speed, Barcelona; linear ramp from half speed assumed)\n")
+    print("| Shift pattern | Advance speed | First 90 days, m/day | Steady, m/day | Ratio |\n|---|---|---|---|---|")
+    for shift, label in SHIFTS:
+        a = forecast(shift, 60, True, learning_days=90.0)
+        b = forecast(shift, 60, True)
+        print(f"| {label} | 60 | {a['m_day']:.1f} | {b['m_day']:.1f} | {a['m_day'] / b['m_day']:.2f} |")
+

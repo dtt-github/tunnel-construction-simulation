@@ -13,6 +13,10 @@ References
 - Roby, J., Willis, D. (2014). Achieving fast EPB advance rates. NAT 2014. 40 EPBs, 5.9-10.2 m: mean 85.4 m/week
   (SD 36.0, max 178.5).
 - Record and reference rates: see ADVANCE_REFERENCES (each entry has its source).
+- Barcelona Metro Line 9, 9.40 m EPBs (Sustainability 17(9), 3966, 2025, CC BY, https://www.mdpi.com/2071-1050/17/9/3966): the first machine took "a
+  little over three months to reach average speed" (learning curve). Learning curve here: production activities run
+  at a fraction of their steady rate that rises linearly from LEARNING_START to 1 over learning_days of calendar time;
+  the linear shape and the starting fraction are assumptions, only the duration has a source.
 
 Model (discrete events, one ring at a time):
     per ring: boring (from the advance speed, or the fitted distribution) -> ring build -> general activities
@@ -22,7 +26,8 @@ Model (discrete events, one ring at a time):
               time to repair, in calendar time (interventions run round the clock).
 Distribution parameters are as fitted for one project (Tabriz) and are illustrative for others; calibrate per project.
 Not modelled: locomotive travel time growing with tunnel length (Tabriz models it; there our simplified rail haulage
-gives about 19 % utilisation against their 14 %), learning curve, ground-related stops other than tool interventions.
+gives about 19 % utilisation against their 14 %), ground-related stops other than tool interventions. The learning
+curve is optional (learning_days, off by default).
 
 A seeded generator (mulberry32) makes runs reproducible and identical in the JavaScript twin.
 Units: minutes inside the model; outputs in metres, days and fractions.
@@ -115,6 +120,8 @@ SHIFT_PATTERNS = {
                       "source": "none: no maintenance at all, for checks and upper bounds only"},
 }
 PER_CYCLE_MAINTENANCE_MIN = 25.0 + 12.0  # TBM + logistics system, Tabriz
+LEARNING_DAYS_BARCELONA = 90.0  # "a little over three months to reach average speed", Barcelona Line 9 (see above)
+LEARNING_START = 0.5  # productivity on the first day as a fraction of the steady rate: assumed
 
 
 @dataclass
@@ -126,6 +133,8 @@ class DriveSettings:
     shift_pattern: str = "2x10h_plus_4h_maintenance"
     haulage: str = "conveyor"  # "rail": train delay every cycle; "conveyor": none
     interventions: bool = True
+    learning_days: float = 0.0  # learning curve length (calendar days); 0 = steady from the start
+    learning_start: float = LEARNING_START  # productivity on day 0 as a fraction of the steady rate
 
 
 @dataclass(frozen=True)
@@ -181,15 +190,22 @@ def simulate_drive(settings: DriveSettings, days: int = 90, seed: int = 1) -> Dr
             dur -= d
         return t, max(dur, 0.0)
 
+    def slow(t: float) -> float:
+        """Duration factor of production activities at time t: 1 / productivity on the learning curve."""
+        if settings.learning_days <= 0:
+            return 1.0
+        f = min(t / (settings.learning_days * DAY), 1.0)
+        return 1.0 / (settings.learning_start + (1.0 - settings.learning_start) * f)
+
     while t < horizon:
         bore = settings.boring_min if settings.boring_min is not None else sample(DIST["boring"], rng.uniform())
-        t, left = work(t, bore, "boring")
+        t, left = work(t, bore * slow(t), "boring")
         if left > 1e-9:
             break  # horizon reached during boring: the partial ring is not credited
         daily[min(int((t - 1e-9) / DAY), days - 1)] += settings.ring_length  # credited when boring ends
         rings += 1
-        t, _ = work(t, sample(settings.ring_build, rng.uniform()), "ring_build")
-        t, _ = work(t, sample(settings.general, rng.uniform()), "general")
+        t, _ = work(t, sample(settings.ring_build, rng.uniform()) * slow(t), "ring_build")
+        t, _ = work(t, sample(settings.general, rng.uniform()) * slow(t), "general")
         if settings.haulage == "rail":
             t, _ = work(t, sample(DIST["train_delay"], rng.uniform()), "train_delay")
         if pattern["per_cycle_maintenance"]:

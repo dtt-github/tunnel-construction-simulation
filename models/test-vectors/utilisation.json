@@ -312,5 +312,65 @@
     }
    }
   }
+ ],
+ "learning": [
+  {
+   "in": {
+    "learning_days": 90.0,
+    "learning_start": 0.5,
+    "days": 120,
+    "seed": 2
+   },
+   "out": {
+    "days": 120,
+    "rings": 980,
+    "metres": 1567.9999999999998,
+    "utilisation": 0.18984510793990408,
+    "mean_m_per_day": 13.066666666666665,
+    "mean_m_per_week": 91.46666666666665,
+    "best_day": 20.8,
+    "best_week": 136.0,
+    "best_month": 569.6,
+    "shares": {
+     "boring": 0.18984510793990408,
+     "ring_build": 0.227492229629969,
+     "general": 0.1802230659490773,
+     "train_delay": 0.0,
+     "maintenance_per_cycle": 0.20983796296296298,
+     "intervention": 0.1926016335180688,
+     "maintenance_shift_and_idle": 1.7763568394002505e-14
+    },
+    "interventions": 3
+   }
+  },
+  {
+   "in": {
+    "learning_days": 30.0,
+    "learning_start": 0.3,
+    "days": 60,
+    "seed": 5
+   },
+   "out": {
+    "days": 60,
+    "rings": 490,
+    "metres": 784.0,
+    "utilisation": 0.19621359832679883,
+    "mean_m_per_day": 13.066666666666666,
+    "mean_m_per_week": 91.46666666666667,
+    "best_day": 20.8,
+    "best_week": 134.4,
+    "best_month": 451.2,
+    "shares": {
+     "boring": 0.19621359832679883,
+     "ring_build": 0.23488707252767566,
+     "general": 0.18720499439234062,
+     "train_delay": 0.0,
+     "maintenance_per_cycle": 0.20940972222222223,
+     "intervention": 0.1722846125309721,
+     "maintenance_shift_and_idle": 0.0
+    },
+    "interventions": 2
+   }
+  }
  ]
 }

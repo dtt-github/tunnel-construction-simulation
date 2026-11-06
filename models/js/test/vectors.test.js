@@ -158,6 +158,11 @@ test("utilisation model matches python", () => {
     const r = simulateDrive({ shift_pattern: i.shift_pattern, haulage: i.haulage, boring_min: i.boring_min, interventions: i.interventions }, i.days, i.seed);
     close({ ...r, check: recordCheck(7.08, r.best_day, r.best_week, r.best_month) }, out, `drive ${i.shift_pattern} seed ${i.seed}`, 1e-6);
   }
+  for (const { in: i, out } of v.learning) {
+    const r = simulateDrive({ shift_pattern: "2x12h_maintenance_per_cycle", boring_min: 26.7, ring_length: 1.6, ring_build: { kind: "fixed", value: 32 },
+      interventions: true, learning_days: i.learning_days, learning_start: i.learning_start }, i.days, i.seed);
+    close(r, out, `learning ${i.learning_days} d`, 1e-6);
+  }
 });
 
 test("hard-rock models match python", () => {

@@ -6,6 +6,11 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ### Changed
 
+- **A second advance check and a learning curve** ([Barcelona Line 9](https://www.mdpi.com/2071-1050/17/9/3966), Sustainability 2025, CC BY):
+  - Barcelona's 9.40 m EPBs averaged 26.4–28.5 m/day with best days of 72–90 m; the drive model gives 18–19 m/day and 20–21 m, about 30 % slow on average and 3.5–4× on the best day, confirming on a second project that best days are too low;
+  - the drive model has an optional learning curve (`learning_days`): about three months to average speed as at Barcelona, with a linear ramp from half speed (assumed). The EPB and Mixshield forecasts show the first 90 days of a new drive (0.78–0.83 of the steady rate) beside the steady forecast;
+  - no open breakdown of delays by cause was found, so the Tabriz distributions stay.
+
 - **EPB torque in conditioned ground: paste shear** (`cutterhead_torque(..., tau_paste=...)` in Python and JavaScript; EPB demo):
   - in fine-grained ground conditioned with foam, the face, back and mixing-arm shear is capped at the paste's shear strength, 2 kPa from the laboratory range in [Bezuijen et al. 2005](https://www.issmge.org/uploads/publications/6/11/2005_023.pdf) (1–3 kPa), not fitted;
   - Sofia's torque in conditioned clays and silty sands goes from 2.7× to 0.98–1.14× measured. Changsha (rock) and Mashhad (dense dry sand) keep friction, which fits them; paste shear would halve them. The split by ground type is this project's reading of the data, stated as such;
