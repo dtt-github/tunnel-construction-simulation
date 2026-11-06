@@ -60,11 +60,14 @@ export const SHIFT_PATTERNS = Object.freeze({
   idealised_24h: { production_h: 24, per_cycle_maintenance: false, source: "none: no maintenance at all, for checks and upper bounds only" },
 });
 export const PER_CYCLE_MAINTENANCE_MIN = 25 + 12;
+export const LEARNING_DAYS_BARCELONA = 90; // "a little over three months to reach average speed" (see utilisation.py)
+export const LEARNING_START = 0.5; // assumed
 const DAY = 1440;
 
 export const defaultDriveSettings = () => ({
   ring_length: 1.5, boring_min: null, ring_build: DIST.ring_build, general: DIST.general,
   shift_pattern: "2x10h_plus_4h_maintenance", haulage: "conveyor", interventions: true,
+  learning_days: 0, learning_start: LEARNING_START,
 });
 
 function productionWindow(t, prodMin) {
@@ -94,15 +97,17 @@ export function simulateDrive(settings, days = 90, seed = 1) {
     }
     return [tt, Math.max(dur, 0)];
   };
+  // learning curve (Barcelona Line 9 duration; linear shape and start fraction assumed): 1 / productivity at t
+  const slow = (tt) => (s.learning_days > 0 ? 1 / (s.learning_start + (1 - s.learning_start) * Math.min(tt / (s.learning_days * DAY), 1)) : 1);
   while (t < horizon) {
     const bore = s.boring_min !== null ? s.boring_min : sample(DIST.boring, rng.uniform());
     let left;
-    [t, left] = work(t, bore, "boring");
+    [t, left] = work(t, bore * slow(t), "boring");
     if (left > 1e-9) break;
     daily[Math.min(Math.floor((t - 1e-9) / DAY), days - 1)] += s.ring_length;
     rings++;
-    [t] = work(t, sample(s.ring_build, rng.uniform()), "ring_build");
-    [t] = work(t, sample(s.general, rng.uniform()), "general");
+    [t] = work(t, sample(s.ring_build, rng.uniform()) * slow(t), "ring_build");
+    [t] = work(t, sample(s.general, rng.uniform()) * slow(t), "general");
     if (s.haulage === "rail") [t] = work(t, sample(DIST.train_delay, rng.uniform()), "train_delay");
     if (pattern.per_cycle_maintenance) [t] = work(t, PER_CYCLE_MAINTENANCE_MIN, "maintenance_per_cycle");
     if (rings >= nextStop && t < horizon) {

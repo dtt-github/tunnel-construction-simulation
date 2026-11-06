@@ -13,7 +13,7 @@ import {
   infiltration as slurryInfiltration, cushion as makeCushion, facePressure, dischargeDensity, drySolidsFlow, theoreticalDryFlow,
   durandVelocity, pipeVelocity, CONTROL_TOLERANCE,
   verticalStress, presetTrough, twinTroughs, deflectionRatios, deflectionModificationFactor, frameBendingStiffness, relativeBendingStiffness, burlandCategory, referenceInstalled, erf,
-  Rng, sample as sampleDist, DIST, SHIFT_PATTERNS, PER_CYCLE_MAINTENANCE_MIN, simulateDrive, recordCheck, EPB_WEEKLY_SURVEY,
+  Rng, sample as sampleDist, DIST, SHIFT_PATTERNS, PER_CYCLE_MAINTENANCE_MIN, simulateDrive, LEARNING_DAYS_BARCELONA, recordCheck, EPB_WEEKLY_SURVEY,
   scenario as loadScenario, jsceRing, woodInertia, subgradeModulus, terzaghiLoads, activeCoefficient, sectionStresses, jackingStress, burstingForce, annulusVolume, groutWindow, ITA2000_ALLOWABLE,
 } from "../../models/js/index.js";
 
@@ -1213,11 +1213,18 @@ function runForecast() {
     runs.push(simulateDrive({ ring_length: W, boring_min: f.boring, ring_build: { kind: "fixed", value: M.buildMin }, shift_pattern: f.shift,
       haulage: f.haulage, interventions: f.iv }, 90, seed));
   }
+  // the same 90 days at the start of a new drive, with the learning curve (Barcelona Line 9: about three months to
+  // reach average speed; linear ramp from half speed assumed)
+  const newDrive = [];
+  for (let seed = 1; seed <= 20; seed++) {
+    newDrive.push(simulateDrive({ ring_length: W, boring_min: f.boring, ring_build: { kind: "fixed", value: M.buildMin }, shift_pattern: f.shift,
+      haulage: f.haulage, interventions: f.iv, learning_days: LEARNING_DAYS_BARCELONA }, 90, seed).mean_m_per_day);
+  }
   const mean = (k) => runs.reduce((a, r) => a + r[k], 0) / runs.length;
   const med = (k) => { const xs = runs.map((r) => r[k]).sort((a, b) => a - b); return (xs[9] + xs[10]) / 2; };
   const shares = {};
   for (const r of runs) for (const [k, v] of Object.entries(r.shares)) shares[k] = (shares[k] ?? 0) + v / runs.length;
-  FC = { util: mean("utilisation"), day: mean("mean_m_per_day"), week: mean("mean_m_per_week"), bestDay: med("best_day"), bestWeek: med("best_week"),
+  FC = { util: mean("utilisation"), day: mean("mean_m_per_day"), newDriveDay: newDrive.reduce((x, y) => x + y, 0) / newDrive.length, week: mean("mean_m_per_week"), bestDay: med("best_day"), bestWeek: med("best_week"),
     bestMonth: med("best_month"), stops: mean("interventions"), shares };
   FC.check = recordCheck(M.D, FC.bestDay, FC.bestWeek, FC.bestMonth, "slurry");
 }
@@ -1242,6 +1249,7 @@ function forecastHtml() {
   return `<dl>
     <dt>Utilisation (boring / calendar time)</dt><dd>${fmt(FC.util * 100, 0)} %</dd>
     <dt>Mean advance</dt><dd>${fmt(FC.day, 1)} m/day · ${fmt(FC.week, 0)} m/week</dd>
+    <dt>First 90 days of a new drive</dt><dd>${fmt(FC.newDriveDay, 1)} m/day (learning curve: about three months to reach average speed, as on Barcelona Line 9; linear ramp from half speed assumed)</dd>
     <dt>40-EPB survey for comparison (Roby & Willis 2014)</dt><dd>${fmt(sv.mean, 0)} ± ${fmt(sv.sd, 0)} m/week</dd>
     ${SCN ? `<dt>Crossrail Thames Tunnel, Sophia and Mary (King et al. 2017)</dt><dd>${DRIVE_H.exclDelays.join("–")} rings a day without delays; ${DRIVE_H.inclDelays.join("–")} over the whole drive; best day ${DRIVE_H.bestDay.join("–")} rings, best week ${DRIVE_H.bestWeek.join("–")}. This forecast: ${fmt(FC.day / W, 1)} rings a day</dd>` : ""}
     <dt>Best day</dt><dd>${fmt(FC.bestDay, 1)} m ${flag(FC.check.day)}</dd>
