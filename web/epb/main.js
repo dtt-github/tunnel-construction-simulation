@@ -9,7 +9,7 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import {
   wedgeSilo, daubWindow, DAUB_DEFAULTS, chamber as makeChamber, screw as makeScrew, shieldThrust, cutterheadTorque, toolTorque,
   verticalStress, PASTE_SHEAR_KPA, presetTrough, twinTroughs, deflectionRatios, deflectionModificationFactor, frameBendingStiffness, relativeBendingStiffness, loadFactor, macklinVolumeLoss, burlandCategory, referenceInstalled, erf,
-  Rng, sample as sampleDist, DIST, SHIFT_PATTERNS, PER_CYCLE_MAINTENANCE_MIN, simulateDrive, LEARNING_DAYS_BARCELONA, recordCheck, EPB_WEEKLY_SURVEY,
+  Rng, sample as sampleDist, DIST, SHIFT_PATTERNS, PER_CYCLE_MAINTENANCE_MIN, simulateDrive, LEARNING_DAYS_BARCELONA, DAY_VARIATION_CROSSRAIL_EPB, recordCheck, EPB_WEEKLY_SURVEY,
   jsceRing, woodInertia, subgradeModulus, terzaghiLoads, activeCoefficient, sectionStresses, jackingStress, burstingForce, annulusVolume, groutWindow, ITA2000_ALLOWABLE,
   scenario as loadScenario,
 } from "../../models/js/index.js";
@@ -1172,7 +1172,7 @@ ui.skip.onclick = () => {
   else if (S.mode === "ACTIVITIES") { S.simTime += S.actLeft; S.actLeft = 0.001; }
 };
 
-// Forecast: 20 runs of 90 days at the current settings (ring build 35 min as in the class preset).
+// Forecast: 20 runs of 90 days at the current settings, with the day-to-day variation fitted to Crossrail's EPB drives.
 let forecastKey = "", forecastTimer = null, FC = null;
 function forecastInputs() {
   const v = val("adv") / 60000;
@@ -1184,14 +1184,14 @@ function runForecast() {
   const runs = [];
   for (let seed = 1; seed <= 20; seed++) {
     runs.push(simulateDrive({ ring_length: W, boring_min: f.boring, ring_build: { kind: "fixed", value: M.buildMin }, shift_pattern: f.shift,
-      haulage: f.haulage, interventions: f.iv }, 90, seed));
+      haulage: f.haulage, interventions: f.iv, ...DAY_VARIATION_CROSSRAIL_EPB }, 90, seed));
   }
   // the same 90 days at the start of a new drive, with the learning curve (Barcelona Line 9: about three months to
   // reach average speed; linear ramp from half speed assumed)
   const newDrive = [];
   for (let seed = 1; seed <= 20; seed++) {
     newDrive.push(simulateDrive({ ring_length: W, boring_min: f.boring, ring_build: { kind: "fixed", value: M.buildMin }, shift_pattern: f.shift,
-      haulage: f.haulage, interventions: f.iv, learning_days: LEARNING_DAYS_BARCELONA }, 90, seed).mean_m_per_day);
+      haulage: f.haulage, interventions: f.iv, learning_days: LEARNING_DAYS_BARCELONA, ...DAY_VARIATION_CROSSRAIL_EPB }, 90, seed).mean_m_per_day);
   }
   const mean = (k) => runs.reduce((a, r) => a + r[k], 0) / runs.length;
   const med = (k) => { const xs = runs.map((r) => r[k]).sort((a, b) => a - b); return (xs[9] + xs[10]) / 2; };
@@ -1231,7 +1231,7 @@ function forecastHtml() {
   </dl>
   <div class="shares">${sh.map(([k, v]) => `<i title="${SHARE_NAMES[k]} ${fmt(v * 100, 0)} %" style="width:${v * 100}%;background:${SHARE_COLORS[k]}"></i>`).join("")}</div>
   <div class="legend">${sh.map(([k, v]) => `<span style="--c:${SHARE_COLORS[k]}">${SHARE_NAMES[k]} ${fmt(v * 100, 0)} %</span>`).join("")}</div>
-  <p class="note">20 runs × 90 days at the current speed, shift pattern and haulage. Best values are medians over the runs. Downtime distributions from a 6.88 m metro EPB (Moosazadeh et al. 2018). Ring times are drawn ring by ring, so whole fast days like Crossrail's best are not reproduced.</p>`;
+  <p class="note">20 runs × 90 days at the current speed, shift pattern and haulage. Best values are medians over the runs. Downtime distributions from a 6.88 m metro EPB (Moosazadeh et al. 2018). Good and bad days follow a day-to-day productivity factor fitted to Crossrail's best days and weeks (King et al. 2017) and tested on Barcelona Line 9.</p>`;
 }
 
 ui.pause.onclick = () => { S.paused = !S.paused; ui.pause.textContent = S.paused ? "Resume" : "Pause"; };
