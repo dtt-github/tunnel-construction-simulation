@@ -6,6 +6,8 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ### Changed
 
+- **README, validation report and roadmap at the Release 1 state:** the README status, demo checks, GPU physics and documentation table updated, and Release 1 added to the roadmap at a glance; the [validation report](docs/validation/REPORT.md) gains today's checks (Brenner penetration and torque, Tehran torque, Fréjus time law, drill & blast rate brackets, GIMP results for the clay tunnel and chamber); the [roadmap](docs/ROADMAP.md) gains a Release 1 section (scope, stop line, what is done for it). NOTICE now lists the third-party data the scenarios carry (BGS, OS, Environment Agency, Historic England, OpenStreetMap) with their attribution statements.
+
 - **MPM scenes use GIMP integration** (`server/tunnelsim_server/scenes/common.py`, `runner.py --integration`; [MPM clay](docs/validation/mpm-clay.md#gimp-integration-6-nov-2026)), on the Newton maintainer's advice in [newton-physics/newton#5180](https://github.com/newton-physics/newton/issues/5180):
   - the volume loss of yielding material is gone: the clay slab round a fixed lining settles 0.185 m and stops (PIC 0.62 m, still creeping), with no particles piling against or inside the lining; the EPB chamber keeps 172 of 216 kPa while the cutterhead turns (PIC 103 of 197 kPa);
   - under GIMP, cohesion and stiffness are no longer divided by the particle packing 2.744 (`material_scale()`); the stress readout keeps the factor;

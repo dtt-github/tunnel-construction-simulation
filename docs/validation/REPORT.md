@@ -1,7 +1,7 @@
 # Validation report: what each demo and model is checked against
 
 - **What this is:** one page that gathers every check in the project: the data, the result and what kind of check it is. It also lists what is still assumed or unchecked. The details are on the validation pages it links.
-- **Status:** as of 6 Nov 2026 (main at `1f21886`). Update it whenever a validation page changes.
+- **Status:** as of 6 Nov 2026, the Release 1 state (main at `56d73c9`). Update it whenever a validation page changes.
 - **Sources:** every data source is openly published. The links are on the validation pages.
 
 ## How to read it
@@ -26,11 +26,11 @@
 |---|---|---|---|
 | [Urban EPB](../../web/epb/) | Thrust at Mashhad 1.3 bar 0.89× and Sofia 1.02–1.28×; ring cycle on an average Crossrail working day, 11.8–12.5 against 12.3–14.9 rings | Shield and rim friction on 281 Changsha rings; Hyde Park settlement uses the site's own back-analysis | Barcelona's mean day about 30 % slow; best days and weeks come from a day-to-day variation fitted on Crossrail (tested on Barcelona and Betuweroute); torque in conditioned ground rests on a paste/friction split read from three datasets; volume loss responds to face pressure only in London Clay |
 | [Mixshield](../../web/slurry/) | Thames settlement 1.10× median over 17 sections (see the caveat below) | Thames volume loss 0.20 % fitted to those same 17 sections (with K 0.4) | Thames: working day 7–58 % fast, whole drive about 2× fast (river crossing and interventions not modelled); on two Dutch slurry drives 0.78–0.98×; no separation-plant stops; air-cushion model is this project's own derivation |
-| [Gripper TBM](../../web/hard-rock/) | Queens Water Tunnel penetration (gneiss, 10 stations): median 1.02× with the Follo ψ, not refitted | Penetration (ψ = −0.1) on Follo | No open section-by-section data for Gotthard; advance only bracketed (calendar against working days) |
-| [Double shield](../../web/hard-rock/) | Follo advance 12.9–14.9 against 14.1 m/day (tests the downtime model only) | Penetration on the Follo 4.5 km mean; discs, thrust and rpm are the Follo means | Penetration does not follow section-to-section strength (0.41–2.89×); cutter changes about 40 % too few |
+| [Gripper TBM](../../web/hard-rock/) | Queens Water Tunnel penetration (gneiss, 10 stations): median 1.02× with the Follo ψ, not refitted | Penetration (ψ = −0.1) on Follo | No open section-by-section data for Gotthard; advance only bracketed (calendar against working days); cutterhead torque 1.25–2.4× the logged value on two projects |
+| [Double shield](../../web/hard-rock/) | Follo advance 12.9–14.9 against 14.1 m/day (tests the downtime model only); share of time boring 28 % against Guadarrama's 32 % | Penetration on the Follo 4.5 km mean; discs, thrust and rpm are the Follo means | Penetration does not follow section-to-section strength (0.41–2.89×); cutter changes about 40 % too few; torque 1.25–2.4× the logged value; ring build and gripper force at 10 m bracketed only |
 | [Drill & blast](../../web/drill-blast/) | Ulvin drilling 0.88× and charging 1.26× (logged round); every T10.5 activity inside a contractor's P5–P95 range | Mucking rate and downtime share at Ulvin; ventilation and scaling at the contractor median | Weekly advance by support class not published, so class IV is untested; activities do not overlap |
-| [SEM / NATM](../../web/sem/) | Farringdon crown settlement 10.4–13.7 mm against 10.3–16.5 measured; Albanian flysch convergence of the right order | None fitted; the 2.5 mm whole-ring term is taken from Whitechapel | Prediction sits in the lower half of the measured range; Sulem time law from one site; not a tight test |
-| [Ground physics (GPU MPM)](../../web/epb/) | Element tests: Rankine within ±6 %, column collapse 7 of 8 within ±17 % | The friction mapping μ = sin φ′ was chosen from the Rankine test | Face pressure only bracketed (Idinger); K0 failed; clay and chamber blocked by solver volume loss |
+| [SEM / NATM](../../web/sem/) | Farringdon crown settlement 10.4–13.7 mm against 10.3–16.5 measured; Albanian flysch convergence of the right order | None fitted; the 2.5 mm whole-ring term is taken from Whitechapel | Prediction sits in the lower half of the measured range; not a tight test. The Sulem time law agrees with a second site (Fréjus) for 100 days, then runs high |
+| [Ground physics (GPU MPM)](../../web/epb/) | Element tests: Rankine within ±6 %, column collapse 7 of 8 within ±17 % | The friction mapping μ = sin φ′ was chosen from the Rankine test | Face pressure only bracketed (Idinger); K0 failed; GIMP integration removed the volume loss, but the clay tunnel is now too strong to collapse and the chamber still loses a fifth of its pressure |
 
 ## Checks by model
 
@@ -85,6 +85,8 @@
 | Queens Water Tunnel No. 3, 10 stations | Yagiz (2006); Khalighi & Diehl (1997) | Median 1.02× (0.71–1.82) at ψ −0.1, not refitted; massive rock 1.51× fast, fractured 0.91× | Independent: passes on the median, fails station by station in massive rock |
 | Gotthard, Guadarrama, Brenner, Niagara | project reports | Average advance 3–20 m/day | Bracket |
 | Double shield share of time boring | Melis Maynar (2006), Guadarrama Table 7 | Model 28 % (Follo case) against 32 % over four machines | Independent; the machine type and rock come from the press |
+| Brenner calc-schist, three double shields | Maggio (2020); Giacomin et al. (2022) | Logged penetration reproduced at UCS 53–85 MPa, inside the published 30–120 MPa | Bracket: no strength logged along the drive |
+| Cutterhead torque, T ≈ 0.3·D·N·F_r | Maggio (2020), Brenner; Samadi & Hassanpour (2024), Tehran open-mode EPB in limestone | Logged ÷ model 0.41–0.67 (Brenner), 0.56–0.80 (Tehran) | Independent: fails; the model is 1.25–2.4× high. Not changed ([torque](hard-rock-projects.md#cutterhead-torque-on-a-second-project)) |
 
 ### Ground response, Hoek–Brown and SEM lining ([SEM convergence](sem-convergence.md))
 
@@ -94,6 +96,7 @@
 | Farringdon platform crown settlement | Gakis, Grau & Schwind (2016) | 10.4–13.7 against 10.3–16.5 mm (mean 13.6) | Independent, but the 2.5 mm whole-ring term is transferred from Whitechapel; in the lower half of the range |
 | Hoek–Brown on its own | hand calculation only | – | Not checked against field data |
 | Sprayed-concrete ageing | Brenner shotcrete moduli at 1 d and 28 d | Passes through both | Laboratory data, not a tunnel |
+| Sulem convergence time law (weak-rock scenario) | de La Fuente et al. (2020), Fréjus road tunnel fit | Same X and n; inside the Fréjus band up to 100 days, 3.5 % above at one year, final value 22 % higher | Bracket: fitted parameters compared, not records ([time law](sem-convergence.md#sulem-time-law-a-second-site)) |
 
 ### Drill & blast ([drill & blast cycle](drill-blast-cycle.md))
 
@@ -104,6 +107,7 @@
 | T10.5 class II activities | Furunes & Strype (2022), NTNU, contractor estimate | All inside P5–P95; drilling, mucking and spraying above the median | Independent, except ventilation and scaling, set at the median |
 | Round time and weekly advance by class | NFF Publication 14 | 12.7 h against "about 12 h" | Matches; production hours set from the Tunnelbyggetid basis |
 | Hole count, T10.5 | published counts | 134 and 45 against 126–158 and 45–50 | Matches, but the contour spacing and burden were fitted to these counts |
+| Charging and drilling rates, T10.5 | Jennemyr (2020), practitioner; Kim & Lee (2021), NTNU model | 100 holes/h against 80–100; about 990 ft/h per three-boom jumbo against 800–1,200; charging, ventilation and scaling inside the NTNU-model times | Bracket: no open time study of charging per hole |
 | Specific charge, T10.5 | [Gjengedal & Jakobsen 2025](https://airdrive.eventsair.com/eventsairwesteuprod/production-atlanticmice-public/927385ad0d3e425bbbf6581c4573f524): 353 logged rounds, three rural road tunnels 2021–24 | 1.81 against 2.67–3.01 kg/m³ (trend at 74.6 m²); charged holes 134 against about 125–180 | Independent: fails, about a third low; not fitted (see the drill & blast page) |
 
 ### Face support, chamber, slurry and lining (analytical)
@@ -120,15 +124,15 @@
 
 | Check | Data | Result | Kind | Page |
 |---|---|---|---|---|
-| Rankine active wall, sand (friction mapping) | Rankine theory | Within −6 % to +6 % for φ′ ≤ 34° | Calibrated: μ = sin φ′ chosen from this test | [element tests](mpm-element-tests.md) |
+| Rankine active wall, sand (friction mapping) | Rankine theory | Within −6 % to +6 % for φ′ ≤ 34° with PIC; with GIMP, 0.96, 0.90 and 0.86 of theory at H/10, H/20, H/40 | Calibrated: μ = sin φ′ chosen from this test | [element tests](mpm-element-tests.md) |
 | Granular column collapse | Rousseau et al. (2022), CC BY | 7 of 8 runouts within ±17 % (G10 58 % long) | Independent | [element tests](mpm-element-tests.md) |
 | Dilatancy mapping | Newton's flow rule (derived) | ψ within 0.5° | Independent | [element tests](mpm-element-tests.md) |
-| At-rest stress K0 | 1 − sin φ′ | 0.74–0.86 for any target | Failed: the analytical value is used | [element tests](mpm-element-tests.md) |
+| At-rest stress K0 | 1 − sin φ′ | 0.74–0.86 for any target (GIMP 0.76 at a target of 0.44) | Failed: the analytical value is used | [element tests](mpm-element-tests.md) |
 | Face pressure, dry sand | Idinger et al. (2011), centrifuge | Measured 4.5–6.0 kPa lies inside the MPM bracket 4.0–8.7 kPa at C/D 1, at every cover | Bracket: no single soil match fits pressure, wedge and settlement | [face sand](mpm-face-sand.md) |
 | Face pressure, dry sand | Wang et al. (2024) / Liu et al. | 0.93–1.22 at D/10; 1.17–1.55 at D/20 | Independent: matches at D/10 only | [face sand](mpm-face-sand.md) |
 | Face mechanism and settlement | Idinger et al. (2011) | Wedge 10–14° too flat; settlement 1.1–3× with Bolton dilation | Failed | [face sand](mpm-face-sand.md) |
-| Clay tunnel stability ratio | Kimura & Mair (1981) | About 0.5× the measured N | Blocked: numerical volume loss in yielding material ([newton#5180](https://github.com/newton-physics/newton/issues/5180)) | [clay](mpm-clay.md) |
-| EPB chamber pressure and gradient | Bezuijen et al. (2005), Botlek | Pressure collapses under cutterhead rotation (P0); the P1d element locks | Blocked: same cause | [chamber](mpm-chamber.md) |
+| Clay tunnel stability ratio | Kimura & Mair (1981) | PIC: about 0.5× the measured N. GIMP: no collapse, N ≥ 4.2–8.2 against 3.5–4.3 | Blocked: PIC loses volume; GIMP is too strong round the opening ([newton#5180](https://github.com/newton-physics/newton/issues/5180)) | [clay](mpm-clay.md#gimp-integration-6-nov-2026) |
+| EPB chamber pressure and gradient | Bezuijen et al. (2005), Botlek | PIC: 197 → 103 kPa under cutterhead rotation. GIMP: 216 → 172 kPa | Blocked: a fifth of the pressure still lost | [chamber](mpm-chamber.md), [clay](mpm-clay.md#gimp-integration-6-nov-2026) |
 
 ## What is still assumed or unchecked
 

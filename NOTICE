@@ -17,6 +17,20 @@ Newton and Warp (Apache-2.0), three.js (MIT) and Jolt Physics (MIT).
 Engineering standards and guidelines (DAUB, ITA-AITES, EN, DIN, ÖGG, BTS) are cited, not
 reproduced. Models are implemented from the published scientific literature cited in each source file.
 
+## Third-party data
+
+The ground scenarios (models/scenarios/*.json) and the demos built on them contain open data under these licences.
+Each scenario file repeats the statements in its "licence" fields.
+
+- Borehole data: British Geological Survey, Open Government Licence v3.0.
+  Contains British Geological Survey materials (c) UKRI 2026.
+- Building footprints: OS OpenMap Local, Open Government Licence v3.0.
+  Contains OS data (c) Crown copyright and database right 2026.
+- Building heights and ground levels: Environment Agency LIDAR Composite 1 m DSM/DTM; Thames river level at the
+  Charlton gauge: Open Government Licence v3.0. (c) Environment Agency copyright and/or database right 2026.
+- Listed buildings: National Heritage List for England, Open Government Licence v3.0. (c) Historic England 2026.
+- Thames Tunnel line: OpenStreetMap, Open Database License (ODbL). (c) OpenStreetMap contributors.
+
 ## Third-party assets
 
-None yet.
+None. 3D models and textures are this project's own.

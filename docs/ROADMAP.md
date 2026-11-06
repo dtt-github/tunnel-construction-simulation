@@ -9,6 +9,13 @@ Sources:
 - [research/industry-survey.md](research/industry-survey.md): machine numbers.
 - [MODELS.md](MODELS.md): what is implemented.
 
+## Release 1 (first complete release)
+
+- **Scope:** Phase R, the five Phase 1 slices as built (six demos), the model library, the validation report, and Phase 0 with Phase 2 WP0 to WP2 and WP7 (one recorded GPU sand face).
+- **Not in it:** the MPM clay tunnel and EPB chamber (WP3, WP4), the open Phase 1 items below, Phases 3 to 5.
+- **Stop line:** no new features. Before the tag: README, validation report and roadmap at the release state; a full test pass and a live check of the six demos; the changelog cut and the tag.
+- **Done for it (6 Nov 2026):** the gap plan (one gap closed, eight shipped as disclosed in the [validation report](validation/REPORT.md#ranked-gaps), two blocked); the [realism checklist template](realism/TEMPLATE.md); the [release audit](RELEASE-AUDIT.md).
+
 ## Realism rules (apply to every phase)
 
 1. **One method, one machine class, one ground.**
@@ -122,7 +129,7 @@ Demo: [web/epb/](../web/epb/) ([live](https://dtt-github.github.io/tunnel-constr
   - cutterhead at ≈ 1.5–3 rpm;
   - thrust and torque breakdown;
   - grout volume and pressure.
-- [~] Surface: settlement heatmap with buildings and Burland categories (done); volume loss from the face pressure and grout (open: needs a published relation).
+- [~] Surface: settlement heatmap with buildings and damage categories by Mair, Taylor & Burland (done); volume loss from the face pressure in London Clay (Macklin 1999, done); from grouting and in other ground (open: needs a published relation).
 - [x] Check against reference machine numbers (Crossrail, Moscow) and the published EPB rates (40-EPB survey, best day and month references, world record by diameter class).
 
 ### Slice B: hard rock, open gripper and double shield
@@ -146,11 +153,11 @@ Demo: [web/epb/](../web/epb/) ([live](https://dtt-github.github.io/tunnel-constr
   - concurrent boring and ring build;
   - falls back to single-shield mode in faults.
 - [ ] Single shield as a further variant: sequential bore and ring build, with segments and pea gravel or grout.
-- [~] Geology (fault zone done: slower drive, heavy support; jamming risk open):
+- [~] Geology (fault zone done: slower drive, heavy support; jamming risk screened against the Brenner machines' thrust by mode; creep and standstill time open):
   - fault zones cut penetration and utilisation;
   - they need heavy support (ribs at 1 m, shotcrete);
   - they raise the jamming risk (model 8).
-- [~] Check against reference projects ([validation](validation/hard-rock-projects.md)): Follo penetration and average advance reproduced (CSM ψ back-analysed); Gotthard machine data verified; Guadarrama, Brenner and Niagara bracket the rates. Follo section by section done: ±27 % with mean rock strength, 0.4–2.9× with single-test UCS. Queens Water Tunnel (gneiss, 10 open stations) checked without refitting: median 1.02×, massive rock up to 1.8× fast. Open: utilisation and downtime by cause from a primary source; other rock types (the Yinsong dataset is not open).
+- [~] Check against reference projects ([validation](validation/hard-rock-projects.md)): Follo penetration and average advance reproduced (CSM ψ back-analysed); Gotthard machine data verified; Guadarrama, Brenner and Niagara bracket the rates. Follo section by section done: ±27 % with mean rock strength, 0.4–2.9× with single-test UCS. Queens Water Tunnel (gneiss, 10 open stations) checked without refitting: median 1.02×, massive rock up to 1.8× fast. Guadarrama's share of time boring (32 %) against the model's 28 %. Brenner calc-schist: penetration consistent, not tested; cutterhead torque 1.25–2.4× the logged value on Brenner and Tehran. Open: penetration in other rock types with logged strength (the Yinsong dataset is not open); the torque formula.
 
 ### Slice C: slurry / Mixshield
 
@@ -190,6 +197,7 @@ Demo: [web/drill-blast/](../web/drill-blast/) ([live](https://dtt-github.github.
 
 ## Phase 2: server ground physics (Newton on the DGX Spark)
 
+- [~] Work packages ([plan](plans/phase2-mpm-face-chamber.md)): WP0 to WP2 and WP7 done (element tests, dry-sand face, recorded face in the EPB demo); WP3 clay and WP4 chamber blocked. GIMP integration (6 Nov 2026, [newton#5180](https://github.com/newton-physics/newton/issues/5180)) removed the volume loss, but the clay tunnel is now too strong ([MPM clay](validation/mpm-clay.md))
 - [ ] MPM face and chamber two-way coupled to the cutterhead, screw and shield, with a pressure-controlled shove; screw inlet resolved
 - [ ] Calibrate against the analytical face pressure and screw discharge
 - [ ] Slurry variant with the pump circuit; mode switching (variable density, crossover rock/EPB)
