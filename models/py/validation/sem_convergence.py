@@ -34,7 +34,7 @@ from tunnelsim_models.hoek_brown import hoek_brown  # noqa: E402
 
 CACHE = HERE / ".cache"
 URL = "https://zenodo.org/api/records/23040284/files/convergence_identifiability_data.zip/content"
-MI, NU, EI = 7.0, 0.3, 20000.0  # E_i only for the Hoek-Diederichs comparison (source prior 15-25 GPa)
+MI, NU, EI = 7.0, 0.3, 20000.0  # E_i only for the Hoek-Diederichs (2006, doi:10.1016/j.ijrmms.2005.06.005) comparison (source prior 15-25 GPa)
 
 
 def tables() -> tuple[list[dict], dict]:

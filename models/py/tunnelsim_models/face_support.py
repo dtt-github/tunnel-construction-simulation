@@ -15,7 +15,7 @@ References
   (Chapter 3, Eqs (4)-(5): minimum support S = 1.5 E + 1.05 W; maximum 0.9 x the total vertical stress at the crown
   with the minimum unit weight; operating deviations +/-10 kPa slurry, +/-30 kPa EPB. Example 8.1: worked case used
   as a test vector. Seepage forces apply only when the support pressure is below the groundwater pressure, as in EPB
-  open or transition mode (section 4.3, after Anagnostou & Kovari 1996); with the 1.05 factor on the water pressure
+  open or transition mode (section 4.3, after Anagnostou & Kovari 1996, doi:10.1016/0886-7798(96)00017-X); with the 1.05 factor on the water pressure
   they do not arise, so they are not modelled.)
 
 Mechanism (x into the ground, z up, face of width B and height H, crown at depth C below the surface):

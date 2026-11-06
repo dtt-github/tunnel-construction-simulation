@@ -29,7 +29,7 @@ Also: [machine class presets](#machine-class-presets) and [where default paramet
 
 Disc-cutter forces, penetration from thrust, rate of penetration, cutterhead torque (T ≈ 0.3·D·N·F_r), power and the torque limit.
 
-- **References:** Rostami & Ozdemir (1993); Rostami (1997).
+- **References:** Rostami & Ozdemir (1993), RETC proceedings, not openly published; Rostami (1997), [PhD thesis, Colorado School of Mines](https://repository.mines.edu/entities/publication/139ea21b-d9e0-4c87-ab35-7f312216fde9).
 - **Validated against:**
   - a hand calculation for a 19″ disc (p = 5 mm, UCS 150 MPa, BTS 10 MPa, ψ 0.1 → F_t ≈ 201 kN, RC ≈ 0.10);
   - Follo Line TBM1, the 4.5 km weighted mean (Hansen 2018, NTNU, [hdl:11250/2503069](https://hdl.handle.net/11250/2503069)): 71 discs, net thrust 18,017 kN, 5.08 rpm, UCS 152 MPa, BTS 10.4 MPa. Measured 6.32 mm/rev. With the spacing as radius / number of discs, ψ = −0.1 gives 6.36 mm/rev; the earlier ψ = 0.1 gave 11.8 mm/rev. ψ = −0.1 is now the default, inside Rostami's −0.2 to +0.2 ([validation](validation/hard-rock-projects.md)).
@@ -48,7 +48,7 @@ Disc-cutter forces, penetration from thrust, rate of penetration, cutterhead tor
 
 Generalised Hoek–Brown constants (m_b, s, a), global rock-mass strength σ_cm and rock-mass modulus.
 
-- **References:** Hoek, Carranza-Torres & Corkum (2002); Hoek & Diederichs (2006).
+- **References:** Hoek, Carranza-Torres & Corkum (2002), [authors' pre-print](https://www.d.umn.edu/~carranza/HB02/); Hoek & Diederichs (2006), [doi:10.1016/j.ijrmms.2005.06.005](https://doi.org/10.1016/j.ijrmms.2005.06.005).
 - **Validated against:** a hand calculation (GSI 50, m_i 10); the intact limit (GSI 100 gives s = 1).
 
 ## Settlement and building damage
@@ -117,7 +117,7 @@ Wedge-silo limit equilibrium for closed-face shields, the Vermeer cohesionless l
   - p_min = 1.5 × earth + 1.05 × water at the axis;
   - p_max = 0.9 × the total vertical stress at the crown, with the minimum unit weights and no surface load;
   - the set point must stay inside the window by the machine's pressure deviation: ±30 kPa for an EPB, ±10 kPa for a slurry shield.
-- **Seepage:** DAUB applies seepage forces only when the support pressure is set below the groundwater pressure (EPB open or transition mode, after Anagnostou & Kovári 1996). With the 1.05 factor on the water pressure they don't arise in closed mode, so they aren't modelled.
+- **Seepage:** DAUB applies seepage forces only when the support pressure is set below the groundwater pressure (EPB open or transition mode, after Anagnostou & Kovári 1996, [doi:10.1016/0886-7798(96)00017-X](https://doi.org/10.1016/0886-7798(96)00017-X)). With the 1.05 factor on the water pressure they don't arise in closed mode, so they aren't modelled.
 
 **References:**
 
@@ -156,9 +156,9 @@ What it computes:
 
 **References:**
 
-- EFNARC (2005) for FIR and FER;
-- Merritt & Mair (2006, 2008), simplified;
-- Yeh (1996).
+- EFNARC (2005) for FIR and FER, [free download](https://efnarc.org/publications) after a short form;
+- Merritt & Mair (2006, [doi:10.1680/geot.2006.56.9.605](https://doi.org/10.1680/geot.2006.56.9.605); 2008, [doi:10.1680/geot.2008.58.2.79](https://doi.org/10.1680/geot.2008.58.2.79)), simplified;
+- Yeh (1997), [doi:10.1016/S0926-5805(96)00165-3](https://doi.org/10.1016/S0926-5805(96)00165-3).
 
 **Validated against:**
 
@@ -178,7 +178,7 @@ What it computes:
 What it computes:
 
 - the stagnation gradient f_s0 = 3.5 τ_f / d₁₀ and whether a filter cake (membrane) forms, at f_s0 ≥ 200 kN/m³ (DIN 4126);
-- the slurry penetration e_max = Δp d₁₀ / (α τ_f), with α = 3.5 by default (2–4 in the literature), and its growth in time e(t) = e_max t / (a + t) (Krause);
+- the slurry penetration e_max = Δp d₁₀ / (α τ_f), with α = 3.5 by default (2–4 in the literature), and its growth in time e(t) = e_max t / (a + t) (Krause 1987, not openly published, as given by Broere & van Tol 2000);
 - the share of the support force transferred to the sliding wedge, approximated as 1 − e / L over the wedge length L;
 - the excess pore pressure ahead of the face, Δp(x) = Δp_p exp(−x / λ), λ = √(k H c);
 - the air cushion: the working-chamber level from feed, excavated and discharge flows; the air compressed or expanded isothermally (Boyle); a first-order regulator that adds or vents air towards the setpoint;
@@ -260,7 +260,7 @@ Cutter wear and changes, rock support by class, and utilisation as downtime per 
 - **Cutter wear:**
   - cutter life CL = 1026 / CAI m³ per cutter (Frenzel 2011, via Zhang et al. 2025, [doi:10.1007/s40789-025-00787-0](https://doi.org/10.1007/s40789-025-00787-0));
   - cutters consumed per km = excavated volume / CL;
-  - 66 min per change (Farrokh 2013);
+  - 66 min per change (Farrokh 2013, SME OneMine, not openly published);
   - Farrokh's fits of cutter downtime by quartz content as a cross-check.
 - **Support:**
   - Bieniawski (1989) RMR classes with their bolts, shotcrete and ribs;
@@ -294,13 +294,13 @@ Cutter wear and changes, rock support by class, and utilisation as downtime per 
 
 Convergence–confinement around a circular tunnel, squeezing classes, and two machine checks for hard-rock TBMs.
 
-- **Rock mass:** equivalent Mohr–Coulomb φ′ and c′ from Hoek–Brown, for the stress range of a deep tunnel (σ′3max). Source: Hoek, Carranza-Torres & Corkum 2002, eqs 12–18.
+- **Rock mass:** equivalent Mohr–Coulomb φ′ and c′ from Hoek–Brown, for the stress range of a deep tunnel (σ′3max). Source: Hoek, Carranza-Torres & Corkum 2002, eqs 12–18 ([authors' pre-print](https://www.d.umn.edu/~carranza/HB02/)).
 - **Ground reaction curve:** closure and plastic radius against support pressure, for an elastic–perfectly plastic Mohr–Coulomb rock mass (Duncan Fama 1993, as given in Hoek, *Practical Rock Engineering*, "Tunnels in weak rock", eqs 1–7). Includes the inverse, the pressure needed to hold a given closure. For undrained clay (φ = 0) it uses the Tresca limit of the same solution: p_cr = p0 − c and R_p = r0·exp((p0 − c − p_i)/2c).
 - **Longitudinal displacement profile:** closure ahead of and behind the face (Vlachopoulos & Diederichs 2009, [doi:10.1007/s00603-009-0176-4](https://doi.org/10.1007/s00603-009-0176-4)).
 - **Squeezing:** strain and classes A–E (Hoek & Marinos 2000).
 - **Support curves and equilibrium:**
   - closed shotcrete or concrete ring, from thick-walled cylinder elasticity;
-  - full steel sets (unblocked) and mechanically anchored bolts, after Carranza-Torres & Fairhurst 2000, as given by Dang et al. 2022;
+  - full steel sets (unblocked) and mechanically anchored bolts, after Carranza-Torres & Fairhurst 2000 ([doi:10.1016/S0886-7798(00)00046-8](https://doi.org/10.1016/S0886-7798(00)00046-8)), as given by Dang et al. 2022;
   - combined supports, and the equilibrium point with the ground reaction curve.
 - **Shield friction (screening estimate):** F_f = μ·2πR·∫p dy (Ramoni & Anagnostou 2010, [doi:10.1016/j.tust.2010.02.008](https://doi.org/10.1016/j.tust.2010.02.008)). The rock contacts the shield where its closure since the face exceeds the overcut, and then presses with the pressure that holds it at the gap. Friction coefficients come from their Table 2.3 for rock.
 - **Gripper bearing:** total gripper force 2.0–3.5 × installed thrust (VSS 1341), spread over the shoe area. Comparing that pressure with the rock-mass strength is our own simple check.
@@ -477,9 +477,9 @@ Outputs: utilisation (boring time / calendar time); mean advance per day and wee
   - rings between tool stops: Weibull;
   - stop duration: log-logistic;
   - maintenance per cycle.
-- Shift pattern of 2 × 10 h + 4 h maintenance: Johnson (2014), San Francisco Central Subway, NAT 2014.
-- Utilisation definition: McMillan et al. (2022), TAC.
-- Weekly advance of 40 EPBs: Roby & Willis (2014), NAT 2014.
+- Shift pattern of 2 × 10 h + 4 h maintenance: Johnson (2014), San Francisco Central Subway, NAT 2014 (proceedings, not openly published).
+- Utilisation definition: McMillan et al. (2022), TAC (proceedings, not openly published).
+- Weekly advance of 40 EPBs: Roby & Willis (2014), NAT 2014 (proceedings, not openly published).
 - Best published EPB rates and the record table by diameter class: sources in `EPB_REFERENCES` and `WORLD_RECORDS`.
 
 **Validated against:**

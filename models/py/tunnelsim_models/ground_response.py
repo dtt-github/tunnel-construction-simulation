@@ -4,7 +4,8 @@ References
 - Hoek, E. Practical Rock Engineering, ch. "Tunnels in weak rock" (rocscience.com), eqs 1-8 and Fig. 8: the Duncan Fama
   (1993) ground reaction curve for an elastic-perfectly plastic Mohr-Coulomb rock mass, and maximum support pressures.
 - Hoek, E., Carranza-Torres, C., Corkum, B. (2002). Hoek-Brown failure criterion - 2002 edition. Proc. NARMS-TAC,
-  267-273, eqs 12-18: equivalent Mohr-Coulomb parameters, and sigma'3max for tunnels.
+  267-273, eqs 12-18: equivalent Mohr-Coulomb parameters, and sigma'3max for tunnels. Authors' pre-print:
+  https://www.d.umn.edu/~carranza/HB02/ .
 - Vlachopoulos, N., Diederichs, M.S. (2009). Improved longitudinal displacement profiles for convergence-confinement
   analysis of deep tunnels. RMRE 42, 131-146, doi:10.1007/s00603-009-0176-4; as given in Hoek et al. (2008), Kersten
   Lecture, Appendix 1 (eqs A1.5-A1.7).
@@ -167,7 +168,7 @@ def ring_support(r0: float, thickness: float, e: float, nu: float, sigma_c: floa
 
 def steel_set_support(r0: float, spacing: float, area: float, e: float = 207000.0, sigma_y: float = 245.0) -> Support:
     """Full circular steel sets of cross-section area A (m^2) at spacing S (m), without blocking (Carranza-Torres &
-    Fairhurst 2000, simplified form as given by Dang et al. 2022): p_max = 1.5 sigma_y A / (S r), K = E A / (S r^2).
+    Fairhurst 2000, TUST 15(2), doi:10.1016/S0886-7798(00)00046-8; simplified form as given by Dang et al. 2022): p_max = 1.5 sigma_y A / (S r), K = E A / (S r^2).
     Steel defaults from Hoek (RocSupport): E 207 GPa, yield 245 MPa. Blocked sets are softer; this is an upper bound."""
     return Support(k=e * area / (spacing * r0**2), p_max=1.5 * sigma_y * area / (spacing * r0))
 

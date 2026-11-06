@@ -624,14 +624,11 @@
           "verified": true
         },
         "pull_fraction": {
-          "value": [
-            0.9,
-            0.95
-          ],
+          "value": null,
           "unit": "fraction",
           "source": null,
           "verified": false,
-          "note": "search snippets only"
+          "note": "0.90-0.95 seen in search snippets only, not used by the code: pull comes from the drilled depth and the empty-hole design (Holmberg), see models/py/tunnelsim_models/drill_blast.py"
         }
       }
     }

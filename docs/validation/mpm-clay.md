@@ -41,7 +41,7 @@ Rigid-plastic Tresca (friction 0, `yield_stress` = cu). The tunnel wall or face 
 | Heading at P/D 0, C/D 1.5, D 7.5 m, D/10 | 4.3 | 7.05 | 0.61 |
 | Heading at P/D 0, C/D 3.0, D 4.5 m, D/10 | 3.8 | 9.0 | 0.42 |
 
-The MPM clay is about **twice too weak** in plane strain and in 3D alike. The plane-strain values fall below the weightless plasticity lower bound for a circular tunnel, N = 2·ln(2C/D + 1) (Davis et al. 1980), which is about 3.2 at C/D 2.0. A correct rigid-plastic solution cannot do that.
+The MPM clay is about **twice too weak** in plane strain and in 3D alike. The plane-strain values fall below the weightless plasticity lower bound for a circular tunnel, N = 2·ln(2C/D + 1) (Davis et al. 1980, [doi:10.1680/geot.1980.30.4.397](https://doi.org/10.1680/geot.1980.30.4.397)), which is about 3.2 at C/D 2.0. A correct rigid-plastic solution cannot do that.
 
 ## What has been ruled out
 

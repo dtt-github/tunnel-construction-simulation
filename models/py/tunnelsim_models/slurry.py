@@ -11,6 +11,8 @@ References
   eq (8) e_max = dp d10 / (alpha tau_F), alpha between 2 and 4; eq (9) e_t / e_max = t / (a + t) (Krause 1987);
   eqs (10)-(11) pressure drop over the partial cake and the remaining excess pressure; eqs (12)-(13) excess pore
   pressure ahead of the face dp(x) = dp_p exp(-x / lambda), lambda = sqrt(k H c).
+  The original works of Mueller-Kirchenbauer (1977) and Krause (1987) are not openly published; their relations are
+  taken as given in DAUB (2016) and Broere & van Tol (2000).
 - Shomee et al. (2022), PEAT 3(2): dry volume V_dry = V (rho - rho_w) / (rho_s - rho_w), applied here to the feed and
   discharge flows (slurry-circuit mass balance).
 - Miedema, Slurry Transport, section 6.27: Durand limit deposit velocity v = F_L sqrt(2 g R_sd D_p).

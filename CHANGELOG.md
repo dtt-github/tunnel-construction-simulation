@@ -87,6 +87,11 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ### Fixed
 
+- **Release audit** ([docs/RELEASE-AUDIT.md](docs/RELEASE-AUDIT.md)): nothing from the owner's system in the repository; four findings fixed:
+  - the EPB and Mixshield pages now carry the OGL attribution statements for OS, Environment Agency and Historic England data, and the SEM page the BGS statement;
+  - the drill & blast preset `pull_fraction` (search snippets only, unused) is set to null with the reason;
+  - cited works now have a DOI or an open link where one exists (DOIs checked in Crossref), or are marked "not openly published"; Yeh's paper is dated 1997, not 1996.
+
 - **Double shield jamming check said "jammed" in the fault zone** (published earlier on 6 Nov 2026): it compared the single-shield skin friction (148 MN) with the 95 MN nominal main thrust, but in single-shield mode the auxiliary cylinders push off the last ring, up to 200 MN on the Brenner machines. Now a restart risk, as before the 95 MN change.
 
 - **Second-bore horizontal strain in the EPB and Mixshield demos:** with "after both drives" shown, the ground movement of both bores was directed at the first bore's axis, which overstated the strain about 3× on the second bore's side. Each bore's movement now points to its own axis. With both bores at 1 % volume loss, buildings at category 2 or worse go from 26 to 0 (EPB) and 10 to 0 (Mixshield); at 2 %, from 31 to 20 and 18 to 8. At the scenario defaults none reach category 2, before or after.

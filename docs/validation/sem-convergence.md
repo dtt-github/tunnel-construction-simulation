@@ -54,7 +54,7 @@ They are Tables 5 and 9 of Terron-Almenara & Panthi (2025), *Rock Mechanics and 
   - Every reading is reproduced with a support pressure inside the installed capacity: 1–51 % of it, median 11–19 % in the flysch sections.
   - The plastic zone comes out at 1.8–2.6 radii.
 - **Not a tight test:** the reading cannot separate the rock-mass stiffness from the share of support mobilised. The package's article draws the same conclusion about identifiability. So this check confirms the order of magnitude, not a calibrated value.
-- **Rock-mass modulus:** the source's back-analysed values are higher than the Hoek–Diederichs (2006) estimate with Eᵢ 20 GPa that the demos use. The Hoek–Diederichs value is a median 0.64 of the source's. With it, our predicted displacements would be larger.
+- **Rock-mass modulus:** the source's back-analysed values are higher than the Hoek–Diederichs (2006, [doi:10.1016/j.ijrmms.2005.06.005](https://doi.org/10.1016/j.ijrmms.2005.06.005)) estimate with Eᵢ 20 GPa that the demos use. The Hoek–Diederichs value is a median 0.64 of the source's. With it, our predicted displacements would be larger.
 - **Time:** the data hold one reading per section, not a time series. So the Sulem convergence law and its time parameters in the SEM demo are not tested here.
 
 ## Consequences

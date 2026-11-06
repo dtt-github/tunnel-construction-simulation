@@ -2,10 +2,12 @@
 
 References
 - EFNARC (2005). Specification and guidelines for the use of specialist products for mechanised tunnelling (TBM) in
-  soft ground and hard rock. (FIR = Q_foam / Q_soil, FER = V_foam / V_liquid.)
-- Merritt, A.S., Mair, R.J. (2006). Mechanics of tunnelling machine screw conveyors: model tests. Geotechnique 56(9).
+  soft ground and hard rock. Free download from https://efnarc.org/publications (after a short form).
+  (FIR = Q_foam / Q_soil, FER = V_foam / V_liquid.)
+- Merritt, A.S., Mair, R.J. (2006). Mechanics of tunnelling machine screw conveyors: model tests. Geotechnique 56(9),
+  doi:10.1680/geot.2006.56.9.605.
 - Merritt, A.S., Mair, R.J. (2008). Mechanics of tunnelling machine screw conveyors: a theoretical model.
-  Geotechnique 58(2). (Discharge below the theoretical capacity; pressure falls along the screw by wall and flight
+  Geotechnique 58(2), doi:10.1680/geot.2008.58.2.79. (Discharge below the theoretical capacity; pressure falls along the screw by wall and flight
   friction. Here: a constant efficiency and an exponential pressure drop, a simplification of their model.)
 - Bezuijen, A., Talmon, A.M., Joustra, J.F.W., Grote, B. (2005). Pressure gradients and muck properties at the face of
   an EPB. Botlek Rail Tunnel, 15 m screw, gauges at 2.5, 5 and 11.5 m (Figs 8-9), ISSMGE library (open):
@@ -14,8 +16,8 @@ References
   (11.5 m). An exponential through the screw gauges gives a decay length of 10.9 / 22.7 m and a drop at the entrance
   to 0.77 / 0.94 of the chamber pressure (the authors put the drop down to arching of sand at the entrance). The
   defaults, 16 m and 0.85, lie between the two rings: CALIBRATED on Botlek, not tested on another machine.
-- Yeh, I.-C. (1996). Application of neural networks to automatic soil pressure balance control for shield tunneling.
-  Automation in Construction 5(5). (Chamber pressure driven by the difference between excavated and discharged volume.)
+- Yeh, I.-C. (1997). Application of neural networks to automatic soil pressure balance control for shield tunneling.
+  Automation in Construction 5(5), doi:10.1016/S0926-5805(96)00165-3. (Chamber pressure driven by the difference between excavated and discharged volume.)
 
 Chamber contents (generic mixture model, isothermal gas):
 the chamber of volume V_ch holds a nearly incompressible part (soil grains, pore water, foam liquid), stored as its

@@ -282,7 +282,7 @@ def kuz_ram_x50(rock_factor: float, powder_factor: float, charge_per_hole: float
 
 def uniformity_index(burden_m: float, spacing: float, d_hole_mm: float, deviation: float, charge_length: float,
                      bench: float, bottom_len: float = 0.0, column_len: float = 0.0) -> float:
-    """Cunningham (1987) uniformity index n."""
+    """Cunningham (1987) uniformity index n, in the form given by Cunningham (2005)."""
     return ((2.2 - 14 * burden_m / d_hole_mm) * math.sqrt((1 + spacing / burden_m) / 2) * (1 - deviation / burden_m)
             * (abs(bottom_len - column_len) / charge_length + 0.1) ** 0.1 * (charge_length / bench))
 

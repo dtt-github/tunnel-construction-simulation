@@ -37,6 +37,7 @@ Start with the [project README](../README.md) for the live demo and quick start.
 | [validation/mpm-chamber.md](validation/mpm-chamber.md) | GPU MPM (Phase 2) EPB chamber under pressure against Bezuijen et al. (2005), Botlek: blocked |
 | [validation/epb-screw-botlek.md](validation/epb-screw-botlek.md) | EPB screw pressure profile against the Botlek screw gauges (Bezuijen et al. 2005): old default failed, now calibrated |
 | [validation/epb-open-data.md](validation/epb-open-data.md) | EPB thrust and torque models against open field data (Changsha Metro Line 4, Guangzhou–Foshan), CC BY 4.0 |
+| [RELEASE-AUDIT.md](RELEASE-AUDIT.md) | Release 1 audit: owner data, sources and labels, cited data; findings and fixes |
 | [realism/TEMPLATE.md](realism/TEMPLATE.md) | Template every realism checklist follows: header links, the six rules, assumed values, open items |
 | [realism/drill-blast-heading.md](realism/drill-blast-heading.md) | Realism checklist for the drill & blast road tunnel demo |
 | [realism/slurry-mixshield.md](realism/slurry-mixshield.md) | Realism checklist for the urban slurry shield (Mixshield) demo |

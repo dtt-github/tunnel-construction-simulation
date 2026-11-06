@@ -7,7 +7,7 @@ References
   regrip and curve terms (Eq. 4), and a worked example (open TBM, 3.9 m: 1021 h/km, U = 21 %, 23.5 m/day).
 - Frenzel, C. (2011), via Zhang et al. (2025), Int. J. Coal Sci. Technol. 12:50, doi:10.1007/s40789-025-00787-0
   (Table 11): cutter life CL = 1026 / CAI m^3 per cutter (17-inch disc, 10 cm spacing, 5 mm/rev).
-- Farrokh, E. (2013), SME (OneMine): average cutter change time about 66 min.
+- Farrokh, E. (2013), SME (OneMine): average cutter change time about 66 min. Not openly published.
 - Bieniawski, Z.T. (1989), via Hoek, Practical Rock Engineering, ch. 3 (rocscience.com): RMR support classes for a
   10 m span (drill and blast); GSI = RMR89' - 5 for RMR89' > 23.
 

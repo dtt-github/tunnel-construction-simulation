@@ -319,7 +319,7 @@ def critical_stability_ratio(cover_over_d: float) -> float:
 
 def load_factor(sigma_v_axis: float, support_axis: float, su_axis: float, cover_over_d: float) -> float:
     """LF = N / N_TC with the stability ratio N = (sigma_v - sigma_T) / S_u at the axis (Broms & Bennermark 1967;
-    Mair 1989). Stresses in kPa: total overburden, support pressure and undrained strength at the axis."""
+    Mair 1989, as given by Macklin 1999). Stresses in kPa: total overburden, support pressure and undrained strength at the axis."""
     if su_axis <= 0:
         raise ValueError("undrained strength must be positive")
     return max(sigma_v_axis - support_axis, 0.0) / su_axis / critical_stability_ratio(cover_over_d)

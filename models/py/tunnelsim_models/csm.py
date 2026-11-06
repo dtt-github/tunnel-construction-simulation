@@ -2,10 +2,11 @@
 
 References
 - Rostami, J., Ozdemir, L. (1993). A new model for performance prediction of hard rock TBMs.
-  Proc. RETC, Boston, 793-809.
+  Proc. RETC, Boston, 793-809. Not openly published (conference proceedings); the relations below are also in the
+  open thesis that follows.
 - Rostami, J. (1997). Development of a force estimation model for rock fragmentation with disc
   cutters through theoretical modeling and physical measurement of crushed zone pressure.
-  PhD thesis, Colorado School of Mines.
+  PhD thesis, Colorado School of Mines, https://repository.mines.edu/entities/publication/139ea21b-d9e0-4c87-ab35-7f312216fde9 .
 
 Core relations (constant-cross-section disc):
     phi  = acos((R - p) / R)                               contact angle

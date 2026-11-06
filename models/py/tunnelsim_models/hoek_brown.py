@@ -2,9 +2,9 @@
 
 References
 - Hoek, E., Carranza-Torres, C., Corkum, B. (2002). Hoek-Brown failure criterion - 2002 edition.
-  Proc. NARMS-TAC, Toronto, 267-273.
+  Proc. NARMS-TAC, Toronto, 267-273. Authors' pre-print: https://www.d.umn.edu/~carranza/HB02/ .
 - Hoek, E., Diederichs, M.S. (2006). Empirical estimation of rock mass modulus.
-  Int. J. Rock Mech. Min. Sci. 43, 203-215.
+  Int. J. Rock Mech. Min. Sci. 43, 203-215, doi:10.1016/j.ijrmms.2005.06.005.
 
 Units: stresses in MPa, moduli in MPa.
 """

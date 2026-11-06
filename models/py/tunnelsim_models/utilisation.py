@@ -7,11 +7,12 @@ References
   delay; TBM and logistics maintenance 25 and 12 min per cycle; rings between cutting-tool stops (Weibull) and time to
   repair per stop (log-logistic, hours); simulated utilisation about 14 %.
 - Johnson, M. (2014). Urban EPBs, San Francisco Central Subway. NAT 2014. Production day of 2 x 10 h shifts plus a
-  4 h maintenance shift.
+  4 h maintenance shift. Not openly published (NAT 2014 proceedings).
 - McMillan, S. et al. (2022). Time usage models for TBM tunnelling. Tunnelling Association of Canada.
-  Utilisation = boring time / calendar time (the definition used here).
+  Utilisation = boring time / calendar time (the definition used here). Not openly published (TAC 2022 proceedings;
+  listed at https://www.hatch.com/About-Us/Events-And-Conferences/2022/11/TAC-2022 ).
 - Roby, J., Willis, D. (2014). Achieving fast EPB advance rates. NAT 2014. 40 EPBs, 5.9-10.2 m: mean 85.4 m/week
-  (SD 36.0, max 178.5).
+  (SD 36.0, max 178.5). Not openly published (NAT 2014 proceedings).
 - Record and reference rates: see ADVANCE_REFERENCES (each entry has its source).
 - Barcelona Metro Line 9, 9.40 m EPBs (Sustainability 17(9), 3966, 2025, CC BY, https://www.mdpi.com/2071-1050/17/9/3966): the first machine took "a
   little over three months to reach average speed" (learning curve). Learning curve here: production activities run
