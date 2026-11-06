@@ -3,7 +3,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { loadFactor, criticalStabilityRatio, macklinVolumeLoss, faceVolumeLoss, deflectionModificationFactor, frameBendingStiffness, relativeBendingStiffness, deflectionRatios, strainModificationFactor, frameAxialStiffness, relativeAxialStiffness } from "../settlement.js";
+import { loadFactor, criticalStabilityRatio, macklinVolumeLoss, faceVolumeLoss, deflectionModificationFactor, frameBendingStiffness, relativeBendingStiffness, deflectionRatios, buildingStrains, strainModificationFactor, frameAxialStiffness, relativeAxialStiffness } from "../settlement.js";
 import { cutterForces, tbmPerformance, hoekBrown, gaussianTrough, presetTrough, twinTroughs, burlandCategory, wedgeSilo, daubWindow, siloStress, chamber, screw, crownPressure, shieldThrust, cutterheadTorque, verticalStress, referenceInstalled, Rng, normalInv, sample as sampleDist, DIST, simulateDrive, recordCheck, maxRpm, cutterChangeHPerKm, supportDowntime, rmrClass, hardRockUtilisation, equivalentMohrCoulomb, groundReaction, pressureForDisplacement, ldp, squeezingStrain, squeezingClass, ringSupport, steelSetSupport, boltSupport, combine, supportEquilibrium, shieldFriction, shotcreteModulus, shotcreteStrength, mc90Modulus, earlyStrengthClass, fictitiousPressure, liningInteraction, sulemConvergence, triggerLevel, kirschCrownFactor, crownSettlement, infiltration as slurryInfiltration, cushion, dischargeDensity, drySolidsFlow, theoreticalDryFlow, durandVelocity, pipeVelocity, excessPorePressure, designRound, roundCycle, bottomCharge, burden, firstCutBurden, holeDepth, cutSections, kuzRamX50, uniformityIndex, ppv, maxChargePerDelay, ss4604866Limit, practiceSpecificCharge, SUPPORT_CLASSES, jsceRing, woodInertia, ringLoads, sectionStresses, jackingStress, burstingForce, annulusVolume, groutWindow, taper, scenario, terzaghiLoads, activeCoefficient } from "../index.js";
 
 const vec = (name) => JSON.parse(readFileSync(new URL(`../../test-vectors/${name}.json`, import.meta.url)));
@@ -88,6 +88,11 @@ test("building bending stiffness matches python", () => {
   for (const { in: [mode, a, e], out } of b.m_eh) close(strainModificationFactor(mode, a, e), out, `M_eh ${mode} ${a} ${e}`);
   for (const { in: n, out } of b.ea) close(frameAxialStiffness(n), out, `EA ${n}`);
   close(relativeAxialStiffness(frameAxialStiffness(4), 77.6e3, 20), b.alpha, "alpha*");
+  for (const { in: i, out } of b.building_strains) {
+    const t = gaussianTrough(7.08, i.z0, i.vl, i.k);
+    close(buildingStrains((x) => t.settlement(x), (x) => t.horizontal(x), i.x_min, i.x_max, i.height, 0.044 * t.s_max, i.e_over_g), out,
+      `building strain ${i.x_min}..${i.x_max}`, 1e-6);
+  }
   for (const { in: i, out } of b.deflection_ratios) {
     const t = gaussianTrough(7.08, i.z0, i.vl, i.k);
     close(deflectionRatios((x) => t.settlement(x), i.x_min, i.x_max, t.i, t.i), out, `DR ${i.x_min}..${i.x_max}`, 1e-6);

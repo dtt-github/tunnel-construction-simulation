@@ -12,7 +12,7 @@ import {
   wedgeSilo, daubWindow, DAUB_DEFAULTS, shieldThrust, cutterheadTorque, toolTorque,
   infiltration as slurryInfiltration, cushion as makeCushion, facePressure, dischargeDensity, drySolidsFlow, theoreticalDryFlow,
   durandVelocity, pipeVelocity, CONTROL_TOLERANCE,
-  verticalStress, presetTrough, twinTroughs, deflectionRatios, deflectionModificationFactor, frameBendingStiffness, relativeBendingStiffness, strainModificationFactor, frameAxialStiffness, relativeAxialStiffness, burlandCategory, referenceInstalled, erf,
+  verticalStress, presetTrough, twinTroughs, deflectionRatios, deflectionModificationFactor, frameBendingStiffness, relativeBendingStiffness, buildingStrains, strainModificationFactor, frameAxialStiffness, relativeAxialStiffness, burlandCategory, referenceInstalled, erf,
   Rng, sample as sampleDist, DIST, SHIFT_PATTERNS, PER_CYCLE_MAINTENANCE_MIN, simulateDrive, LEARNING_DAYS_BARCELONA, recordCheck, EPB_WEEKLY_SURVEY,
   scenario as loadScenario, jsceRing, woodInertia, subgradeModulus, terzaghiLoads, activeCoefficient, sectionStresses, jackingStress, burstingForce, annulusVolume, groutWindow, ITA2000_ALLOWABLE,
 } from "../../models/js/index.js";
@@ -895,15 +895,30 @@ function updateSurface() {
   pos.needsUpdate = col.needsUpdate = true;
   surfGeo.computeVertexNormals();
   surfaceMax = smax;
+  // greenfield settlement and horizontal displacement across the line at chainage ch, and the trough's peak there
+  const profile = (ch) => {
+    const zone = zoneAt(ch), t = trough(zone, vl);
+    if (both) {
+      const t2 = trough2(zone, vl);
+      return { s: (x) => t.settlement(x) + t2.settlement(x - BORE2.offset_m), u: (x) => t.horizontal(x) + t2.horizontal(x - BORE2.offset_m),
+        smax: bothSmax(zone) };
+    }
+    const f = tunnelFraction(t, c, ch);
+    return { s: (x) => t.settlement(x) * f, u: (x) => t.horizontal(x) * f, smax: t.s_max * f };
+  };
   for (const b of BUILDINGS) {
-    // greenfield horizontal strain under the footprint at the building's chainage: u = -(x/z0) S, eps = du/dx
+    // largest local greenfield horizontal strain under the footprint (shown, and the basis of the stiffness factor)
+    // (each bore's displacement points to its own axis; before 6 Nov 2026 both were taken towards the first bore's axis)
+    const pr = profile(b.ch);
     let emax = 0, smaxB = 0;
     for (let x = b.xmin, dx = Math.max((b.xmax - b.xmin) / 200, 0.25); x <= b.xmax; x += dx) {
-      const e = -(settle(x + 0.05, b.ch) * (x + 0.05) - settle(x - 0.05, b.ch) * (x - 0.05)) / (zoneAt(b.ch).z0 * 0.1);
-      emax = Math.max(emax, e);
-      smaxB = Math.max(smaxB, settle(x, b.ch));
+      emax = Math.max(emax, (pr.u(x + 0.05) - pr.u(x - 0.05)) / 0.1);
+      smaxB = Math.max(smaxB, pr.s(x));
     }
-    b.strain = emax * 100;
+    b.eh = emax * 100;
+    // damage category: Mair, Taylor & Burland (1996) second stage, bending or diagonal strain from each span's Delta/L
+    // plus the span's average horizontal strain, building following the greenfield trough, masonry E/G 2.6
+    b.strain = buildingStrains(pr.s, pr.u, b.xmin, b.xmax, b.h ?? 10, 0.044 * pr.smax, 2.6, 100).strain * 100;
     b.settle = smaxB; // largest settlement under the footprint
     const [cat, name] = burlandCategory(b.strain);
     b.cat = cat;
@@ -1131,7 +1146,7 @@ function hud() {
     ...(SCN?.data.settlement ? [["Volume loss, trough width (default)", `${SCN.data.settlement.volume_loss} %, K ${SCN.data.settlement.k} (measured on Crossrail${SCN.data.settlement.measured_smax_mm ? `; Smax ${SCN.data.settlement.measured_smax_mm.join("–")} mm measured` : ", Hyde Park"})`]] : []),
     ["Buildings within 60 m", `${BUILDINGS.length}${SCN ? `, ${BUILDINGS.filter((b) => b.listed.length).length} listed` : ""}; category 2 or worse: ${BUILDINGS.filter((b) => b.cat >= 2).length}`],
     ...BUILDINGS.filter((b) => Math.abs(b.ch - S.chainage) < 150).sort((p, q) => (q.cat ?? 0) - (p.cat ?? 0) || (q.settle ?? 0) - (p.settle ?? 0)).slice(0, 6)
-      .map((b) => [`${b.name}${b.grade ? ` (Grade ${b.grade})` : ""}`, `ch ${fmt(b.ch, 0)} m, ${fmt(b.h, 0)} m high: ${fmt((b.settle ?? 0) * 1000, 1)} mm, ε ${fmt(b.strain ?? 0, 3)} %${b.bending ? ` (${fmt((b.strain ?? 0) * b.bending.mt, 4)} % with stiffness, α* ${fmt(b.bending.alpha, 0)})` : ""}, cat. ${b.cat ?? 0}${b.bending ? `; Δ/L ${fmt(b.bending.gf * 1e4, 2)} → ${fmt(b.bending.mod * 1e4, 2)} ×10⁻⁴ with stiffness (${b.bending.storeys} ${b.bending.storeys === 1 ? "storey" : "storeys"})` : ""}`]),
+      .map((b) => [`${b.name}${b.grade ? ` (Grade ${b.grade})` : ""}`, `ch ${fmt(b.ch, 0)} m, ${fmt(b.h, 0)} m high: ${fmt((b.settle ?? 0) * 1000, 1)} mm, ε ${fmt(b.strain ?? 0, 3)} % (bending + horizontal), cat. ${b.cat ?? 0}; horizontal ε ${fmt(b.eh ?? 0, 3)} %${b.bending ? ` → ${fmt((b.eh ?? 0) * b.bending.mt, 4)} % with stiffness (α* ${fmt(b.bending.alpha, 0)})` : ""}${b.bending ? `; Δ/L ${fmt(b.bending.gf * 1e4, 2)} → ${fmt(b.bending.mod * 1e4, 2)} ×10⁻⁴ with stiffness (${b.bending.storeys} ${b.bending.storeys === 1 ? "storey" : "storeys"})` : ""}`]),
     ["Surface heights", "exaggerated ×150"],
   ]);
   placeFace();

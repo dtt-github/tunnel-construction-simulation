@@ -22,6 +22,7 @@ from .settlement import (
     METHOD_PRESETS,
     Trough,
     TwinTroughs,
+    building_strains,
     burland_category,
     critical_stability_ratio,
     deflection_modification_factor,

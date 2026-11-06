@@ -10,7 +10,7 @@ from dataclasses import asdict
 
 from tunnelsim_models import critical_stability_ratio, face_volume_loss, load_factor, macklin_volume_loss
 from tunnelsim_models import deflection_modification_factor, deflection_ratios, frame_bending_stiffness, relative_bending_stiffness
-from tunnelsim_models import frame_axial_stiffness, relative_axial_stiffness, strain_modification_factor
+from tunnelsim_models import frame_axial_stiffness, relative_axial_stiffness, strain_modification_factor, building_strains
 from tunnelsim_models import Cutter, daub_window, silo_stress, wedge_silo, cutter_forces, gaussian_trough, hoek_brown, preset_trough, tbm_performance, twin_troughs
 
 OUT = pathlib.Path(__file__).resolve().parents[1] / "test-vectors"
@@ -106,6 +106,14 @@ for z0, vl, k, xmin, xmax in [(30, 0.005, 0.5, -10, 10), (30, 0.005, 0.5, 5, 30)
     r = deflection_ratios(t.settlement, xmin, xmax, t.i, t.i)
     dr_cases.append({"in": {"z0": z0, "vl": vl, "k": k, "x_min": xmin, "x_max": xmax}, "out": {kk: (list(v) if v else None) for kk, v in r.items()}})
 bending["deflection_ratios"] = dr_cases
+# Mair, Taylor & Burland (1996) second-stage building strain across a greenfield trough
+bs_cases = []
+for z0, vl, k, xmin, xmax, hgt, eg in [(20, 0.01, 0.5, -30, -5, 10, 2.6), (20, 0.01, 0.5, -5, 5, 10, 2.6), (30, 0.005, 0.43, -40, 12, 18, 12.5),
+                                       (14, 0.003, 0.4, 2, 25, 6, 2.6)]:
+    t = gaussian_trough(7.08, z0, vl, k)
+    r = building_strains(t.settlement, t.horizontal, xmin, xmax, hgt, 0.044 * t.s_max, eg)
+    bs_cases.append({"in": {"z0": z0, "vl": vl, "k": k, "x_min": xmin, "x_max": xmax, "height": hgt, "e_over_g": eg}, "out": r})
+bending["building_strains"] = bs_cases
 write("settlement", {"symmetric": st, "asymmetric": asym, "presets": presets, "twin": twins, "face_volume_loss": face_vl, "bending": bending})
 face = []
 # (D, cover, gamma, phi, c, water_depth, q, k_wedge)

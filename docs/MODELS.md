@@ -59,7 +59,8 @@ What it computes:
 - twin tunnels: the second bore's trough at its own volume loss, with separate widths towards and away from the first bore;
 - volume loss from the face's load factor in overconsolidated clay (Macklin 1999): LF = N / N_TC, N = (σv − σT)/S_u, VL = 0.23 % × e^(4.4 LF), with N_TC from Kimura & Mair (1981) for a face supported up to the cutterhead (7.05 at C/D 1.5 to 9.0 at C/D ≥ 3);
 - the deflection ratio Δ/L of a footprint in sagging and hogging, and its modification by the building's bending stiffness: M_DR against ρ* = EI / (E_s H⁴), H = B/2, and e/B (Potts & Addenbrooke 1997, digitised from [Mair 1997](https://www.issmge.org/uploads/publications/1/31/1997_04_0052.pdf) Fig. 4 to about ±0.03), with an assumed EI from floor slabs;
-- Burland damage categories.
+- the building's tensile strain by the second-stage assessment of Mair, Taylor & Burland (1996): the footprint follows the greenfield trough, is split at the points of inflection into hogging and sagging spans and limited to 2.5 i; each span's Δ/L gives the bending and diagonal strain of a deep beam (Burland & Wroth 1974; E/G 2.6 for masonry), combined with the span's average tensile horizontal strain (their Eqs 7–10);
+- Burland damage categories from that strain.
 
 **References:**
 
@@ -68,6 +69,7 @@ What it computes:
 - Addenbrooke & Potts (2001), [doi:10.1061/(ASCE)1532-3641(2001)1:2(249)](https://doi.org/10.1061/(ASCE)1532-3641(2001)1:2(249));
 - Wan, Standing, Potts & Burland (2017), [doi:10.1680/jgeot.16.P.099](https://doi.org/10.1680/jgeot.16.P.099) (second bore at Hyde Park);
 - Burland (1995);
+- Mair, Taylor & Burland (1996), IS-London, [ISSMGE library](https://www.issmge.org/uploads/publications/6/8/1996_118.pdf) (second-stage building strain, Eqs 7–10, Table 2, Fig. 4);
 - Macklin (1999), *Ground Engineering* 32(4), not open; the relation as quoted in [Divall et al. 2023](https://openaccess.city.ac.uk/id/eprint/31563/), Eq. (4)–(6), accepted version open;
 - Mair (1997), theme lecture, [ISSMGE library](https://www.issmge.org/uploads/publications/1/31/1997_04_0052.pdf) (Potts & Addenbrooke's deflection-ratio factors, Fig. 4);
 - Potts & Addenbrooke (1996), IS-London, [ISSMGE library](https://www.issmge.org/uploads/publications/6/8/1996_093.pdf) (horizontal-strain factors against α* = EA / (E_s H), Fig. 5);
@@ -97,7 +99,9 @@ What it computes:
 **Limits of the building stiffness:**
 
 - the deflection ratio and the horizontal strain are both modified and shown beside the greenfield values. The horizontal-strain factors come from Potts & Addenbrooke (1996) Fig. 5, digitised to about ±0.003. They are upper-bound design curves, at most about 0.11 of greenfield, stated valid for α* > 0.5;
-- the damage category stays on greenfield horizontal strain. The slab stiffness is assumed, and a category with stiffness also needs the bending strain from Δ/L combined with the horizontal strain, which is not done here. With the assumed slabs, α* is about 2–22 for the buildings checked at the start of each drive, so the tensile strain with stiffness is at most a few per cent of greenfield;
+- the damage category uses the greenfield second-stage strain (Mair, Taylor & Burland 1996), as that method intends: conservative, because the building is assumed to follow the greenfield trough. The stiffness-modified values are shown only, because the slab stiffness is assumed. With the assumed slabs, α* is about 2–22 for the buildings checked, so the horizontal strain with stiffness is at most a few per cent of greenfield;
+- the building strain checks: Fig. 4 of Mair, Taylor & Burland is reproduced (L/H = 1, hogging: the category 2/3 boundary at Δ/L 0.16 % with no horizontal strain); with no bending the strain equals the horizontal strain;
+- E/G is 2.6 (masonry) for every building; framed buildings (12.5) would give less strain. Horizontal compression is not allowed to reduce the strain;
 - the chart is digitised from a scan (about ±0.03); between the plotted e/B curves the factor is interpolated, and e/B above 0.6 uses the 0.6 curve;
 - EI and EA are assumed estimates: floor slabs (0.15 m, E 23 GPa, every 3.4 m, storeys from the LIDAR height) acting together, bending about mid-height. Real frames act less than fully together, and masonry on strip footings is far less stiff axially, so this is an upper estimate of stiffness and of the reduction;
 - no field data check: no open source gives a building's measured deflection ratio with its stiffness on these drives.

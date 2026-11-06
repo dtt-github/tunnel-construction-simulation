@@ -6,6 +6,10 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ### Changed
 
+- **Building damage categories by the second-stage assessment of Mair, Taylor & Burland (1996)** (`building_strains` in Python and JavaScript; EPB and Mixshield demos; [ISSMGE library, open](https://www.issmge.org/uploads/publications/6/8/1996_118.pdf)):
+  - each footprint is split at the trough's points of inflection into hogging and sagging spans (limited to 2.5 i); each span's Δ/L gives the bending and diagonal strain of a masonry deep beam (E/G 2.6), combined with its average horizontal strain (Eqs 7–10). Before, the category used the largest local horizontal strain only, which missed bending over the tunnel;
+  - checked against the paper's Fig. 4: with L/H = 1 in hogging and no horizontal strain, the category 2/3 boundary falls at Δ/L 0.16 %, as plotted;
+
 - **Buildings: horizontal strain with building stiffness** (`strain_modification_factor`, `frame_axial_stiffness`, `relative_axial_stiffness` in Python and JavaScript; EPB and Mixshield demos):
   - Potts & Addenbrooke's modification factors for horizontal strain, against the relative axial stiffness α* = EA / (E_s H), digitised from Fig. 5 of their 1996 IS-London paper ([ISSMGE library, open](https://www.issmge.org/uploads/publications/6/8/1996_093.pdf)). The earlier search had found only the deflection-ratio chart;
   - each building shows its tensile strain with stiffness beside the greenfield value, with EA from the same floor slabs as EI (assumed). For the buildings checked, α* is about 2–22 and the strain with stiffness at most a few per cent of greenfield;
@@ -66,6 +70,10 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
   - the set point must now stay inside the window by the machine's support-pressure deviation (±30 kPa EPB, ±10 kPa slurry). The EPB and Mixshield demos show this operating range at the crown and raise an alarm if it is empty; along both drives it stays open (narrowest 36 kPa, Mixshield);
   - DAUB's worked example 8.1 is reproduced (critical angle 66.56°, earth force 4,121 against 4,122 kN, operating range 200.8–219.5 kPa) and is now a test vector in Python and JavaScript;
   - seepage forces are not added: DAUB applies them only when the support is below the groundwater pressure, which the 1.05 factor excludes in closed mode.
+
+### Fixed
+
+- **Second-bore horizontal strain in the EPB and Mixshield demos:** with "after both drives" shown, the ground movement of both bores was directed at the first bore's axis, which overstated the strain about 3× on the second bore's side. Each bore's movement now points to its own axis. With both bores at 1 % volume loss, buildings at category 2 or worse go from 26 to 0 (EPB) and 10 to 0 (Mixshield); at 2 %, from 31 to 20 and 18 to 8. At the scenario defaults none reach category 2, before or after.
 
 ### Added
 

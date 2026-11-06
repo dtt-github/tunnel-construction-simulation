@@ -143,6 +143,42 @@ export function twinTroughs(diameterM, axisDepthM, spacingM, volumeLossFirst, vo
   };
 }
 
+/** Largest tensile strain (fraction) of a building across a trough, Mair, Taylor & Burland (1996) second stage. See
+ * settlement.py building_strains for the method; returns { strain, spans }. */
+export function buildingStrains(settlement, horizontal, xMin, xMax, height, sLimit = 0, eOverG = 2.6, n = 200) {
+  const h = Math.max(height, 1);
+  let xs = Array.from({ length: n + 1 }, (_, k) => xMin + ((xMax - xMin) * k) / n);
+  const inside = xs.filter((x) => settlement(x) >= sLimit);
+  const out = { strain: 0, spans: [] };
+  if (inside.length < 3 || inside.at(-1) - inside[0] < 1) return out;
+  const a0 = inside[0], b0 = inside.at(-1);
+  xs = Array.from({ length: n + 1 }, (_, k) => a0 + ((b0 - a0) * k) / n);
+  const ss = xs.map(settlement);
+  const curv = [];
+  for (let k = 1; k < n; k++) curv.push(ss[k - 1] - 2 * ss[k] + ss[k + 1]);
+  const sag = [curv[0] < 0, ...curv.map((c) => c < 0), curv.at(-1) < 0];
+  let k0 = 0;
+  for (let k = 1; k <= n + 1; k++) {
+    if (k === n + 1 || sag[k] !== sag[k0]) {
+      const a = xs[k0], b = xs[Math.min(k, n)], ln = b - a;
+      if (ln >= 1) {
+        const sa = settlement(a), sb = settlement(b), m = 50;
+        let delta = 0;
+        for (let j = 0; j <= m; j++) delta = Math.max(delta, Math.abs(settlement(a + (ln * j) / m) - (sa + ((sb - sa) * j) / m)));
+        const dr = delta / ln, eh = Math.max((horizontal(b) - horizontal(a)) / ln, 0);
+        const [i, t] = sag[k0] ? [h ** 3 / 12, h / 2] : [h ** 3 / 3, h];
+        const eb = dr / (ln / (12 * t) + (3 * i * eOverG) / (2 * t * ln * h));
+        const ed = dr / (1 + (h * ln ** 2) / (18 * i * eOverG));
+        const ebt = eh + eb, edt = 0.35 * eh + Math.sqrt((0.65 * eh) ** 2 + ed ** 2);
+        out.spans.push({ mode: sag[k0] ? "sag" : "hog", length: ln, dr, eh, eb, ed, ebt, edt });
+        out.strain = Math.max(out.strain, ebt, edt);
+      }
+      k0 = k;
+    }
+  }
+  return out;
+}
+
 export function burlandCategory(tensileStrainPercent) {
   for (const [limit, cat, name] of BURLAND) if (tensileStrainPercent < limit) return [cat, name];
 }

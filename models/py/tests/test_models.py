@@ -219,6 +219,30 @@ def test_deflection_modification_factor():
     assert side["sag"] is None and side["hog"][1] > 0
 
 
+def test_building_strains():
+    import math
+    from tunnelsim_models import building_strains, burland_category, gaussian_trough
+
+    # Mair, Taylor & Burland (1996) Fig. 4 (L/H = 1, hogging, E/G 2.6): with no horizontal strain the category 2/3
+    # boundary (0.15 %) lies at Delta/L about 0.16 %, set by the diagonal strain (Eq. 8)
+    h = 10.0
+    # a parabolic hogging profile over 10 m with Delta/L 0.16 %: settlement rises to the middle by Delta
+    delta = 0.0016 * h
+    r = building_strains(lambda x: -4 * delta * x * (h - x) / h**2, lambda x: 0.0, 0.0, h, h, s_limit=-1.0)
+    assert r["spans"][0]["mode"] == "hog" and r["strain"] * 100 == pytest.approx(0.150, abs=0.003)
+    assert burland_category(r["strain"] * 100 + 0.001)[0] == 3
+    # no bending: the combined strain is the average horizontal strain (Eq. 9 and 10 both give eps_h)
+    r = building_strains(lambda x: 0.0, lambda x: 0.001 * x, 0.0, 20.0, 8.0)
+    assert r["strain"] == pytest.approx(0.001)
+    # over the tunnel the old horizontal-strain-only check sees compression, but bending still strains the building
+    t = gaussian_trough(7.08, 20, 0.01, 0.5)
+    r = building_strains(t.settlement, t.horizontal, -5, 5, 10, 0.044 * t.s_max)
+    assert r["spans"][0]["mode"] == "sag" and r["spans"][0]["eh"] == 0 and r["strain"] > 0
+    # beyond the trough's extent (2.5 i) nothing is counted
+    assert building_strains(t.settlement, t.horizontal, 3 * t.i, 4 * t.i, 10, 0.044 * t.s_max)["strain"] == 0
+    assert math.isfinite(r["spans"][0]["edt"])
+
+
 def test_strain_modification_factor():
     from tunnelsim_models import frame_axial_stiffness, relative_axial_stiffness, strain_modification_factor
 

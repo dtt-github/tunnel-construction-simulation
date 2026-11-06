@@ -34,6 +34,15 @@ References
   strain in that part of the trough, against the relative axial stiffness alpha* = EA / (E_s H), H = B / 2, EA per
   metre run (dimensionless). Digitised here to about +/-0.003. Upper-bound design curves, stated valid for
   alpha* > 0.5; the plotted curves start at alpha* about 0.33 (0.6 for tension at e/B 0.6).
+- Mair, R.J., Taylor, R.N., Burland, J.B. (1996). Prediction of ground movements and assessment of risk of building
+  damage due to bored tunnelling. Geotechnical Aspects of Underground Construction in Soft Ground, Mair & Taylor (eds),
+  Balkema, 713-718 (ISSMGE library, open: https://www.issmge.org/uploads/publications/6/8/1996_118.pdf). Second-stage
+  assessment, used by building_strains: the building follows the greenfield trough, split at the points of inflection
+  into hogging and sagging spans, limited to the trough's extent (2.5 i, S/Smax = 0.044); per span the deflection ratio
+  Delta/L gives the bending strain (Eq. 7) and diagonal strain (Eq. 8) of a deep beam (Burland & Wroth 1974), with
+  I = H^3/12, t = H/2 when sagging and I = H^3/3, t = H when hogging, E/G 2.6 for masonry (12.5 for frames); the
+  average horizontal strain over the span is added (Eq. 9: eps_bt = eps_h + eps_b; Eq. 10: eps_dt = 0.35 eps_h +
+  sqrt((0.65 eps_h)^2 + eps_d^2)), and the larger gives the category (Table 2).
 - Kimura, T., Mair, R.J. (1981). Centrifugal testing of model tunnels in soft clay. Proc. 10th ICSMFE, Stockholm, 1,
   319-322, https://www.issmge.org/uploads/publications/1/35/1981_01_0061.pdf. N at collapse for a heading supported to
   the face (P/D 0): 7.05 at C/D 1.5 and 9.0 at C/D 3.0, digitised from Fig. 9 (docs/validation/mpm-clay.md); N is
@@ -244,6 +253,49 @@ def twin_troughs(
     else:
         second = gaussian_trough(diameter_m, axis_depth_m, vl2, k, k_left=k_out, k_right=k_in)
     return TwinTroughs(first=first, second=second, spacing=spacing_m)
+
+
+def building_strains(settlement, horizontal, x_min: float, x_max: float, height: float, s_limit: float = 0.0,
+                     e_over_g: float = 2.6, n: int = 200) -> dict:
+    """Largest tensile strain (fraction) of a building across a trough by Mair, Taylor & Burland (1996), second stage.
+
+    settlement(x) and horizontal(x) are the greenfield settlement (positive down) and horizontal displacement (positive
+    in +x) at the foundation, in m; the footprint x_min..x_max is limited to where settlement >= s_limit (the trough's
+    extent) and split where the curvature changes sign: sagging where the settlement is concave (S'' < 0), hogging
+    elsewhere. Spans shorter than 1 m are skipped. Horizontal strain is counted only when tensile (compression is not
+    allowed to reduce the strain). Returns {'strain': largest of eps_bt and eps_dt, 'spans': [...]}."""
+    h = max(height, 1.0)
+    xs = [x_min + (x_max - x_min) * k / n for k in range(n + 1)]
+    inside = [x for x in xs if settlement(x) >= s_limit]
+    out = {"strain": 0.0, "spans": []}
+    if len(inside) < 3 or inside[-1] - inside[0] < 1.0:
+        return out
+    a0, b0 = inside[0], inside[-1]
+    xs = [a0 + (b0 - a0) * k / n for k in range(n + 1)]
+    ss = [settlement(x) for x in xs]
+    curv = [ss[k - 1] - 2 * ss[k] + ss[k + 1] for k in range(1, n)]
+    sag = [curv[0] < 0] + [c < 0 for c in curv] + [curv[-1] < 0]
+    k0 = 0
+    for k in range(1, n + 2):
+        if k == n + 1 or sag[k] != sag[k0]:
+            a, b = xs[k0], xs[min(k, n)]
+            ln = b - a
+            if ln >= 1.0:
+                sa, sb = settlement(a), settlement(b)
+                m = 50
+                delta = max(abs(settlement(a + ln * j / m) - (sa + (sb - sa) * j / m)) for j in range(m + 1))
+                dr = delta / ln
+                eh = max((horizontal(b) - horizontal(a)) / ln, 0.0)
+                i_, t = (h**3 / 12, h / 2) if sag[k0] else (h**3 / 3, h)
+                eb = dr / (ln / (12 * t) + 3 * i_ * e_over_g / (2 * t * ln * h))
+                ed = dr / (1 + h * ln**2 / (18 * i_ * e_over_g))
+                ebt = eh + eb
+                edt = 0.35 * eh + math.sqrt((0.65 * eh) ** 2 + ed**2)
+                out["spans"].append({"mode": "sag" if sag[k0] else "hog", "length": ln, "dr": dr, "eh": eh, "eb": eb, "ed": ed,
+                                     "ebt": ebt, "edt": edt})
+                out["strain"] = max(out["strain"], ebt, edt)
+            k0 = k
+    return out
 
 
 def burland_category(tensile_strain_percent: float) -> tuple[int, str]:

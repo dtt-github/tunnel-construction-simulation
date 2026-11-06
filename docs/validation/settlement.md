@@ -100,5 +100,5 @@ The volume-loss slider still covers the published range (0.1–2 %), including C
 
 - The second bore is driven "later" as a final trough only; the demos do not animate it. Its spacing and side are assumed on both routes, and the Thames reading of the table is inferred, not stated.
 - On the one independent chalk site, the second bore lost about half the first's volume, not 1.2×, and K was about 0.4, not 0.5 (see above). The Thames second-bore setting is unconfirmed.
-- The building category uses the greenfield trough and the horizontal strain under each footprint. The deflection ratio and horizontal strain with an assumed building stiffness (Potts & Addenbrooke 1996, 1997) are shown beside it, not used for the category ([models](../MODELS.md#settlement-and-building-damage)).
+- The building category uses the greenfield trough under each footprint, by the second-stage method of Mair, Taylor & Burland (1996): bending or diagonal strain from Δ/L combined with horizontal strain. The deflection ratio and horizontal strain with an assumed building stiffness (Potts & Addenbrooke 1996, 1997) are shown beside it, not used for the category ([models](../MODELS.md#settlement-and-building-damage)).
 - OS OpenMap Local merges terraces into blocks. A block's strain is the largest along its width at its centroid chainage.
