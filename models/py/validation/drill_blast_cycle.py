@@ -18,6 +18,14 @@ Data (open sources, read and cited, not redistributed):
 - 101 production hours a week: Tunnelbyggetid guidance v2.0 (EBA, Statens vegvesen, Bane NOR, NTNU, 2024), p. 3-4:
   https://www.eba.no/siteassets/dokumenter/vei-og-jernbane/tunnellbyggetid/veileder-byggetidsmodell-april-2024-ver-2.0.pdf
 - NFF Publication 14 (2004): about 12 h per round and about 50 m/week; Publication 23: 40-80 m/week per face.
+- Jennemyr, L. (2020). Advancements in tunneling and underground excavation by drill & blast. Tunnel Business Magazine,
+  15 Apr 2020: https://tunnelingonline.com/advancements-in-tunneling-and-underground-excavation-by-drill-blast/ .
+  Practitioner statements: 80-100 holes/h from a charging truck with two pumps; an automated three-boom jumbo drills
+  800-1,200 ft/h with 20 ft rods.
+- Kim, Y. & Lee, S.S. (2021). A study of the effects of geological conditions on Korean tunnel construction time using the
+  updated NTNU drill and blast prediction model. Applied Sciences 11(21): 10096 (CC BY), Table 6:
+  https://www.mdpi.com/2076-3417/11/21/10096 . NTNU-model output for a 77-82 m^2 road tunnel, minutes per round,
+  support types 1-5: charging and blasting 88-119, ventilation 28, scaling 43-112, rig time and lost time 43-51.
 
 Run:  uv run python validation/drill_blast_cycle.py      (prints a Markdown summary)
 """
@@ -33,6 +41,8 @@ from tunnelsim_models import drill_blast as db  # noqa: E402
 ULVIN = {"holes": 200, "depth": 5.2, "reamed": 4, "muck": 639.8, "logged": {"Drilling": 4.54, "Charging": 1.99, "Mucking": 2.90,
          "Scaling (machine and manual)": 3.29, "Clean-up mucking": 0.76, "Bolting": 1.38, "Sprayed concrete": 1.70, "Downtime": 2.46},
          "total": 19.02, "pull": 5.09, "hours": 105.0, "rounds_per_week": 4.57}
+JENNEMYR = {"charge_holes_per_h": (80, 100), "jumbo_ft_per_h": (800, 1200)}
+NTNU_KOREA_MIN = {"Charging": (88, 119), "Ventilation": (28, 28), "Scaling": (43, 112)}  # Kim & Lee (2021) Table 6
 T105_CONTRACTOR_MIN = {"Drilling": (120, 90, 360), "Charging": (90, 60, 180), "Ventilation": (20, 10, 30), "Mucking": (90, 75, 120),
                        "Scaling": (90, 60, 180), "Sprayed concrete": (60, None, None), "Bolting": (90, 60, 210)}
 DEMO = {"width": 10.6, "wall": 2.9, "depth": 5.2, "overbreak": 0.12}
@@ -83,5 +93,19 @@ if __name__ == "__main__":
     print("|---|---|---|")
     for c, cy in cycles.items():
         print(f"| {c} | {cy.total_h:.1f} | {cy.m_per_week:.0f} |")
+    rd = demo_cycles()[0]
+    drilled = [h for h in rd.holes if h.kind != "empty"]
+    depth = rd.drill_metres / len(rd.holes)
+    k = db.RATES
+    jumbo_m_h = depth * len(drilled) / ((depth * len(drilled) / k["drill_m_per_min"] + len(drilled) * k["move_min_per_hole"]) / k["booms"]) * 60
+    print("\n### Rates against practitioner statements and the NTNU model\n")
+    print("| Rate | Demo | Source |")
+    print("|---|---|---|")
+    print(f"| Charging (holes/h) | {60 / k['charge_min_per_hole']:.0f} | {JENNEMYR['charge_holes_per_h'][0]}-{JENNEMYR['charge_holes_per_h'][1]} "
+          "(Jennemyr 2020, two-pump truck) |")
+    print(f"| Jumbo drilling, three booms (ft/h) | {jumbo_m_h * 3.281:.0f} | {JENNEMYR['jumbo_ft_per_h'][0]}-{JENNEMYR['jumbo_ft_per_h'][1]} "
+          "(Jennemyr 2020) |")
+    for a, (lo, hi) in NTNU_KOREA_MIN.items():
+        print(f"| {a} (min/round) | {model_min[a] * 60:.0f} | {lo}-{hi} (NTNU model, Kim & Lee 2021) |".replace(f"{lo}-{lo} ", f"{lo} "))
     print("\nReferences: Tunnelbyggetid 2021 model case (74.6 m^2, about class II) about 48 m/week; NFF Publication 23 40-80 m/week per face; "
           "NFF Publication 14 about 12 h per round and about 50 m/week; logged Ulvin (120 m^2) 23 m/week at 105 h.")

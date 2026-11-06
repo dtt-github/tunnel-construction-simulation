@@ -76,6 +76,25 @@ Bolting (12/h) and sprayed concrete (6 m³/h) stay at the NFF contract rates. Th
 - **Against Tunnelbyggetid:** class II gives 37 m/week, against about 48 m/week for the Tunnelbyggetid case. That case uses 109 charged holes, against the demo's 134 (published 120–148 for 80 m² in medium to poor blastability, Jakobsen et al. 2024). It is also a model, not a log, and its downtime assumptions are not open.
 - **Against Ulvin:** the logged 23 m/week was for a 120 m² profile, so it is a lower bound.
 
+## Rates against practitioner statements and the NTNU model
+
+Searched again on 6 Nov 2026 for a time study of charging per hole: none is open. Two brackets were found.
+
+- **Jennemyr (2020)**, AECOM, [Tunnel Business Magazine](https://tunnelingonline.com/advancements-in-tunneling-and-underground-excavation-by-drill-blast/): a charging truck with two pumps charges 80–100 holes an hour, and an automated three-boom jumbo drills 800–1,200 ft an hour. These are practitioner statements, not measurements.
+- **Kim & Lee (2021)**, [Applied Sciences 11: 10096](https://www.mdpi.com/2076-3417/11/21/10096) (CC BY), Table 6: NTNU-model times for a 77–82 m² road tunnel in five support types. Model output, not logs.
+
+| Rate | Demo (T10.5, class II) | Source |
+|---|---|---|
+| Charging (holes/h) | 100 | 80–100 (Jennemyr) |
+| Jumbo drilling, three booms (ft/h) | 991 | 800–1,200 (Jennemyr) |
+| Charging, connecting and firing (min/round) | 110 | 88–119 (NTNU model) |
+| Ventilation (min/round) | 20 | 28 (NTNU model) |
+| Scaling (min/round) | 90 | 43–112 (NTNU model) |
+
+**What this shows:**
+- **Every rate is inside the brackets.** Charging at 0.6 min per hole is at the fast end of the practitioner range; at 80 holes an hour the 134 holes would take 20 min longer, about 2.5 % of the round.
+- **None of it is a measurement,** so charging per hole stays an assumption, now bracketed.
+
 ## Specific charge and charged holes against current practice
 
 **Data:** [Gjengedal & Jakobsen 2025](https://airdrive.eventsair.com/eventsairwesteuprod/production-atlanticmice-public/927385ad0d3e425bbbf6581c4573f524), Eurock 2025, Trondheim (ISBN 978-82-8208-079-8, open on the conference site). They compiled 353 logged blast rounds from four Norwegian tunnels driven in 2021–2025, with explosive weight per round from the contractors' reports to the authorities, mostly bulk emulsion. Their Fig. 5 gives each project's best-fit trend of specific charge (kg per m³ of solid rock) against cross-section A. At the T10.5 area (74.6 m²):
@@ -101,6 +120,6 @@ Bolting (12/h) and sprayed concrete (6 m³/h) stay at the NFF contract rates. Th
 
 - Only one logged round breakdown is open (Ulvin, 120 m², 2013). The T10.5 activity times are one contractor's estimate.
 - Weekly advance by support class is not published openly, so the class IV rate (22 m/week) is untested.
-- Charging time per hole is still an assumption (0.6 min per hole, two lines); no open source times it. Searched again 6 Nov 2026.
+- Charging time per hole is still an assumption (0.6 min per hole, two lines); no open source times it. It sits at the fast end of a practitioner's 80–100 holes an hour (Jennemyr 2020). Searched again 6 Nov 2026.
 - The specific charge is about a third below logged road-tunnel practice (see above); the design is not fitted to it.
 - Activities do not overlap. On site, ventilation often overlaps mucking, and charging sometimes overlaps drilling: at Ulvin by 16 min a round.

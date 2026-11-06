@@ -87,6 +87,11 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ### Added
 
+- **Drill & blast rates bracketed** (`models/py/validation/drill_blast_cycle.py`; [drill & blast cycle](docs/validation/drill-blast-cycle.md#rates-against-practitioner-statements-and-the-ntnu-model)); no default changed:
+  - charging 100 holes/h and drilling about 990 ft/h per three-boom jumbo, against a practitioner's 80–100 holes/h and 800–1,200 ft/h (Jennemyr 2020, Tunnel Business Magazine);
+  - charging, ventilation and scaling per round inside NTNU-model times for a 77–82 m² road tunnel (Kim & Lee 2021, Applied Sciences, CC BY);
+  - no open time study of charging per hole was found; it stays an assumption.
+
 - **Hard-rock cutterhead torque on a second project** (`models/py/validation/hard_rock_torque.py`; [hard-rock projects](docs/validation/hard-rock-projects.md#cutterhead-torque-on-a-second-project)); no default changed:
   - Tehran Metro Line 6, an open-mode EPB in limestone (Samadi & Hassanpour 2024, Heliyon): logged torque 0.56–0.80 of the model; with Brenner (0.41–0.67), the model torque is 1.25–2.4× high on both projects;
   - Follo's open thesis data log no torque;
