@@ -1,5 +1,6 @@
 // EPB excavation chamber: support pressure from a volume balance (Boyle's law for foam air), foam conditioning
-// (EFNARC 2005) and the screw conveyor (simplified from Merritt & Mair 2006, 2008).
+// (EFNARC 2005) and the screw conveyor (simplified from Merritt & Mair 2006, 2008; entrance drop and decay length
+// calibrated on the Botlek screw gauges, Bezuijen et al. 2005).
 // Twin of models/py/tunnelsim_models/epb_chamber.py, which documents the equations. m, s, kPa gauge, rpm.
 
 export const P_ATM = 101.325;
@@ -11,12 +12,12 @@ export function foamSplit(qSoil, fir, fer) {
   return [qFoam / fer, qFoam * (1 - 1 / fer)];
 }
 
-export function screw({ diameter = 0.9, shaftDiameter = 0.3, pitch = 0.7, length = 12, efficiency = 0.6, decayLength = 3 } = {}) {
+export function screw({ diameter = 0.9, shaftDiameter = 0.3, pitch = 0.7, length = 12, efficiency = 0.6, decayLength = 16, entranceFactor = 0.85 } = {}) {
   const theoreticalFlow = (rpm) => ((Math.PI * (diameter ** 2 - shaftDiameter ** 2)) / 4) * pitch * (rpm / 60);
   const discharge = (rpm) => efficiency * theoreticalFlow(rpm);
-  const pressureAlong = (s, pIn) => pIn * Math.exp(-s / decayLength);
+  const pressureAlong = (s, pIn) => pIn * entranceFactor * Math.exp(-s / decayLength);
   return {
-    diameter, shaftDiameter, pitch, length, efficiency, decayLength,
+    diameter, shaftDiameter, pitch, length, efficiency, decayLength, entranceFactor,
     theoreticalFlow,
     discharge,
     rpmForFlow: (q) => q / discharge(1),

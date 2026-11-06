@@ -81,7 +81,8 @@ const BUILDINGS = SCN?.data.buildings
   { name: "Building C", x: -20, ch: 150, w: 16, d: 12, h: 9 },
 ].map((b) => ({ ...b, cz: b.ch, xmin: b.x - b.w / 2, xmax: b.x + b.w / 2, listed: [] }));
 const CH = makeChamber(Math.PI * R * R * M.chamberLength);
-const SCREW = makeScrew({ diameter: 0.9, shaftDiameter: 0.3, pitch: 0.7, length: 11, efficiency: 0.6, decayLength: 3 });
+// entrance drop and decay length calibrated on the Botlek screw gauges (Bezuijen et al. 2005); the rest illustrative
+const SCREW = makeScrew({ diameter: 0.9, shaftDiameter: 0.3, pitch: 0.7, length: 11, efficiency: 0.6, decayLength: 16, entranceFactor: 0.85 });
 const SCREW_ANGLE = (22 * Math.PI) / 180;
 
 // ---------------------------------------------------------------- renderer and views
