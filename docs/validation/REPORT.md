@@ -1,7 +1,7 @@
 # Validation report: what each demo and model is checked against
 
 - **What this is:** one page that gathers every check in the project: the data, the result and what kind of check it is. It also lists what is still assumed or unchecked. The details are on the validation pages it links.
-- **Status:** as of 5 Nov 2026 (main at `0c11cb4`). Update it whenever a validation page changes.
+- **Status:** as of 6 Nov 2026 (main at `1f21886`). Update it whenever a validation page changes.
 - **Sources:** every data source is openly published. The links are on the validation pages.
 
 ## How to read it
@@ -24,7 +24,7 @@
 
 | Demo | Strongest independent check | Calibrated on | Biggest known gap |
 |---|---|---|---|
-| [Urban EPB](../../web/epb/) | Thrust at Mashhad 1.3 bar 0.89× and Sofia 1.02–1.28×; ring cycle on an average Crossrail working day, 11.8–12.5 against 12.3–14.9 rings | Shield and rim friction on 281 Changsha rings; Hyde Park settlement uses the site's own back-analysis | Best days and weeks far too low; torque in conditioned ground rests on a paste/friction split read from three datasets; volume loss is an input, not predicted |
+| [Urban EPB](../../web/epb/) | Thrust at Mashhad 1.3 bar 0.89× and Sofia 1.02–1.28×; ring cycle on an average Crossrail working day, 11.8–12.5 against 12.3–14.9 rings | Shield and rim friction on 281 Changsha rings; Hyde Park settlement uses the site's own back-analysis | Barcelona's mean day about 30 % slow; best days and weeks come from a day-to-day variation fitted on Crossrail (tested on Barcelona and Betuweroute); torque in conditioned ground rests on a paste/friction split read from three datasets; volume loss responds to face pressure only in London Clay |
 | [Mixshield](../../web/slurry/) | Thames settlement 1.10× median over 17 sections (see the caveat below) | Thames volume loss 0.25 % fitted to those same 17 sections | Thames: working day 7–58 % fast, whole drive about 2× fast (river crossing and interventions not modelled); on two Dutch slurry drives 0.78–0.98×; no separation-plant stops; air-cushion model is this project's own derivation |
 | [Gripper TBM](../../web/hard-rock/) | Queens Water Tunnel penetration (gneiss, 10 stations): median 1.02× with the Follo ψ, not refitted | Penetration (ψ = −0.1) on Follo | No open section-by-section data for Gotthard; advance only bracketed (calendar against working days) |
 | [Double shield](../../web/hard-rock/) | Follo advance 12.9–14.9 against 14.1 m/day (tests the downtime model only) | Penetration on the Follo 4.5 km mean; discs, thrust and rpm are the Follo means | Penetration does not follow section-to-section strength (0.41–2.89×); cutter changes about 40 % too few |
@@ -63,10 +63,10 @@
 | Check | Data | Result | Kind |
 |---|---|---|---|
 | EPB best day / mean day, Barcelona | [Barcelona Line 9](https://www.mdpi.com/2071-1050/17/9/3966); variation fitted on Crossrail only | 2.65–2.71 against 2.67–3.16 | Independent: matches, at the low end |
-| EPB advance, second project | [Barcelona Line 9](https://www.mdpi.com/2071-1050/17/9/3966) (CC BY) | Model 18–19 m/day against 26.4–28.5 (excluding stationary periods); best day 20–21 m against 72–90 m | Independent: fails, about 30 % slow on average, 3.5–4× on the best day |
+| EPB advance, second project | [Barcelona Line 9](https://www.mdpi.com/2071-1050/17/9/3966) (CC BY) | Model 18–19 m/day against 26.4–28.5 (excluding stationary periods); best day about 47–50 m with the Crossrail-fitted day variation (20–21 m without), against 72–90 m | Independent: fails, about 30 % slow on average; the best day is low by the same factor plus a little |
 | EPB rings per average working day | King, Thomas & Stenning (2017), Table 3 | 11.8–12.5 against 12.3–14.9 | Independent: matches (ring length, build time and shifts are taken from the sources) |
 | EPB whole drive | same | 9.2–9.6 against drive X 8.9–9.0; drive Y 5.1–5.5 | Matches X; Y has station transits, not modelled |
-| EPB best day and week | same | 13–14 against 33–59 rings; about 90 against 169–216 per week | Fails |
+| EPB best day and week | same | With the day variation: about 34 rings against 33–59, about 159 against 169–216 a week (without it 13–14 and about 90: failed) | Calibrated: the variation is fitted on these drives |
 | Mixshield rings per working day | same, drive H | 10.7–12.5 against 7.9–10.0 | Fails: 7–58 % fast |
 | Mixshield best day and week | same | 12–14 against 16–17; 77–92 against 91–100 | Matches roughly |
 | Mixshield whole drive | same | 8.4–9.6 against 4.4–4.6 | Fails: about 2× fast (river crossing and interventions not modelled) |
