@@ -25,7 +25,7 @@
 | Demo | Strongest independent check | Calibrated on | Biggest known gap |
 |---|---|---|---|
 | [Urban EPB](../../web/epb/) | Thrust at Mashhad 1.3 bar 0.89× and Sofia 1.02–1.28×; ring cycle on an average Crossrail working day, 11.8–12.5 against 12.3–14.9 rings | Shield and rim friction on 281 Changsha rings; Hyde Park settlement uses the site's own back-analysis | Barcelona's mean day about 30 % slow; best days and weeks come from a day-to-day variation fitted on Crossrail (tested on Barcelona and Betuweroute); torque in conditioned ground rests on a paste/friction split read from three datasets; volume loss responds to face pressure only in London Clay |
-| [Mixshield](../../web/slurry/) | Thames settlement 1.10× median over 17 sections (see the caveat below) | Thames volume loss 0.25 % fitted to those same 17 sections | Thames: working day 7–58 % fast, whole drive about 2× fast (river crossing and interventions not modelled); on two Dutch slurry drives 0.78–0.98×; no separation-plant stops; air-cushion model is this project's own derivation |
+| [Mixshield](../../web/slurry/) | Thames settlement 1.10× median over 17 sections (see the caveat below) | Thames volume loss 0.20 % fitted to those same 17 sections (with K 0.4) | Thames: working day 7–58 % fast, whole drive about 2× fast (river crossing and interventions not modelled); on two Dutch slurry drives 0.78–0.98×; no separation-plant stops; air-cushion model is this project's own derivation |
 | [Gripper TBM](../../web/hard-rock/) | Queens Water Tunnel penetration (gneiss, 10 stations): median 1.02× with the Follo ψ, not refitted | Penetration (ψ = −0.1) on Follo | No open section-by-section data for Gotthard; advance only bracketed (calendar against working days) |
 | [Double shield](../../web/hard-rock/) | Follo advance 12.9–14.9 against 14.1 m/day (tests the downtime model only) | Penetration on the Follo 4.5 km mean; discs, thrust and rpm are the Follo means | Penetration does not follow section-to-section strength (0.41–2.89×); cutter changes about 40 % too few |
 | [Drill & blast](../../web/drill-blast/) | Ulvin drilling 0.88× and charging 1.26× (logged round); every T10.5 activity inside a contractor's P5–P95 range | Mucking rate and downtime share at Ulvin; ventilation and scaling at the contractor median | Weekly advance by support class not published, so class IV is untested; activities do not overlap |
@@ -39,11 +39,12 @@
 | Check | Data | Result | Kind |
 |---|---|---|---|
 | Smax, Hyde Park first bore | Wan, Standing, Potts & Burland (2017) | 8.1 against 8.3 mm | Consistency: the site's own VL 0.78 % and K 0.44 |
-| Smax, Thames chalk, 17 twin-bore sections | Cheng & Mikulski (2014), Table 1 | Median 1.10 (0.80–2.38) | Calibrated: VL 0.25 % fitted to these sections. The paper doesn't state how its table should be read; the reading that agrees was chosen |
+| Smax, Thames chalk, 17 twin-bore sections | Cheng & Mikulski (2014), Table 1 | Median 1.10 (0.80–2.38) | Calibrated: VL fitted to these sections, 0.25 % with K 0.5 or 0.20 % with the default K 0.4. The paper doesn't state how its table should be read; the reading that agrees was chosen |
 | Second bore, Hyde Park | Wan et al. (2017) | VL ratio median 1.7, Ky 0.44 → 0.33 | Calibrated parameters, then transferred to Farringdon |
 | Farringdon – Liverpool Street | none on this stretch | VL 0.5 %, K 0.43 transferred from Hyde Park | Untested |
 | Thames chalk defaults at North Woolwich (not one of the 17) | Liew (2016), Crossrail Learning Legacy | First bore 5.6 against 9 mm (0.63×), second 6.8 against 5 mm (1.35×). Measured VL 0.32 / 0.165 %, K 0.40 / 0.39 | Independent in place, same machines: VL consistent, K 0.5 wide, second bore half the first, not 1.2× |
 | Chalk volume loss and K, CTRL Contract 220 | Wongsaroj et al. (2006), Table 4 | VL 0.28 % (0.18–0.53), K 0.43 (0.4–0.5) against 0.25 % and 0.5 | Bracket: EPB, Thanet Sand over chalk |
+| Chalk K, A20 Round Hill | Pound & Beveridge (2002), Table 1 | K 0.25–0.30 (mean 0.28) on four arrays, VL 0.105–0.54 % | Bracket: hand-mined NATM, Lower Chalk. Third source narrower than 0.5. Refitting VL with K 0.4 gives 0.20 % and the same Smax everywhere; only the trough's width changes |
 
 ### Thrust and torque ([EPB field data](epb-open-data.md))
 
@@ -157,7 +158,7 @@ A calibrated parameter is trustworthy only once data it was not fitted on confir
 |---|---|---|
 | Shield friction 0.17, rim 0.07 | Changsha, 281 rings | Mashhad and Sofia: thrust yes; torque at Mashhad 1.3 bar yes, Sofia no |
 | CSM ψ = −0.1 | Follo 4.5 km mean | Follo sections: not followed; Queens Water Tunnel (gneiss, 10 stations): median 1.02×, scatter 0.71–1.82× |
-| Thames volume loss 0.25 %, K 0.5 | 17 Thames sections | North Woolwich (Liew 2016): VL 0.165–0.32 % (consistent), K 0.40 (narrower); CTRL chalk/sand VL 0.28 %, K 0.43 (bracket) |
+| Thames volume loss 0.20 % (K 0.4 since 6 Nov 2026; was 0.25 %, K 0.5) | VL: 17 Thames sections. K: the three sources in the next column | North Woolwich (Liew 2016): VL 0.165–0.32 % (consistent), K 0.40 (narrower); CTRL chalk/sand VL 0.28 %, K 0.43 (bracket); Round Hill NATM K 0.25–0.30 (bracket) |
 | Second-bore ratio 1.7, Ky 0.44 → 0.33 | Hyde Park | Thames ratios 1.0–2.5 (median 1.2): consistent, not a test. North Woolwich chalk: 0.52, the other way |
 | Ulvin mucking rate and downtime share | Ulvin | T10.5 contractor estimate: inside the range |
 | Norwegian contour spacing 0.47 m, burden 0.75 B | Published T10.5 hole counts | Nothing else |

@@ -468,8 +468,8 @@
   "source": "https://environment.data.gov.uk/flood-monitoring/id/stations/0003"
  },
  "settlement": {
-  "volume_loss": 0.25,
-  "k": 0.5,
+  "volume_loss": 0.2,
+  "k": 0.4,
   "range": [
    0.1,
    0.8
@@ -478,14 +478,15 @@
    3,
    10
   ],
-  "source": "Cheng & Mikulski (2014), Crossrail Learning Legacy, Ground settlement behaviour in chalk due to TBM excavations, Table 1: 17 sections Plumstead - Woolwich, Smax 3-10 mm, back-analysed VL 0.10-0.35 % with K fixed at 0.5. Reading the 'WB & EB' column as the second bore's own VL, the first-bore VL that reproduces each measured Smax has median 0.25 % (range 0.10-0.54 %; docs/validation/settlement.md).",
+  "source": "Cheng & Mikulski (2014), Crossrail Learning Legacy, Ground settlement behaviour in chalk due to TBM excavations, Table 1: 17 sections Plumstead - Woolwich, Smax 3-10 mm, back-analysed VL 0.10-0.35 % with K fixed at 0.5. Reading the 'WB & EB' column as the second bore's own VL, the first-bore VL that reproduces each measured Smax with K 0.4 has median 0.20 % (range 0.08-0.45 %; 0.25 % with K 0.5; docs/validation/settlement.md). K 0.4 from three chalk sources not used for VL, all narrower than 0.5: Liew (2016) Store Road Inlet, Crossrail C310, K 0.39-0.40; Wongsaroj et al. (2006) CTRL C220, Thanet Sand over chalk, K 0.43; Pound & Beveridge (2002) A20 Round Hill, Lower Chalk NATM, K 0.25-0.30.",
+  "basis": "VL fitted to 17 Crossrail sections, K from three chalk sites",
   "notes": "Crossrail designed for 1 % (0.5 % in controlled zones). No data under the river.",
   "second_bore": {
    "offset_m": 17.0,
    "vl_ratio": 1.2,
-   "k_inner": 0.5,
-   "k_outer": 0.5,
-   "source": "Cheng & Mikulski (2014), Crossrail Learning Legacy, Table 1: distance between the two tunnels 10-37 m (median 17 m), second-bore VL 1.0-2.5 x the first bore's (median 1.2), reading the 'WB & EB' column as the second bore's own VL (docs/validation/settlement.md). Side of the second bore assumed; no data under the river."
+   "k_inner": 0.4,
+   "k_outer": 0.4,
+   "source": "Cheng & Mikulski (2014), Crossrail Learning Legacy, Table 1: distance between the two tunnels 10-37 m (median 17 m), second-bore VL 1.0-2.5 x the first bore's (median 1.2, a published ratio, so unchanged by K), reading the 'WB & EB' column as the second bore's own VL (docs/validation/settlement.md). Side of the second bore assumed; no data under the river."
   }
  },
  "boreholes": [

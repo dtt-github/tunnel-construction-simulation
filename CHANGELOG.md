@@ -6,6 +6,12 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ### Changed
 
+- **Thames chalk trough: K 0.4, volume loss 0.20 %** (`models/scenarios/thames-plumstead-north-woolwich.json`; Mixshield demo; [settlement validation](docs/validation/settlement.md)):
+  - K from three chalk sources not used for the volume-loss fit, all narrower than the old 0.5: Store Road 0.39–0.40, CTRL 0.43, Round Hill 0.25–0.30. The second bore's K towards and away from the first is 0.4 too;
+  - volume loss refitted to the same 17 Plumstead – Woolwich sections: 0.20 % (0.08–0.45 %). Smax predictions are unchanged; the trough is narrower and steeper;
+  - Mixshield demo, both bores, buildings at category 2 or worse: none at the default or up to 1 % VL (as before), 3 at 1.5 % (was 2), 13 at 2 % (was 8). Final Smax of both bores at the start 6.0 mm (was 6.5), against 3–10 mm measured;
+  - the demo's default line now names its basis ("VL fitted to 17 Crossrail sections, K from three chalk sites").
+
 - **Building damage categories by the second-stage assessment of Mair, Taylor & Burland (1996)** (`building_strains` in Python and JavaScript; EPB and Mixshield demos; [ISSMGE library, open](https://www.issmge.org/uploads/publications/6/8/1996_118.pdf)):
   - each footprint is split at the trough's points of inflection into hogging and sagging spans (limited to 2.5 i); each span's Δ/L gives the bending and diagonal strain of a masonry deep beam (E/G 2.6), combined with its average horizontal strain (Eqs 7–10). Before, the category used the largest local horizontal strain only, which missed bending over the tunnel;
   - checked against the paper's Fig. 4: with L/H = 1 in hogging and no horizontal strain, the category 2/3 boundary falls at Δ/L 0.16 %, as plotted;
@@ -76,6 +82,11 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 - **Second-bore horizontal strain in the EPB and Mixshield demos:** with "after both drives" shown, the ground movement of both bores was directed at the first bore's axis, which overstated the strain about 3× on the second bore's side. Each bore's movement now points to its own axis. With both bores at 1 % volume loss, buildings at category 2 or worse go from 26 to 0 (EPB) and 10 to 0 (Mixshield); at 2 %, from 31 to 20 and 18 to 8. At the scenario defaults none reach category 2, before or after.
 
 ### Added
+
+- **Chalk trough width: a third source** (`models/py/validation/settlement_chalk_independent.py`; [settlement validation](docs/validation/settlement.md)):
+  - A20 Round Hill tunnels in Lower Chalk, hand-mined by NATM: K 0.25–0.30 on four arrays (Pound & Beveridge 2002, [ISSMGE library, open](https://www.issmge.org/uploads/publications/6/10/2002_060.pdf)). With Store Road (0.40) and CTRL (0.43), all three are narrower than the Thames default 0.5;
+  - the script now shows what K would change: refitting VL to the 17 Thames sections gives 0.20 % at K 0.4 and the same Smax at every site, so only the trough's width and the building categories move (the default is now K 0.4, under Changed);
+  - no further open chalk TBM site with section depths was found. Crossrail's C310 monitoring close-out reports are scanned plan views of point readings, and the Tideway papers give no chalk trough parameters.
 
 - **Phase 2, WP7: recorded GPU sand face in the EPB demo** (`server/tunnelsim_server/record.py`, `web/epb/recordings/face-sand-cd1.tsr.gz`):
   - the WP2 dry-sand face recorded on the GPU through a scripted support-pressure timeline: it holds at 20 kPa, gives way at 3 kPa with the chimney reaching the surface, and stops when the pressure is raised again;

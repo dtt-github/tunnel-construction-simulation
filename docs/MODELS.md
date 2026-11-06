@@ -80,7 +80,7 @@ What it computes:
 - a hand calculation: D 6 m, z₀ 20 m, VL 1 % → S_max 11.3 mm;
 - measured Crossrail settlement ([validation](validation/settlement.md)):
   - Hyde Park reproduced (8.1 mm against 8.3 mm).
-  - In the Thames chalk, the published per-bore volume losses reproduce the 17 measured Smax values (median ratio 1.10). This reads the "WB & EB" column as the second bore's own VL; read as both bores together, they were 1.6× low. The first-bore VL that fits has a median of 0.25 %, the demo default there.
+  - In the Thames chalk, the published per-bore volume losses reproduce the 17 measured Smax values (median ratio 1.10). This reads the "WB & EB" column as the second bore's own VL; read as both bores together, they were 1.6× low. The first-bore VL that fits has a median of 0.25 % with K 0.5, or 0.20 % with K 0.4. The demo uses K 0.4, the trough width of three chalk sources not used for the fit, and so 0.20 %.
 - the second bore: Hyde Park gives 1.5–1.9× the first bore's volume loss, Ky 0.44 towards the first bore and 0.33 away, 16.2 m apart; the Thames table gives a ratio of 1.2 at a median of 17 m. These are the scenario defaults;
 - numerical integration equals V_s, also for asymmetric troughs;
 - one component at the face gives half the final settlement at the face; a tail-only component gives Φ(−L/i);
