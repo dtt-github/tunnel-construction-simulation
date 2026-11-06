@@ -25,7 +25,7 @@
 | Demo | Strongest independent check | Calibrated on | Biggest known gap |
 |---|---|---|---|
 | [Urban EPB](../../web/epb/) | Thrust at Mashhad 1.3 bar 0.89× and Sofia 1.02–1.28×; ring cycle on an average Crossrail working day, 11.8–12.5 against 12.3–14.9 rings | Shield and rim friction on 281 Changsha rings; Hyde Park settlement uses the site's own back-analysis | Best days and weeks far too low; torque in conditioned ground rests on a paste/friction split read from three datasets; volume loss is an input, not predicted |
-| [Mixshield](../../web/slurry/) | Thames settlement 1.10× median over 17 sections (see the caveat below) | Thames volume loss 0.25 % fitted to those same 17 sections | Working day 7–58 % fast; no separation-plant stops; whole drive about 2× faster than measured; air-cushion model is this project's own derivation |
+| [Mixshield](../../web/slurry/) | Thames settlement 1.10× median over 17 sections (see the caveat below) | Thames volume loss 0.25 % fitted to those same 17 sections | Thames: working day 7–58 % fast, whole drive about 2× fast (river crossing and interventions not modelled); on two Dutch slurry drives 0.78–0.98×; no separation-plant stops; air-cushion model is this project's own derivation |
 | [Gripper TBM](../../web/hard-rock/) | Queens Water Tunnel penetration (gneiss, 10 stations): median 1.02× with the Follo ψ, not refitted | Penetration (ψ = −0.1) on Follo | No open section-by-section data for Gotthard; advance only bracketed (calendar against working days) |
 | [Double shield](../../web/hard-rock/) | Follo advance 12.9–14.9 against 14.1 m/day (tests the downtime model only) | Penetration on the Follo 4.5 km mean; discs, thrust and rpm are the Follo means | Penetration does not follow section-to-section strength (0.41–2.89×); cutter changes about 40 % too few |
 | [Drill & blast](../../web/drill-blast/) | Ulvin drilling 0.88× and charging 1.26× (logged round); every T10.5 activity inside a contractor's P5–P95 range | Mucking rate and downtime share at Ulvin; ventilation and scaling at the contractor median | Weekly advance by support class not published, so class IV is untested; activities do not overlap |
@@ -68,6 +68,8 @@
 | Mixshield rings per working day | same, drive H | 10.7–12.5 against 7.9–10.0 | Fails: 7–58 % fast |
 | Mixshield best day and week | same | 12–14 against 16–17; 77–92 against 91–100 | Matches roughly |
 | Mixshield whole drive | same | 8.4–9.6 against 4.4–4.6 | Fails: about 2× fast (river crossing and interventions not modelled) |
+| Slurry whole drive, second project | Betuweroute Sophia and PanKan, tube 2 ([Jonker 2004](https://www.cementonline.nl/artikelen/boortunnels-in-de-betuweroute)); cycle times and ring length from the source | 11.8–14.2 against 14.4–15.2 m/day (0.78–0.98×) | Independent: matches, slightly slow |
+| Slurry best day and week, Betuweroute | same; day variation fitted on Crossrail only | 37–45 against 36 m; 180–215 against 213–216 m | Independent: matches |
 
 ### Disc-cutter penetration (CSM) and the hard-rock drive ([hard-rock projects](hard-rock-projects.md))
 
@@ -135,7 +137,7 @@ Ranked by how much each changes what a user sees, then by whether open data coul
 | # | Gap | Demos | Effect | Open data to close it |
 |---|---|---|---|---|
 | 1 | Volume loss is a scenario input; it doesn't respond to face pressure or grouting. **Partly closed 6 Nov 2026:** in London Clay (half the EPB drive) it now rises with the face's load factor (Macklin 1999); at normal pressure it equals the measured value. Still open: grouting, other ground, the Mixshield in Chalk | EPB, Mixshield | Settlement doesn't change with the operator's actions outside London Clay | Needs paired face pressure and volume loss: none found under CC BY |
-| 2 | Downtime distributions come from one 6.88 m EPB (Tabriz); no locomotive travel or slurry-plant stops. Day-to-day variation now fitted on Crossrail and tested on Barcelona (6 Nov 2026). Searched 6 Nov 2026: no open delay breakdown found; Barcelona Line 9 confirms the gap on a second project and gives a learning-curve length (now modelled, shape assumed) | EPB, Mixshield | Best days too low; Mixshield working day 7–58 % fast; whole drive 2× fast | Crossrail and Thames delay breakdowns are not published; look for other open drive logs |
+| 2 | Downtime distributions come from one 6.88 m EPB (Tabriz); no locomotive travel or slurry-plant stops. Day-to-day variation now fitted on Crossrail and tested on Barcelona and Betuweroute (6 Nov 2026). On two Dutch slurry drives the model is 0.78–0.98×, so the Thames 2× is that drive's river crossing and interventions; slurry pipe extensions run during ring build (Mimura 1992). Searched 6 Nov 2026: no open delay breakdown found; Barcelona Line 9 confirms the gap on a second project and gives a learning-curve length (now modelled, shape assumed) | EPB, Mixshield | Best days too low without day variation; Thames working day 7–58 % fast; Thames whole drive 2× fast | Crossrail and Thames delay breakdowns are not published; look for other open drive logs |
 | 3 | ~~Torque in foam-conditioned clay 2.7× over~~ **Addressed 6 Nov 2026:** paste shear (2 kPa, Bezuijen et al. 2005) gives Sofia 0.98–1.14×. Open: the paste/friction split by ground type is not from a published rule, and no second open dataset in conditioned clay tests it | EPB | – | An open torque dataset in conditioned clay |
 | 4 | CSM penetration fitted on one project (Follo gneiss) and checked on a second (Queens gneiss, 6 Nov 2026: median 1.02×); it doesn't follow section strength and has no fracture term (massive rock up to 1.8× fast) | Gripper, double shield | Penetration in rock other than strong crystalline rock is untested | An open TBM dataset in sedimentary or schistose rock, with fracture spacing (Yinsong is not open) |
 | 5 | Chamber model: screw efficiency and decay length unchecked; the paste weight now checked against Botlek (6 Nov 2026); the GPU chamber is blocked | EPB | Chamber pressure dynamics illustrative | Botlek gradients (Bezuijen 2005) are now in hand; needs the MPM fix or an analytical gradient model |
@@ -158,7 +160,7 @@ A calibrated parameter is trustworthy only once data it was not fitted on confir
 | Ulvin mucking rate and downtime share | Ulvin | T10.5 contractor estimate: inside the range |
 | Norwegian contour spacing 0.47 m, burden 0.75 B | Published T10.5 hole counts | Nothing else |
 | MPM friction mapping μ = sin φ′ | Rankine wall | Column collapse (yes); face pressure (bracket only) |
-| Day-to-day variation σ 0.4, ρ 0.7 | Crossrail X and Y best day and week | Barcelona best day / mean (yes, at the low end) |
+| Day-to-day variation σ 0.4, ρ 0.7 | Crossrail X and Y best day and week | Barcelona best day / mean (yes, at the low end); Betuweroute slurry best day and week (yes) |
 
 ## Keeping this page right
 

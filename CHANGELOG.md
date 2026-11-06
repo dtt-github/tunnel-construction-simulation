@@ -6,6 +6,11 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ### Changed
 
+- **Slurry drive checked on a second project** ([Betuweroute, Jonker 2004](https://www.cementonline.nl/artikelen/boortunnels-in-de-betuweroute); script `models/py/validation/slurry_betuweroute_advance.py`):
+  - on the Sophia and PanKan slurry tunnels (8.65 m, Dutch sand), the drive model with each tunnel's published boring and ring-build times gives 0.78–0.98× the measured whole-drive advance, so the Thames drive's 2× shortfall is that drive's own (river crossing, interventions, one TBM at a time);
+  - with the day-to-day variation fitted on Crossrail, best days come out 37–45 m against 36 and best weeks 180–215 m against 213–216: a second independent test of it;
+  - slurry pipe extensions run during ring build ([Mimura et al. 1992](https://www.iaarc.org/publications/fulltext/Automatic_extension_%20robot_%20for_slurry_transport_pipes.PDF)) and add only 2–3 min per ring, so they are left out. No open source gives separation-plant stops by cause. No model change.
+
 - **Disc-cutter penetration checked on a second project** ([Queens Water Tunnel No. 3](https://media.geolsoc.org.uk/iaeg2006/PAPERS/IAEG_383.PDF), Yagiz 2006; machine from [Khalighi & Diehl 1997](https://robbinstbm.com/wp-content/uploads/2010/09/QueensWaterTunnel_RETC_1997.pdf); script `models/py/validation/queens_csm.py`):
   - the CSM model with ψ −0.1, fitted at Follo, is run unchanged on the 10 open stations: median 1.02× the measured penetration (0.71–1.82×). The earlier ψ +0.1 would have been 1.89×;
   - massive rock comes out a median 1.51× fast and fractured rock 0.91×: the model has no fracture term. Queens is also gneiss, so other rock types stay untested;
