@@ -6,6 +6,8 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ### Changed
 
+- **EPB chamber gradient checked against the Botlek bulkhead** ([Bezuijen et al. 2005](https://www.issmge.org/uploads/publications/6/11/2005_023.pdf)): the gauge's paste weight, 18 kN/m³ less the foam air, gives about 16 kPa/m at FIR 40 %, inside the 10–20+ kPa/m measured; the demo now shows the gradient with the measured range. The yield-stress part of the gradient is not modelled.
+
 - **Drill & blast specific charge checked against logged practice** ([Gjengedal & Jakobsen 2025](https://airdrive.eventsair.com/eventsairwesteuprod/production-atlanticmice-public/927385ad0d3e425bbbf6581c4573f524), Eurock 2025, 353 logged rounds):
   - the demo's T10.5 round (134 charged holes, 1.81 kg/m³ with textbook charging) has the logged number of charged holes but about a third less explosive than three Norwegian road tunnels in 2021–24 (2.67–3.01 kg/m³ at this size); it is above the NTNU model;
   - not fitted: full columns give only 2.3 kg/m³, and matching would need unsourced assumptions. The demo now shows the logged range beside its own value, and notes that the vibration estimate is likely low for the same reason (`practice_specific_charge` in Python and JavaScript).

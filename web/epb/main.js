@@ -625,8 +625,14 @@ const buildGroup = new THREE.Group();
 buildGroup.position.z = ZR;
 machine.add(buildGroup);
 
+// Unit weight of the chamber muck, which sets the vertical pressure gradient on the gauge. At the Botlek Rail Tunnel
+// (Bezuijen, Talmon, Joustra & Grote 2005, IS-Amsterdam, ISSMGE library, open) muck sampled through the bulkhead had a
+// porosity just above the sand's maximum, about 18-19 kN/m^3 without air (our estimate with sand grains of
+// 26.5 kN/m^3), and weighed about 13 kN/m^3 with its foam; bulkhead gradients measured from under 10 to over 20 kPa/m,
+// higher while boring, because the muck's yield stress adds or subtracts 2 tau / L with the stirring direction. Here:
+// 18 kN/m^3 less the foam-air fraction, weight only.
 function pasteUnitWeight() {
-  return 18 * (1 - CH.airFraction(S.st)); // soil-water paste ~18 kN/m^3, lightened by foam air
+  return 18 * (1 - CH.airFraction(S.st));
 }
 
 const pattern = () => SHIFT_PATTERNS[ui.shift.value];
@@ -1006,6 +1012,7 @@ function hud() {
     ["Operating range at crown", w.feasible ? `${fmt(w.p_min_crown_operating / 100, 2)} – ${fmt(w.p_max_crown_operating / 100, 2)} bar (±${fmt(w.deviation, 0)} kPa deviation inside the window)` : `none: the window is narrower than ±${fmt(w.deviation, 0)} kPa`],
     ["Chamber fill", `${fmt(fill * 100, 1)} %`],
     ["Air in chamber", `${fmt(air * 100, 1)} %`],
+    ["Vertical gradient", `${fmt(pw, 1)} kPa/m from the muck weight (measured at Botlek: under 10 to over 20 kPa/m, muck about 13 kN/m³)`],
     ["Stiffness", `${fmt(CH.stiffness(S.st) / 100, 2)} bar per m³`],
     ["Screw speed", `${fmt(S.screwRpm, 1)} rpm`],
     ["Screw discharge", `${fmt(SCREW.discharge(S.screwRpm) * 60, 2)} m³/min`],

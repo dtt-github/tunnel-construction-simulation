@@ -25,7 +25,7 @@ These values are in `web/epb/main.js`:
   - shield weight 4,000 kN, backup weight 6,000 kN, tail-seal friction 500 kN;
   - 80 tools at 4 kN tangential force;
   - friction coefficients (model defaults).
-- **Chamber:** paste unit weight 18 kN/m³ × (1 − air fraction); automatic screw control gain 0.06 rpm/kPa with feed-forward from the steady balance.
+- **Chamber:** screw control gain 0.06 rpm/kPa with feed-forward from the steady balance (assumed). The paste unit weight, 18 kN/m³ × (1 − air fraction), is now checked: about 16 kPa/m at FIR 40 %, inside the 10–20+ kPa/m measured on the Botlek bulkhead ([Bezuijen et al. 2005](https://www.issmge.org/uploads/publications/6/11/2005_023.pdf)), where the muck had a porosity just above the sand's maximum (about 18–19 kN/m³ without air) and weighed about 13 kN/m³ with more foam. The yield-stress part of the gradient (higher while boring, lower at standstill) is not modelled.
 - **Scenario:** ground parameters per zone, axis depth 20 m, water table 3 m, volume loss 1 % (the default of the `closed_face_clay` preset, Mair & Taylor 1997 range), building positions and sizes.
 
 ## Before the next publish
