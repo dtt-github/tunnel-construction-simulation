@@ -1,8 +1,13 @@
 # Realism checklist: urban EPB, Slice A
 
-Demo: [`web/epb/`](../../web/epb/) · Class preset: `urban-epb-7m` in [machine-classes.json](../../models/presets/machine-classes.json) · Method card: [EPB](../research/methods-reference.md#epb-and-slurry) · Rules: [ROADMAP realism rules](../ROADMAP.md#realism-rules-apply-to-every-phase)
+- **Demo:** [`web/epb/`](../../web/epb/)
+- **Class preset:** `urban-epb-7m` in [machine-classes.json](../../models/presets/machine-classes.json)
+- **Method card:** [EPB](../research/methods-reference.md#epb-and-slurry)
+- **Rules:** [ROADMAP realism rules](../ROADMAP.md#realism-rules-apply-to-every-phase)
+- **Models:** [EPB chamber and screw](../MODELS.md#epb-chamber-and-screw-conveyor), [face support](../MODELS.md#face-support-pressure), [thrust and torque](../MODELS.md#thrust-and-torque), [settlement](../MODELS.md#settlement-and-building-damage), [utilisation](../MODELS.md#utilisation-and-downtime)
+- **Validation:** [Crossrail advance](../validation/epb-crossrail-advance.md), [open EPB data](../validation/epb-open-data.md), [Botlek screw](../validation/epb-screw-botlek.md), [settlement](../validation/settlement.md)
 
-Reviewed 4 Nov 2026 against the page as committed with this file; rule 4 updated the same day for the utilisation model. Status: ✅ meets the rule · ⚠️ partly, gap listed · ❌ not yet.
+Reviewed 4 Nov 2026 against the page as committed with this file; rule 4 updated the same day for the utilisation model. Status: ✅ meets the rule · ⚠️ partly, gap listed · ❌ not yet. Format: [template](TEMPLATE.md).
 
 | # | Rule | Status | Evidence | Known gaps |
 |---|---|---|---|---|

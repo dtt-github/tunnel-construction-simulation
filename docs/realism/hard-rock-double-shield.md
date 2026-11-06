@@ -5,8 +5,9 @@
 - **Method card:** [double shield](../research/methods-reference.md#double-shield)
 - **Rules:** [ROADMAP realism rules](../ROADMAP.md#realism-rules-apply-to-every-phase)
 - **Models:** [CSM disc cutter](../MODELS.md#csm-disc-cutter), [hard-rock drive](../MODELS.md#hard-rock-drive)
+- **Validation:** [hard-rock projects](../validation/hard-rock-projects.md)
 
-Reviewed 5 Nov 2026. Status: ✅ meets the rule · ⚠️ partly, gap listed · ❌ not yet.
+Reviewed 5 Nov 2026. Status: ✅ meets the rule · ⚠️ partly, gap listed · ❌ not yet. Format: [template](TEMPLATE.md).
 
 | # | Rule | Status | Evidence | Known gaps |
 |---|---|---|---|---|

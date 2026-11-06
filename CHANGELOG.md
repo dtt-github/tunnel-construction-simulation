@@ -93,6 +93,8 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ### Added
 
+- **Realism checklist template** ([docs/realism/TEMPLATE.md](docs/realism/TEMPLATE.md)): header links (demo, class preset, method card, rules, models, validation), the six realism rules under fixed names, and optional sections for sources, assumed values and browser checks. The six demo checklists now follow it: rule names unified, class preset and validation links added where missing. Closes the last open Phase R item.
+
 - **SEM convergence time law against a second site** (`models/py/validation/sem_time_law.py`; [SEM convergence](docs/validation/sem-convergence.md#sulem-time-law-a-second-site)); no default changed:
   - the Fréjus road tunnel fit of the same Sulem law (de La Fuente et al. 2020, free-access version on HAL): X 0.9 D, m 4.5, n 0.3, T 0.5–5 days, against the demo's 0.885 D, 5.7, 0.3 and 6 days;
   - the demo's curve lies inside the Fréjus band up to 100 days; at one year it is 3.5 % above, and its final value 22 % higher (m 5.7 against 4.5).

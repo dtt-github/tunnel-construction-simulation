@@ -61,7 +61,7 @@ Sources:
   - 7 m Mixshield;
   - SEM heading in stiff soil;
   - drill & blast road tunnel.
-- [ ] Realism checklist template, used by every demo PR
+- [x] Realism checklist template, used by every demo PR ([template](realism/TEMPLATE.md); the six checklists follow it, 6 Nov 2026)
 
 ## Phase 1: browser simulator, one method slice at a time
 
