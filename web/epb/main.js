@@ -8,7 +8,7 @@ import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import {
   wedgeSilo, daubWindow, DAUB_DEFAULTS, chamber as makeChamber, screw as makeScrew, shieldThrust, cutterheadTorque, toolTorque,
-  verticalStress, PASTE_SHEAR_KPA, presetTrough, twinTroughs, deflectionRatios, deflectionModificationFactor, frameBendingStiffness, relativeBendingStiffness, loadFactor, macklinVolumeLoss, burlandCategory, referenceInstalled, erf,
+  verticalStress, PASTE_SHEAR_KPA, presetTrough, twinTroughs, deflectionRatios, deflectionModificationFactor, frameBendingStiffness, relativeBendingStiffness, strainModificationFactor, frameAxialStiffness, relativeAxialStiffness, loadFactor, macklinVolumeLoss, burlandCategory, referenceInstalled, erf,
   Rng, sample as sampleDist, DIST, SHIFT_PATTERNS, PER_CYCLE_MAINTENANCE_MIN, simulateDrive, LEARNING_DAYS_BARCELONA, DAY_VARIATION_CROSSRAIL_EPB, recordCheck, EPB_WEEKLY_SURVEY,
   jsceRing, woodInertia, subgradeModulus, terzaghiLoads, activeCoefficient, sectionStresses, jackingStress, burstingForce, annulusVolume, groutWindow, ITA2000_ALLOWABLE,
   scenario as loadScenario,
@@ -853,8 +853,10 @@ function tunnelFraction(t, c, ch) {
 
 // Building bending (Potts & Addenbrooke 1997, as plotted by Mair 1997 Fig. 4, open): the greenfield deflection ratio
 // Delta/L under the footprint from this bore's final trough, and the same with the building's estimated bending
-// stiffness (floor slabs every 3.4 m acting together: an assumed upper estimate). Shown only: the damage category stays
-// on greenfield horizontal strain, because the factors for horizontal strain are not in any open source.
+// stiffness (floor slabs every 3.4 m acting together: an assumed upper estimate). Horizontal strain with the building's
+// axial stiffness (the same slabs) from Potts & Addenbrooke (1996) Fig. 5, open. Both are shown only: the damage
+// category stays on greenfield horizontal strain, because the slab stiffness is assumed and a building's category also
+// needs its bending strain, which is not combined here.
 function buildingBending(b) {
   const zone = zoneAt(b.ch), vl = vlFor(zone), key = `${zone.key}|${vl}`;
   if (b.bending?.key === key) return b.bending;
@@ -864,7 +866,8 @@ function buildingBending(b) {
   const rho = relativeBendingStiffness(frameBendingStiffness(storeys), zone.Es, width), eB = Math.abs(b.x) / width;
   const sag = gf.sag ? gf.sag[1] : 0, hog = gf.hog ? gf.hog[1] : 0;
   const mod = Math.max(sag * deflectionModificationFactor("sag", rho, eB), hog * deflectionModificationFactor("hog", rho, eB));
-  return (b.bending = { key, gf: Math.max(sag, hog), mod, rho, storeys });
+  const alpha = relativeAxialStiffness(frameAxialStiffness(storeys), zone.Es, width), mt = strainModificationFactor("tens", alpha, eB);
+  return (b.bending = { key, gf: Math.max(sag, hog), mod, rho, storeys, alpha, mt });
 }
 // Surface settlement and building categories.
 let surfaceMax = 0;
@@ -1102,7 +1105,7 @@ function hud() {
     ...(SCN?.data.settlement ? [["Volume loss, trough width (default)", `${SCN.data.settlement.volume_loss} %, K ${SCN.data.settlement.k} (measured on Crossrail${SCN.data.settlement.measured_smax_mm ? `; Smax ${SCN.data.settlement.measured_smax_mm.join("–")} mm measured` : ", Hyde Park"})`]] : []),
     ["Buildings within 60 m", `${BUILDINGS.length}${SCN ? `, ${BUILDINGS.filter((b) => b.listed.length).length} listed` : ""}; category 2 or worse: ${BUILDINGS.filter((b) => b.cat >= 2).length}`],
     ...BUILDINGS.filter((b) => Math.abs(b.ch - S.chainage) < 150).sort((p, q) => (q.cat ?? 0) - (p.cat ?? 0) || (q.settle ?? 0) - (p.settle ?? 0)).slice(0, 6)
-      .map((b) => [`${b.name}${b.grade ? ` (Grade ${b.grade})` : ""}`, `ch ${fmt(b.ch, 0)} m, ${fmt(b.h, 0)} m high: ${fmt((b.settle ?? 0) * 1000, 1)} mm, ε ${fmt(b.strain ?? 0, 3)} %, cat. ${b.cat ?? 0}${b.bending ? `; Δ/L ${fmt(b.bending.gf * 1e4, 2)} → ${fmt(b.bending.mod * 1e4, 2)} ×10⁻⁴ with stiffness (${b.bending.storeys} ${b.bending.storeys === 1 ? "storey" : "storeys"})` : ""}`]),
+      .map((b) => [`${b.name}${b.grade ? ` (Grade ${b.grade})` : ""}`, `ch ${fmt(b.ch, 0)} m, ${fmt(b.h, 0)} m high: ${fmt((b.settle ?? 0) * 1000, 1)} mm, ε ${fmt(b.strain ?? 0, 3)} %${b.bending ? ` (${fmt((b.strain ?? 0) * b.bending.mt, 4)} % with stiffness, α* ${fmt(b.bending.alpha, 0)})` : ""}, cat. ${b.cat ?? 0}${b.bending ? `; Δ/L ${fmt(b.bending.gf * 1e4, 2)} → ${fmt(b.bending.mod * 1e4, 2)} ×10⁻⁴ with stiffness (${b.bending.storeys} ${b.bending.storeys === 1 ? "storey" : "storeys"})` : ""}`]),
     ["Surface heights", "exaggerated ×150"],
   ]);
   placeFace();

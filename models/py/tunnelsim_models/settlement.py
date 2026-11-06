@@ -26,8 +26,14 @@ References
 - Mair, R.J. (1997). Theme lecture: Subsidence due to tunnelling and its effects on buildings. Proc. 14th ICSMFE,
   Hamburg, 4, 2397-2402 (ISSMGE library, open: https://www.issmge.org/uploads/publications/1/31/1997_04_0052.pdf).
   Reproduces Potts & Addenbrooke's (1997) modification factors for the deflection ratio in sagging and hogging against
-  the relative bending stiffness rho* = EI / (E_s H^4), H = B / 2 (Fig. 4), digitised here to about +/-0.03; the
-  horizontal-strain factors (against EA / (E_s H)) are not given there and are not used.
+  the relative bending stiffness rho* = EI / (E_s H^4), H = B / 2 (Fig. 4), digitised here to about +/-0.03.
+- Potts, D.M., Addenbrooke, T.I. (1996). The influence of an existing surface structure on the ground movements due to
+  tunnelling. Geotechnical Aspects of Underground Construction in Soft Ground, Mair & Taylor (eds), Balkema, 573-578
+  (ISSMGE library, open: https://www.issmge.org/uploads/publications/6/8/1996_093.pdf). Fig. 5: modification factors
+  for horizontal strain, M_eps_hc (compression) and M_eps_ht (tension) = largest building strain / largest greenfield
+  strain in that part of the trough, against the relative axial stiffness alpha* = EA / (E_s H), H = B / 2, EA per
+  metre run (dimensionless). Digitised here to about +/-0.003. Upper-bound design curves, stated valid for
+  alpha* > 0.5; the plotted curves start at alpha* about 0.33 (0.6 for tension at e/B 0.6).
 - Kimura, T., Mair, R.J. (1981). Centrifugal testing of model tunnels in soft clay. Proc. 10th ICSMFE, Stockholm, 1,
   319-322, https://www.issmge.org/uploads/publications/1/35/1981_01_0061.pdf. N at collapse for a heading supported to
   the face (P/D 0): 7.05 at C/D 1.5 and 9.0 at C/D 3.0, digitised from Fig. 9 (docs/validation/mpm-clay.md); N is
@@ -304,6 +310,23 @@ M_DR_HOG = {  # the e/B 0.2 curve stands for e/B <= 0.2
 }
 
 
+# Potts & Addenbrooke (1996) Fig. 5, digitised (about +/-0.003): log10 alpha* and M for each e/B curve. Below the first
+# plotted point (alpha* 0.316) and above 100 the end values are kept; the tension curve for e/B 0.6 starts at alpha*
+# 0.6, and its first value is kept below it.
+_LOG_ALPHA = (-0.5, -0.398, -0.301, -0.155, 0.0, 0.176, 0.301, 0.477, 0.699, 0.845, 1.0, 1.5, 2.0)
+M_EH_COMP = {
+    0.0: (0.113, 0.105, 0.093, 0.077, 0.061, 0.044, 0.035, 0.024, 0.016, 0.011, 0.007, 0.002, 0.0),
+    0.2: (0.083, 0.079, 0.070, 0.058, 0.047, 0.034, 0.026, 0.018, 0.011, 0.008, 0.005, 0.001, 0.0),
+    0.4: (0.056, 0.053, 0.045, 0.035, 0.027, 0.019, 0.014, 0.009, 0.006, 0.004, 0.003, 0.001, 0.0),
+    0.6: (0.025, 0.023, 0.018, 0.013, 0.009, 0.007, 0.006, 0.004, 0.003, 0.002, 0.002, 0.001, 0.0),
+}
+M_EH_TENS = {  # the e/B < 0.2 curve stands for e/B <= 0.2
+    0.2: (0.025, 0.020, 0.014, 0.009, 0.006, 0.005, 0.005, 0.004, 0.004, 0.003, 0.002, 0.001, 0.0),
+    0.4: (0.070, 0.060, 0.049, 0.037, 0.027, 0.021, 0.018, 0.013, 0.009, 0.006, 0.0045, 0.001, 0.0),
+    0.6: (0.095, 0.095, 0.095, 0.089, 0.065, 0.046, 0.035, 0.025, 0.016, 0.012, 0.009, 0.002, 0.0),
+}
+
+
 def _interp(xs: Sequence[float], ys: Sequence[float], x: float) -> float:
     if x <= xs[0]:
         return ys[0]
@@ -327,6 +350,34 @@ def deflection_modification_factor(mode: str, rho_star: float, e_over_b: float) 
             t = (e - lo) / (hi - lo)
             return (1 - t) * _interp(_LOG_RHO, table[lo], lr) + t * _interp(_LOG_RHO, table[hi], lr)
     return _interp(_LOG_RHO, table[es[0]], lr)
+
+
+def strain_modification_factor(mode: str, alpha_star: float, e_over_b: float) -> float:
+    """M_eps_h for 'comp' or 'tens' at relative axial stiffness alpha* (dimensionless) and eccentricity e/B (Potts &
+    Addenbrooke 1996 Fig. 5): linear in log10 alpha* and in e/B between the plotted curves, e/B clamped to the plotted
+    range."""
+    table = {"comp": M_EH_COMP, "tens": M_EH_TENS}[mode]
+    la = math.log10(max(alpha_star, 1e-12))
+    es = sorted(table)
+    e = min(max(e_over_b, es[0]), es[-1])
+    for k in range(1, len(es)):
+        if e <= es[k]:
+            lo, hi = es[k - 1], es[k]
+            t = (e - lo) / (hi - lo)
+            return (1 - t) * _interp(_LOG_ALPHA, table[lo], la) + t * _interp(_LOG_ALPHA, table[hi], la)
+    return _interp(_LOG_ALPHA, table[es[0]], la)
+
+
+def frame_axial_stiffness(storeys: int, slab_thickness: float = 0.15, e_concrete: float = 23e6) -> float:
+    """Assumed estimate of a framed building's axial stiffness EA per metre run (kN/m): the floor slabs (ground floor
+    and one per storey) acting together, as for frame_bending_stiffness. The slab thickness and concrete modulus are
+    assumptions, not from a source."""
+    return e_concrete * slab_thickness * (max(int(storeys), 1) + 1)
+
+
+def relative_axial_stiffness(ea: float, soil_modulus: float, width: float) -> float:
+    """alpha* = EA / (E_s H) with H = B / 2 (Potts & Addenbrooke 1996, 1997), dimensionless for EA per metre run."""
+    return ea / (soil_modulus * width / 2)
 
 
 def frame_bending_stiffness(storeys: int, storey_height: float = 3.4, slab_thickness: float = 0.15,

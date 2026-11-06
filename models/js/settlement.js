@@ -175,8 +175,8 @@ export function faceVolumeLoss(baseVolumeLoss, lf) {
 }
 
 // Building bending stiffness and the deflection ratio (Potts & Addenbrooke 1997, as plotted by Mair 1997 Fig. 4,
-// ISSMGE library, open; digitised to about +/-0.03). See settlement.py for the sources and limits. Horizontal-strain
-// factors are not used: no open source gives them.
+// ISSMGE library, open; digitised to about +/-0.03), and horizontal strain (Potts & Addenbrooke 1996 Fig. 5, ISSMGE
+// library, open; digitised to about +/-0.003). See settlement.py for the sources and limits.
 const LOG_RHO = [-7.0, -6.5, -6.0, -5.5, -5.0, -4.75, -4.5, -4.25, -4.0, -3.75, -3.5, -3.25, -3.0, -2.75, -2.5, -2.25, -2.0, -1.75, -1.5, -1.0, 0.0, 1.0];
 export const M_DR_SAG = Object.freeze({
   "0.0": [1.40, 1.403, 1.396, 1.371, 1.323, 1.298, 1.249, 1.195, 1.136, 1.059, 0.987, 0.891, 0.786, 0.667, 0.530, 0.411, 0.304, 0.226, 0.157, 0.113, 0.096, 0.096],
@@ -188,6 +188,19 @@ export const M_DR_HOG = Object.freeze({
   "0.2": [1.40, 1.39, 1.376, 1.332, 1.218, 1.118, 1.000, 0.842, 0.632, 0.354, 0.190, 0.185, 0.180, 0.178, 0.178, 0.178, 0.172, 0.172, 0.170, 0.168, 0.168, 0.168],
   "0.4": [1.42, 1.42, 1.418, 1.408, 1.356, 1.320, 1.246, 1.172, 1.076, 0.964, 0.812, 0.626, 0.442, 0.304, 0.212, 0.178, 0.172, 0.172, 0.170, 0.168, 0.168, 0.168],
   "0.6": [1.42, 1.42, 1.418, 1.408, 1.394, 1.375, 1.356, 1.324, 1.280, 1.218, 1.130, 1.026, 0.880, 0.726, 0.548, 0.396, 0.274, 0.190, 0.174, 0.168, 0.168, 0.168],
+});
+
+const LOG_ALPHA = [-0.5, -0.398, -0.301, -0.155, 0.0, 0.176, 0.301, 0.477, 0.699, 0.845, 1.0, 1.5, 2.0];
+export const M_EH_COMP = Object.freeze({
+  "0.0": [0.113, 0.105, 0.093, 0.077, 0.061, 0.044, 0.035, 0.024, 0.016, 0.011, 0.007, 0.002, 0.0],
+  "0.2": [0.083, 0.079, 0.070, 0.058, 0.047, 0.034, 0.026, 0.018, 0.011, 0.008, 0.005, 0.001, 0.0],
+  "0.4": [0.056, 0.053, 0.045, 0.035, 0.027, 0.019, 0.014, 0.009, 0.006, 0.004, 0.003, 0.001, 0.0],
+  "0.6": [0.025, 0.023, 0.018, 0.013, 0.009, 0.007, 0.006, 0.004, 0.003, 0.002, 0.002, 0.001, 0.0],
+});
+export const M_EH_TENS = Object.freeze({
+  "0.2": [0.025, 0.020, 0.014, 0.009, 0.006, 0.005, 0.005, 0.004, 0.004, 0.003, 0.002, 0.001, 0.0],
+  "0.4": [0.070, 0.060, 0.049, 0.037, 0.027, 0.021, 0.018, 0.013, 0.009, 0.006, 0.0045, 0.001, 0.0],
+  "0.6": [0.095, 0.095, 0.095, 0.089, 0.065, 0.046, 0.035, 0.025, 0.016, 0.012, 0.009, 0.002, 0.0],
 });
 
 function interp(xs, ys, x) {
@@ -211,6 +224,31 @@ export function deflectionModificationFactor(mode, rhoStar, eOverB) {
     }
   }
   return interp(LOG_RHO, table[es[0].toFixed(1)], lr);
+}
+
+/** M_eps_h for "comp" or "tens" at relative axial stiffness alpha* and eccentricity e/B (clamped to the plotted range). */
+export function strainModificationFactor(mode, alphaStar, eOverB) {
+  const table = { comp: M_EH_COMP, tens: M_EH_TENS }[mode];
+  const la = Math.log10(Math.max(alphaStar, 1e-12));
+  const es = Object.keys(table).map(Number).sort((a, b) => a - b);
+  const e = Math.min(Math.max(eOverB, es[0]), es.at(-1));
+  for (let k = 1; k < es.length; k++) {
+    if (e <= es[k]) {
+      const lo = es[k - 1], hi = es[k], t = (e - lo) / (hi - lo);
+      return (1 - t) * interp(LOG_ALPHA, table[lo.toFixed(1)], la) + t * interp(LOG_ALPHA, table[hi.toFixed(1)], la);
+    }
+  }
+  return interp(LOG_ALPHA, table[es[0].toFixed(1)], la);
+}
+
+/** Assumed estimate of a framed building's EA per metre run (kN/m): the floor slabs acting together. */
+export function frameAxialStiffness(storeys, slabThickness = 0.15, eConcrete = 23e6) {
+  return eConcrete * slabThickness * (Math.max(Math.trunc(storeys), 1) + 1);
+}
+
+/** alpha* = EA / (E_s H), H = B / 2, dimensionless for EA per metre run. */
+export function relativeAxialStiffness(ea, soilModulus, width) {
+  return ea / ((soilModulus * width) / 2);
 }
 
 /** Assumed estimate of a framed building's EI per metre run (kN m^2/m): floor slabs bending together about mid-height. */

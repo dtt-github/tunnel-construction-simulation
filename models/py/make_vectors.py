@@ -10,6 +10,7 @@ from dataclasses import asdict
 
 from tunnelsim_models import critical_stability_ratio, face_volume_loss, load_factor, macklin_volume_loss
 from tunnelsim_models import deflection_modification_factor, deflection_ratios, frame_bending_stiffness, relative_bending_stiffness
+from tunnelsim_models import frame_axial_stiffness, relative_axial_stiffness, strain_modification_factor
 from tunnelsim_models import Cutter, daub_window, silo_stress, wedge_silo, cutter_forces, gaussian_trough, hoek_brown, preset_trough, tbm_performance, twin_troughs
 
 OUT = pathlib.Path(__file__).resolve().parents[1] / "test-vectors"
@@ -93,7 +94,12 @@ for sv, pt, su, cd, base in [(600, 220, 235, 3.7, 0.005), (600, 0, 235, 3.7, 0.0
 bending = {"m_dr": [{"in": [mode, r, e], "out": deflection_modification_factor(mode, r, e)}
                     for mode in ("sag", "hog") for r in (1e-8, 3e-6, 1e-4, 2.5e-3, 0.5, 30.0) for e in (0.0, 0.1, 0.3, 0.5, 0.8)],
            "frame": [{"in": n, "out": frame_bending_stiffness(n)} for n in (1, 4, 9)],
-           "rho": relative_bending_stiffness(frame_bending_stiffness(4), 77.6e3, 20.0)}
+           "rho": relative_bending_stiffness(frame_bending_stiffness(4), 77.6e3, 20.0),
+           # horizontal strain (Potts & Addenbrooke 1996 Fig. 5)
+           "m_eh": [{"in": [mode, a, e], "out": strain_modification_factor(mode, a, e)}
+                    for mode in ("comp", "tens") for a in (0.1, 0.45, 1.0, 4.0, 30.0, 300.0) for e in (0.0, 0.1, 0.3, 0.5, 0.8)],
+           "ea": [{"in": n, "out": frame_axial_stiffness(n)} for n in (1, 4, 9)],
+           "alpha": relative_axial_stiffness(frame_axial_stiffness(4), 77.6e3, 20.0)}
 dr_cases = []
 for z0, vl, k, xmin, xmax in [(30, 0.005, 0.5, -10, 10), (30, 0.005, 0.5, 5, 30), (20, 0.01, 0.43, -40, 2), (34.5, 0.0078, 0.44, -3, 0.5)]:
     t = gaussian_trough(7.08, z0, vl, k)

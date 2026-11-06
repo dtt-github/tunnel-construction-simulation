@@ -219,6 +219,21 @@ def test_deflection_modification_factor():
     assert side["sag"] is None and side["hog"][1] > 0
 
 
+def test_strain_modification_factor():
+    from tunnelsim_models import frame_axial_stiffness, relative_axial_stiffness, strain_modification_factor
+
+    # Potts & Addenbrooke (1996) Fig. 5 as digitised: at most about 0.11 of greenfield, falling to 0 for stiff buildings
+    assert strain_modification_factor("comp", 0.316, 0.0) == pytest.approx(0.113)
+    assert strain_modification_factor("tens", 1.0, 0.6) == pytest.approx(0.065)
+    assert strain_modification_factor("tens", 1000, 0.0) == 0.0
+    assert all(strain_modification_factor(m, a, e) <= 0.113 for m in ("comp", "tens") for a in (0.01, 0.5, 3) for e in (0, 0.3, 0.7))
+    # tension grows with eccentricity, compression falls
+    assert strain_modification_factor("tens", 2, 0.6) > strain_modification_factor("tens", 2, 0.0)
+    assert strain_modification_factor("comp", 2, 0.6) < strain_modification_factor("comp", 2, 0.0)
+    # slabs acting together: a 4-storey frame on 20 m in stiff clay is axially stiff (alpha* far above 0.5)
+    assert relative_axial_stiffness(frame_axial_stiffness(4), 77.6e3, 20.0) > 10
+
+
 def test_practice_specific_charge():
     from tunnelsim_models import design_round, practice_specific_charge
 

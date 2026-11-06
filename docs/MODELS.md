@@ -70,6 +70,7 @@ What it computes:
 - Burland (1995);
 - Macklin (1999), *Ground Engineering* 32(4), not open; the relation as quoted in [Divall et al. 2023](https://openaccess.city.ac.uk/id/eprint/31563/), Eq. (4)–(6), accepted version open;
 - Mair (1997), theme lecture, [ISSMGE library](https://www.issmge.org/uploads/publications/1/31/1997_04_0052.pdf) (Potts & Addenbrooke's deflection-ratio factors, Fig. 4);
+- Potts & Addenbrooke (1996), IS-London, [ISSMGE library](https://www.issmge.org/uploads/publications/6/8/1996_093.pdf) (horizontal-strain factors against α* = EA / (E_s H), Fig. 5);
 - Kimura & Mair (1981), [ISSMGE library](https://www.issmge.org/uploads/publications/1/35/1981_01_0061.pdf), digitised in [mpm-clay](validation/mpm-clay.md).
 
 **Validated against:**
@@ -95,9 +96,10 @@ What it computes:
 
 **Limits of the building stiffness:**
 
-- only the deflection ratio is modified; the factors for horizontal strain (against EA / (E_s H)) are not in any open source, so the damage category stays on greenfield horizontal strain and the modified Δ/L is shown beside it;
+- the deflection ratio and the horizontal strain are both modified and shown beside the greenfield values. The horizontal-strain factors come from Potts & Addenbrooke (1996) Fig. 5, digitised to about ±0.003. They are upper-bound design curves, at most about 0.11 of greenfield, stated valid for α* > 0.5;
+- the damage category stays on greenfield horizontal strain. The slab stiffness is assumed, and a category with stiffness also needs the bending strain from Δ/L combined with the horizontal strain, which is not done here. With the assumed slabs, α* is about 2–22 for the buildings checked at the start of each drive, so the tensile strain with stiffness is at most a few per cent of greenfield;
 - the chart is digitised from a scan (about ±0.03); between the plotted e/B curves the factor is interpolated, and e/B above 0.6 uses the 0.6 curve;
-- EI is an assumed estimate: floor slabs (0.15 m, E 23 GPa, every 3.4 m, storeys from the LIDAR height) bending together about mid-height. Real frames act less than fully together, so this is an upper estimate of stiffness and of the reduction;
+- EI and EA are assumed estimates: floor slabs (0.15 m, E 23 GPa, every 3.4 m, storeys from the LIDAR height) acting together, bending about mid-height. Real frames act less than fully together, and masonry on strip footings is far less stiff axially, so this is an upper estimate of stiffness and of the reduction;
 - no field data check: no open source gives a building's measured deflection ratio with its stiffness on these drives.
 
 ## Face support pressure

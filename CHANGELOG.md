@@ -6,6 +6,11 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ### Changed
 
+- **Buildings: horizontal strain with building stiffness** (`strain_modification_factor`, `frame_axial_stiffness`, `relative_axial_stiffness` in Python and JavaScript; EPB and Mixshield demos):
+  - Potts & Addenbrooke's modification factors for horizontal strain, against the relative axial stiffness α* = EA / (E_s H), digitised from Fig. 5 of their 1996 IS-London paper ([ISSMGE library, open](https://www.issmge.org/uploads/publications/6/8/1996_093.pdf)). The earlier search had found only the deflection-ratio chart;
+  - each building shows its tensile strain with stiffness beside the greenfield value, with EA from the same floor slabs as EI (assumed). For the buildings checked, α* is about 2–22 and the strain with stiffness at most a few per cent of greenfield;
+  - the damage category stays on greenfield strain: the slab stiffness is assumed, and a category with stiffness needs the bending and horizontal strains combined, which is not done.
+
 - **EPB screw pressure checked against the Botlek screw gauges** (`Screw(entrance_factor=...)`, `decay_length` in Python and JavaScript; EPB demo; script `models/py/validation/epb_botlek_screw.py`):
   - the old illustrative 3 m decay length left 1.4–25× too little pressure along the screw (12–25× at 11.5 m) compared with the gauges at 2.5, 5 and 11.5 m on the Botlek EPB ([Bezuijen et al. 2005](https://www.issmge.org/uploads/publications/6/11/2005_023.pdf), Figs 8–9);
   - the screw now has a pressure drop at its entrance (factor 0.85) and a 16 m decay length, set between the two rings the authors show as extremes (0.77–0.94, 10.9–22.7 m): within 0.73–1.54× at every gauge. Calibrated on Botlek, not tested on another machine;
