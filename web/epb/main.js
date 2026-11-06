@@ -8,7 +8,7 @@ import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import {
   wedgeSilo, daubWindow, DAUB_DEFAULTS, chamber as makeChamber, screw as makeScrew, shieldThrust, cutterheadTorque, toolTorque,
-  verticalStress, presetTrough, twinTroughs, loadFactor, macklinVolumeLoss, burlandCategory, referenceInstalled, erf,
+  verticalStress, presetTrough, twinTroughs, deflectionRatios, deflectionModificationFactor, frameBendingStiffness, relativeBendingStiffness, loadFactor, macklinVolumeLoss, burlandCategory, referenceInstalled, erf,
   Rng, sample as sampleDist, DIST, SHIFT_PATTERNS, PER_CYCLE_MAINTENANCE_MIN, simulateDrive, recordCheck, EPB_WEEKLY_SURVEY,
   jsceRing, woodInertia, subgradeModulus, terzaghiLoads, activeCoefficient, sectionStresses, jackingStress, burstingForce, annulusVolume, groutWindow, ITA2000_ALLOWABLE,
   scenario as loadScenario,
@@ -838,6 +838,21 @@ function tunnelFraction(t, c, ch) {
   return Math.max(f, 0);
 }
 
+// Building bending (Potts & Addenbrooke 1997, as plotted by Mair 1997 Fig. 4, open): the greenfield deflection ratio
+// Delta/L under the footprint from this bore's final trough, and the same with the building's estimated bending
+// stiffness (floor slabs every 3.4 m acting together: an assumed upper estimate). Shown only: the damage category stays
+// on greenfield horizontal strain, because the factors for horizontal strain are not in any open source.
+function buildingBending(b) {
+  const zone = zoneAt(b.ch), vl = vlFor(zone), key = `${zone.key}|${vl}`;
+  if (b.bending?.key === key) return b.bending;
+  const t = trough(zone, vl), width = b.xmax - b.xmin;
+  const gf = deflectionRatios((x) => t.settlement(x), b.xmin, b.xmax, t.i_left ?? t.i, t.i_right ?? t.i, 60);
+  const storeys = Math.max(1, Math.round((b.h ?? 10) / 3.4));
+  const rho = relativeBendingStiffness(frameBendingStiffness(storeys), zone.Es, width), eB = Math.abs(b.x) / width;
+  const sag = gf.sag ? gf.sag[1] : 0, hog = gf.hog ? gf.hog[1] : 0;
+  const mod = Math.max(sag * deflectionModificationFactor("sag", rho, eB), hog * deflectionModificationFactor("hog", rho, eB));
+  return (b.bending = { key, gf: Math.max(sag, hog), mod, rho, storeys });
+}
 // Surface settlement and building categories.
 let surfaceMax = 0;
 function bothSmax(zone) {
@@ -883,6 +898,7 @@ function updateSurface() {
     b.settle = smaxB; // largest settlement under the footprint
     const [cat, name] = burlandCategory(b.strain);
     b.cat = cat;
+    buildingBending(b);
     b.catName = name;
     b.mesh.material.color.setHex(CAT_COLORS[cat]);
     b.mesh.position.y = Z0 + b.h / 2 - b.settle * 150;
@@ -1072,7 +1088,7 @@ function hud() {
     ...(SCN?.data.settlement ? [["Volume loss, trough width (default)", `${SCN.data.settlement.volume_loss} %, K ${SCN.data.settlement.k} (measured on Crossrail${SCN.data.settlement.measured_smax_mm ? `; Smax ${SCN.data.settlement.measured_smax_mm.join("–")} mm measured` : ", Hyde Park"})`]] : []),
     ["Buildings within 60 m", `${BUILDINGS.length}${SCN ? `, ${BUILDINGS.filter((b) => b.listed.length).length} listed` : ""}; category 2 or worse: ${BUILDINGS.filter((b) => b.cat >= 2).length}`],
     ...BUILDINGS.filter((b) => Math.abs(b.ch - S.chainage) < 150).sort((p, q) => (q.cat ?? 0) - (p.cat ?? 0) || (q.settle ?? 0) - (p.settle ?? 0)).slice(0, 6)
-      .map((b) => [`${b.name}${b.grade ? ` (Grade ${b.grade})` : ""}`, `ch ${fmt(b.ch, 0)} m, ${fmt(b.h, 0)} m high: ${fmt((b.settle ?? 0) * 1000, 1)} mm, ε ${fmt(b.strain ?? 0, 3)} %, cat. ${b.cat ?? 0}`]),
+      .map((b) => [`${b.name}${b.grade ? ` (Grade ${b.grade})` : ""}`, `ch ${fmt(b.ch, 0)} m, ${fmt(b.h, 0)} m high: ${fmt((b.settle ?? 0) * 1000, 1)} mm, ε ${fmt(b.strain ?? 0, 3)} %, cat. ${b.cat ?? 0}${b.bending ? `; Δ/L ${fmt(b.bending.gf * 1e4, 2)} → ${fmt(b.bending.mod * 1e4, 2)} ×10⁻⁴ with stiffness (${b.bending.storeys} ${b.bending.storeys === 1 ? "storey" : "storeys"})` : ""}`]),
     ["Surface heights", "exaggerated ×150"],
   ]);
   placeFace();

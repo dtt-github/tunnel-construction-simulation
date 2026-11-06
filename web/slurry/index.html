@@ -125,7 +125,7 @@
     <ul class="limits">
       <li>Volume loss is a scenario input (default from measured Crossrail settlement, see the Ground panel); it does not yet respond to face pressure or grouting. One bore is modelled.</li>
       <li>Buildings: OS OpenMap Local footprints (terraces merged into blocks), heights from Environment Agency LIDAR, listing from Historic England (all OGL). Damage uses the greenfield strain under each footprint, without building stiffness.</li>
-      <li>Building categories use greenfield horizontal strain only (no deflection ratio, no building stiffness).</li>
+      <li>Building categories use greenfield horizontal strain only. Each building also shows its greenfield deflection ratio Δ/L and the value with its bending stiffness (Potts &amp; Addenbrooke 1997, as plotted by Mair 1997); that stiffness is estimated from storeys (floor slabs every 3.4 m acting together, an upper estimate). The deflection ratio does not change the category: the stiffness factors for horizontal strain are not openly published.</li>
       <li>The air-cushion dynamics (Boyle's law, level balance, first-order air regulator) are this project's own derivation; no open source with equations was found. Chamber area, air volume and regulator time are assumed.</li>
       <li>Penetration uses DAUB's steady e<sub>max</sub> (conservative); the support transferred is approximated as 1 − e/L over the wedge length. Over-excavation when support falls short is illustrative.</li>
       <li>The dry-mass balance assumes ideal density and flow meters; the separation plant is shown only as a load, not modelled.</li>

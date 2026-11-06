@@ -173,3 +173,69 @@ export function macklinVolumeLoss(lf) {
 export function faceVolumeLoss(baseVolumeLoss, lf) {
   return Math.max(baseVolumeLoss, macklinVolumeLoss(lf));
 }
+
+// Building bending stiffness and the deflection ratio (Potts & Addenbrooke 1997, as plotted by Mair 1997 Fig. 4,
+// ISSMGE library, open; digitised to about +/-0.03). See settlement.py for the sources and limits. Horizontal-strain
+// factors are not used: no open source gives them.
+const LOG_RHO = [-7.0, -6.5, -6.0, -5.5, -5.0, -4.75, -4.5, -4.25, -4.0, -3.75, -3.5, -3.25, -3.0, -2.75, -2.5, -2.25, -2.0, -1.75, -1.5, -1.0, 0.0, 1.0];
+export const M_DR_SAG = Object.freeze({
+  "0.0": [1.40, 1.403, 1.396, 1.371, 1.323, 1.298, 1.249, 1.195, 1.136, 1.059, 0.987, 0.891, 0.786, 0.667, 0.530, 0.411, 0.304, 0.226, 0.157, 0.113, 0.096, 0.096],
+  "0.2": [1.40, 1.40, 1.39, 1.36, 1.31, 1.273, 1.222, 1.151, 1.084, 1.004, 0.922, 0.834, 0.730, 0.606, 0.476, 0.367, 0.266, 0.189, 0.150, 0.110, 0.096, 0.096],
+  "0.4": [1.344, 1.344, 1.335, 1.306, 1.212, 1.138, 1.046, 0.954, 0.841, 0.704, 0.581, 0.455, 0.323, 0.215, 0.143, 0.117, 0.103, 0.090, 0.080, 0.073, 0.050, 0.050],
+  "0.6": [0.82, 0.809, 0.765, 0.686, 0.556, 0.463, 0.351, 0.220, 0.124, 0.065, 0.057, 0.057, 0.057, 0.055, 0.050, 0.050, 0.046, 0.046, 0.042, 0.038, 0.040, 0.040],
+});
+export const M_DR_HOG = Object.freeze({
+  "0.2": [1.40, 1.39, 1.376, 1.332, 1.218, 1.118, 1.000, 0.842, 0.632, 0.354, 0.190, 0.185, 0.180, 0.178, 0.178, 0.178, 0.172, 0.172, 0.170, 0.168, 0.168, 0.168],
+  "0.4": [1.42, 1.42, 1.418, 1.408, 1.356, 1.320, 1.246, 1.172, 1.076, 0.964, 0.812, 0.626, 0.442, 0.304, 0.212, 0.178, 0.172, 0.172, 0.170, 0.168, 0.168, 0.168],
+  "0.6": [1.42, 1.42, 1.418, 1.408, 1.394, 1.375, 1.356, 1.324, 1.280, 1.218, 1.130, 1.026, 0.880, 0.726, 0.548, 0.396, 0.274, 0.190, 0.174, 0.168, 0.168, 0.168],
+});
+
+function interp(xs, ys, x) {
+  if (x <= xs[0]) return ys[0];
+  for (let k = 1; k < xs.length; k++) {
+    if (x <= xs[k]) return ys[k - 1] + ((x - xs[k - 1]) / (xs[k] - xs[k - 1])) * (ys[k] - ys[k - 1]);
+  }
+  return ys.at(-1);
+}
+
+/** M_DR for "sag" or "hog" at relative bending stiffness rho* (1/m) and eccentricity e/B (clamped to 0-0.6). */
+export function deflectionModificationFactor(mode, rhoStar, eOverB) {
+  const table = { sag: M_DR_SAG, hog: M_DR_HOG }[mode];
+  const lr = Math.log10(Math.max(rhoStar, 1e-12));
+  const es = Object.keys(table).map(Number).sort((a, b) => a - b);
+  const e = Math.min(Math.max(eOverB, es[0]), es.at(-1));
+  for (let k = 1; k < es.length; k++) {
+    if (e <= es[k]) {
+      const lo = es[k - 1], hi = es[k], t = (e - lo) / (hi - lo);
+      return (1 - t) * interp(LOG_RHO, table[lo.toFixed(1)], lr) + t * interp(LOG_RHO, table[hi.toFixed(1)], lr);
+    }
+  }
+  return interp(LOG_RHO, table[es[0].toFixed(1)], lr);
+}
+
+/** Assumed estimate of a framed building's EI per metre run (kN m^2/m): floor slabs bending together about mid-height. */
+export function frameBendingStiffness(storeys, storeyHeight = 3.4, slabThickness = 0.15, eConcrete = 23e6) {
+  const n = Math.max(Math.trunc(storeys), 1);
+  const zs = Array.from({ length: n + 1 }, (_, k) => k * storeyHeight);
+  const zm = zs.reduce((a, z) => a + z, 0) / zs.length;
+  return eConcrete * zs.reduce((a, z) => a + slabThickness ** 3 / 12 + slabThickness * (z - zm) ** 2, 0);
+}
+
+/** rho* = EI / (E_s H^4), H = B / 2, in 1/m. */
+export function relativeBendingStiffness(ei, soilModulus, width) {
+  return ei / (soilModulus * (width / 2) ** 4);
+}
+
+/** Greenfield deflection ratio of a footprint across a trough: { sag: [L, DR] | null, hog: [L, DR] | null }. */
+export function deflectionRatios(settlement, xMin, xMax, iLeft, iRight, n = 200) {
+  const part = (a, b) => {
+    if (b - a < 1) return null;
+    const sa = settlement(a), sb = settlement(b);
+    let d = 0;
+    for (let k = 0; k <= n; k++) d = Math.max(d, Math.abs(settlement(a + ((b - a) * k) / n) - (sa + ((sb - sa) * k) / n)));
+    return [b - a, d / (b - a)];
+  };
+  const sag = part(Math.max(xMin, -iLeft), Math.min(xMax, iRight));
+  const hogs = [part(xMin, Math.min(xMax, -iLeft)), part(Math.max(xMin, iRight), xMax)].filter((h) => h !== null);
+  return { sag, hog: hogs.length ? hogs.reduce((m, h) => (h[1] > m[1] ? h : m)) : null };
+}
