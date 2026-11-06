@@ -1,7 +1,7 @@
 """Check the double shield demo's assumed cycle values against open sources. Nothing is fitted.
 
 The demo (web/hard-rock/double.js) assumes a 30 min ring build, a main stroke equal to the 1.8 m ring width, 150 MN
-installed thrust (95 MN since this check) and 320 mm segments. Sources (open, read and cited, not redistributed):
+installed thrust (since this check: 210 MN double-shield mode, 200 MN single-shield mode) and 320 mm segments. Sources (open, read and cited, not redistributed):
 
 - Comis, Younis & Goodfellow (2016). Concurrent segment lining and TBM design: a coordinated approach for tunneling
   success. WTC 2016 (Robbins): https://www.robbinstbm.com/wp-content/uploads/2017/04/5_SegmentDesign_WTC2016.pdf
@@ -35,7 +35,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from validation.hard_rock_projects import follo_advance  # noqa: E402
 
 RING_W = 1.8  # m, Follo rings and the demo's stroke
-DEMO = {"ring_build_min": 30.0, "regrip_min": 10.0, "thrust_installed_mn": 95.0, "segment_mm": 320}  # thrust 150 MN before this check
+DEMO = {"ring_build_min": 30.0, "regrip_min": 10.0, "thrust_installed_mn": 200.0, "segment_mm": 320}  # single-shield mode; 150 MN before this check
 RING_BUILD = (  # (machine, minutes per ring, kind)
     ("Bheri Babai, 5.06 m", 15.0, "stated by the contractor"),
     ("Job B, 6.53 m, first 200 m", 7990 / 120, "logged, learning curve included"),
@@ -84,6 +84,7 @@ if __name__ == "__main__":
           f"{u.h_per_km['cutters'] / u.total_h_per_km * 100:.0f} % |")
     print(f"| Disc time / boring time | {g['discs'] / g['boring_ring']:.2f} | {u.h_per_km['cutters'] / u.h_per_km['boring']:.2f} |")
     print("\n### Thrust and segments (10.71 m Brenner double shields, Maggio 2020)\n")
-    print(f"Main cylinders 95 MN nominal; the demo now uses {DEMO['thrust_installed_mn']:.0f} MN (was 150 MN). Logged main thrust "
+    print(f"Main cylinders 95 MN nominal, 210 MN exceptional; auxiliary up to {DEMO['thrust_installed_mn']:.0f} MN in single-shield "
+          "mode (Giacomin et al. 2022), now used by the demo (was 150 MN). Logged main thrust "
           "mean 14.2 MN (Follo default on the cutters 18.0 MN). Segments 450 mm against the demo's "
           f"{DEMO['segment_mm']} mm (Guadarrama, 9.5 m). Gripper force: about 37 MN on a 6.8 m machine only.")

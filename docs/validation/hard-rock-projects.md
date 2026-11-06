@@ -162,7 +162,7 @@ None of these publish the rock and machine inputs needed to run the model sectio
 
 ## Double shield cycle
 
-- **Script:** [`models/py/validation/double_shield_cycle.py`](../../models/py/validation/double_shield_cycle.py). Nothing is fitted. One default changed: installed thrust 150 → 95 MN (see below).
+- **Script:** [`models/py/validation/double_shield_cycle.py`](../../models/py/validation/double_shield_cycle.py). Nothing is fitted. One default changed: installed thrust, now by mode from the 10.71 m Brenner machines (see below).
 - **What is checked:** the demo's assumed ring build (30 min), main stroke (equal to the 1.8 m ring), installed thrust (150 MN) and segment thickness (320 mm).
 
 **Data** (open):
@@ -180,17 +180,17 @@ None of these publish the rock and machine inputs needed to run the model sectio
 | Main stroke | 1.80 m, equal to the ring | ring + 0.10 to +0.35 m on three of four machines (one is 0.10 m short) | The demo's stroke is the advance per regrip, one per ring, so the regrip time per km is right; a real cylinder is 0.1–0.2 m longer |
 | Boring (with ring build) / all time | 28 % (Follo case) | Guadarrama 32 % | Consistent. The first independent utilisation check for the double shield |
 | Disc inspection and change / all time | 26 % (Follo's own cutter changes) | Guadarrama 19 % | Follo changed more cutters per metre bored (disc time / boring 0.93 against 0.61); the rock is different |
-| Installed thrust | 150 MN, now 95 MN | 95 MN main nominal (10.71 m Brenner) | Adopted: the one open figure for a 10 m double shield. Auxiliary thrust for single-shield mode is not published |
+| Installed thrust | 150 MN, now 210 / 200 MN by mode | 10.71 m Brenner: 95 MN nominal, 210 MN exceptional main thrust; auxiliary cylinders up to 200 MN on the last ring in single-shield mode (Giacomin et al. 2022) | Adopted |
 | Logged thrust | 18.0 MN on the cutters (Follo) | 14.2 MN mean main thrust (Brenner, 10.71 m) | Same order; different rock |
 | Segment thickness | 320 mm (Guadarrama, press) | 450 mm (10.71 m Brenner) | Bracket: 320–450 mm for 9.5–10.7 m |
 
 **What this shows:**
 - **Ring build is not limiting** in double-shield mode for any published value up to about 50 min. The 30 min assumption only matters in single-shield mode, where boring and ring building alternate.
 - **Utilisation agrees** with the one open time split for a large double-shield drive.
-- **Installed thrust changed to 95 MN** (6 Nov 2026). The old 150 MN was the low end of a general range for 10 m shields (Ramoni & Anagnostou); the only open 10 m double shield has 95 MN main thrust. In the fault zone (300 m cover) the shield needs about 148 MN to keep sliding and 229 MN to restart:
-  - with 150 MN the demo said "Jamming risk after any standstill";
-  - with 95 MN it says "Shield jammed: skin friction 148 MN exceeds the installed thrust".
-  - The auxiliary thrust that pushes in single-shield mode is not published, so this stays a screening estimate. The alarm is a warning only: the demo keeps boring through the zone.
+- **Installed thrust now by mode** (6 Nov 2026). The old 150 MN was the low end of a general range for 10 m shields (Ramoni & Anagnostou). Giacomin et al. (2022, [TAC 2022, open](https://www.tunnelcanada.ca/members/documents/2022/papers/SESO3I569Z2AV8KEI_Long_and_deep_hard_rock_TBM_Tunnelling_under_the_Alps_Brenner_Base_Tunnel_Italian_section_-_Giacomin_et_al.pdf), Table 2 and text) give the 10.71 m Brenner machines 95 MN nominal and 210 MN exceptional main thrust, and up to 200 MN from the auxiliary cylinders on the last ring in single-shield mode. The jamming check now uses 210 MN in double-shield mode and 200 MN in single-shield mode.
+  - In the fault zone (single-shield mode, 300 m cover) the shield needs about 148 MN to keep sliding and 229 MN to restart: "Jamming risk after any standstill: 229 MN needed to restart vs 200 MN", the same verdict as with 150 MN.
+  - **Correction:** an earlier change the same day set 95 MN, the nominal main thrust from Maggio (2020), and the demo then reported the shield jammed. That compared single-shield friction with the wrong cylinders; it was published to the site for a few hours.
+  - The alarm is a warning only: the demo keeps boring through the zone. Skin friction is a screening estimate.
 
 ## Changes made
 
@@ -204,12 +204,29 @@ None of these publish the rock and machine inputs needed to run the model sectio
   - In gneiss it gives 5.8 mm/rev and about 16 m per working day. Gotthard averaged about 8–10 m per calendar day over whole drives, including fault zones and stoppages; that is not a like-for-like comparison.
 - **Presets:** the class presets and the Gotthard reference machine now carry these sources and are marked verified.
 
+## Penetration and torque on the Brenner double shields
+
+- **Script:** [`models/py/validation/brenner_csm.py`](../../models/py/validation/brenner_csm.py). Nothing is fitted.
+- **Data:** Maggio (2020), [Politecnico di Torino thesis](https://webthesis.biblio.polito.it/15216/1/tesi.pdf): machine data for three Herrenknecht double shields with 19″ discs (Tables 3.1–3.2) and logged means over 500 m each (281 values per parameter; Tables 4.1–4.19). The 10.71 m main-tunnel machines bored geomechanical zone 10 (Table 2.2): Bündner schist, 50 % calc-schist, 20 % calc-phyllite, 25 % mica marble. The stretch ends where face instability stopped S-1071. The thesis gives no rock strength there; Giacomin et al. (2022) give UCS 30–120 MPa for the calc-schists, amphibolite and marble of the first 10 km.
+- **Assumed:** BTS = UCS / 10; shield drag 0 or 15 % of the main-cylinder thrust (Follo's share).
+
+| Machine | Thrust (MN) | rpm | Logged penetration (mm/rev) | UCS the CSM needs, drag 0 / 15 % (MPa) | Logged torque (MNm) | Model torque, drag 0 / 15 % (MNm) | Logged / model torque |
+|---|---|---|---|---|---|---|---|
+| S-1054, exploratory, 6.85 m | 6.1 | 3.69 | 10.8 | 63 / 53 | 1.08 | 1.90 / 1.62 | 0.57–0.67 |
+| S-1071, main, 10.71 m | 14.2 | 2.75 | 14.4 | 85 / 72 | 3.23 | 7.98 / 6.79 | 0.41–0.48 |
+| S-1072, main, 10.71 m | 13.3 | 2.58 | 15.9 | 77 / 65 | 3.22 | 7.90 / 6.71 | 0.41–0.48 |
+
+**What this shows:**
+- **Penetration: consistent, not tested.** The Follo-fitted CSM reproduces the logged penetration at UCS 53–85 MPa, inside the published 30–120 MPa. Across that range it gives anything from over 30 down to 2–5 mm/rev, so without strength logged along the drive this cannot test it.
+- **Torque: the model is about twice the logged value.** At the logged thrust and penetration, the model's torque (0.3 · D · thrust · rolling coefficient) is 1.5–2.4× the logged torque on all three machines. The ratio depends only on penetration and cutter size, not on rock strength, so it is a real test. In the demos this can make weak rock torque-limited too early. Not changed: one geology, and the 0.3 radius factor and the CSM rolling force are both in play.
+
 ## Limits
 
 - **Penetration:**
   - It is fitted to one project. Section by section, with mean rock strength, it follows the operator's thrust and speed well (±27 %), but not single-test UCS (0.4–2.9×).
   - Tested without refitting on 10 Queens Water Tunnel stations, also gneiss: median 1.02×, but up to 1.8× fast in massive rock, because there is no fracture term.
-  - Rock types other than strong crystalline rock (sandstone, limestone, schist-dominated rock) are untested. The Yinsong data is not open.
+  - Rock types other than strong crystalline rock are untested: in Brenner calc-schist the logged penetration fits the published strength range, but the range is too wide to test it. The Yinsong data is not open.
+- **Torque:** about twice the logged torque on three Brenner double shields in calc-schist (logged / model 0.41–0.67).
 - **Advance at Follo** used the measured penetration and cutter changes, so it tests the downtime model, not the whole chain. With the demo's own CAI wear model, cutter changes are about 40 % fewer than at Follo.
 - **Fault zones:** in the fault zone (RMR 22) the demos give about 12–13 m/day, because Farrokh's support curve at that RMR is about 1,000 h/km. Niagara's 3 m/day with spiling was in a 14.4 m bore with up to 3 m of overbreak, so it is not a direct test; no open source gives a like-for-like fault-zone rate.
 - **Gotthard and Niagara** publish calendar-day averages over whole drives. The model's working-day rate excludes holidays and long stoppages.

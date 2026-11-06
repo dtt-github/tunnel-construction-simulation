@@ -26,14 +26,15 @@ export const M = {
   doubleModeMinRmr: 50, // below: single-shield mode (as in the support-downtime model)
   shieldLength: 13.7, // m, sum of the Brenner shield lengths
   overcut: 0.10, // m radial gap between bore and shield, assumed (Ramoni & Anagnostou's example uses 5-15 cm)
-  thrustInstalled: 95, // MN, main cylinders of the 10.71 m Brenner double shields (Maggio 2020, Table 3.2); auxiliary thrust
-  // not published. Was 150, the low end of "up to 150-200 MN" for ~10 m shields (Ramoni & Anagnostou, VSS 1341)
+  // MN, 10.71 m Brenner main-tunnel double shields (Giacomin et al. 2022, Table 2; Maggio 2020, Table 3.2): main cylinders
+  // 95 nominal, 210 exceptional; auxiliary cylinders up to 200 on the last ring in single-shield mode
+  thrustNominal: 95, thrustExceptional: 210, thrustSingleShield: 200,
   utilMachine: () => "double",
   limits: [
     "Machine diameter, torque, power, 71 discs and ring width are the Follo values; the default thrust and speed are the logged Follo TBM1 means (Hansen 2018). Shield lengths come from the 10.65 m Brenner machines. Gripper force and strokes are not published; the stroke is taken equal to the ring width.",
     "Penetration (CSM) reproduces Follo TBM1: 6.4 against 6.32 mm/rev measured. With Follo's cutter changes the downtime model gives 13–15 m/day against the 14.1 m/day average (Follo, including probing and grouting). Boring took 28 % of the time in this case, against 32 % at Guadarrama (Melis Maynar 2006).",
     "Ring-build time (30 min) is assumed, between 15 and 67 min published for 5-6.5 m machines; in double-shield mode it is hidden while shorter than boring a ring. Segment thickness 320 mm (Guadarrama; 450 mm at Brenner). Single-shield mode below RMR 50 follows the support-downtime model, not project data.",
-    "Installed thrust 95 MN is the main-cylinder thrust of the 10.71 m Brenner double shields; the auxiliary thrust that pushes in single-shield mode is not published, so the jamming check is a screening estimate.",
+    "Thrust from the 10.71 m Brenner double shields (Giacomin et al. 2022): 95 MN nominal, 210 MN exceptional; up to 200 MN from the auxiliary cylinders on the last ring in single-shield mode, which the jamming check uses in the fault zone. Skin friction is a screening estimate.",
   ],
 };
 const R = M.D / 2, W = M.stroke;
@@ -199,6 +200,11 @@ export function build(machine, world) {
   const completeTo = (r, k) => { while (r.placed < k) { r.g.add(makePiece(ringPieces(r.n)[r.placed], r.n)); r.placed++; } };
 
   const doubleMode = (zone) => zone.rmr >= M.doubleModeMinRmr;
+  // largest thrust that can push the shields in this mode: main cylinders (exceptional) braced on the grippers, or the
+  // auxiliary cylinders on the last ring in single-shield mode
+  const thrustFor = (zone) => doubleMode(zone)
+    ? { mn: M.thrustExceptional, what: "exceptional main thrust" }
+    : { mn: M.thrustSingleShield, what: "auxiliary thrust on the last ring" };
   const buildPer = (M.ringBuildMin * 60) / 7;
 
   // Skin friction of the closing rock on the shield (screening estimate after Ramoni & Anagnostou), sliding and at restart
@@ -216,15 +222,15 @@ export function build(machine, world) {
     // the shield and then the lining stop the rock at the overcut gap
     closureLimit() { return M.overcut; },
     groundRows(zone, g) {
-      const f = friction(zone, g);
+      const f = friction(zone, g), t = thrustFor(zone);
       const contact = f.sliding.contact_from === null ? "no contact with the shield" : `rock reaches the shield ${f.sliding.contact_from.toFixed(1)} m behind the face`;
       return [["Rock on the shield (overcut 10 cm)", contact],
-        ["Shield skin friction", `${f.sliding.friction_force.toFixed(0)} MN sliding, ${f.restart.friction_force.toFixed(0)} MN to restart, vs about ${M.thrustInstalled} MN installed`]];
+        ["Shield skin friction", `${f.sliding.friction_force.toFixed(0)} MN sliding, ${f.restart.friction_force.toFixed(0)} MN to restart, vs ${t.mn} MN ${t.what}`]];
     },
     groundAlarms(zone, g) {
-      const f = friction(zone, g);
-      if (f.sliding.friction_force > M.thrustInstalled) return [`Shield jammed: skin friction ${f.sliding.friction_force.toFixed(0)} MN exceeds the installed thrust; free the shield (by-pass, overcut, lubrication)`];
-      if (f.restart.friction_force > M.thrustInstalled) return [`Jamming risk after any standstill: ${f.restart.friction_force.toFixed(0)} MN needed to restart vs ${M.thrustInstalled} MN installed. Keep advancing; avoid stops in this zone`];
+      const f = friction(zone, g), t = thrustFor(zone);
+      if (f.sliding.friction_force > t.mn) return [`Shield jammed: skin friction ${f.sliding.friction_force.toFixed(0)} MN exceeds the ${t.mn} MN ${t.what}; free the shield (by-pass, overcut, lubrication)`];
+      if (f.restart.friction_force > t.mn) return [`Jamming risk after any standstill: ${f.restart.friction_force.toFixed(0)} MN needed to restart vs ${t.mn} MN ${t.what}. Keep advancing; avoid stops in this zone`];
       return [];
     },
     reset(S) {

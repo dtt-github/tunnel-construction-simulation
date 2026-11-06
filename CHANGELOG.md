@@ -6,7 +6,7 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ### Changed
 
-- **Double shield installed thrust 95 MN** (was 150 MN; `web/hard-rock/double.js`): the main thrust of the 10.71 m Brenner double shields (Maggio 2020, Table 3.2), the one open figure for a 10 m double shield. In the fault zone (148 MN sliding, 229 MN to restart) the jamming check now reports the shield jammed, where it reported a risk after standstill. The auxiliary thrust is not published; the alarm does not stop the drive.
+- **Double shield installed thrust by mode** (was 150 MN; `web/hard-rock/double.js`): from the 10.71 m Brenner double shields (Giacomin et al. 2022, [TAC 2022, open](https://www.tunnelcanada.ca/members/documents/2022/papers/SESO3I569Z2AV8KEI_Long_and_deep_hard_rock_TBM_Tunnelling_under_the_Alps_Brenner_Base_Tunnel_Italian_section_-_Giacomin_et_al.pdf)): 95 MN nominal and 210 MN exceptional main thrust; up to 200 MN from the auxiliary cylinders on the last ring in single-shield mode. The jamming check uses 210 MN in double-shield mode and 200 MN in single-shield mode. In the fault zone (148 MN sliding, 229 MN to restart) it reports a jamming risk after any standstill. The alarm does not stop the drive.
 
 - **Thames chalk trough: K 0.4, volume loss 0.20 %** (`models/scenarios/thames-plumstead-north-woolwich.json`; Mixshield demo; [settlement validation](docs/validation/settlement.md)):
   - K from three chalk sources not used for the volume-loss fit, all narrower than the old 0.5: Store Road 0.39–0.40, CTRL 0.43, Round Hill 0.25–0.30. The second bore's K towards and away from the first is 0.4 too;
@@ -81,9 +81,15 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ### Fixed
 
+- **Double shield jamming check said "jammed" in the fault zone** (published earlier on 6 Nov 2026): it compared the single-shield skin friction (148 MN) with the 95 MN nominal main thrust, but in single-shield mode the auxiliary cylinders push off the last ring, up to 200 MN on the Brenner machines. Now a restart risk, as before the 95 MN change.
+
 - **Second-bore horizontal strain in the EPB and Mixshield demos:** with "after both drives" shown, the ground movement of both bores was directed at the first bore's axis, which overstated the strain about 3× on the second bore's side. Each bore's movement now points to its own axis. With both bores at 1 % volume loss, buildings at category 2 or worse go from 26 to 0 (EPB) and 10 to 0 (Mixshield); at 2 %, from 31 to 20 and 18 to 8. At the scenario defaults none reach category 2, before or after.
 
 ### Added
+
+- **Penetration and torque on the Brenner double shields** (`models/py/validation/brenner_csm.py`; [hard-rock projects](docs/validation/hard-rock-projects.md#penetration-and-torque-on-the-brenner-double-shields)); nothing refitted:
+  - logged means of three Herrenknecht double shields in Bündner schist (Maggio 2020, Politecnico di Torino): the CSM reproduces the logged penetration at UCS 53–85 MPa, inside the published 30–120 MPa (Giacomin et al. 2022). Consistent, not tested: the range is too wide;
+  - torque: the model gives 1.5–2.4× the logged torque on all three machines, independent of UCS. Recorded as an open gap; no default changed.
 
 - **Double shield cycle checked against open sources** (`models/py/validation/double_shield_cycle.py`; [hard-rock projects](docs/validation/hard-rock-projects.md#double-shield-cycle)):
   - ring build: 15 min (5.06 m Bheri Babai, stated) and 67 min (6.53 m, logged over the first 200 m; Comis et al., WTC 2016) bracket the demo's 30 min. In double-shield mode it is hidden while shorter than boring one ring (51–56 min), so only the 67 min would slow the Follo case (−5 %);
