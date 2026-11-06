@@ -1,0 +1,64 @@
+{
+  "scene": "rankine",
+  "time": "2026-11-06T22:19:03",
+  "git": "daf5179",
+  "versions": {
+    "newton": "1.7.0",
+    "warp": "1.19.0",
+    "numpy": "2.5.4",
+    "python": "3.12.3"
+  },
+  "params": {
+    "height": 2.0,
+    "length": 4.0,
+    "width": 1.0,
+    "voxel": 0.1,
+    "ppc": 2,
+    "move": 0.08,
+    "speed": 0.05,
+    "fps": 60.0,
+    "settle": 60,
+    "iterations": 50,
+    "seed": 0,
+    "soil": {
+      "name": "element-test sand",
+      "density": 1600.0,
+      "friction": 0.5592,
+      "source": "element test (assumed values)",
+      "yield_stress": 0.0,
+      "young_modulus": 1000000000000000.0,
+      "poisson_ratio": 0.3,
+      "dilatancy": 0.0,
+      "phi_deg": null,
+      "cohesion": 0.0,
+      "match": "none",
+      "extra": {}
+    },
+    "critical_fraction": 0.0,
+    "radius_over_h": 0.7,
+    "strain_basis": "P0"
+  },
+  "gpu_before": {
+    "name": "NVIDIA GB10",
+    "utilisation_percent": 53,
+    "driver": "580.178.04",
+    "other_processes": [
+      "python"
+    ]
+  },
+  "timing_valid_for_decisions": false,
+  "timing_note": "GPU shared with other processes: timings are lower bounds",
+  "calibration": "uncalibrated",
+  "result": {
+    "particles": 64000,
+    "K_settled": 0.7539,
+    "K_active": 0.3163,
+    "psi_measured_deg": -0.81,
+    "psi_p25_p75_deg": [
+      -3.86,
+      2.85
+    ],
+    "sheared_cells": 1369,
+    "ms_per_frame": 22.08
+  }
+}

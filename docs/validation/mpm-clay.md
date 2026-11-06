@@ -5,10 +5,10 @@
   - [`server/tunnelsim_server/scenes/tunnel_2d.py`](../../server/tunnelsim_server/scenes/tunnel_2d.py), a plane-strain tunnel with a closing ring of segments;
   - [`face_sand.py`](../../server/tunnelsim_server/scenes/face_sand.py) with the kaolin soil;
   - records `t2d_*` and `fc_*` in [`server/results/`](../../server/results/).
-- **Status:** **blocked, cause not yet found.** The MPM clay tunnel collapses at about half the stability ratio measured by Kimura & Mair (1981), in 2D and 3D alike.
+- **Status:** **blocked, now from the other side.** With PIC integration the MPM clay tunnel collapsed at about half the stability ratio measured by Kimura & Mair (1981). Since 6 Nov 2026 the scenes use GIMP integration, on the Newton maintainer's advice: the volume loss is gone, but the clay tunnel no longer collapses at all at the measured ratios (see [GIMP integration](#gimp-integration-6-nov-2026)). This is an open gap.
   - The first diagnosis blamed Newton's packing constraint (`critical_fraction`). WP0b withdrew it: that apparent gain came from compaction (see [WP0b correction](#wp0b-correction-5-nov-2026)).
   - The clay piling up against the ring is the tunnel-scale sign of a numerical volume loss in yielding clay. It comes from the default element (Q1 velocities, P0 strains), not from the colliders. The one element that removes it locks (see [piling](#the-piling-investigated-5-nov-2026)).
-- **Run on:** 5 Nov 2026
+- **Run on:** 5 Nov 2026; GIMP runs 6 Nov 2026
 
 ## Data: Kimura & Mair (1981)
 
@@ -184,12 +184,50 @@ The script is [`diagnostics/ringpile.py`](../../server/diagnostics/ringpile.py).
 - **pic8**, a strain basis per particle, gets the closest (N 3.8 at C/D 2), but it locks even more: about 13 % on friction and about 30 % on cohesion.
 - **Neither is adopted.** P0 stays: it is the element that passes the element tests.
 
+## GIMP integration (6 Nov 2026)
+
+- **Source of the change:** we reported the volume loss to Newton ([newton-physics/newton#5180](https://github.com/newton-physics/newton/issues/5180)). A maintainer reproduced it: with PIC integration the P0 incompressibility condition is summed at the particle positions, which is not exact when the particles are jittered, so yielding material creeps. GIMP integrates over the particle–cell overlaps instead. Their runs used an open pull request (#5021); ours are on plain Newton 1.7.0 with the default `S2` collider.
+- **Code:** `common.INTEGRATION_SCHEME = "gimp"` is now the default; `runner.py --integration pic` repeats the earlier runs. Records end in `_gimp`.
+- **Particle-volume scaling:** under GIMP, cohesion and stiffness come out at the input values, so they are no longer divided by 2.744 (`material_scale()`). The stored particle stress is still per particle volume, so the stress readout keeps the factor: the K0 column reads σv / γz 0.37 without it and 1.01 with it.
+
+**What GIMP fixes:**
+
+| Check | PIC | GIMP |
+|---|---|---|
+| Clay slab round a fixed lining, 4 s: surface drop, speed | 0.62 m, still creeping (25 mm/s) | 0.185 m, at rest from 2 s (0.5 mm/s) |
+| Clay slab: particles in the shell next to the lining (308 at start) / inside it | 519 / 85 | 308 / 0 |
+| Stiff control slab (never yields) | 0.03 m | 0.033 m |
+| EPB chamber paste, bulkhead pressure, cutterhead still → turning | 197 → 103 kPa | 216 → 172 kPa |
+| Tresca Rankine wall, strength / theory at H/10, H/20, H/40 | about 0.98 at H/20 (with the 2.744 correction) | 1.10, 1.06, 1.10 |
+
+The chamber still loses a fifth of its pressure while the cutterhead turns, and particles leak through a side gap with either scheme (about 165), which is our scene.
+
+**What it changes elsewhere** (WP0b runs repeated, `*_gimp` against `*_r07`):
+- **Sand faces:** face pressure at 5 % of D within about 10 % of before (Idinger 8.3–8.8 kPa, Wang 9.5–9.7 kPa; Vermeer 8.4 and 9.3). The Phase 0 golden face run and the GPU tests pass unchanged.
+- **Sand element tests:** the Rankine wall is a little weaker: K 0.316 against 0.302 at H/20 (theory 0.283), and it weakens further as the grid is refined (strength / theory 0.96, 0.90, 0.86 at H/10, H/20, H/40). The maintainer's runs with #5021 show the same direction, less steeply (0.97, 0.945, 0.94).
+- **Column collapse:** B00 runout 0.168 m (measured 0.18), G00 0.084 m (measured 0.11).
+
+**The clay tunnel no longer collapses.** The support is withdrawn and the clay stands: the pressure on it falls to about zero and stays there, so the N shown is only the overburden ratio, a lower bound.
+
+| Case | PIC N | GIMP | Kimura N |
+|---|---|---|---|
+| Plane strain, C/D 1.2, D/10 | 2.4 | ≥ 4.2, stands unsupported | 3.5 |
+| Plane strain, C/D 2.0, D/10 and D/20 | 1.9 | ≥ 6.2, stands | 4.3 |
+| Plane strain, C/D 2.8, D/10 | 1.8 | ≥ 8.2, stands | 4.2 |
+| Heading at P/D 0, C/D 1.5, D 7.5 m | p 104 kPa at 5 % | p ≈ 0, no settlement | N 7.05: needs about 30 kPa |
+| Heading at P/D 0, C/D 3.0, D 4.5 m | p 127 kPa | p ≈ 0 | N 9.0: about at collapse |
+
+- In plane strain the clay is now at least 1.2–2× too strong. At C/D 2.8 it stands unsupported where Kimura's tunnel collapsed at N 4.2.
+- The Tresca wall test still matches theory, so the overstrength appears only when the clay has to flow round the opening. That points to locking under GIMP, not to the cohesion value.
+- **Not yet known:** whether #5021 or the `pic8` collider changes this; the maintainer's runs did not include a clay tunnel.
+
 ## Where this leaves WP3
 
-- The clay tunnel's low N comes with a numerical volume loss in yielding clay, about 5 % in a few seconds, which no undrained clay can have.
-- Neither element on offer gives incompressible plastic flow without locking.
+- With PIC, the clay tunnel's low N came with a numerical volume loss in yielding clay, about 5 % in a few seconds, which no undrained clay can have.
+- With GIMP the volume loss is gone, but the clay tunnel is too strong to collapse at the measured ratios.
+- So no configuration yet gives incompressible plastic flow round a tunnel without locking.
 - **Possible routes:**
-  1. Ask the Newton developers about volume-preserving plastic flow (P0 with a particle-density correction, or a stabilised P1d).
+  1. Report the clay-tunnel result to the Newton developers on #5180, and test #5021 and `pic8` once merged.
   2. Accept clay as out of scope for the MPM and keep the analytical clay models.
 
 Until then WP3 stays blocked and the clay face is not used anywhere.

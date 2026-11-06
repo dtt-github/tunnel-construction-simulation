@@ -31,12 +31,14 @@ FACE_SOILS = {
 
 
 def _packing(args) -> dict:
-    return {"critical_fraction": args.critical_fraction, "radius_over_h": args.radius, "strain_basis": args.strain_basis or "P0"}
+    return {"critical_fraction": args.critical_fraction, "radius_over_h": args.radius, "strain_basis": args.strain_basis or "P0",
+            "integration_scheme": args.integration}
 
 
 def run(args) -> dict:
     common.CRITICAL_FRACTION = args.critical_fraction
     common.RADIUS = args.radius
+    common.INTEGRATION_SCHEME = args.integration
     if args.strain_basis:
         common.SOLVER_OPTIONS["strain_basis"] = args.strain_basis
     gpu = gpu_snapshot()
@@ -98,6 +100,7 @@ def main() -> None:
         s.add_argument("--name", type=str, default=None)
         s.add_argument("--critical-fraction", type=float, default=0.0, help="Newton packing constraint (0 = off, as WP0-WP3)")
         s.add_argument("--strain-basis", type=str, default=None, help="Newton strain basis (default P0; P1d locks, see mpm-clay.md)")
+        s.add_argument("--integration", choices=["gimp", "pic"], default="gimp", help="Newton integration scheme (pic: WP0-WP3, WP0b)")
         s.add_argument("--radius", type=float, default=0.7, help="particle radius / spacing (WP0b default 0.7; 0.5 = nominal packing 1, as WP0-WP3)")
         if name == "face":
             s.add_argument("--diameter", type=float, default=2.0)

@@ -30,16 +30,30 @@ def add_walls(builder, body: int, boxes):
 RADIUS = 0.7
 
 
+# Newton integration scheme. "gimp" integrates over particle-cell overlaps: with the P0 strain basis it holds volume under
+# plastic shear, where "pic" lets yielding material creep and compact (newton-physics/newton#5180, maintainer's advice
+# and our runs on 1.7.0). WP0-WP3 and the first WP0b runs used "pic".
+INTEGRATION_SCHEME = "gimp"
+
+
 def packing() -> float:
-    """Nominal packing (2 RADIUS)^3: Newton's stresses act per unit of particle volume, so its effective cohesion and
-    stiffness are this many times the input values (diagnostics/cohesion_scale.py)."""
+    """Nominal packing (2 RADIUS)^3: Newton takes a particle's volume as (2r)^3 and stores particle_stress per unit of
+    that volume, so true stresses are this many times the stored ones (also with GIMP: K0 column sigma_v / gamma z 0.370
+    unscaled, 1.01 scaled)."""
     return (2 * RADIUS) ** 3
 
 
+def material_scale() -> float:
+    """Factor by which Newton's effective cohesion and stiffness exceed the input values. With PIC integration it is the
+    packing (diagnostics/cohesion_scale.py); with GIMP the cohesion comes out at the input value (Tresca Rankine wall
+    1.06-1.10 x theory unscaled, against about 0.5 with the PIC correction), so it is 1."""
+    return 1.0 if INTEGRATION_SCHEME == "gimp" else packing()
+
+
 def _attributes(soil, n: int) -> dict:
-    """Soil attributes with yield stress and Young's modulus divided by the packing, so the soil behaves as specified."""
+    """Soil attributes with yield stress and Young's modulus divided by the material scale, so the soil behaves as specified."""
     a = soil.custom_attributes(n)
-    k = packing()
+    k = material_scale()
     for key in ("mpm:yield_stress", "mpm:young_modulus"):
         a[key] = [v / k for v in a[key]]
     return a
@@ -80,7 +94,7 @@ def make_particles_multi(groups):
 CRITICAL_FRACTION = 0.0
 
 
-# Further SolverImplicitMPM.Config settings (name: value); empty = Newton's defaults with strain basis P0 (WP0-WP3).
+# Further SolverImplicitMPM.Config settings (name: value); empty = strain basis P0 and INTEGRATION_SCHEME.
 SOLVER_OPTIONS: dict = {}
 
 
@@ -92,6 +106,7 @@ def make_solver(particle_model, collider_model, voxel: float, iterations: int, f
     cfg.max_iterations = iterations
     cfg.critical_fraction = CRITICAL_FRACTION
     cfg.strain_basis = "P0"
+    cfg.integration_scheme = INTEGRATION_SCHEME
     for k, v in SOLVER_OPTIONS.items():
         setattr(cfg, k, v)
     solver = SolverImplicitMPM(particle_model, config=cfg)

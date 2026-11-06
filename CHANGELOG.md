@@ -6,6 +6,12 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ### Changed
 
+- **MPM scenes use GIMP integration** (`server/tunnelsim_server/scenes/common.py`, `runner.py --integration`; [MPM clay](docs/validation/mpm-clay.md#gimp-integration-6-nov-2026)), on the Newton maintainer's advice in [newton-physics/newton#5180](https://github.com/newton-physics/newton/issues/5180):
+  - the volume loss of yielding material is gone: the clay slab round a fixed lining settles 0.185 m and stops (PIC 0.62 m, still creeping), with no particles piling against or inside the lining; the EPB chamber keeps 172 of 216 kPa while the cutterhead turns (PIC 103 of 197 kPa);
+  - under GIMP, cohesion and stiffness are no longer divided by the particle packing 2.744 (`material_scale()`); the stress readout keeps the factor;
+  - sand faces, the K0 column and the golden tests are within about 10 % of before; the sand Rankine wall is a little weaker and weakens with refinement (0.96–0.86 of theory);
+  - **open gap:** the undrained clay tunnel no longer collapses at Kimura & Mair's stability ratios. In plane strain it stands unsupported at N ≥ 4.2–8.2 against the measured 3.5–4.3, at least 1.2–2× too strong, while the Tresca wall test still matches theory. WP3 stays blocked.
+
 - **Double shield installed thrust by mode** (was 150 MN; `web/hard-rock/double.js`): from the 10.71 m Brenner double shields (Giacomin et al. 2022, [TAC 2022, open](https://www.tunnelcanada.ca/members/documents/2022/papers/SESO3I569Z2AV8KEI_Long_and_deep_hard_rock_TBM_Tunnelling_under_the_Alps_Brenner_Base_Tunnel_Italian_section_-_Giacomin_et_al.pdf)): 95 MN nominal and 210 MN exceptional main thrust; up to 200 MN from the auxiliary cylinders on the last ring in single-shield mode. The jamming check uses 210 MN in double-shield mode and 200 MN in single-shield mode. In the fault zone (148 MN sliding, 229 MN to restart) it reports a jamming risk after any standstill. The alarm does not stop the drive.
 
 - **Thames chalk trough: K 0.4, volume loss 0.20 %** (`models/scenarios/thames-plumstead-north-woolwich.json`; Mixshield demo; [settlement validation](docs/validation/settlement.md)):
