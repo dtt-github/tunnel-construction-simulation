@@ -35,6 +35,7 @@ Start with the [project README](../README.md) for the live demo and quick start.
 | [validation/mpm-face-sand.md](validation/mpm-face-sand.md) | GPU MPM (Phase 2) tunnel face in dry sand against Idinger et al. (2011) and Wang et al. (2024); still uncalibrated |
 | [validation/mpm-clay.md](validation/mpm-clay.md) | GPU MPM (Phase 2) tunnel in undrained clay against Kimura & Mair (1981): blocked, about half the measured stability ratio |
 | [validation/mpm-chamber.md](validation/mpm-chamber.md) | GPU MPM (Phase 2) EPB chamber under pressure against Bezuijen et al. (2005), Botlek: blocked |
+| [validation/epb-screw-botlek.md](validation/epb-screw-botlek.md) | EPB screw pressure profile against the Botlek screw gauges (Bezuijen et al. 2005): old default failed, now calibrated |
 | [validation/epb-open-data.md](validation/epb-open-data.md) | EPB thrust and torque models against open field data (Changsha Metro Line 4, Guangzhou–Foshan), CC BY 4.0 |
 | [realism/drill-blast-heading.md](realism/drill-blast-heading.md) | Realism checklist for the drill & blast road tunnel demo |
 | [realism/slurry-mixshield.md](realism/slurry-mixshield.md) | Realism checklist for the urban slurry shield (Mixshield) demo |

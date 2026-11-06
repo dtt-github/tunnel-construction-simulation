@@ -10,7 +10,7 @@ Every model exists twice: a Python reference in [`models/py/tunnelsim_models/`](
 | [Hoek–Brown rock mass](#hoekbrown-rock-mass) | `hoek_brown.py` | `hoek_brown.js` | Hand-checked |
 | [Settlement and building damage](#settlement-and-building-damage) | `settlement.py` | `settlement.js` | Hand-checked; checked privately against published case histories |
 | [Face support pressure](#face-support-pressure) | `face_support.py` | `face_support.js` | Hand-checked; seepage not yet modelled |
-| [EPB chamber and screw conveyor](#epb-chamber-and-screw-conveyor) | `epb_chamber.py` | `epb_chamber.js` | Hand-checked; screw simplified |
+| [EPB chamber and screw conveyor](#epb-chamber-and-screw-conveyor) | `epb_chamber.py` | `epb_chamber.js` | Hand-checked; screw pressure profile calibrated on the Botlek screw gauges ([validation](validation/epb-screw-botlek.md)) |
 | [Slurry shield (Mixshield)](#slurry-shield-mixshield) | `slurry.py` | `slurry.js` | Reproduces the DAUB worked example; air cushion is this project's derivation |
 | [Thrust and torque](#thrust-and-torque) | `thrust_torque.py` | `thrust_torque.js` | Shield and rim friction fitted on open field data; thrust within about ±25 % on three EPB projects, torque high in conditioned clays ([validation](validation/epb-open-data.md)) |
 | [Hard-rock drive](#hard-rock-drive) | `hard_rock.py` | `hard_rock.js` | Reproduces Farrokh's worked example within 3 %; support curve digitised |
@@ -144,7 +144,7 @@ What it computes:
 - the foam split from FIR and FER;
 - the steady screw flow for a target pressure;
 - chamber stiffness;
-- screw capacity and efficiency, with an exponential pressure drop along the screw.
+- screw capacity and efficiency, with a drop at the screw entrance and an exponential pressure drop along the screw.
 
 **References:**
 
@@ -162,7 +162,7 @@ What it computes:
 
 **Limits:**
 
-- screw efficiency and decay length are illustrative defaults;
+- screw efficiency is an illustrative default. The entrance factor (0.85) and decay length (16 m) are calibrated between two Botlek rings (Bezuijen et al. 2005; 0.73–1.54× at every gauge) and not tested on another machine ([validation](validation/epb-screw-botlek.md)). The old 3 m left 1.4–25× too little pressure along the screw (12–25× at 11.5 m);
 - the slurry branch is a separate model: [slurry shield](#slurry-shield-mixshield).
 
 ## Slurry shield (Mixshield)

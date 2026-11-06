@@ -20,7 +20,17 @@ def test_screw_hand():
     assert s.theoretical_flow(10) == pytest.approx(q)
     assert s.discharge(10) == pytest.approx(0.6 * q)
     assert s.rpm_for_flow(s.discharge(7.5)) == pytest.approx(7.5)
-    assert s.outlet_pressure(200) == pytest.approx(200 * math.exp(-4))
+    assert s.outlet_pressure(200) == pytest.approx(0.85 * 200 * math.exp(-4))  # default entrance factor 0.85
+
+
+def test_screw_botlek_defaults():
+    # defaults calibrated between the two Botlek rings (Bezuijen et al. 2005, Figs 8-9): each gauge within the two rings'
+    # readings scaled by +-50 %, and far more pressure left along the screw than the old 3 m decay length gave
+    s = Screw()
+    for pc, gauges in ((3.35, {2.5: 2.05, 5: 1.95, 11.5: 0.9}), (3.1, {2.5: 2.6, 5: 2.45, 11.5: 1.75})):
+        for x, measured in gauges.items():
+            assert 0.5 < s.pressure_along(x, pc) / measured < 1.6
+    assert s.pressure_along(11.5, 3.35) > 10 * Screw(decay_length=3, entrance_factor=1).pressure_along(11.5, 3.35)
 
 
 def test_equation_of_state():

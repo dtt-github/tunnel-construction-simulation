@@ -143,9 +143,10 @@ for vol, ks, qe, p, fir, fer, stop in [(30, 1e5, 0.032, 200, 0.0, 10, 20), (30, 
                 "out": {"screw_flow": q, "steady": asdict(ch.steady_state(qe, q, fir, fer)), "stiffness": ch.stiffness(ch.steady_state(qe, q, fir, fer)),
                         "state_at": asdict(st_at), "crown": crown_pressure(p, 3.5), "trace": trace}})
 screws = []
-for d, ds, pitch, length, eta, lam, rpm in [(0.9, 0.3, 0.7, 12, 0.6, 3, 10), (1.2, 0.4, 0.9, 16, 0.5, 4, 6)]:
-    sc = Screw(d, ds, pitch, length, eta, lam)
-    screws.append({"in": {"diameter": d, "shaftDiameter": ds, "pitch": pitch, "length": length, "efficiency": eta, "decayLength": lam, "rpm": rpm},
+for d, ds, pitch, length, eta, lam, fe, rpm in [(0.9, 0.3, 0.7, 12, 0.6, 3, 1.0, 10), (1.2, 0.4, 0.9, 16, 0.5, 4, 1.0, 6), (0.9, 0.3, 0.7, 11, 0.6, 16, 0.85, 8)]:
+    sc = Screw(d, ds, pitch, length, eta, lam, fe)
+    screws.append({"in": {"diameter": d, "shaftDiameter": ds, "pitch": pitch, "length": length, "efficiency": eta, "decayLength": lam,
+                          "entranceFactor": fe, "rpm": rpm},
                    "out": {"q_th": sc.theoretical_flow(rpm), "q": sc.discharge(rpm), "outlet": sc.outlet_pressure(250), "mid": sc.pressure_along(length / 2, 250)}})
 write("epb_chamber", {"chamber": epb, "screw": screws})
 from tunnelsim_models.thrust_torque import cutterhead_torque, reference_installed, shield_thrust, vertical_stress  # noqa: E402

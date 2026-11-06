@@ -7,6 +7,13 @@ References
 - Merritt, A.S., Mair, R.J. (2008). Mechanics of tunnelling machine screw conveyors: a theoretical model.
   Geotechnique 58(2). (Discharge below the theoretical capacity; pressure falls along the screw by wall and flight
   friction. Here: a constant efficiency and an exponential pressure drop, a simplification of their model.)
+- Bezuijen, A., Talmon, A.M., Joustra, J.F.W., Grote, B. (2005). Pressure gradients and muck properties at the face of
+  an EPB. Botlek Rail Tunnel, 15 m screw, gauges at 2.5, 5 and 11.5 m (Figs 8-9), ISSMGE library (open):
+  https://www.issmge.org/uploads/publications/6/11/2005_023.pdf . Read while boring, the two rings the authors show as
+  the extremes: chamber at the screw inlet 3.35 / 3.1 bar, screw 2.05 / 2.6 (2.5 m), 1.95 / 2.45 (5 m), 0.9 / 1.75 bar
+  (11.5 m). An exponential through the screw gauges gives a decay length of 10.9 / 22.7 m and a drop at the entrance
+  to 0.77 / 0.94 of the chamber pressure (the authors put the drop down to arching of sand at the entrance). The
+  defaults, 16 m and 0.85, lie between the two rings: CALIBRATED on Botlek, not tested on another machine.
 - Yeh, I.-C. (1996). Application of neural networks to automatic soil pressure balance control for shield tunneling.
   Automation in Construction 5(5). (Chamber pressure driven by the difference between excavated and discharged volume.)
 
@@ -30,7 +37,7 @@ linear ODE is integrated exactly over each step. Foam air makes the chamber comp
 volume imbalance); unconditioned soil makes it stiff (K_s alone).
 
 Screw conveyor: theoretical capacity Q_th = pi (r^2 - r_shaft^2) pitch n; discharge Q = eta Q_th. Pressure along the
-screw p(s) = p_in exp(-s / lambda), lambda the decay length.
+screw p(s) = f_e p_in exp(-s / lambda): f_e the drop at the entrance, lambda the decay length (Botlek, see above).
 
 Units: m, s, kPa (gauge unless stated), rpm for screw speed, fractions for FIR (1.0 = 100 %).
 """
@@ -56,8 +63,9 @@ class Screw:
     shaft_diameter: float = 0.3  # m
     pitch: float = 0.7  # m
     length: float = 12.0  # m
-    efficiency: float = 0.6  # discharge / theoretical capacity
-    decay_length: float = 3.0  # m, pressure falls by e over this length
+    efficiency: float = 0.6  # discharge / theoretical capacity (illustrative)
+    decay_length: float = 16.0  # m, pressure falls by e over this length (Botlek 10.9-22.7 m)
+    entrance_factor: float = 0.85  # pressure just inside the screw / chamber pressure at the inlet (Botlek 0.77-0.94)
 
     def theoretical_flow(self, rpm: float) -> float:
         """m^3/s."""
@@ -70,7 +78,7 @@ class Screw:
         return q / self.discharge(1.0)
 
     def pressure_along(self, s: float, p_in: float) -> float:
-        return p_in * math.exp(-s / self.decay_length)
+        return p_in * self.entrance_factor * math.exp(-s / self.decay_length)
 
     def outlet_pressure(self, p_in: float) -> float:
         return self.pressure_along(self.length, p_in)

@@ -20,7 +20,7 @@ These values are in `web/epb/main.js`:
 - **Machine:**
   - shield length: no longer assumed. 12 m with mid-shield articulation, as on Crossrail (Crossrail Learning Legacy, [TBM station transits](https://learninglegacy.crossrail.co.uk/documents/tbm-station-transits/));
   - chamber length 0.9 m (≈ 35 m³);
-  - screw Ø 0.9 m, shaft 0.3 m, pitch 0.7 m, length 11 m, efficiency 0.6, pressure-decay length 3 m;
+  - screw Ø 0.9 m, shaft 0.3 m, pitch 0.7 m, length 11 m, efficiency 0.6. The pressure-decay length (16 m) and entrance drop (0.85) are no longer assumed: they are calibrated on the Botlek screw gauges ([screw](../validation/epb-screw-botlek.md)). The old 3 m was 1.4–25× low (12–25× at 11.5 m);
   - segment OD 6.8 m and ID 6.2 m;
   - shield weight 4,000 kN, backup weight 6,000 kN, tail-seal friction 500 kN;
   - 80 tools at 4 kN tangential force;

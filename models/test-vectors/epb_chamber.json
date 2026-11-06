@@ -426,6 +426,7 @@
     "length": 12,
     "efficiency": 0.6,
     "decayLength": 3,
+    "entranceFactor": 1.0,
     "rpm": 10
    },
    "out": {
@@ -443,6 +444,7 @@
     "length": 16,
     "efficiency": 0.5,
     "decayLength": 4,
+    "entranceFactor": 1.0,
     "rpm": 6
    },
    "out": {
@@ -450,6 +452,24 @@
     "q": 0.04523893421169302,
     "outlet": 4.578909722183544,
     "mid": 33.833820809153174
+   }
+  },
+  {
+   "in": {
+    "diameter": 0.9,
+    "shaftDiameter": 0.3,
+    "pitch": 0.7,
+    "length": 11,
+    "efficiency": 0.6,
+    "decayLength": 16,
+    "entranceFactor": 0.85,
+    "rpm": 8
+   },
+   "out": {
+    "q_th": 0.05277875658030852,
+    "q": 0.03166725394818511,
+    "outlet": 106.85171031882494,
+    "mid": 150.68506376794716
    }
   }
  ]

@@ -6,6 +6,11 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ### Changed
 
+- **EPB screw pressure checked against the Botlek screw gauges** (`Screw(entrance_factor=...)`, `decay_length` in Python and JavaScript; EPB demo; script `models/py/validation/epb_botlek_screw.py`):
+  - the old illustrative 3 m decay length left 1.4–25× too little pressure along the screw (12–25× at 11.5 m) compared with the gauges at 2.5, 5 and 11.5 m on the Botlek EPB ([Bezuijen et al. 2005](https://www.issmge.org/uploads/publications/6/11/2005_023.pdf), Figs 8–9);
+  - the screw now has a pressure drop at its entrance (factor 0.85) and a 16 m decay length, set between the two rings the authors show as extremes (0.77–0.94, 10.9–22.7 m): within 0.73–1.54× at every gauge. Calibrated on Botlek, not tested on another machine;
+  - the EPB console's screw outlet pressure goes from about 0.1 bar to about 1.2 bar at 3 bar in the chamber. Chamber pressure control is unchanged: it uses the screw's discharge, not its pressure profile.
+
 - **Thames chalk settlement defaults tested on data not used to set them** (script `models/py/validation/settlement_chalk_independent.py`):
   - at the Store Road Inlet, North Woolwich ([Liew 2016](https://learninglegacy.crossrail.co.uk/documents/observations-tunnelling-effects-large-diameter-jointed-concrete-pipe-crossrail-contract-c310-north-woolwich-newham-london/), same slurry shields, chalk face, not one of the 17 calibration sections), the defaults give 5.6 mm against 9 mm for the first bore and 6.8 against 5 mm for the second;
   - the measured volume loss (0.32 % and 0.165 %) is consistent with 0.25 %, and so is CTRL Contract 220's 0.28 % in sand over chalk ([Wongsaroj et al. 2006](https://www.issmge.org/uploads/publications/6/11/2005_044.pdf)); both sites give K about 0.4, narrower than the default 0.5;
