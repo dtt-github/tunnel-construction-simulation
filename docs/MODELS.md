@@ -240,7 +240,7 @@ The ground stress on the shield is effective or total vertical stress, with a wa
 Checked on two other projects:
 
 - **Mashhad Line 3:** at 1.3 bar, thrust comes out at 0.89× and torque at 1.06× the measured values.
-- **Sofia Line 3, 14 means:** thrust 1.02× with groundwater, 1.28× dry. Torque is still 2.7× over in foam-conditioned clays and sands.
+- **Sofia Line 3, 14 means:** thrust 1.02× with groundwater, 1.28× dry. Torque with friction alone is 2.7× over in foam-conditioned clays and sands; with the face, back and arm shear capped at the paste's shear strength (`tau_paste` 2 kPa, [Bezuijen et al. 2005](https://www.issmge.org/uploads/publications/6/11/2005_023.pdf), not fitted) it is 0.98–1.14×. Paste shear is used only in fine-grained conditioned ground; Changsha and Mashhad keep friction (this split is the project's reading of the data).
 - **Low face pressure in dense, dry ground:** about 2× over.
 - **Ring-to-ring scatter:** not reproduced.
 

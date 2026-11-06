@@ -38,7 +38,7 @@ HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE.parent))
 sys.path.insert(0, str(HERE))
 
-from tunnelsim_models.thrust_torque import cutterhead_torque, reference_installed, shield_thrust, tool_torque, vertical_stress  # noqa: E402
+from tunnelsim_models.thrust_torque import PASTE_SHEAR_KPA, cutterhead_torque, reference_installed, shield_thrust, tool_torque, vertical_stress  # noqa: E402
 from xlsx_reader import read  # noqa: E402
 
 CACHE = HERE / ".cache"
@@ -84,14 +84,14 @@ SOFIA_K0 = {"CH": 0.6, "CL": 0.55, "SM": 0.45}  # assumed, normally consolidated
 
 
 def generic(d: float, length: float, axis_depth: float, gamma: float, p: float, k0: float, water: float, opening: float, mu: dict,
-            rim_width: float = 0.5) -> tuple:
+            rim_width: float = 0.5, tau_paste: float | None = None) -> tuple:
     """Thrust (kN) and torque (kNm) with the urban EPB demo's weights and tools scaled by (D / 7.08)^2."""
     s, r = (d / 7.08) ** 2, d / 2
     th = shield_thrust(d, length, axis_depth, gamma, p, water_depth=water, k0=k0, mu_shield=mu["mu_shield"], shield_weight=4000 * s,
                        tools=1000 * s, tail_seal=500 * s, backup_weight=6000 * s)
     sv = vertical_stress(axis_depth, gamma, water_depth=water)
     tq = cutterhead_torque(d, p, sv * (1 + k0) / 2, opening_ratio=opening, mu_rim=mu["mu_rim"], rim_width=rim_width, n_arms=4, arm_area=0.5,
-                           arm_radius=0.32 * d, tools=tool_torque(round(80 * s), 4.0, r), seals=300 * s)
+                           arm_radius=0.32 * d, tools=tool_torque(round(80 * s), 4.0, r), seals=300 * s, tau_paste=tau_paste)
     return th.total, tq.total
 
 
@@ -106,14 +106,14 @@ def mashhad(mu: dict) -> list[tuple]:
     return out
 
 
-def sofia(mu: dict, water: float) -> list[tuple]:
+def sofia(mu: dict, water: float, tau_paste: float | None = None) -> list[tuple]:
     """(soil, pressure bar, thrust ratio, torque ratio); axis at the mean cover 13.0 m + R, gamma 19.5 (assumed), the
     sensor pressure moved to the axis with a 15 kN/m^3 chamber paste, opening 0.3 (assumed)."""
     d = 9.39
     out = []
     for soil, pb, f, t in SOFIA:
         p = pb * 100 + 15 * (d / 2 - 2.08)
-        th, tq = generic(d, 10.28, 13.0 + d / 2, 19.5, p, SOFIA_K0[soil], water, 0.3, mu)
+        th, tq = generic(d, 10.28, 13.0 + d / 2, 19.5, p, SOFIA_K0[soil], water, 0.3, mu, tau_paste=tau_paste)
         out.append((soil, pb, th / f, tq / 1000 / t))
     return out
 
@@ -205,6 +205,16 @@ if __name__ == "__main__":
         o, n = sofia(OLD, water), sofia(NEW, water)
         rng = lambda xs: f"{st.median(xs):.2f} ({min(xs):.2f}–{max(xs):.2f})"
         print(f"| Sofia, 14 bin means, {label} | {rng([x[2] for x in o])} | {rng([x[2] for x in n])} | {rng([x[3] for x in o])} | {rng([x[3] for x in n])} |")
+    print("\n## Sofia with paste shear (tau_paste = PASTE_SHEAR_KPA, Bezuijen et al. 2005; not fitted)\n")
+    print("| Water | Soil | Torque, friction | Torque, paste 1 kPa | Torque, paste 2 kPa | Torque, paste 3 kPa |\n|---|---|---|---|---|---|")
+    for water, label in ((math.inf, "dry"), (3.0, "3 m below ground")):
+        runs = [sofia(NEW, water)] + [sofia(NEW, water, tau) for tau in (1.0, PASTE_SHEAR_KPA, 3.0)]
+        for soil in ("CH", "CL", "SM", "all"):
+            cells = []
+            for run in runs:
+                xs = [x[3] for x in run if soil == "all" or x[0] == soil]
+                cells.append(f"{st.median(xs):.2f} ({min(xs):.2f}–{max(xs):.2f})")
+            print(f"| {label} | {soil} | " + " | ".join(cells) + " |")
     print(f"\n## Changsha Line 4 (n = {c['n']}, new defaults)\n")
     print("| Ground class | Rings | Thrust predicted / measured | Torque predicted / measured |\n|---|---|---|---|")
     for k, v in c["classes"].items():

@@ -8,7 +8,7 @@ import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import {
   wedgeSilo, daubWindow, DAUB_DEFAULTS, chamber as makeChamber, screw as makeScrew, shieldThrust, cutterheadTorque, toolTorque,
-  verticalStress, presetTrough, twinTroughs, deflectionRatios, deflectionModificationFactor, frameBendingStiffness, relativeBendingStiffness, loadFactor, macklinVolumeLoss, burlandCategory, referenceInstalled, erf,
+  verticalStress, PASTE_SHEAR_KPA, presetTrough, twinTroughs, deflectionRatios, deflectionModificationFactor, frameBendingStiffness, relativeBendingStiffness, loadFactor, macklinVolumeLoss, burlandCategory, referenceInstalled, erf,
   Rng, sample as sampleDist, DIST, SHIFT_PATTERNS, PER_CYCLE_MAINTENANCE_MIN, simulateDrive, recordCheck, EPB_WEEKLY_SURVEY,
   jsceRing, woodInertia, subgradeModulus, terzaghiLoads, activeCoefficient, sectionStresses, jackingStress, burstingForce, annulusVolume, groutWindow, ITA2000_ALLOWABLE,
   scenario as loadScenario,
@@ -62,6 +62,9 @@ if (SCN) {
   ];
 }
 const zoneAt = (ch) => ZONES.find((z) => ch >= z.from && ch < z.to) ?? ZONES.at(-1);
+// fine-grained units that foam conditioning turns into a paste (the illustrative grounds are clay and clayey sand)
+const PASTE_UNITS = new Set(["MG", "AL", "LC", "LG", "TS"]);
+const pasteGround = (zone) => !SCN || PASTE_UNITS.has(zone.unit);
 const Z0 = Math.round(zoneAt(0).z0); // axis depth for the scene and the surface view; the physics uses each zone's own
 // Buildings: the scenario's OS OpenMap Local footprints with LIDAR heights and listed status (OGL), or three
 // illustrative blocks. x spans the footprint across the line (offset, + to the right of the drive), cz is its middle
@@ -683,9 +686,12 @@ function substep(dt) {
   const p = CH.pressure(S.st);
   S.cutRpm = S.mode === "PUSH" ? val("rpm") : 0;
   const sv = verticalStress(zone.z0, zone.gamma, { waterDepth: zone.water });
-  // torque at the current pressure; above the installed limit the head stalls and the push stops
+  // torque at the current pressure; above the installed limit the head stalls and the push stops. In fine-grained
+  // ground the foam-conditioned muck is a paste whose shear strength (2 kPa, Bezuijen et al. 2005) caps the face, back
+  // and arm shear; in gravel and Chalk friction applies (models/py/tunnelsim_models/thrust_torque.py)
   S.tq = S.cutRpm > 0 ? cutterheadTorque(M.D, p, (sv * (1 + zone.k0)) / 2, {
     openingRatio: drawnOpening, nArms: 4, armArea: 0.5, armRadius: 2.3, tools: toolTorque(M.nTools, M.toolForce, R), seals: 300,
+    tauPaste: pasteGround(zone) ? PASTE_SHEAR_KPA : null,
   }) : null;
   S.torque = S.tq ? S.tq.total : 0;
   S.stalled = S.torque > M.torqueLimit;
@@ -1073,7 +1079,7 @@ function hud() {
     const q = S.tq;
     html += bars([["tools", q.tools], ["face", q.face], ["rim", q.rim], ["back", q.back], ["arms", q.arms], ["seals", q.seals]], q.total, M.torqueLimit, "torque MNm");
   } else html += `<div class="bar"><span class="k">Torque</span><span class="t"></span><span class="v">stopped</span></div>`;
-  html += `<p class="legend">Installed torque ${fmt(M.torqueLimit / 1000, 1)} MNm. Reference thrust for this diameter ≈ ${fmt(REF.thrust[0] / 1000, 0)} MN (6.6 m mixed-face EPB scaled). Drawn opening ratio ${fmt(drawnOpening * 100, 0)} %.</p>`;
+  html += `<p class="legend">Installed torque ${fmt(M.torqueLimit / 1000, 1)} MNm. Reference thrust for this diameter ≈ ${fmt(REF.thrust[0] / 1000, 0)} MN (6.6 m mixed-face EPB scaled). Drawn opening ratio ${fmt(drawnOpening * 100, 0)} %. Face and chamber shear: ${pasteGround(zoneAt(S.chainage)) ? `conditioned paste, ${PASTE_SHEAR_KPA} kPa (Bezuijen et al. 2005); with friction alone torque was 2.7× the Sofia records` : "friction × pressure (gravel or Chalk at the axis)"}.</p>`;
   ui.bars.innerHTML = html;
   scheduleForecast();
   ui.forecast.innerHTML = forecastHtml();

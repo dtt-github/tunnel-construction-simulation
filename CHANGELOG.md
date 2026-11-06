@@ -6,6 +6,11 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ### Changed
 
+- **EPB torque in conditioned ground: paste shear** (`cutterhead_torque(..., tau_paste=...)` in Python and JavaScript; EPB demo):
+  - in fine-grained ground conditioned with foam, the face, back and mixing-arm shear is capped at the paste's shear strength, 2 kPa from the laboratory range in [Bezuijen et al. 2005](https://www.issmge.org/uploads/publications/6/11/2005_023.pdf) (1–3 kPa), not fitted;
+  - Sofia's torque in conditioned clays and silty sands goes from 2.7× to 0.98–1.14× measured. Changsha (rock) and Mashhad (dense dry sand) keep friction, which fits them; paste shear would halve them. The split by ground type is this project's reading of the data, stated as such;
+  - the EPB demo uses paste shear in London Clay, Lambeth Group, Thanet Sand and the made ground and alluvium, friction in gravel and Chalk: torque at the start of the drive is about 3.5 MNm (was about 6).
+
 - **EPB chamber gradient checked against the Botlek bulkhead** ([Bezuijen et al. 2005](https://www.issmge.org/uploads/publications/6/11/2005_023.pdf)): the gauge's paste weight, 18 kN/m³ less the foam air, gives about 16 kPa/m at FIR 40 %, inside the 10–20+ kPa/m measured; the demo now shows the gradient with the measured range. The yield-stress part of the gradient is not modelled.
 
 - **Drill & blast specific charge checked against logged practice** ([Gjengedal & Jakobsen 2025](https://airdrive.eventsair.com/eventsairwesteuprod/production-atlanticmice-public/927385ad0d3e425bbbf6581c4573f524), Eurock 2025, 353 logged rounds):

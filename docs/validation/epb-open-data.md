@@ -21,7 +21,7 @@ Each cell is the median of predicted ÷ measured. The range in brackets is the i
 **What this shows:**
 
 - **Thrust:** within about ±25 % at closed-face pressures on all three projects.
-- **Torque:** within about ±10 % at Changsha and at Mashhad's 1.3 bar points. Sofia's foam-conditioned clays and sands are still 2.7× over, so the face and chamber friction there must be lower than the defaults (0.15, 0.1). One coefficient set cannot cover both conditioned clay and dry dense sand.
+- **Torque:** within about ±10 % at Changsha and at Mashhad's 1.3 bar points. With friction × pressure on the face and in the chamber, Sofia's foam-conditioned clays and sands are 2.7× over. **Changed 6 Nov 2026:** in conditioned fine-grained ground the face, back and arm shear is capped at the paste's shear strength, 2 kPa from the laboratory range of [Bezuijen et al. 2005](https://www.issmge.org/uploads/publications/6/11/2005_023.pdf) (not fitted to Sofia). Sofia's torque is then 0.98–1.14× (see [paste shear](#torque-in-conditioned-ground-paste-shear)). Changsha and Mashhad keep friction.
 - **Low face pressure:** at Mashhad's 0.27 bar points in dry, dense ground, both thrust and torque stay about 2× over. A plausible cause is that the ground arches, so the shield does not carry the full overburden stress the model assumes.
 - **Ring-to-ring scatter:** not reproduced. The correlation is about 0.1 at Changsha.
 
@@ -104,6 +104,33 @@ The Changsha and Guangzhou–Foshan datasets are published under CC BY 4.0; cred
   - In soft ground, the earth pressure on the face carries about 40–44 % of the thrust; the rest is friction and the other terms.
   - In mostly hard rock the chamber runs at low pressure, so the face term falls to about 10 %.
 - **Mixed face:** class 2 needs about twice the thrust and torque of soft soil, at a third of the advance rate.
+
+## Torque in conditioned ground: paste shear
+
+**The idea:** in fine-grained ground conditioned with foam, the cutterhead's face, back and mixing arms shear a soft paste, not soil pressed on steel. The shear stress is then limited by the paste's shear strength, not by friction × support pressure. [Bezuijen et al. 2005](https://www.issmge.org/uploads/publications/6/11/2005_023.pdf) found that strength to be "one to a few kPa" in laboratory tests on the Botlek muck (about 3 kPa at most), and 0.2–0.6 kPa back-calculated in the screw. The model takes the lower of friction × pressure and 2 kPa (`tau_paste`, `PASTE_SHEAR_KPA`).
+
+**Sofia, not fitted** (median, range; the script prints this table):
+
+| Water | Soil | Friction | Paste 1 kPa | Paste 2 kPa | Paste 3 kPa |
+|---|---|---|---|---|---|
+| dry | CH | 2.79 (1.71–2.98) | 1.01 (0.77–1.11) | 1.10 (0.84–1.21) | 1.19 (0.91–1.30) |
+| dry | CL | 3.23 (2.52–3.63) | 1.17 (1.09–1.95) | 1.27 (1.19–2.13) | 1.37 (1.29–2.30) |
+| dry | SM | 2.57 (2.31–2.87) | 0.85 (0.71–1.53) | 0.93 (0.77–1.67) | 1.01 (0.84–1.81) |
+| dry | all | 2.80 (1.71–3.63) | 1.05 (0.71–1.95) | **1.14** (0.77–2.13) | 1.24 (0.84–2.30) |
+| 3 m below ground | all | 2.67 (1.54–3.44) | 0.88 (0.60–1.64) | **0.98** (0.66–1.82) | 1.07 (0.73–1.99) |
+
+**Where it applies, and where it does not:**
+- Applied to Changsha (mostly weathered rock) or to Mashhad's dense dry sand, paste shear would halve their torque (Changsha median 0.98 → 0.53–0.59; Mashhad at 1.3 bar 1.02–1.11 → 0.49–0.61). Friction fits them.
+- So the model uses paste shear only for fine-grained ground that foam conditioning turns into a paste (clays, silts, silty sands), and friction for rock, gravel and dense coarse sand. **That split is this project's reading of the three datasets, not a published rule.**
+- **A weak second test, Changsha's soft-ground rings** (ground classes 1 and 2, 18 rings, UCS 0; conditioning not stated; the rim friction was fitted on all Changsha rings, these included). Median predicted / measured torque:
+
+| Ground class | Rings | Friction | Paste 2 kPa |
+|---|---|---|---|
+| 1, soft soil | 5 | 1.42 (1.24–1.63) | 0.69 (0.58–0.70) |
+| 2, mostly soft soil | 13 | 1.92 (1.07–3.64) | 0.72 (0.65–1.41) |
+
+  The measured torque lies between the two: friction over-predicts, paste shear under-predicts by about 30 %. It neither confirms nor rules out the 2 kPa value; it shows the soft-ground torque is well below friction × pressure.
+- Guangzhou–Foshan's working torque of 15–35 % of installed is consistent: in the EPB demo's London Clay and Lambeth Group, torque falls from about 56 % of installed (friction) to about 25–36 % (paste).
 
 ## Consequences for the demos
 

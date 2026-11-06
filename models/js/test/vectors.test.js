@@ -141,7 +141,8 @@ test("thrust and torque match python", () => {
     const th = shieldThrust(i.d, i.ln, i.z, i.g, i.p, { k0: i.k0, muShield: i.mus, shieldWeight: i.ws, tools: i.tools, tailSeal: i.tail, backupWeight: i.wb, ...water });
     const sn = (verticalStress(i.z, i.g, water) * (1 + i.k0)) / 2;
     const tq = cutterheadTorque(i.d, i.p, sn, { openingRatio: i.xi, nArms: i.na, armArea: i.aa, armRadius: i.ar, tools: i.ttool, seals: i.seals });
-    close({ sv_eff: verticalStress(i.z, i.g, water), sv_total: verticalStress(i.z, i.g, { ...water, effective: false }), thrust: th, sigma_n: sn, torque: tq,
+    const tqp = cutterheadTorque(i.d, i.p, sn, { openingRatio: i.xi, nArms: i.na, armArea: i.aa, armRadius: i.ar, tools: i.ttool, seals: i.seals, tauPaste: 2 });
+    close({ sv_eff: verticalStress(i.z, i.g, water), sv_total: verticalStress(i.z, i.g, { ...water, effective: false }), thrust: th, sigma_n: sn, torque: tq, torque_paste: tqp,
       reference: Object.fromEntries(["epb", "slurry", "gripper"].map((t) => [t, referenceInstalled(t, i.d)])),
       reference_all: Object.fromEntries(["epb", "slurry", "gripper"].map((t) => [t, referenceInstalled(t, i.d, { includeUnverified: true })])) }, out, `D=${i.d}`);
   }

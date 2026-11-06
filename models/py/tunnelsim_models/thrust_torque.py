@@ -4,6 +4,10 @@ References
 - Shi, H., Yang, H., Gong, G., Wang, L. (2011). Determination of the cutterhead torque for EPB shield tunneling machine.
   Automation in Construction 20(8), 1087-1095, doi:10.1016/j.autcon.2011.04.010. (Torque = cutting tools + front-face
   friction + rim friction + back-face friction + mixing arms + seals; opening ratio and earth pressure dominate.)
+- Bezuijen, A., Talmon, A.M., Joustra, J.F.W., Grote, B. (2005). Pressure gradients and muck properties at the face of
+  an EPB. Proc. IS-Amsterdam (Geotechnical Aspects of Underground Construction in Soft Ground), ISSMGE library, open:
+  https://www.issmge.org/uploads/publications/6/11/2005_023.pdf. (Shear strength of the foam-conditioned sand mixture in the chamber "one to a few kPa" from laboratory
+  tests, about 3 kPa at most; 0.2-0.6 kPa back-calculated in the screw.)
 - Installed torque and thrust of built machines (REFERENCE_MACHINES, each with its source) for the plausibility check.
   The empirical band M = alpha D^3 (Krause 1987) is not used: modern EPB machines exceed it.
 
@@ -17,6 +21,10 @@ Torque (kNm), cutterhead radius R, opening ratio xi:
     T_back  = 2/3 pi mu_c p (1 - xi) R^3                 back face against the chamber paste
     T_rim   = 2 pi R^2 B mu_r sigma_n                    rim (width B) against the ground
     T_arms  = n mu_c p A r_arm                           mixing arms of area A at radius r_arm
+    With a conditioned paste (tau_paste given): the face, back and arm shear stress is the lower of mu p and tau_paste,
+    the paste's shear strength (Bezuijen et al. 2005: 1-3 kPa). Used for fine-grained ground conditioned to a paste
+    (clays, silts, silty sands); rock, gravel and dense coarse sand keep friction. That split is this project's
+    reading of the field data (Sofia: paste; Changsha, Mashhad: friction), not a published rule.
     T_tools = n F_t r_mean ,  r_mean = f R               scrapers/rippers (f = 0.5 for uniform radial spacing);
                                                          for disc cutters use csm.tbm_performance instead
     T_seals: given
@@ -27,8 +35,9 @@ open field data (docs/validation/epb-open-data.md): mu_shield 0.17 brings the me
 Line 4 rings to the measured one and is within -13 / +28 % at Mashhad Line 3 (high pressure) and Sofia Line 3;
 mu_rim 0.07 does the same for torque at Changsha and Mashhad. They lump overcut, conditioning and partial contact,
 so they are lower than steel-on-soil friction (about 0.2-0.4). Face and chamber coefficients stay illustrative
-(conditioning reduces torque, Shi et al. 2011); in conditioned clays (Sofia) torque is still over-predicted about
-2.6x. Calibrate per project where data exist.
+(conditioning reduces torque, Shi et al. 2011). With friction alone, torque in Sofia's foam-conditioned clays and silty
+sands is 2.7x over; with tau_paste = PASTE_SHEAR_KPA (not fitted to Sofia) it is 0.9-1.2x. Calibrate per project
+where data exist.
 
 Units: m, kPa, kN, kNm.
 """
@@ -38,6 +47,7 @@ import math
 from dataclasses import dataclass
 
 GAMMA_W = 10.0
+PASTE_SHEAR_KPA = 2.0  # middle of the 1-3 kPa laboratory range of Bezuijen et al. (2005) for conditioned EPB muck
 
 # Built machines: installed (or stated working) cutterhead torque and thrust. "verified": figures read on the source
 # page; False for figures from search snippets or secondary sources only.
@@ -138,17 +148,23 @@ def tool_torque(n_tools: int, tangential_force: float, radius: float, radius_fac
 def cutterhead_torque(diameter: float, p_axis: float, sigma_n: float, *, opening_ratio: float = 0.3,
                       mu: float = 0.15, mu_rim: float = 0.07, mu_chamber: float = 0.1, rim_width: float = 0.5, n_arms: int = 0,
                       arm_area: float = 0.0, arm_radius: float = 0.0, tools: float = 0.0,
-                      seals: float = 0.0) -> Torque:
-    """Cutterhead torque components (kNm). sigma_n: radial ground stress on the rim (kPa); arm_area in m^2."""
+                      seals: float = 0.0, tau_paste: float | None = None) -> Torque:
+    """Cutterhead torque components (kNm). sigma_n: radial ground stress on the rim (kPa); arm_area in m^2.
+    tau_paste (kPa): shear strength of a conditioned paste, which caps the face, back and arm shear stress."""
     if not 0 <= opening_ratio < 1:
         raise ValueError("opening ratio must be in [0, 1)")
     r = diameter / 2
-    disc = 2 / 3 * math.pi * (1 - opening_ratio) * r**3 * p_axis
+    lever = 2 / 3 * math.pi * (1 - opening_ratio) * r**3  # integral of r dA over the solid face, m^3
+
+    def shear(coef: float) -> float:
+        tau = coef * p_axis
+        return tau if tau_paste is None else min(tau, tau_paste)
+
     return Torque(
         tools=tools,
-        face=mu * disc,
+        face=shear(mu) * lever,
         rim=2 * math.pi * r * r * rim_width * mu_rim * sigma_n,
-        back=mu_chamber * disc,
-        arms=n_arms * mu_chamber * p_axis * arm_area * arm_radius,
+        back=shear(mu_chamber) * lever,
+        arms=n_arms * shear(mu_chamber) * arm_area * arm_radius,
         seals=seals,
     )

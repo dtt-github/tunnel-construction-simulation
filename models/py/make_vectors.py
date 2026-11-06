@@ -160,9 +160,11 @@ for row in [(7, 9, 18, 20, 200, 3, 0.5, 0.3, 4000, 1000, 500, 6000, 0.3, 4, 0.5,
     th = shield_thrust(d, ln, z, g, p, k0=k0, mu_shield=mus, shield_weight=ws, tools=tools, tail_seal=tail, backup_weight=wb, **wkw)
     sn = vertical_stress(z, g, **wkw) * (1 + k0) / 2
     tq = cutterhead_torque(d, p, sn, opening_ratio=xi, n_arms=na, arm_area=aa, arm_radius=ar, tools=ttool, seals=seals)
+    tqp = cutterhead_torque(d, p, sn, opening_ratio=xi, n_arms=na, arm_area=aa, arm_radius=ar, tools=ttool, seals=seals, tau_paste=2.0)
     tt.append({"in": dict(zip("d ln z g p hw k0 mus ws tools tail wb xi na aa ar ttool seals".split(), row)),
                "out": {"sv_eff": vertical_stress(z, g, **wkw), "sv_total": vertical_stress(z, g, effective=False, **wkw),
                        "thrust": asdict(th) | {"total": th.total}, "sigma_n": sn, "torque": asdict(tq) | {"total": tq.total},
+                       "torque_paste": asdict(tqp) | {"total": tqp.total},
                        "reference": {t: reference_installed(t, d) for t in ("epb", "slurry", "gripper")},
                        "reference_all": {t: reference_installed(t, d, include_unverified=True) for t in ("epb", "slurry", "gripper")}}})
 write("thrust_torque", tt)

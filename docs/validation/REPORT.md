@@ -24,7 +24,7 @@
 
 | Demo | Strongest independent check | Calibrated on | Biggest known gap |
 |---|---|---|---|
-| [Urban EPB](../../web/epb/) | Thrust at Mashhad 1.3 bar 0.89× and Sofia 1.02–1.28×; ring cycle on an average Crossrail working day, 11.8–12.5 against 12.3–14.9 rings | Shield and rim friction on 281 Changsha rings; Hyde Park settlement uses the site's own back-analysis | Torque in foam-conditioned clay 2.7× over (Sofia); best days and weeks far too low; volume loss is an input, not predicted |
+| [Urban EPB](../../web/epb/) | Thrust at Mashhad 1.3 bar 0.89× and Sofia 1.02–1.28×; ring cycle on an average Crossrail working day, 11.8–12.5 against 12.3–14.9 rings | Shield and rim friction on 281 Changsha rings; Hyde Park settlement uses the site's own back-analysis | Best days and weeks far too low; torque in conditioned ground rests on a paste/friction split read from three datasets; volume loss is an input, not predicted |
 | [Mixshield](../../web/slurry/) | Thames settlement 1.10× median over 17 sections (see the caveat below) | Thames volume loss 0.25 % fitted to those same 17 sections | Working day 7–58 % fast; no separation-plant stops; whole drive about 2× faster than measured; air-cushion model is this project's own derivation |
 | [Gripper TBM](../../web/hard-rock/) | None of its own: it shares the CSM penetration fitted at Follo | Penetration (ψ = −0.1) on Follo | No open section-by-section data for Gotthard; advance only bracketed (calendar against working days) |
 | [Double shield](../../web/hard-rock/) | Follo advance 12.9–14.9 against 14.1 m/day (tests the downtime model only) | Penetration on the Follo 4.5 km mean; discs, thrust and rpm are the Follo means | Penetration does not follow section-to-section strength (0.41–2.89×); cutter changes about 40 % too few |
@@ -50,7 +50,9 @@
 | Changsha Line 4, 281 rings | Zhang, Chen & Wu (2019), CC BY 4.0 | Thrust 0.99 (0.76–1.23), torque 0.99 (0.74–1.44) | Calibrated (shield 0.17, rim 0.07) |
 | Mashhad Line 3, 1.3 bar | Farrokh, Lotfi & Dalir (2025) | Thrust 0.89, torque 1.06 | Independent: matches |
 | Mashhad Line 3, 0.27 bar | same | Thrust 2.04, torque 1.85 | Independent: fails (ground arching suspected) |
-| Sofia Line 3, 14 bin means | Benli (2019) | Thrust 1.02–1.28, torque 2.67–2.80 | Independent: thrust matches, torque fails |
+| Sofia Line 3, 14 bin means | Benli (2019) | Thrust 1.02–1.28, torque 2.67–2.80 with friction | Independent: thrust matches, torque fails |
+| Sofia, torque with paste shear | Benli (2019); paste strength 2 kPa from [Bezuijen et al. 2005](https://www.issmge.org/uploads/publications/6/11/2005_023.pdf) laboratory tests | Torque 0.98–1.14 (median) | Independent of Sofia (strength not fitted), but the choice of paste shear for this ground was made after seeing the friction misfit |
+| Changsha soft-ground rings (classes 1–2, 18 rings), torque | Zhang et al. (2019) | Friction 1.42–1.92, paste 0.69–0.72 (medians) | Weak, mixed: measured lies between; conditioning not stated |
 | Ring-to-ring variation, Changsha | Zhang et al. (2019) | Correlation about 0.1 | Fails: not reproduced |
 | Guangzhou–Foshan | Yan (2022), CC BY 4.0 | Working torque 15–35 % of installed | Bracket (cover and ground not published openly) |
 
@@ -131,7 +133,7 @@ Ranked by how much each changes what a user sees, then by whether open data coul
 |---|---|---|---|---|
 | 1 | Volume loss is a scenario input; it doesn't respond to face pressure or grouting. **Partly closed 6 Nov 2026:** in London Clay (half the EPB drive) it now rises with the face's load factor (Macklin 1999); at normal pressure it equals the measured value. Still open: grouting, other ground, the Mixshield in Chalk | EPB, Mixshield | Settlement doesn't change with the operator's actions outside London Clay | Needs paired face pressure and volume loss: none found under CC BY |
 | 2 | Downtime distributions come from one 6.88 m EPB (Tabriz); no learning curve, day-to-day correlation, locomotive travel or slurry-plant stops | EPB, Mixshield | Best days too low; Mixshield working day 7–58 % fast; whole drive 2× fast | Crossrail and Thames delay breakdowns are not published; look for other open drive logs |
-| 3 | Torque in foam-conditioned clay 2.7× over | EPB | Torque bar over-reads in clay | Sofia gives the target; needs face and chamber friction for conditioned soil |
+| 3 | ~~Torque in foam-conditioned clay 2.7× over~~ **Addressed 6 Nov 2026:** paste shear (2 kPa, Bezuijen et al. 2005) gives Sofia 0.98–1.14×. Open: the paste/friction split by ground type is not from a published rule, and no second open dataset in conditioned clay tests it | EPB | – | An open torque dataset in conditioned clay |
 | 4 | CSM penetration fitted to one project (Follo gneiss); doesn't follow section strength | Gripper, double shield | Penetration in other rocks is untested | An open TBM dataset in other rock types (Yinsong is not open) |
 | 5 | Chamber model: screw efficiency and decay length unchecked; the paste weight now checked against Botlek (6 Nov 2026); the GPU chamber is blocked | EPB | Chamber pressure dynamics illustrative | Botlek gradients (Bezuijen 2005) are now in hand; needs the MPM fix or an analytical gradient model |
 | 6 | ~~Face support: DAUB factors unverified; no seepage forces~~ Closed 6 Nov 2026: factors and deviations checked against DAUB (2016), example 8.1 reproduced; seepage arises only below the groundwater pressure. The Mixshield's operating range is as narrow as 36 kPa in places | EPB, Mixshield | – | – |

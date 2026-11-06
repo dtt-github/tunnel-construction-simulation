@@ -65,3 +65,14 @@ def test_reference_machines():
     assert reference_installed("gripper", 9)["torque"][1] == pytest.approx(5290 * (9 / 9.33) ** 3)
     for m in REFERENCE_MACHINES:
         assert m["source"] and m["type"] in ("epb", "slurry", "gripper")
+
+
+def test_paste_shear_caps_face_and_chamber_torque():
+    # Bezuijen et al. (2005): conditioned muck shears at 1-3 kPa, far below mu p at operating pressures
+    fr = cutterhead_torque(7, 200, 150, n_arms=4, arm_area=0.5, arm_radius=2.3)
+    pa = cutterhead_torque(7, 200, 150, n_arms=4, arm_area=0.5, arm_radius=2.3, tau_paste=2.0)
+    assert pa.face == pytest.approx(fr.face * 2.0 / (0.15 * 200))
+    assert pa.back == pytest.approx(fr.back * 2.0 / (0.1 * 200))
+    assert pa.rim == fr.rim and pa.total < 0.5 * fr.total
+    # at very low pressure friction is the lower bound and stays
+    assert cutterhead_torque(7, 10, 150, tau_paste=2.0).face == cutterhead_torque(7, 10, 150).face
