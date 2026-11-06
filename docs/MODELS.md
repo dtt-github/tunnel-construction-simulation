@@ -39,7 +39,8 @@ Disc-cutter forces, penetration from thrust, rate of penetration, cutterhead tor
   - Optional penetration cap. The practical maximum is 15 mm/rev, the lower end of the 15–20 mm/rev "brief maximum before the conveyor overloads" (Macias & Barton 2022).
   - The limit that binds is reported (thrust, penetration, torque or power), together with the thrust actually carried by the cutters.
 - **Section by section** (18 Follo sections, digitised from the thesis's vector charts): with each section's single-test UCS the prediction is 0.41–2.89× the measurement, and the error follows UCS (r = −0.94). With the tunnel-mean UCS and each section's thrust and rpm, it is within about ±27 % (RMS of ln ratio 0.24). Fitted on section averages, ψ would be about −0.15.
-- **Limits:** one project in strong gneiss. The Yinsong dataset, planned for other rock types, is not open (data on request only).
+- **Second project, not refitted:** Queens Water Tunnel No. 3, 10 stations from Yagiz (2006, [IAEG paper 383](https://media.geolsoc.org.uk/iaeg2006/PAPERS/IAEG_383.PDF)), machine from Khalighi & Diehl (1997). Median 1.02× (0.71–1.82×). Massive rock comes out fast (median 1.51×), fractured rock slightly slow (0.91×): the model has no fracture term.
+- **Limits:** two projects, both in strong gneiss. The Yinsong dataset, planned for other rock types, is not open (data on request only).
 
 ## Hoek–Brown rock mass
 

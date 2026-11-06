@@ -6,6 +6,11 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ### Changed
 
+- **Disc-cutter penetration checked on a second project** ([Queens Water Tunnel No. 3](https://media.geolsoc.org.uk/iaeg2006/PAPERS/IAEG_383.PDF), Yagiz 2006; machine from [Khalighi & Diehl 1997](https://robbinstbm.com/wp-content/uploads/2010/09/QueensWaterTunnel_RETC_1997.pdf); script `models/py/validation/queens_csm.py`):
+  - the CSM model with ψ −0.1, fitted at Follo, is run unchanged on the 10 open stations: median 1.02× the measured penetration (0.71–1.82×). The earlier ψ +0.1 would have been 1.89×;
+  - massive rock comes out a median 1.51× fast and fractured rock 0.91×: the model has no fracture term. Queens is also gneiss, so other rock types stay untested;
+  - the source's "mm/rev" column is in cm/rev; penetration is taken from the advance rate at 8.3 rpm. No model change.
+
 - **Best days and weeks: day-to-day variation, fitted on Crossrail, tested on Barcelona** (`day_sigma`, `day_rho` in `simulate_drive`, Python and JavaScript; EPB demo):
   - a daily productivity factor (lognormal, mean 1, correlated day to day) scales boring, ring build and per-cycle activities, so whole days run fast or slow while the mean stays the same;
   - fitted to Crossrail drives X and Y ([King et al. 2017](https://learninglegacy.crossrail.co.uk/wp-content/uploads/2017/04/Machine-driven-tunnels-on-the-Elizabeth-line-London.pdf): best day 3.0×, best week 1.94× the mean) as σ 0.4, ρ 0.7; tested on [Barcelona Line 9](https://www.mdpi.com/2071-1050/17/9/3966), not used for the fit: best day 2.65–2.71× the mean against 2.67–3.16× measured;

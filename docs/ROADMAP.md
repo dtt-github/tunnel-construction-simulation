@@ -150,7 +150,7 @@ Demo: [web/epb/](../web/epb/) ([live](https://dtt-github.github.io/tunnel-constr
   - fault zones cut penetration and utilisation;
   - they need heavy support (ribs at 1 m, shotcrete);
   - they raise the jamming risk (model 8).
-- [~] Check against reference projects ([validation](validation/hard-rock-projects.md)): Follo penetration and average advance reproduced (CSM ψ back-analysed); Gotthard machine data verified; Guadarrama, Brenner and Niagara bracket the rates. Follo section by section done: ±27 % with mean rock strength, 0.4–2.9× with single-test UCS. Open: utilisation and downtime by cause from a primary source; other rock types (the Yinsong dataset is not open).
+- [~] Check against reference projects ([validation](validation/hard-rock-projects.md)): Follo penetration and average advance reproduced (CSM ψ back-analysed); Gotthard machine data verified; Guadarrama, Brenner and Niagara bracket the rates. Follo section by section done: ±27 % with mean rock strength, 0.4–2.9× with single-test UCS. Queens Water Tunnel (gneiss, 10 open stations) checked without refitting: median 1.02×, massive rock up to 1.8× fast. Open: utilisation and downtime by cause from a primary source; other rock types (the Yinsong dataset is not open).
 
 ### Slice C: slurry / Mixshield
 

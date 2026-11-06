@@ -84,6 +84,49 @@ Weighted by section length, these give UCS 152.1 MPa, BTS 10.35 MPa, 301 kN/cutt
 - **ψ depends on how it is fitted.** Fitting the length-weighted mean of the section predictions gives ψ ≈ −0.15. Fitting the tunnel means gives −0.1. Both are inside Rostami's range. The demos feed zone-average rock values, so the default stays at −0.1. A user should read CSM penetration as about ±30 % at best, and much less certain where the rock strength comes from a single test.
 - **Fracturing does not explain the remaining scatter.** The CSM model has no fracturing term, and ks varies little here (0.6–1.2, mostly 0.6–0.9).
 
+## Penetration on a second project: Queens Water Tunnel No. 3
+
+- **Script:** [`models/py/validation/queens_csm.py`](../../models/py/validation/queens_csm.py). ψ stays at the Follo value, −0.1; nothing is refitted.
+- **Rock and machine data:** Yagiz (2006), IAEG2006 paper 383 ([open PDF](https://media.geolsoc.org.uk/iaeg2006/PAPERS/IAEG_383.PDF)), Tables 2–4. It gives 10 of the 151 stations openly, each with UCS, BTS, fracture spacing, cutter load and advance rate.
+- **Machine:** Khalighi & Diehl (1997), RETC ([Robbins, open PDF](https://robbinstbm.com/wp-content/uploads/2010/09/QueensWaterTunnel_RETC_1997.pdf)). A 7.06 m open TBM with 50 × 19″ discs rated at 311 kN, turning at 8.3 rpm.
+- **Rock:** biotite-hornblende and granitic gneiss with amphibolite, pegmatite and schist (Khalighi & Diehl). UCS is 168–200 MPa, against Follo's 152. So this is a second project in stronger crystalline rock, **not a different rock type**.
+
+**Reading the data:**
+- **Penetration:** the column printed as "mm/rev" is in cm/rev. For example, 2.19 m/h at 8.3 rpm is 4.4 mm/rev, not 0.44. So the measured penetration here is the advance rate divided by 8.3 rpm.
+- **Cutter loads** are in short tons (8.896 kN). Read as tonnes, the highest load would be above the disc rating.
+- **Disc tip width and spacing** are not published. The model defaults, 19 mm and 85 mm, are assumed.
+
+| Station (m) | UCS (MPa) | BTS (MPa) | Fracture spacing (m) | Cutter load (kN) | Measured (mm/rev) | Model, ψ −0.1 (mm/rev) | Ratio |
+|---|---|---|---|---|---|---|---|
+| 269 | 200 | 9.3 | 0.8 | 267 | 4.40 | 3.94 | 0.90 |
+| 280 | 199 | 9.3 | 1.6 | 267 | 4.26 | 3.98 | 0.93 |
+| 301 | 199 | 9.1 | >1.60 | 267 | 3.78 | 4.06 | 1.08 |
+| 473 | 190 | 9.0 | 0.2 | 285 | 5.64 | 5.49 | 0.97 |
+| 600 | 189 | 9.0 | >1.60 | 302 | 4.42 | 6.68 | 1.51 |
+| 929 | 168 | 9.8 | 1.6 | 311 | 4.76 | 8.50 | 1.79 |
+| 989 | 174 | 9.9 | >1.60 | 320 | 4.70 | 8.54 | 1.82 |
+| 1021 | 178 | 10.1 | 0.4 | 258 | 5.82 | 4.14 | 0.71 |
+| 1026 | 181 | 10.1 | 0.2 | 311 | 6.10 | 7.08 | 1.16 |
+| 1045 | 184 | 10.2 | 0.4 | 285 | 6.16 | 5.16 | 0.84 |
+
+**Ratio of model to measured penetration:**
+
+| Model | Median | Range | RMS of ln ratio |
+|---|---|---|---|
+| ψ −0.1, as fitted at Follo | **1.02** | 0.71–1.82 | 0.33 |
+| ψ 0 | 1.41 | 0.98–2.51 | 0.53 |
+| ψ +0.1, the earlier default | 1.89 | 1.31–3.38 | 0.79 |
+| The original CSM run printed in the source (Table 4) | 1.39 | 0.86–1.59 | 0.31 |
+
+**What this shows:**
+- **The level carries over.** On the median, the Follo ψ predicts Queens without refitting. The earlier ψ +0.1 would have been about 1.9× fast.
+- **The scatter does not shrink.** Station by station, the spread (0.71–1.82×) is like Follo's section-by-section result.
+- **Fractures matter, and the model has no term for them.**
+  - In massive rock (fracture spacing 1.6 m or more, 5 stations), the model is a median 1.51× fast, up to 1.82×.
+  - In fractured rock (0.2–0.4 m, 4 stations), it is 0.91× (0.71–1.16).
+  - The CSM is an intact-rock model. Yagiz's own regression adds fracture spacing and orientation for this reason. Adding a rock-mass term would need more than 10 stations to fit and test it.
+- **The sample is small.** Ten stations is a sample, not the drive. The full 151-station set is not open.
+
 ## Advance: Follo
 
 The downtime model is fed the measured net penetration rate (1.92 m/h) and Follo's cutter changes (442 per km at Farrokh's 66 min each). Rock support is from RMR 71, using RMR = 9 ln Q + 44 with Q 21.2.
@@ -131,7 +174,10 @@ None of these publish the rock and machine inputs needed to run the model sectio
 
 ## Limits
 
-- **Penetration** is fitted to one project. Section by section it follows the operator's thrust and speed well (±27 %) with mean rock strength, but not single-test UCS (0.4–2.9×). Other rock types are untested, because the Yinsong data is not open.
+- **Penetration:**
+  - It is fitted to one project. Section by section, with mean rock strength, it follows the operator's thrust and speed well (±27 %), but not single-test UCS (0.4–2.9×).
+  - Tested without refitting on 10 Queens Water Tunnel stations, also gneiss: median 1.02×, but up to 1.8× fast in massive rock, because there is no fracture term.
+  - Rock types other than strong crystalline rock (sandstone, limestone, schist-dominated rock) are untested. The Yinsong data is not open.
 - **Advance at Follo** used the measured penetration and cutter changes, so it tests the downtime model, not the whole chain. With the demo's own CAI wear model, cutter changes are about 40 % fewer than at Follo.
 - **Fault zones:** in the fault zone (RMR 22) the demos give about 12–13 m/day, because Farrokh's support curve at that RMR is about 1,000 h/km. Niagara's 3 m/day with spiling was in a 14.4 m bore with up to 3 m of overbreak, so it is not a direct test; no open source gives a like-for-like fault-zone rate.
 - **Gotthard and Niagara** publish calendar-day averages over whole drives. The model's working-day rate excludes holidays and long stoppages.

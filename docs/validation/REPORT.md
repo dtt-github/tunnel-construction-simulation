@@ -26,7 +26,7 @@
 |---|---|---|---|
 | [Urban EPB](../../web/epb/) | Thrust at Mashhad 1.3 bar 0.89× and Sofia 1.02–1.28×; ring cycle on an average Crossrail working day, 11.8–12.5 against 12.3–14.9 rings | Shield and rim friction on 281 Changsha rings; Hyde Park settlement uses the site's own back-analysis | Best days and weeks far too low; torque in conditioned ground rests on a paste/friction split read from three datasets; volume loss is an input, not predicted |
 | [Mixshield](../../web/slurry/) | Thames settlement 1.10× median over 17 sections (see the caveat below) | Thames volume loss 0.25 % fitted to those same 17 sections | Working day 7–58 % fast; no separation-plant stops; whole drive about 2× faster than measured; air-cushion model is this project's own derivation |
-| [Gripper TBM](../../web/hard-rock/) | None of its own: it shares the CSM penetration fitted at Follo | Penetration (ψ = −0.1) on Follo | No open section-by-section data for Gotthard; advance only bracketed (calendar against working days) |
+| [Gripper TBM](../../web/hard-rock/) | Queens Water Tunnel penetration (gneiss, 10 stations): median 1.02× with the Follo ψ, not refitted | Penetration (ψ = −0.1) on Follo | No open section-by-section data for Gotthard; advance only bracketed (calendar against working days) |
 | [Double shield](../../web/hard-rock/) | Follo advance 12.9–14.9 against 14.1 m/day (tests the downtime model only) | Penetration on the Follo 4.5 km mean; discs, thrust and rpm are the Follo means | Penetration does not follow section-to-section strength (0.41–2.89×); cutter changes about 40 % too few |
 | [Drill & blast](../../web/drill-blast/) | Ulvin drilling 0.88× and charging 1.26× (logged round); every T10.5 activity inside a contractor's P5–P95 range | Mucking rate and downtime share at Ulvin; ventilation and scaling at the contractor median | Weekly advance by support class not published, so class IV is untested; activities do not overlap |
 | [SEM / NATM](../../web/sem/) | Farringdon crown settlement 10.4–13.7 mm against 10.3–16.5 measured; Albanian flysch convergence of the right order | None fitted; the 2.5 mm whole-ring term is taken from Whitechapel | Prediction sits in the lower half of the measured range; Sulem time law from one site; not a tight test |
@@ -74,9 +74,10 @@
 | Check | Data | Result | Kind |
 |---|---|---|---|
 | Follo TBM1, 4.5 km mean penetration | Hansen (2018), NTNU | 6.36 against 6.32 mm/rev at ψ −0.1 | Calibrated (ψ back-analysed) |
-| Follo, 18 sections | same | 0.41–2.89× with each section's strength test; about ±27 % with the tunnel-mean strength | Independent: fails section by section; other rock types untested |
+| Follo, 18 sections | same | 0.41–2.89× with each section's strength test; about ±27 % with the tunnel-mean strength | Independent: fails section by section |
 | Follo advance and utilisation | Iddeng (2019); Herrenknecht reference | 12.9–14.9 against 14.1 m/day; 28–32 % against about 31 % | Independent for the downtime model only (fed the measured penetration) |
 | Cutter changes per km (CAI wear) | Herrenknecht Follo reference | About 266 against 442 | Fails: a lower bound |
+| Queens Water Tunnel No. 3, 10 stations | Yagiz (2006); Khalighi & Diehl (1997) | Median 1.02× (0.71–1.82) at ψ −0.1, not refitted; massive rock 1.51× fast, fractured 0.91× | Independent: passes on the median, fails station by station in massive rock |
 | Gotthard, Guadarrama, Brenner, Niagara | project reports | Average advance 3–20 m/day | Bracket |
 
 ### Ground response, Hoek–Brown and SEM lining ([SEM convergence](sem-convergence.md))
@@ -136,7 +137,7 @@ Ranked by how much each changes what a user sees, then by whether open data coul
 | 1 | Volume loss is a scenario input; it doesn't respond to face pressure or grouting. **Partly closed 6 Nov 2026:** in London Clay (half the EPB drive) it now rises with the face's load factor (Macklin 1999); at normal pressure it equals the measured value. Still open: grouting, other ground, the Mixshield in Chalk | EPB, Mixshield | Settlement doesn't change with the operator's actions outside London Clay | Needs paired face pressure and volume loss: none found under CC BY |
 | 2 | Downtime distributions come from one 6.88 m EPB (Tabriz); no locomotive travel or slurry-plant stops. Day-to-day variation now fitted on Crossrail and tested on Barcelona (6 Nov 2026). Searched 6 Nov 2026: no open delay breakdown found; Barcelona Line 9 confirms the gap on a second project and gives a learning-curve length (now modelled, shape assumed) | EPB, Mixshield | Best days too low; Mixshield working day 7–58 % fast; whole drive 2× fast | Crossrail and Thames delay breakdowns are not published; look for other open drive logs |
 | 3 | ~~Torque in foam-conditioned clay 2.7× over~~ **Addressed 6 Nov 2026:** paste shear (2 kPa, Bezuijen et al. 2005) gives Sofia 0.98–1.14×. Open: the paste/friction split by ground type is not from a published rule, and no second open dataset in conditioned clay tests it | EPB | – | An open torque dataset in conditioned clay |
-| 4 | CSM penetration fitted to one project (Follo gneiss); doesn't follow section strength | Gripper, double shield | Penetration in other rocks is untested | An open TBM dataset in other rock types (Yinsong is not open) |
+| 4 | CSM penetration fitted on one project (Follo gneiss) and checked on a second (Queens gneiss, 6 Nov 2026: median 1.02×); it doesn't follow section strength and has no fracture term (massive rock up to 1.8× fast) | Gripper, double shield | Penetration in rock other than strong crystalline rock is untested | An open TBM dataset in sedimentary or schistose rock, with fracture spacing (Yinsong is not open) |
 | 5 | Chamber model: screw efficiency and decay length unchecked; the paste weight now checked against Botlek (6 Nov 2026); the GPU chamber is blocked | EPB | Chamber pressure dynamics illustrative | Botlek gradients (Bezuijen 2005) are now in hand; needs the MPM fix or an analytical gradient model |
 | 6 | ~~Face support: DAUB factors unverified; no seepage forces~~ Closed 6 Nov 2026: factors and deviations checked against DAUB (2016), example 8.1 reproduced; seepage arises only below the groundwater pressure. The Mixshield's operating range is as narrow as 36 kPa in places | EPB, Mixshield | – | – |
 | 7 | Gripper force, stroke and ring-build time for a 10 m double shield are not published | Double shield | Cycle times assumed | Manufacturer or thesis data |
@@ -151,7 +152,7 @@ A calibrated parameter is trustworthy only once data it was not fitted on confir
 | Parameter | Fitted on | Tested independently on |
 |---|---|---|
 | Shield friction 0.17, rim 0.07 | Changsha, 281 rings | Mashhad and Sofia: thrust yes; torque at Mashhad 1.3 bar yes, Sofia no |
-| CSM ψ = −0.1 | Follo 4.5 km mean | Follo sections: not followed; no other project |
+| CSM ψ = −0.1 | Follo 4.5 km mean | Follo sections: not followed; Queens Water Tunnel (gneiss, 10 stations): median 1.02×, scatter 0.71–1.82× |
 | Thames volume loss 0.25 %, K 0.5 | 17 Thames sections | Nothing independent yet |
 | Second-bore ratio 1.7, Ky 0.44 → 0.33 | Hyde Park | Thames ratios 1.0–2.5 (median 1.2): consistent, not a test |
 | Ulvin mucking rate and downtime share | Ulvin | T10.5 contractor estimate: inside the range |
