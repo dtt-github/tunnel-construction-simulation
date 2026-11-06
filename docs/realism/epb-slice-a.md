@@ -18,7 +18,7 @@ Reviewed 4 Nov 2026 against the page as committed with this file; rule 4 updated
 These values are in `web/epb/main.js`:
 
 - **Machine:**
-  - shield length 9.5 m;
+  - shield length: no longer assumed. 12 m with mid-shield articulation, as on Crossrail (Crossrail Learning Legacy, [TBM station transits](https://learninglegacy.crossrail.co.uk/documents/tbm-station-transits/));
   - chamber length 0.9 m (≈ 35 m³);
   - screw Ø 0.9 m, shaft 0.3 m, pitch 0.7 m, length 11 m, efficiency 0.6, pressure-decay length 3 m;
   - segment OD 6.8 m and ID 6.2 m;
