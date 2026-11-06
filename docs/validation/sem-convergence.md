@@ -61,8 +61,27 @@ They are Tables 5 and 9 of Terron-Almenara & Panthi (2025), *Rock Mechanics and 
 
 - **No defaults change.** The ground-response chain is consistent with this tunnel.
 - **Still open for the SEM demo:**
-  - convergence time series from a site in comparable rock, to test the Sulem law;
+  - convergence time series from a site in comparable rock, to test the Sulem law (parameters now compared with an independent fit; see the next section);
   - a measured share of support mobilisation, for example from lining strain gauges, to test the lining interaction.
+
+## Sulem time law: a second site
+
+- **Script:** [`models/py/validation/sem_time_law.py`](../../models/py/validation/sem_time_law.py). Nothing is fitted; no default is changed.
+- **Demo:** the weak-rock scenario uses the Sulem et al. (1987) law with parameters fitted to a claystone drift (D 5.2 m) at the Meuse/Haute-Marne laboratory: X = 0.885 D, T = 6 days, m = 5.7, n = 0.3 (Guayacan-Carrillo et al. 2016). At Farringdon the time term is off.
+- **Second site:** de La Fuente, Sulem, Taherzadeh & Subrin (2020), Rock Mechanics and Rock Engineering, [free-access version on HAL](https://hal.science/hal-03119942), section 4.1. The same law fitted to the convergence records of the Fréjus road tunnel (squeezing calc-schist): X = 0.9 D, m = 4.5, n = 0.3 for almost all sections, and T fitted per section, 0.5–5 days.
+
+Convergence far behind the face, as a multiple of the instantaneous convergence:
+
+| Days | 1 | 7 | 30 | 100 | 365 | Final |
+|---|---|---|---|---|---|---|
+| Demo | 1.26 | 2.18 | 3.37 | 4.29 | 5.05 | 6.7 |
+| Fréjus, T 0.5–5 days | 1.24–2.26 | 2.04–3.50 | 2.99–4.19 | 3.69–4.58 | 4.26–4.88 | 5.5 |
+
+**What this shows:**
+- **X agrees** (0.885 D against 0.9 D) and n is the same.
+- **The first 100 days agree:** the demo’s curve lies inside the Fréjus band up to 100 days, at its slow edge early on, because its T (6 days) is just above Fréjus's 0.5–5.
+- **The long term is higher:** m 5.7 against 4.5 puts the demo 3.5 % above the band at one year and its final value 22 % above (6.7 against 5.5 times the instantaneous convergence). The demo shows the first weeks, so this is not changed.
+- **Not a time series test:** this compares fitted parameters, not records. The Fréjus records themselves are only plotted.
 
 ## Farringdon platform tunnels: undrained ground, London clays
 

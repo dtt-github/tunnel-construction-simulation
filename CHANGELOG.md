@@ -87,6 +87,10 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ### Added
 
+- **SEM convergence time law against a second site** (`models/py/validation/sem_time_law.py`; [SEM convergence](docs/validation/sem-convergence.md#sulem-time-law-a-second-site)); no default changed:
+  - the Fréjus road tunnel fit of the same Sulem law (de La Fuente et al. 2020, free-access version on HAL): X 0.9 D, m 4.5, n 0.3, T 0.5–5 days, against the demo's 0.885 D, 5.7, 0.3 and 6 days;
+  - the demo's curve lies inside the Fréjus band up to 100 days; at one year it is 3.5 % above, and its final value 22 % higher (m 5.7 against 4.5).
+
 - **Drill & blast rates bracketed** (`models/py/validation/drill_blast_cycle.py`; [drill & blast cycle](docs/validation/drill-blast-cycle.md#rates-against-practitioner-statements-and-the-ntnu-model)); no default changed:
   - charging 100 holes/h and drilling about 990 ft/h per three-boom jumbo, against a practitioner's 80–100 holes/h and 800–1,200 ft/h (Jennemyr 2020, Tunnel Business Magazine);
   - charging, ventilation and scaling per round inside NTNU-model times for a 77–82 m² road tunnel (Kim & Lee 2021, Applied Sciences, CC BY);
