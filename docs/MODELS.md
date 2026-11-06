@@ -57,6 +57,7 @@ What it computes:
 - excavation-method presets (volume loss and K);
 - twin tunnels: the second bore's trough at its own volume loss, with separate widths towards and away from the first bore;
 - volume loss from the face's load factor in overconsolidated clay (Macklin 1999): LF = N / N_TC, N = (σv − σT)/S_u, VL = 0.23 % × e^(4.4 LF), with N_TC from Kimura & Mair (1981) for a face supported up to the cutterhead (7.05 at C/D 1.5 to 9.0 at C/D ≥ 3);
+- the deflection ratio Δ/L of a footprint in sagging and hogging, and its modification by the building's bending stiffness: M_DR against ρ* = EI / (E_s H⁴), H = B/2, and e/B (Potts & Addenbrooke 1997, digitised from [Mair 1997](https://www.issmge.org/uploads/publications/1/31/1997_04_0052.pdf) Fig. 4 to about ±0.03), with an assumed EI from floor slabs;
 - Burland damage categories.
 
 **References:**
@@ -67,6 +68,7 @@ What it computes:
 - Wan, Standing, Potts & Burland (2017), [doi:10.1680/jgeot.16.P.099](https://doi.org/10.1680/jgeot.16.P.099) (second bore at Hyde Park);
 - Burland (1995);
 - Macklin (1999), *Ground Engineering* 32(4), not open; the relation as quoted in [Divall et al. 2023](https://openaccess.city.ac.uk/id/eprint/31563/), Eq. (4)–(6), accepted version open;
+- Mair (1997), theme lecture, [ISSMGE library](https://www.issmge.org/uploads/publications/1/31/1997_04_0052.pdf) (Potts & Addenbrooke's deflection-ratio factors, Fig. 4);
 - Kimura & Mair (1981), [ISSMGE library](https://www.issmge.org/uploads/publications/1/35/1981_01_0061.pdf), digitised in [mpm-clay](validation/mpm-clay.md).
 
 **Validated against:**
@@ -89,6 +91,13 @@ What it computes:
 - the volume loss used is the larger of the measured value and Macklin's, so it rises when support drops but never falls below what was measured;
 - S_u is the Paddington design profile carried along the line; N_TC comes from two digitised centrifuge points;
 - grout filling and tail-void loss are not modelled separately; they remain in the measured value.
+
+**Limits of the building stiffness:**
+
+- only the deflection ratio is modified; the factors for horizontal strain (against EA / (E_s H)) are not in any open source, so the damage category stays on greenfield horizontal strain and the modified Δ/L is shown beside it;
+- the chart is digitised from a scan (about ±0.03); between the plotted e/B curves the factor is interpolated, and e/B above 0.6 uses the 0.6 curve;
+- EI is an assumed estimate: floor slabs (0.15 m, E 23 GPa, every 3.4 m, storeys from the LIDAR height) bending together about mid-height. Real frames act less than fully together, so this is an upper estimate of stiffness and of the reduction;
+- no field data check: no open source gives a building's measured deflection ratio with its stiffness on these drives.
 
 ## Face support pressure
 

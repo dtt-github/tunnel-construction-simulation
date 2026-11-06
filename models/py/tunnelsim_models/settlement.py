@@ -23,6 +23,11 @@ References
   doi:10.46326/jmes.2023.64(6).08, accepted version open at https://openaccess.city.ac.uk/id/eprint/31563/, Eq. (4)-(6)
   and Fig. 1 (VL (%) = 0.23 e^(4.4 LF) for LF >= 0.2, LF = N / N_TC,
   N = (sigma_v - sigma_T) / S_u, N_TC from Kimura & Mair (1981); field data from overconsolidated clay, mostly C/D > 1.)
+- Mair, R.J. (1997). Theme lecture: Subsidence due to tunnelling and its effects on buildings. Proc. 14th ICSMFE,
+  Hamburg, 4, 2397-2402 (ISSMGE library, open: https://www.issmge.org/uploads/publications/1/31/1997_04_0052.pdf).
+  Reproduces Potts & Addenbrooke's (1997) modification factors for the deflection ratio in sagging and hogging against
+  the relative bending stiffness rho* = EI / (E_s H^4), H = B / 2 (Fig. 4), digitised here to about +/-0.03; the
+  horizontal-strain factors (against EA / (E_s H)) are not given there and are not used.
 - Kimura, T., Mair, R.J. (1981). Centrifugal testing of model tunnels in soft clay. Proc. 10th ICSMFE, Stockholm, 1,
   319-322, https://www.issmge.org/uploads/publications/1/35/1981_01_0061.pdf. N at collapse for a heading supported to
   the face (P/D 0): 7.05 at C/D 1.5 and 9.0 at C/D 3.0, digitised from Fig. 9 (docs/validation/mpm-clay.md); N is
@@ -272,4 +277,87 @@ def face_volume_loss(base_volume_loss: float, lf: float) -> float:
     the tail void and grouting) and Macklin's value for the load factor at the face. It equals the base value while
     the face is well supported and rises once a lower support pressure raises the load factor."""
     return max(base_volume_loss, macklin_volume_loss(lf))
+
+
+# Potts & Addenbrooke (1997) modification factors M = DR(building) / DR(greenfield), as plotted by Mair (1997) Fig. 4,
+# digitised from the scan (about +/-0.03): log10 rho* (m^-1) and M for each e/B curve. Below 10^-7 and above 10^1 the
+# end values are kept.
+_LOG_RHO = (-7.0, -6.5, -6.0, -5.5, -5.0, -4.75, -4.5, -4.25, -4.0, -3.75, -3.5, -3.25, -3.0, -2.75, -2.5, -2.25, -2.0,
+            -1.75, -1.5, -1.0, 0.0, 1.0)
+M_DR_SAG = {
+    0.0: (1.40, 1.403, 1.396, 1.371, 1.323, 1.298, 1.249, 1.195, 1.136, 1.059, 0.987, 0.891, 0.786, 0.667, 0.530, 0.411,
+          0.304, 0.226, 0.157, 0.113, 0.096, 0.096),
+    0.2: (1.40, 1.40, 1.39, 1.36, 1.31, 1.273, 1.222, 1.151, 1.084, 1.004, 0.922, 0.834, 0.730, 0.606, 0.476, 0.367,
+          0.266, 0.189, 0.150, 0.110, 0.096, 0.096),
+    0.4: (1.344, 1.344, 1.335, 1.306, 1.212, 1.138, 1.046, 0.954, 0.841, 0.704, 0.581, 0.455, 0.323, 0.215, 0.143, 0.117,
+          0.103, 0.090, 0.080, 0.073, 0.050, 0.050),
+    0.6: (0.82, 0.809, 0.765, 0.686, 0.556, 0.463, 0.351, 0.220, 0.124, 0.065, 0.057, 0.057, 0.057, 0.055, 0.050, 0.050,
+          0.046, 0.046, 0.042, 0.038, 0.040, 0.040),
+}
+M_DR_HOG = {  # the e/B 0.2 curve stands for e/B <= 0.2
+    0.2: (1.40, 1.39, 1.376, 1.332, 1.218, 1.118, 1.000, 0.842, 0.632, 0.354, 0.190, 0.185, 0.180, 0.178, 0.178, 0.178,
+          0.172, 0.172, 0.170, 0.168, 0.168, 0.168),
+    0.4: (1.42, 1.42, 1.418, 1.408, 1.356, 1.320, 1.246, 1.172, 1.076, 0.964, 0.812, 0.626, 0.442, 0.304, 0.212, 0.178,
+          0.172, 0.172, 0.170, 0.168, 0.168, 0.168),
+    0.6: (1.42, 1.42, 1.418, 1.408, 1.394, 1.375, 1.356, 1.324, 1.280, 1.218, 1.130, 1.026, 0.880, 0.726, 0.548, 0.396,
+          0.274, 0.190, 0.174, 0.168, 0.168, 0.168),
+}
+
+
+def _interp(xs: Sequence[float], ys: Sequence[float], x: float) -> float:
+    if x <= xs[0]:
+        return ys[0]
+    for k in range(1, len(xs)):
+        if x <= xs[k]:
+            t = (x - xs[k - 1]) / (xs[k] - xs[k - 1])
+            return ys[k - 1] + t * (ys[k] - ys[k - 1])
+    return ys[-1]
+
+
+def deflection_modification_factor(mode: str, rho_star: float, e_over_b: float) -> float:
+    """M_DR for 'sag' or 'hog' at relative bending stiffness rho* (m^-1) and eccentricity e/B (Potts & Addenbrooke
+    1997 via Mair 1997 Fig. 4): linear in log10 rho* and in e/B between the plotted curves, e/B clamped to 0-0.6."""
+    table = {"sag": M_DR_SAG, "hog": M_DR_HOG}[mode]
+    lr = math.log10(max(rho_star, 1e-12))
+    es = sorted(table)
+    e = min(max(e_over_b, es[0]), es[-1])
+    for k in range(1, len(es)):
+        if e <= es[k]:
+            lo, hi = es[k - 1], es[k]
+            t = (e - lo) / (hi - lo)
+            return (1 - t) * _interp(_LOG_RHO, table[lo], lr) + t * _interp(_LOG_RHO, table[hi], lr)
+    return _interp(_LOG_RHO, table[es[0]], lr)
+
+
+def frame_bending_stiffness(storeys: int, storey_height: float = 3.4, slab_thickness: float = 0.15,
+                            e_concrete: float = 23e6) -> float:
+    """Assumed estimate of a framed building's bending stiffness EI per metre run (kN m^2/m): the floor slabs (ground
+    floor and one per storey) bending together about mid-height, by the parallel-axis theorem. Storey height, slab
+    thickness and concrete modulus are assumptions, not from a source."""
+    n = max(int(storeys), 1)
+    zs = [k * storey_height for k in range(n + 1)]
+    zm = sum(zs) / len(zs)
+    return e_concrete * sum(slab_thickness ** 3 / 12 + slab_thickness * (z - zm) ** 2 for z in zs)
+
+
+def relative_bending_stiffness(ei: float, soil_modulus: float, width: float) -> float:
+    """rho* = EI / (E_s H^4) with H = B / 2 (Potts & Addenbrooke 1997, as defined in Mair 1997), in m^-1."""
+    return ei / (soil_modulus * (width / 2) ** 4)
+
+
+def deflection_ratios(settlement, x_min: float, x_max: float, i_left: float, i_right: float, n: int = 200) -> dict:
+    """Greenfield deflection ratio Delta/L of a footprint x_min..x_max across a trough (settlement(x), positive down):
+    the largest deviation of the profile from the chord between the ends of each part, over its length. Sagging is
+    -i_left < x < i_right, hogging outside it. Returns {'sag': (L, DR) or None, 'hog': (L, DR) or None}; with hogging
+    on both sides, the larger DR."""
+    def part(a: float, b: float):
+        if b - a < 1.0:
+            return None
+        sa, sb = settlement(a), settlement(b)
+        d = max(abs(settlement(a + (b - a) * k / n) - (sa + (sb - sa) * k / n)) for k in range(n + 1))
+        return (b - a, d / (b - a))
+
+    sag = part(max(x_min, -i_left), min(x_max, i_right))
+    hogs = [h for h in (part(x_min, min(x_max, -i_left)), part(max(x_min, i_right), x_max)) if h is not None]
+    return {"sag": sag, "hog": max(hogs, key=lambda h: h[1]) if hogs else None}
 

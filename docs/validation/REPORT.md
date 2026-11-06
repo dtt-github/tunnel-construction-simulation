@@ -137,7 +137,7 @@ Ranked by how much each changes what a user sees, then by whether open data coul
 | 7 | Gripper force, stroke and ring-build time for a 10 m double shield are not published | Double shield | Cycle times assumed | Manufacturer or thesis data |
 | 8 | Drill & blast specific charge (1.8 kg/m³), charging time per hole and support-work overlap | Drill & blast | Round time and peak weeks | Norwegian theses (NTNU) with logged rounds |
 | 9 | SEM: Sulem time law from one claystone site; sand-lens position illustrative; the whole-ring term transferred | SEM | Convergence history is illustrative | A convergence time series in comparable ground |
-| 10 | Building damage uses greenfield strain only (no building stiffness or deflection ratio) | EPB, Mixshield | Damage categories conservative | Relative-stiffness factors of Potts & Addenbrooke (1997), already in the [research survey](../research/research-survey.md) |
+| 10 | Building damage uses greenfield strain only. **Partly addressed 6 Nov 2026:** the greenfield and stiffness-modified deflection ratio are shown per building (Potts & Addenbrooke via Mair 1997, digitised; EI assumed); the category still uses greenfield horizontal strain | EPB, Mixshield | Damage categories conservative | Relative-stiffness factors of Potts & Addenbrooke (1997). Searched 6 Nov 2026: the method and the deflection-ratio chart are in Mair (1997, [ISSMGE library](https://www.issmge.org/uploads/publications/1/31/1997_04_0052.pdf)), scanned; the horizontal-strain curves the demos need (M vs α*) were not found in any open source |
 
 ### Calibrated parameters and where they are tested
 

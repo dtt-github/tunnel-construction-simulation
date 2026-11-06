@@ -197,3 +197,23 @@ def test_macklin_volume_loss():
     assert face_volume_loss(0.005, lf_on) == pytest.approx(0.005, abs=3e-4)
     assert face_volume_loss(0.005, lf_off) > 0.007
     assert load_factor(600, 700, 235, 3.7) == 0.0  # support above the overburden: no driving stress
+
+
+def test_deflection_modification_factor():
+    from tunnelsim_models import deflection_modification_factor, deflection_ratios, frame_bending_stiffness, gaussian_trough
+
+    # Mair (1997) Fig. 4 as digitised: flexible about 1.4, stiff about 0.1 (sag) and 0.17 (hog)
+    assert deflection_modification_factor("sag", 1e-8, 0.0) == pytest.approx(1.40)
+    assert deflection_modification_factor("sag", 10, 0.0) == pytest.approx(0.096)
+    assert deflection_modification_factor("hog", 10, 0.0) == pytest.approx(0.168)
+    # hogging stiffens over a narrow range; eccentric buildings need more stiffness to reach the same M
+    assert deflection_modification_factor("hog", 1e-3, 0.0) < deflection_modification_factor("hog", 1e-3, 0.6)
+    assert deflection_modification_factor("sag", 1e-4, 0.6) < deflection_modification_factor("sag", 1e-4, 0.0)
+    # slabs about mid-height: more storeys, much stiffer
+    assert frame_bending_stiffness(9) > 5 * frame_bending_stiffness(4)
+    # a footprint centred over the trough is all sagging; one beyond the inflection point is mostly hogging
+    t = gaussian_trough(7.08, 30, 0.005, 0.5)
+    centred = deflection_ratios(t.settlement, -10, 10, t.i, t.i)
+    assert centred["hog"] is None and centred["sag"][0] == 20
+    side = deflection_ratios(t.settlement, 20, 40, t.i, t.i)
+    assert side["sag"] is None and side["hog"][1] > 0

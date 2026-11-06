@@ -6,6 +6,10 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ### Changed
 
+- **Building deflection ratio with building stiffness** (EPB and Mixshield demos; `deflection_ratios`, `deflection_modification_factor`, `frame_bending_stiffness`, `relative_bending_stiffness` in Python and JavaScript):
+  - each building shows its greenfield deflection ratio Δ/L in sagging or hogging and the value with its bending stiffness, from Potts & Addenbrooke's (1997) modification factors as plotted by [Mair 1997](https://www.issmge.org/uploads/publications/1/31/1997_04_0052.pdf), digitised to about ±0.03;
+  - the building's EI is an assumed upper estimate from storeys (floor slabs bending together); the damage category stays on greenfield horizontal strain, because no open source gives the horizontal-strain factors.
+
 - **Volume loss responds to face pressure in London Clay** (EPB demo; `settlement.load_factor`, `macklin_volume_loss`, `face_volume_loss` in Python and JavaScript):
   - Macklin's (1999) relation VL = 0.23 % × e^(4.4 LF), quoted from [Divall et al. 2023](https://openaccess.city.ac.uk/id/eprint/31563/), with the load factor LF = N / N_TC at the face and N_TC from Kimura & Mair (1981) for a face supported up to the cutterhead;
   - each 10 m of drive keeps the larger of the measured volume loss and the mean Macklin value while it was dug. At the normal 2.2 bar it gives 0.51 % (measured 0.5 %); at 1 bar 0.65 %, about 30 % more settlement over that stretch. Undrained strength is the Crossrail Paddington design profile (85 + 5z kPa);

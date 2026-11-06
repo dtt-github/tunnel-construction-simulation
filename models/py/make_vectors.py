@@ -9,6 +9,7 @@ import pathlib
 from dataclasses import asdict
 
 from tunnelsim_models import critical_stability_ratio, face_volume_loss, load_factor, macklin_volume_loss
+from tunnelsim_models import deflection_modification_factor, deflection_ratios, frame_bending_stiffness, relative_bending_stiffness
 from tunnelsim_models import Cutter, daub_window, silo_stress, wedge_silo, cutter_forces, gaussian_trough, hoek_brown, preset_trough, tbm_performance, twin_troughs
 
 OUT = pathlib.Path(__file__).resolve().parents[1] / "test-vectors"
@@ -88,7 +89,18 @@ for sv, pt, su, cd, base in [(600, 220, 235, 3.7, 0.005), (600, 0, 235, 3.7, 0.0
     lf = load_factor(sv, pt, su, cd)
     face_vl.append({"in": {"sigma_v": sv, "support": pt, "su": su, "cover_over_d": cd, "base_vl": base},
                     "out": {"n_tc": critical_stability_ratio(cd), "lf": lf, "macklin": macklin_volume_loss(lf), "vl": face_volume_loss(base, lf)}})
-write("settlement", {"symmetric": st, "asymmetric": asym, "presets": presets, "twin": twins, "face_volume_loss": face_vl})
+# building stiffness and deflection ratio (Potts & Addenbrooke 1997 via Mair 1997 Fig. 4)
+bending = {"m_dr": [{"in": [mode, r, e], "out": deflection_modification_factor(mode, r, e)}
+                    for mode in ("sag", "hog") for r in (1e-8, 3e-6, 1e-4, 2.5e-3, 0.5, 30.0) for e in (0.0, 0.1, 0.3, 0.5, 0.8)],
+           "frame": [{"in": n, "out": frame_bending_stiffness(n)} for n in (1, 4, 9)],
+           "rho": relative_bending_stiffness(frame_bending_stiffness(4), 77.6e3, 20.0)}
+dr_cases = []
+for z0, vl, k, xmin, xmax in [(30, 0.005, 0.5, -10, 10), (30, 0.005, 0.5, 5, 30), (20, 0.01, 0.43, -40, 2), (34.5, 0.0078, 0.44, -3, 0.5)]:
+    t = gaussian_trough(7.08, z0, vl, k)
+    r = deflection_ratios(t.settlement, xmin, xmax, t.i, t.i)
+    dr_cases.append({"in": {"z0": z0, "vl": vl, "k": k, "x_min": xmin, "x_max": xmax}, "out": {kk: (list(v) if v else None) for kk, v in r.items()}})
+bending["deflection_ratios"] = dr_cases
+write("settlement", {"symmetric": st, "asymmetric": asym, "presets": presets, "twin": twins, "face_volume_loss": face_vl, "bending": bending})
 face = []
 # (D, cover, gamma, phi, c, water_depth, q, k_wedge)
 for dia, cov, g, phi, c, hw, q, kw in [(10, 15, 20, 30, 0, None, 0, None), (8, 12, 20, 30, 0, 3, 0, None), (6, 9, 19, 25, 8, 0, 10, 0.4),
