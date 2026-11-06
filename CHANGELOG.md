@@ -87,6 +87,11 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ### Added
 
+- **Hard-rock cutterhead torque on a second project** (`models/py/validation/hard_rock_torque.py`; [hard-rock projects](docs/validation/hard-rock-projects.md#cutterhead-torque-on-a-second-project)); no default changed:
+  - Tehran Metro Line 6, an open-mode EPB in limestone (Samadi & Hassanpour 2024, Heliyon): logged torque 0.56–0.80 of the model; with Brenner (0.41–0.67), the model torque is 1.25–2.4× high on both projects;
+  - Follo's open thesis data log no torque;
+  - halving the torque changes the demos' advance in one zone only (gripper in mica schist, 13.8 → 15 mm/rev); the torque and power shown would halve.
+
 - **Penetration and torque on the Brenner double shields** (`models/py/validation/brenner_csm.py`; [hard-rock projects](docs/validation/hard-rock-projects.md#penetration-and-torque-on-the-brenner-double-shields)); nothing refitted:
   - logged means of three Herrenknecht double shields in Bündner schist (Maggio 2020, Politecnico di Torino): the CSM reproduces the logged penetration at UCS 53–85 MPa, inside the published 30–120 MPa (Giacomin et al. 2022). Consistent, not tested: the range is too wide;
   - torque: the model gives 1.5–2.4× the logged torque on all three machines, independent of UCS. Recorded as an open gap; no default changed.

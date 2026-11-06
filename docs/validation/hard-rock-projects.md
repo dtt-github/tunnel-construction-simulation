@@ -220,13 +220,33 @@ None of these publish the rock and machine inputs needed to run the model sectio
 - **Penetration: consistent, not tested.** The Follo-fitted CSM reproduces the logged penetration at UCS 53–85 MPa, inside the published 30–120 MPa. Across that range it gives anything from over 30 down to 2–5 mm/rev, so without strength logged along the drive this cannot test it.
 - **Torque: the model is about twice the logged value.** At the logged thrust and penetration, the model's torque (0.3 · D · thrust · rolling coefficient) is 1.5–2.4× the logged torque on all three machines. The ratio depends only on penetration and cutter size, not on rock strength, so it is a real test. In the demos this can make weak rock torque-limited too early. Not changed: one geology, and the 0.3 radius factor and the CSM rolling force are both in play.
 
+## Cutterhead torque on a second project
+
+- **Script:** [`models/py/validation/hard_rock_torque.py`](../../models/py/validation/hard_rock_torque.py). Nothing is fitted; no default is changed.
+- **Second dataset:** Tehran Metro Line 6, a 9.19 m Herrenknecht EPB working in open mode in limestone (UCS 50–120 MPa), 17″ discs. Means of 457 records: thrust 15.8 MN, torque 2.2 MNm, penetration 3.5 mm/rev, 2.6 rpm (Samadi & Hassanpour 2024, [Heliyon, open](https://pmc.ncbi.nlm.nih.gov/articles/PMC11140792/), Table 2).
+- **Follo:** the thesis's open data appendix (Hansen 2018) logs thrust, speed and penetration, not torque.
+- **Assumed:** thrust lost to shield friction, 0–15 % for the double shields and 0–30 % for the EPB.
+
+| Machine | Thrust (MN) | Penetration (mm/rev) | Logged torque (MNm) | Logged / model |
+|---|---|---|---|---|
+| Brenner S-1054, 6.85 m | 6.1 | 10.8 | 1.08 | 0.57–0.67 |
+| Brenner S-1071, 10.71 m | 14.2 | 14.4 | 3.23 | 0.41–0.48 |
+| Brenner S-1072, 10.71 m | 13.3 | 15.9 | 3.22 | 0.41–0.48 |
+| Tehran TML6, EPB in open mode, 9.19 m | 15.8 | 3.5 | 2.20 | 0.56–0.80 |
+
+**What this shows:**
+- **The model torque is high on both projects,** by 1.25–2.4×, in schist and in limestone, at 3.5 and at 11–16 mm/rev. The logged torque also includes friction the model leaves out, so the cutting torque alone is lower still.
+- **The cause cannot be split** with these data. The model is 0.3 · D · N · F_r; the 0.3 radius factor and the CSM rolling force enter only as a product.
+- **Effect on the demos is small.** At the default thrust and speed, halving the torque changes the penetration in one zone only: the gripper in mica schist goes from 13.8 mm/rev (power-limited) to the 15 mm/rev cap. The torque and power shown halve everywhere.
+- **Not changed.** Fitting the factor to these two projects would leave nothing to test it on, and the effect on advance is small. The demos' torque reads about twice what these machines logged.
+
 ## Limits
 
 - **Penetration:**
   - It is fitted to one project. Section by section, with mean rock strength, it follows the operator's thrust and speed well (±27 %), but not single-test UCS (0.4–2.9×).
   - Tested without refitting on 10 Queens Water Tunnel stations, also gneiss: median 1.02×, but up to 1.8× fast in massive rock, because there is no fracture term.
   - Rock types other than strong crystalline rock are untested: in Brenner calc-schist the logged penetration fits the published strength range, but the range is too wide to test it. The Yinsong data is not open.
-- **Torque:** about twice the logged torque on three Brenner double shields in calc-schist (logged / model 0.41–0.67).
+- **Torque:** 1.25–2.4× the logged torque on two projects: three Brenner double shields in calc-schist and an open-mode EPB in Tehran limestone (logged / model 0.41–0.80).
 - **Advance at Follo** used the measured penetration and cutter changes, so it tests the downtime model, not the whole chain. With the demo's own CAI wear model, cutter changes are about 40 % fewer than at Follo.
 - **Fault zones:** in the fault zone (RMR 22) the demos give about 12–13 m/day, because Farrokh's support curve at that RMR is about 1,000 h/km. Niagara's 3 m/day with spiling was in a 14.4 m bore with up to 3 m of overbreak, so it is not a direct test; no open source gives a like-for-like fault-zone rate.
 - **Gotthard and Niagara** publish calendar-day averages over whole drives. The model's working-day rate excludes holidays and long stoppages.
