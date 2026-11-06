@@ -26,12 +26,14 @@ export const M = {
   doubleModeMinRmr: 50, // below: single-shield mode (as in the support-downtime model)
   shieldLength: 13.7, // m, sum of the Brenner shield lengths
   overcut: 0.10, // m radial gap between bore and shield, assumed (Ramoni & Anagnostou's example uses 5-15 cm)
-  thrustInstalled: 150, // MN, low end of "up to 150-200 MN" for ~10 m shielded TBMs (Ramoni & Anagnostou, VSS 1341)
+  thrustInstalled: 95, // MN, main cylinders of the 10.71 m Brenner double shields (Maggio 2020, Table 3.2); auxiliary thrust
+  // not published. Was 150, the low end of "up to 150-200 MN" for ~10 m shields (Ramoni & Anagnostou, VSS 1341)
   utilMachine: () => "double",
   limits: [
     "Machine diameter, torque, power, 71 discs and ring width are the Follo values; the default thrust and speed are the logged Follo TBM1 means (Hansen 2018). Shield lengths come from the 10.65 m Brenner machines. Gripper force and strokes are not published; the stroke is taken equal to the ring width.",
-    "Penetration (CSM) reproduces Follo TBM1: 6.4 against 6.32 mm/rev measured. With Follo's cutter changes the downtime model gives 13–15 m/day against the 14.1 m/day average (Follo, including probing and grouting). Utilisation is not published for any of the reference projects.",
-    "Ring-build time (30 min) and segment thickness (320 mm) are assumptions; single-shield mode below RMR 50 follows the support-downtime model, not project data.",
+    "Penetration (CSM) reproduces Follo TBM1: 6.4 against 6.32 mm/rev measured. With Follo's cutter changes the downtime model gives 13–15 m/day against the 14.1 m/day average (Follo, including probing and grouting). Boring took 28 % of the time in this case, against 32 % at Guadarrama (Melis Maynar 2006).",
+    "Ring-build time (30 min) is assumed, between 15 and 67 min published for 5-6.5 m machines; in double-shield mode it is hidden while shorter than boring a ring. Segment thickness 320 mm (Guadarrama; 450 mm at Brenner). Single-shield mode below RMR 50 follows the support-downtime model, not project data.",
+    "Installed thrust 95 MN is the main-cylinder thrust of the 10.71 m Brenner double shields; the auxiliary thrust that pushes in single-shield mode is not published, so the jamming check is a screening estimate.",
   ],
 };
 const R = M.D / 2, W = M.stroke;
