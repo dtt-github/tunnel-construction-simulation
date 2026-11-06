@@ -243,3 +243,19 @@ export function roundCycle(rd, width, wallHeight, cls, { overbreak = 0.15, hours
   const total = steps.reduce((a, [, h]) => a + h, 0);
   return { steps, total_h: total, pull: rd.pull, m_per_week: (hoursPerWeek / total) * rd.pull, muck_m3: muck };
 }
+
+// Specific charge in current Norwegian practice (Gjengedal & Jakobsen 2025, Eurock 2025, Fig. 5): y = a A^b, kg/m^3
+// solid against cross-section A (m^2). See drill_blast.py for the source.
+export const PRACTICE_SPECIFIC_CHARGE = Object.freeze({
+  "Pro. 12, rural road, poor SPR": [13.6, -0.35],
+  "Pro. 13, rural road, poor SPR": [11.515, -0.339],
+  "Pro. 15, rural road, good SPR": [11.63, -0.321],
+  "Pro. 14, urban utility, blasting limits": [14.327, -0.452],
+});
+
+/** Lowest and highest project trend (kg/m^3 solid) at cross-section `area`, road tunnels only by default. */
+export function practiceSpecificCharge(area, roadOnly = true) {
+  const ys = Object.entries(PRACTICE_SPECIFIC_CHARGE).filter(([n]) => !roadOnly || n.includes("road")).map(([, [a, b]]) => a * area ** b);
+  return [Math.min(...ys), Math.max(...ys)];
+}
+
