@@ -5,7 +5,7 @@
 [![Live demo](https://img.shields.io/badge/demo-live-2a78d6)](https://dtt-github.github.io/tunnel-construction-simulation/)
 [![Tests](https://github.com/dtt-github/tunnel-construction-simulation/actions/workflows/tests.yml/badge.svg)](https://github.com/dtt-github/tunnel-construction-simulation/actions/workflows/tests.yml)
 [![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-blue)](LICENSE)
-![Status: Release 1 in preparation](https://img.shields.io/badge/status-release%201%20in%20preparation-c9862a)
+[![Release: v1.0.0](https://img.shields.io/badge/release-v1.0.0-2a9d5c)](https://github.com/dtt-github/tunnel-construction-simulation/releases/tag/v1.0.0)
 
 ### ▶ [Open the live demo](https://dtt-github.github.io/tunnel-construction-simulation/)
 
@@ -111,7 +111,7 @@ npm run test:py
    - C: slurry / Mixshield (demo live)
    - D: SEM/NATM (heading live; final lining after Release 1)
    - E: drill & blast (demo live)
-4. **Release 1:** the six browser demos, each checked against open published data, plus a recorded GPU sand face. In preparation; the remaining work is release hygiene, no new features.
+4. **Release 1 (v1.0.0, 6 Nov 2026):** the six browser demos, each checked against open published data, plus a recorded GPU sand face. [Changelog](CHANGELOG.md).
 5. **Phase 2:** GPU ground physics coupled to the machine. Sand face done; clay tunnel and EPB chamber open, after Release 1.
 6. **Phase 3:** further methods.
 7. **Phase 4:** validation against case histories (the validation report is kept up to date with every check).

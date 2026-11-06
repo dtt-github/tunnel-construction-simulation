@@ -9,11 +9,11 @@ Sources:
 - [research/industry-survey.md](research/industry-survey.md): machine numbers.
 - [MODELS.md](MODELS.md): what is implemented.
 
-## Release 1 (first complete release)
+## Release 1 (first complete release): tagged v1.0.0 on 6 Nov 2026
 
 - **Scope:** Phase R, the five Phase 1 slices as built (six demos), the model library, the validation report, and Phase 0 with Phase 2 WP0 to WP2 and WP7 (one recorded GPU sand face).
 - **Not in it:** the MPM clay tunnel and EPB chamber (WP3, WP4), the open Phase 1 items below, Phases 3 to 5.
-- **Stop line:** no new features. Before the tag: README, validation report and roadmap at the release state; a full test pass and a live check of the six demos; the changelog cut and the tag.
+- **Stop line:** no new features went in after the scope was set. Before the tag: README, validation report and roadmap at the release state; a full test pass (94 Python, 21 JavaScript and 14 server tests including GPU) and a live check of the six demos; the changelog cut and the tag.
 - **Done for it (6 Nov 2026):** the gap plan (one gap closed, eight shipped as disclosed in the [validation report](validation/REPORT.md#ranked-gaps), two blocked); the [realism checklist template](realism/TEMPLATE.md); the [release audit](RELEASE-AUDIT.md).
 
 ## Realism rules (apply to every phase)

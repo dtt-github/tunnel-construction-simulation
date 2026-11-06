@@ -1,8 +1,12 @@
 # Changelog
 
-Notable changes to this project. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versions will be tagged from the first complete Phase 1 slice; until then, changes are grouped by date.
+Notable changes to this project. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Releases are tagged on main (v1.0.0 is Release 1); changes before it are grouped by date.
 
 ## [Unreleased]
+
+## 1.0.0 (2026-11-06): Release 1
+
+The six browser demos (urban EPB, Mixshield, gripper and double shield TBMs, drill & blast, SEM/NATM), each checked against open published data and labelled independent, calibrated or bracket in the [validation report](docs/validation/REPORT.md), plus one recorded GPU sand face. Not in it: the MPM clay tunnel and EPB chamber (blocked). Sources, labels and licences audited in [docs/RELEASE-AUDIT.md](docs/RELEASE-AUDIT.md). Tag: `v1.0.0`.
 
 ### Changed
 
