@@ -62,12 +62,15 @@ export const SHIFT_PATTERNS = Object.freeze({
 export const PER_CYCLE_MAINTENANCE_MIN = 25 + 12;
 export const LEARNING_DAYS_BARCELONA = 90; // "a little over three months to reach average speed" (see utilisation.py)
 export const LEARNING_START = 0.5; // assumed
+// Day-to-day variation fitted to the Crossrail EPB drives (best day 3.0 x and best week 1.94 x the mean); tested on
+// Barcelona Line 9. Not used for the Thames Mixshields, which vary less. See utilisation.py.
+export const DAY_VARIATION_CROSSRAIL_EPB = Object.freeze({ day_sigma: 0.4, day_rho: 0.7 });
 const DAY = 1440;
 
 export const defaultDriveSettings = () => ({
   ring_length: 1.5, boring_min: null, ring_build: DIST.ring_build, general: DIST.general,
   shift_pattern: "2x10h_plus_4h_maintenance", haulage: "conveyor", interventions: true,
-  learning_days: 0, learning_start: LEARNING_START,
+  learning_days: 0, learning_start: LEARNING_START, day_sigma: 0, day_rho: 0,
 });
 
 function productionWindow(t, prodMin) {
@@ -97,8 +100,20 @@ export function simulateDrive(settings, days = 90, seed = 1) {
     }
     return [tt, Math.max(dur, 0)];
   };
-  // learning curve (Barcelona Line 9 duration; linear shape and start fraction assumed): 1 / productivity at t
-  const slow = (tt) => (s.learning_days > 0 ? 1 / (s.learning_start + (1 - s.learning_start) * Math.min(tt / (s.learning_days * DAY), 1)) : 1);
+  // day-to-day variation: lognormal productivity factor per day, mean 1, AR(1) in its log, from its own stream
+  const dayFactor = new Array(days).fill(1);
+  if (s.day_sigma > 0) {
+    const drng = new Rng(seed ^ 0x9e3779b9);
+    let x = 0;
+    for (let i = 0; i < days; i++) {
+      const z = normalInv(drng.uniform());
+      x = i === 0 ? z * s.day_sigma : s.day_rho * x + s.day_sigma * Math.sqrt(1 - s.day_rho * s.day_rho) * z;
+      dayFactor[i] = Math.exp(x - (s.day_sigma * s.day_sigma) / 2);
+    }
+  }
+  const dayK = (tt) => 1 / dayFactor[Math.min(Math.floor(tt / DAY), days - 1)];
+  // learning curve (Barcelona Line 9 duration; linear shape and start fraction assumed) and day factor: 1 / productivity at t
+  const slow = (tt) => dayK(tt) * (s.learning_days > 0 ? 1 / (s.learning_start + (1 - s.learning_start) * Math.min(tt / (s.learning_days * DAY), 1)) : 1);
   while (t < horizon) {
     const bore = s.boring_min !== null ? s.boring_min : sample(DIST.boring, rng.uniform());
     let left;
@@ -109,7 +124,7 @@ export function simulateDrive(settings, days = 90, seed = 1) {
     [t] = work(t, sample(s.ring_build, rng.uniform()) * slow(t), "ring_build");
     [t] = work(t, sample(s.general, rng.uniform()) * slow(t), "general");
     if (s.haulage === "rail") [t] = work(t, sample(DIST.train_delay, rng.uniform()), "train_delay");
-    if (pattern.per_cycle_maintenance) [t] = work(t, PER_CYCLE_MAINTENANCE_MIN, "maintenance_per_cycle");
+    if (pattern.per_cycle_maintenance) [t] = work(t, PER_CYCLE_MAINTENANCE_MIN * dayK(t), "maintenance_per_cycle");
     if (rings >= nextStop && t < horizon) {
       const d = Math.min(sample(DIST.stop_hours, rng.uniform()) * 60, horizon - t);
       time.intervention += d;
@@ -144,6 +159,9 @@ export const EPB_REFERENCES = Object.freeze([
   { what: "best month", metric: "month", value: 920.0, diameter: null, project: "Doha Gold Line (contractor claim)", source: "https://tunnelbuilder.com/News/SELI-breaks-through-on-the-Gold-Line-on-the-Doha-Metro-in-record-time.aspx" },
   { what: "best week in a survey of 40 EPBs, 5.9-10.2 m", metric: "week", value: 178.5, diameter: null, project: "Roby & Willis (2014)", source: "https://www.robbinstbm.com/wp-content/uploads/2014/08/FastEPBAdvance_NAT2014.pdf" },
   { what: "week, 9.73 m EPB", metric: "week", value: 260.0, diameter: 9.73, project: "Riyadh Metro Line 5", source: "https://www.herrenknecht.com/en/references/referencesdetail/riyadh-metro/" },
+  { what: "best day, 59 rings of 1.6 m", metric: "day", value: 94.4, diameter: 7.1, project: "Crossrail drive Y, TBM Victoria", source: "King, Thomas & Stenning (2017), Table 3, https://learninglegacy.crossrail.co.uk/wp-content/uploads/2017/04/Machine-driven-tunnels-on-the-Elizabeth-line-London.pdf" },
+  { what: "best week, 216 rings of 1.6 m", metric: "week", value: 345.6, diameter: 7.1, project: "Crossrail drive Y, TBM Victoria", source: "King, Thomas & Stenning (2017), Table 3, https://learninglegacy.crossrail.co.uk/wp-content/uploads/2017/04/Machine-driven-tunnels-on-the-Elizabeth-line-London.pdf" },
+  { what: "best day, 60 rings of 1.5 m", metric: "day", value: 90.0, diameter: 9.4, project: "Barcelona Metro Line 9, Section 1D", source: "https://www.mdpi.com/2071-1050/17/9/3966" },
 ]);
 export const EPB_WEEKLY_SURVEY = Object.freeze({ mean: 85.4, sd: 36.0, min: 32.6, max: 178.5, source: "https://www.robbinstbm.com/wp-content/uploads/2014/08/FastEPBAdvance_NAT2014.pdf" });
 

@@ -185,6 +185,12 @@ for ld, ls, days, seed in [(90.0, 0.5, 120, 2), (30.0, 0.3, 60, 5)]:
                                      ring_build={"kind": "fixed", "value": 32.0}, interventions=True, learning_days=ld, learning_start=ls),
                        days=days, seed=seed)
     util["learning"].append({"in": {"learning_days": ld, "learning_start": ls, "days": days, "seed": seed}, "out": asdict(r)})
+util["day_variation"] = []
+for sig, rho, days, seed in [(0.4, 0.7, 120, 4), (0.25, 0.0, 60, 9)]:
+    r = simulate_drive(DriveSettings(shift_pattern="2x12h_maintenance_per_cycle", boring_min=26.7, ring_length=1.6,
+                                     ring_build={"kind": "fixed", "value": 32.0}, interventions=True, day_sigma=sig, day_rho=rho),
+                       days=days, seed=seed)
+    util["day_variation"].append({"in": {"day_sigma": sig, "day_rho": rho, "days": days, "seed": seed}, "out": asdict(r)})
 write("utilisation", util)
 from tunnelsim_models import max_rpm  # noqa: E402
 from tunnelsim_models.hard_rock import cutter_change_h_per_km, hard_rock_utilisation, rmr_class, support_downtime  # noqa: E402

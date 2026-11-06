@@ -29,7 +29,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from tunnelsim_models.utilisation import DriveSettings, simulate_drive  # noqa: E402
+from tunnelsim_models.utilisation import DAY_VARIATION_CROSSRAIL_EPB, DriveSettings, simulate_drive  # noqa: E402
 
 RING, BUILD = 1.6, 32.0
 # King et al. Table 3, EPB drives: TBM, drive, total days, days excluding delays, rings/d incl., rings/d excl., best day, best week
@@ -41,11 +41,14 @@ SHIFTS = (("2x12h_maintenance_per_cycle", "2 x 12 h, maintenance in each cycle")
 
 
 def forecast(shift: str, adv_mm_min: float, interventions: bool, runs: int = 20, days: int = 90, ring: float = RING,
-             learning_days: float = 0.0) -> dict:
+             learning_days: float = 0.0, variation: dict | None = None) -> dict:
     rs = [simulate_drive(DriveSettings(ring_length=ring, boring_min=ring / (adv_mm_min / 1000), ring_build={"kind": "fixed", "value": BUILD},
-                                       shift_pattern=shift, haulage="conveyor", interventions=interventions, learning_days=learning_days),
+                                       shift_pattern=shift, haulage="conveyor", interventions=interventions, learning_days=learning_days,
+                                       **(variation or {})),
                          days, seed) for seed in range(1, runs + 1)]
     return {"m_day": st.mean(r.mean_m_per_day for r in rs), "best_day_m": st.median(r.best_day for r in rs),
+            "best_day_ratio": st.median(r.best_day / r.mean_m_per_day for r in rs),
+            "best_week_ratio": st.median(r.best_week / (7 * r.mean_m_per_day) for r in rs),
             "rings_day": st.mean(r.mean_m_per_day for r in rs) / ring, "best_day": st.median(r.best_day for r in rs) / RING,
             "best_week": st.median(r.best_week for r in rs) / RING, "util": st.mean(r.utilisation for r in rs)}
 
@@ -81,4 +84,19 @@ if __name__ == "__main__":
         a = forecast(shift, 60, True, learning_days=90.0)
         b = forecast(shift, 60, True)
         print(f"| {label} | 60 | {a['m_day']:.1f} | {b['m_day']:.1f} | {a['m_day'] / b['m_day']:.2f} |")
+
+    print("\n### Day-to-day variation (fitted on Crossrail X and Y, tested on Barcelona)\n")
+    xy = [t for t in TABLE3 if t[1] in "XY"]
+    bd = st.median(t[6] / t[5] for t in xy)
+    bw = st.median(t[7] / (7 * t[5]) for t in xy)
+    print(f"Crossrail X and Y, medians of four TBMs: best day / mean working day {bd:.2f}, best week / mean week {bw:.2f}.\n")
+    print("| Case | Variation | Mean rings/day | Best day / mean | Best week / mean | Measured |\n|---|---|---|---|---|---|")
+    for var, vl in ((None, "none"), (DAY_VARIATION_CROSSRAIL_EPB, "fitted (sigma 0.4, rho 0.7)")):
+        f = forecast("2x12h_maintenance_per_cycle", 60, False, runs=12, days=360, variation=var)
+        print(f"| Crossrail-like, 1.6 m, 60 mm/min, 360 days | {vl} | {f['rings_day']:.1f} | {f['best_day_ratio']:.2f} | {f['best_week_ratio']:.2f} | "
+              f"{bd:.2f} / {bw:.2f} (used for the fit) |")
+    for adv in (60, 80):
+        f = forecast("2x12h_maintenance_per_cycle", adv, False, runs=12, days=300, ring=1.5, variation=DAY_VARIATION_CROSSRAIL_EPB)
+        print(f"| Barcelona-like, 1.5 m, {adv} mm/min, 300 days | fitted | {f['rings_day']:.1f} | {f['best_day_ratio']:.2f} | {f['best_week_ratio']:.2f} | "
+              f"best day / mean 2.67-3.16 (not used for the fit) |")
 

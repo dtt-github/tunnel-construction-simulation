@@ -130,14 +130,14 @@
       "value": 25.5,
       "world_record": 115.7,
       "above_world_record": false,
-      "epb_reference": 40.6,
+      "epb_reference": 94.4,
       "above_epb_reference": false
      },
      "week": {
       "value": 166.5,
       "world_record": 428.0,
       "above_world_record": false,
-      "epb_reference": 260.0,
+      "epb_reference": 345.6,
       "above_epb_reference": false
      },
      "month": {
@@ -184,14 +184,14 @@
       "value": 15.0,
       "world_record": 115.7,
       "above_world_record": false,
-      "epb_reference": 40.6,
+      "epb_reference": 94.4,
       "above_epb_reference": false
      },
      "week": {
       "value": 96.0,
       "world_record": 428.0,
       "above_world_record": false,
-      "epb_reference": 260.0,
+      "epb_reference": 345.6,
       "above_epb_reference": false
      },
      "month": {
@@ -238,14 +238,14 @@
       "value": 33.0,
       "world_record": 115.7,
       "above_world_record": false,
-      "epb_reference": 40.6,
+      "epb_reference": 94.4,
       "above_epb_reference": false
      },
      "week": {
       "value": 201.0,
       "world_record": 428.0,
       "above_world_record": false,
-      "epb_reference": 260.0,
+      "epb_reference": 345.6,
       "above_epb_reference": false
      },
      "month": {
@@ -292,14 +292,14 @@
       "value": 36.0,
       "world_record": 115.7,
       "above_world_record": false,
-      "epb_reference": 40.6,
+      "epb_reference": 94.4,
       "above_epb_reference": false
      },
      "week": {
       "value": 225.0,
       "world_record": 428.0,
       "above_world_record": false,
-      "epb_reference": 260.0,
+      "epb_reference": 345.6,
       "above_epb_reference": false
      },
      "month": {
@@ -370,6 +370,66 @@
      "maintenance_shift_and_idle": 0.0
     },
     "interventions": 2
+   }
+  }
+ ],
+ "day_variation": [
+  {
+   "in": {
+    "day_sigma": 0.4,
+    "day_rho": 0.7,
+    "days": 120,
+    "seed": 4
+   },
+   "out": {
+    "days": 120,
+    "rings": 1146,
+    "metres": 1833.6000000000001,
+    "utilisation": 0.17443878801214643,
+    "mean_m_per_day": 15.280000000000001,
+    "mean_m_per_week": 106.96000000000001,
+    "best_day": 43.20000000000002,
+    "best_week": 166.40000000000003,
+    "best_month": 614.4000000000001,
+    "shares": {
+     "boring": 0.17443878801214643,
+     "ring_build": 0.20917097647869035,
+     "general": 0.18820030453082734,
+     "train_delay": 0.0,
+     "maintenance_per_cycle": 0.24137166877172733,
+     "intervention": 0.18681826220661166,
+     "maintenance_shift_and_idle": 0.0
+    },
+    "interventions": 6
+   }
+  },
+  {
+   "in": {
+    "day_sigma": 0.25,
+    "day_rho": 0.0,
+    "days": 60,
+    "seed": 9
+   },
+   "out": {
+    "days": 60,
+    "rings": 614,
+    "metres": 982.4,
+    "utilisation": 0.18340746684107853,
+    "mean_m_per_day": 16.37333333333333,
+    "mean_m_per_week": 114.61333333333332,
+    "best_day": 32.00000000000001,
+    "best_week": 148.8,
+    "best_month": 592.0,
+    "shares": {
+     "boring": 0.18340746684107853,
+     "ring_build": 0.21942468584581598,
+     "general": 0.18747206640417552,
+     "train_delay": 0.0,
+     "maintenance_per_cycle": 0.2533810831436731,
+     "intervention": 0.1563146977652445,
+     "maintenance_shift_and_idle": 1.2434497875801753e-14
+    },
+    "interventions": 1
    }
   }
  ]

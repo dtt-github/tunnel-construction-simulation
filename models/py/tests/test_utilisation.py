@@ -77,6 +77,6 @@ def test_record_check_flags():
     chk = record_check(7.08, 130, 600, 2000)
     assert all(v["above_world_record"] for v in chk.values())  # 7.01-8 m class: 115.7 / 428 / 1482
     assert chk["day"]["world_record"] == 115.7
-    chk = record_check(6.5, 45, 100, 500)
+    chk = record_check(6.5, 100, 100, 500)  # above the best published EPB day (Crossrail 94.4 m), below the 6-7 m record 124.7
     assert chk["day"]["above_epb_reference"] and not chk["day"]["above_world_record"]
     assert record_check(15, 10, 10, 10)["day"]["world_record"] is None

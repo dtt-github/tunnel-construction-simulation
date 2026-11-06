@@ -241,3 +241,18 @@ def test_learning_curve():
     first = simulate_drive(DriveSettings(**kw, learning_days=LEARNING_DAYS_BARCELONA), days=30, seed=3)
     assert first.mean_m_per_day < 0.7 * steady.mean_m_per_day
     assert learn.best_day == pytest.approx(steady.best_day, rel=0.15)
+
+
+def test_day_variation():
+    from tunnelsim_models.utilisation import DAY_VARIATION_CROSSRAIL_EPB, DriveSettings, simulate_drive
+
+    kw = {"shift_pattern": "2x12h_maintenance_per_cycle", "boring_min": 26.7, "ring_length": 1.6,
+          "ring_build": {"kind": "fixed", "value": 32.0}, "interventions": False}
+    flat = [simulate_drive(DriveSettings(**kw), 360, s) for s in range(1, 6)]
+    var = [simulate_drive(DriveSettings(**kw, **DAY_VARIATION_CROSSRAIL_EPB), 360, s) for s in range(1, 6)]
+    mean = lambda rs, k: sum(getattr(r, k) for r in rs) / len(rs)
+    # the mean day is kept within a few per cent; best day and week rise to about 3x and 2x the mean (Crossrail)
+    assert mean(var, "mean_m_per_day") == pytest.approx(mean(flat, "mean_m_per_day"), rel=0.05)
+    assert 2.4 < mean(var, "best_day") / mean(var, "mean_m_per_day") < 3.6
+    assert 1.6 < mean(var, "best_week") / (7 * mean(var, "mean_m_per_day")) < 2.4
+    assert mean(flat, "best_day") / mean(flat, "mean_m_per_day") < 1.3

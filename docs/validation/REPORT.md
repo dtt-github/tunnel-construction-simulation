@@ -60,6 +60,7 @@
 
 | Check | Data | Result | Kind |
 |---|---|---|---|
+| EPB best day / mean day, Barcelona | [Barcelona Line 9](https://www.mdpi.com/2071-1050/17/9/3966); variation fitted on Crossrail only | 2.65–2.71 against 2.67–3.16 | Independent: matches, at the low end |
 | EPB advance, second project | [Barcelona Line 9](https://www.mdpi.com/2071-1050/17/9/3966) (CC BY) | Model 18–19 m/day against 26.4–28.5 (excluding stationary periods); best day 20–21 m against 72–90 m | Independent: fails, about 30 % slow on average, 3.5–4× on the best day |
 | EPB rings per average working day | King, Thomas & Stenning (2017), Table 3 | 11.8–12.5 against 12.3–14.9 | Independent: matches (ring length, build time and shifts are taken from the sources) |
 | EPB whole drive | same | 9.2–9.6 against drive X 8.9–9.0; drive Y 5.1–5.5 | Matches X; Y has station transits, not modelled |
@@ -133,7 +134,7 @@ Ranked by how much each changes what a user sees, then by whether open data coul
 | # | Gap | Demos | Effect | Open data to close it |
 |---|---|---|---|---|
 | 1 | Volume loss is a scenario input; it doesn't respond to face pressure or grouting. **Partly closed 6 Nov 2026:** in London Clay (half the EPB drive) it now rises with the face's load factor (Macklin 1999); at normal pressure it equals the measured value. Still open: grouting, other ground, the Mixshield in Chalk | EPB, Mixshield | Settlement doesn't change with the operator's actions outside London Clay | Needs paired face pressure and volume loss: none found under CC BY |
-| 2 | Downtime distributions come from one 6.88 m EPB (Tabriz); no day-to-day correlation, locomotive travel or slurry-plant stops. Searched 6 Nov 2026: no open delay breakdown found; Barcelona Line 9 confirms the gap on a second project and gives a learning-curve length (now modelled, shape assumed) | EPB, Mixshield | Best days too low; Mixshield working day 7–58 % fast; whole drive 2× fast | Crossrail and Thames delay breakdowns are not published; look for other open drive logs |
+| 2 | Downtime distributions come from one 6.88 m EPB (Tabriz); no locomotive travel or slurry-plant stops. Day-to-day variation now fitted on Crossrail and tested on Barcelona (6 Nov 2026). Searched 6 Nov 2026: no open delay breakdown found; Barcelona Line 9 confirms the gap on a second project and gives a learning-curve length (now modelled, shape assumed) | EPB, Mixshield | Best days too low; Mixshield working day 7–58 % fast; whole drive 2× fast | Crossrail and Thames delay breakdowns are not published; look for other open drive logs |
 | 3 | ~~Torque in foam-conditioned clay 2.7× over~~ **Addressed 6 Nov 2026:** paste shear (2 kPa, Bezuijen et al. 2005) gives Sofia 0.98–1.14×. Open: the paste/friction split by ground type is not from a published rule, and no second open dataset in conditioned clay tests it | EPB | – | An open torque dataset in conditioned clay |
 | 4 | CSM penetration fitted to one project (Follo gneiss); doesn't follow section strength | Gripper, double shield | Penetration in other rocks is untested | An open TBM dataset in other rock types (Yinsong is not open) |
 | 5 | Chamber model: screw efficiency and decay length unchecked; the paste weight now checked against Botlek (6 Nov 2026); the GPU chamber is blocked | EPB | Chamber pressure dynamics illustrative | Botlek gradients (Bezuijen 2005) are now in hand; needs the MPM fix or an analytical gradient model |
@@ -156,6 +157,7 @@ A calibrated parameter is trustworthy only once data it was not fitted on confir
 | Ulvin mucking rate and downtime share | Ulvin | T10.5 contractor estimate: inside the range |
 | Norwegian contour spacing 0.47 m, burden 0.75 B | Published T10.5 hole counts | Nothing else |
 | MPM friction mapping μ = sin φ′ | Rankine wall | Column collapse (yes); face pressure (bracket only) |
+| Day-to-day variation σ 0.4, ρ 0.7 | Crossrail X and Y best day and week | Barcelona best day / mean (yes, at the low end) |
 
 ## Keeping this page right
 

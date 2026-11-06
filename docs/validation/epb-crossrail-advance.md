@@ -70,7 +70,7 @@ The longer shield raises the shield-friction part of the thrust. Total thrust at
 
 - **The average working day matches.** With the Crossrail shift pattern and no tool interventions, the model gives 11.8–12.5 rings a day, against 12.3–14.9 on Crossrail's days without delays. In other words, the general activities and per-cycle maintenance from the Tabriz project add about the time per ring that Crossrail lost on an ordinary day.
 - **The whole-drive average matches drive X, not Y.** With tool interventions, the model gives 9.2–9.6 rings a day, close to drive X's 8.9–9.0. Drive Y's 5.1–5.5 includes three station transits and a maintenance stop at Stepney Green, which the model does not have.
-- **The best days are far too low:** 13–14 rings against 33–59, and about 90 rings a week against 169–216. A 33–59 ring day needs a whole cycle of 24–44 min. The model draws each ring's push, build, activities and maintenance independently, so a day averages about 12 rings and never has a run of fast rings. Crossrail's 32 min average build must have had much faster rings in it; Tideway's fastest was 12 min. The model has no day-to-day correlation, and no open source gives one.
+- **The best days are far too low:** 13–14 rings against 33–59, and about 90 rings a week against 169–216. A 33–59 ring day needs a whole cycle of 24–44 min. The model draws each ring's push, build, activities and maintenance independently, so a day averages about 12 rings and never has a run of fast rings. Crossrail's 32 min average build must have had much faster rings in it; Tideway's fastest was 12 min. **Addressed 6 Nov 2026** with a day-to-day productivity factor fitted to these drives and tested on Barcelona (see [below](#day-to-day-variation-fitted-on-crossrail-tested-on-barcelona)).
 
 ## A second project: Barcelona Metro Line 9
 
@@ -89,6 +89,25 @@ The longer shield raises the shield-friction part of the thrust. Total thrust at
 | 80 mm/min | 19.0 m/day (12.6 rings), best day 21 m | |
 
 **What this shows:** a second, independent project where the model is too slow, about 30 % on average and 3.5–4× on the best day. Crossrail's working day matched, Barcelona's did not; Barcelona's machines are larger and its build time is unknown, so part of the gap may be the cycle, but the best-day gap repeats Crossrail's and points to the missing day-to-day variation, not a single wrong time.
+
+## Day-to-day variation: fitted on Crossrail, tested on Barcelona
+
+**The model:** each calendar day has a productivity factor, lognormal with mean 1 and autocorrelated from day to day (log AR(1), standard deviation σ, correlation ρ). It scales the time of boring, ring build, general activities and per-cycle maintenance, so good days run whole cycles fast and bad days slow, and the mean day stays the same. It is drawn from its own random stream (`day_sigma`, `day_rho` in `simulate_drive`; off by default).
+
+**The fit (calibrated, on Crossrail X and Y only):** the four TBMs give best day / mean working day 2.52–4.80 (median 3.00) and best week / mean week 1.77–2.51 (median 1.94), over about 360 production days. A grid over σ 0.3–1.0 and ρ 0–0.9 (12 runs of 360 days, 1.6 m rings, 60 mm/min, 2 × 12 h, no tool interventions) gives **σ 0.4, ρ 0.7**:
+
+| Case | Variation | Mean rings/day | Best day / mean | Best week / mean | Measured |
+|---|---|---|---|---|---|
+| Crossrail-like, 360 days | none | 11.8 | 1.10 | 1.05 | 3.00 / 1.94 (used for the fit) |
+| Crossrail-like, 360 days | fitted | 11.6 | 2.90 | 1.96 | 3.00 / 1.94 (used for the fit) |
+| Barcelona-like, 1.5 m, 60 mm/min, 300 days | fitted | 11.8 | **2.65** | 1.93 | best day / mean **2.67–3.16** (not used) |
+| Barcelona-like, 1.5 m, 80 mm/min, 300 days | fitted | 12.4 | **2.71** | 1.92 | |
+
+**The test:** Barcelona's best days, 48 and 60 rings against means of 18 and 19, were not used for the fit. The model's ratio, 2.65–2.71, is at the low end of the measured 2.67–3.16. In metres the best day is still low (about 49 m against 72–90), because the model's mean day is about 30 % slow there (see above).
+
+**Not for the Mixshield:** on the Thames drive the best day is only about 1.7–2.1 × the working day (16–17 against 7.9–10.0 rings), and the model already came close without variation. So the variation is used in the EPB demo only.
+
+**Reference rates:** with real best days now possible, the EPB references the demo checks against include Crossrail's best day and week (59 rings, 94.4 m; 216 rings, 345.6 m; {K}) and Barcelona's best day (90 m; {BCN}), not only the earlier 40.6 m Bangkok day.
 
 ## Learning curve (added 6 Nov 2026)
 

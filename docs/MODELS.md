@@ -489,7 +489,7 @@ Outputs: utilisation (boring time / calendar time); mean advance per day and wee
 - no breakdowns by subsystem, station transits or ground-related stops besides tool interventions;
 - the learning curve is optional (`learning_days`): about three months to average speed from [Barcelona Line 9](https://www.mdpi.com/2071-1050/17/9/3966), with a linear ramp from half speed that is assumed;
 - Barcelona Line 9, a second project, also runs about 30 % faster than the model on average and 3.5–4× on its best day ([validation](validation/epb-crossrail-advance.md#a-second-project-barcelona-metro-line-9));
-- no day-to-day correlation of ring times, so best days and weeks are too low;
+- day-to-day variation is optional (`day_sigma`, `day_rho`): a daily productivity factor **fitted** to Crossrail's best days and weeks ([King et al. 2017](https://learninglegacy.crossrail.co.uk/wp-content/uploads/2017/04/Machine-driven-tunnels-on-the-Elizabeth-line-London.pdf); σ 0.4, ρ 0.7) and tested on [Barcelona Line 9](https://www.mdpi.com/2071-1050/17/9/3966) (best day / mean 2.65–2.71 against 2.67–3.16). Used for the EPB demo, not for the Mixshield, whose drive varies less;
 - on the Thames Tunnel Mixshields (drive H) the working day is 7–58 % fast (10.7–12.5 against 7.9–10.0 rings), with no separation-plant stops in the model ([validation](validation/slurry-thames-advance.md));
 - hard-rock terms (stroke, regrip, rock support, cutter changes per cutter) are still to come.
 

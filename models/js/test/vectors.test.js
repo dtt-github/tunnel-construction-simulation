@@ -163,6 +163,11 @@ test("utilisation model matches python", () => {
       interventions: true, learning_days: i.learning_days, learning_start: i.learning_start }, i.days, i.seed);
     close(r, out, `learning ${i.learning_days} d`, 1e-6);
   }
+  for (const { in: i, out } of v.day_variation) {
+    const r = simulateDrive({ shift_pattern: "2x12h_maintenance_per_cycle", boring_min: 26.7, ring_length: 1.6, ring_build: { kind: "fixed", value: 32 },
+      interventions: true, day_sigma: i.day_sigma, day_rho: i.day_rho }, i.days, i.seed);
+    close(r, out, `day variation ${i.day_sigma}/${i.day_rho}`, 1e-6);
+  }
 });
 
 test("hard-rock models match python", () => {

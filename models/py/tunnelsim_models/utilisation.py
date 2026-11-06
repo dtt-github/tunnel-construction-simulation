@@ -122,6 +122,12 @@ SHIFT_PATTERNS = {
 PER_CYCLE_MAINTENANCE_MIN = 25.0 + 12.0  # TBM + logistics system, Tabriz
 LEARNING_DAYS_BARCELONA = 90.0  # "a little over three months to reach average speed", Barcelona Line 9 (see above)
 LEARNING_START = 0.5  # productivity on the first day as a fraction of the steady rate: assumed
+# Day-to-day variation (day_sigma, day_rho) FITTED to the Crossrail EPB drives X and Y (King et al. 2017, Table 3):
+# best day / mean day 3.0 and best week / mean week 1.94 (medians of four TBMs) over about 360 production days; the
+# fit gives 2.90 and 1.96 with the mean unchanged. Tested on Barcelona Line 9 (not used for the fit): best day / mean
+# 2.65-2.71 against 2.67-3.16 measured. The Thames Mixshields vary less (best day about 1.7-2.1 x their working day),
+# so it is not used for them. See docs/validation/epb-crossrail-advance.md.
+DAY_VARIATION_CROSSRAIL_EPB = {"day_sigma": 0.4, "day_rho": 0.7}
 
 
 @dataclass
@@ -135,6 +141,8 @@ class DriveSettings:
     interventions: bool = True
     learning_days: float = 0.0  # learning curve length (calendar days); 0 = steady from the start
     learning_start: float = LEARNING_START  # productivity on day 0 as a fraction of the steady rate
+    day_sigma: float = 0.0  # day-to-day variation: standard deviation of the log productivity factor (0 = off)
+    day_rho: float = 0.0  # its correlation from one day to the next
 
 
 @dataclass(frozen=True)
@@ -190,12 +198,24 @@ def simulate_drive(settings: DriveSettings, days: int = 90, seed: int = 1) -> Dr
             dur -= d
         return t, max(dur, 0.0)
 
+    # day-to-day variation: a lognormal productivity factor per day with mean 1, AR(1) in its log, drawn from its own
+    # stream so the ring-by-ring draws are unchanged
+    day_factor = [1.0] * days
+    if settings.day_sigma > 0:
+        drng, x = Rng(seed ^ 0x9E3779B9), 0.0
+        s, r = settings.day_sigma, settings.day_rho
+        for i in range(days):
+            z = normal_inv(drng.uniform())
+            x = z * s if i == 0 else r * x + s * math.sqrt(1 - r * r) * z
+            day_factor[i] = math.exp(x - s * s / 2)
+
     def slow(t: float) -> float:
-        """Duration factor of production activities at time t: 1 / productivity on the learning curve."""
+        """Duration factor of production activities at time t: 1 / productivity (learning curve and day factor)."""
+        k = 1.0 / day_factor[min(int(t / DAY), days - 1)]
         if settings.learning_days <= 0:
-            return 1.0
+            return k
         f = min(t / (settings.learning_days * DAY), 1.0)
-        return 1.0 / (settings.learning_start + (1.0 - settings.learning_start) * f)
+        return k / (settings.learning_start + (1.0 - settings.learning_start) * f)
 
     while t < horizon:
         bore = settings.boring_min if settings.boring_min is not None else sample(DIST["boring"], rng.uniform())
@@ -209,7 +229,7 @@ def simulate_drive(settings: DriveSettings, days: int = 90, seed: int = 1) -> Dr
         if settings.haulage == "rail":
             t, _ = work(t, sample(DIST["train_delay"], rng.uniform()), "train_delay")
         if pattern["per_cycle_maintenance"]:
-            t, _ = work(t, PER_CYCLE_MAINTENANCE_MIN, "maintenance_per_cycle")
+            t, _ = work(t, PER_CYCLE_MAINTENANCE_MIN * (1.0 / day_factor[min(int(t / DAY), days - 1)]), "maintenance_per_cycle")
         if rings >= next_stop and t < horizon:
             d = min(sample(DIST["stop_hours"], rng.uniform()) * 60, horizon - t)
             time["intervention"] += d
@@ -252,6 +272,12 @@ EPB_REFERENCES = (
      "project": "Roby & Willis (2014)", "source": "https://www.robbinstbm.com/wp-content/uploads/2014/08/FastEPBAdvance_NAT2014.pdf"},
     {"what": "week, 9.73 m EPB", "metric": "week", "value": 260.0, "diameter": 9.73, "project": "Riyadh Metro Line 5",
      "source": "https://www.herrenknecht.com/en/references/referencesdetail/riyadh-metro/"},
+    {"what": "best day, 59 rings of 1.6 m", "metric": "day", "value": 94.4, "diameter": 7.1, "project": "Crossrail drive Y, TBM Victoria",
+     "source": "King, Thomas & Stenning (2017), Table 3, https://learninglegacy.crossrail.co.uk/wp-content/uploads/2017/04/Machine-driven-tunnels-on-the-Elizabeth-line-London.pdf"},
+    {"what": "best week, 216 rings of 1.6 m", "metric": "week", "value": 345.6, "diameter": 7.1, "project": "Crossrail drive Y, TBM Victoria",
+     "source": "King, Thomas & Stenning (2017), Table 3, https://learninglegacy.crossrail.co.uk/wp-content/uploads/2017/04/Machine-driven-tunnels-on-the-Elizabeth-line-London.pdf"},
+    {"what": "best day, 60 rings of 1.5 m", "metric": "day", "value": 90.0, "diameter": 9.4, "project": "Barcelona Metro Line 9, Section 1D",
+     "source": "https://www.mdpi.com/2071-1050/17/9/3966"},
 )
 EPB_WEEKLY_SURVEY = {"mean": 85.4, "sd": 36.0, "min": 32.6, "max": 178.5,
                      "source": "https://www.robbinstbm.com/wp-content/uploads/2014/08/FastEPBAdvance_NAT2014.pdf"}

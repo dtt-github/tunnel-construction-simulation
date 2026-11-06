@@ -6,6 +6,11 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ### Changed
 
+- **Best days and weeks: day-to-day variation, fitted on Crossrail, tested on Barcelona** (`day_sigma`, `day_rho` in `simulate_drive`, Python and JavaScript; EPB demo):
+  - a daily productivity factor (lognormal, mean 1, correlated day to day) scales boring, ring build and per-cycle activities, so whole days run fast or slow while the mean stays the same;
+  - fitted to Crossrail drives X and Y ([King et al. 2017](https://learninglegacy.crossrail.co.uk/wp-content/uploads/2017/04/Machine-driven-tunnels-on-the-Elizabeth-line-London.pdf): best day 3.0×, best week 1.94× the mean) as σ 0.4, ρ 0.7; tested on [Barcelona Line 9](https://www.mdpi.com/2071-1050/17/9/3966), not used for the fit: best day 2.65–2.71× the mean against 2.67–3.16× measured;
+  - the EPB forecast's best day rises from about 14 to about 42 m; the reference rates add Crossrail's best day and week and Barcelona's best day. The Mixshield keeps no variation: its Thames drive varies less.
+
 - **A second advance check and a learning curve** ([Barcelona Line 9](https://www.mdpi.com/2071-1050/17/9/3966), Sustainability 2025, CC BY):
   - Barcelona's 9.40 m EPBs averaged 26.4–28.5 m/day with best days of 72–90 m; the drive model gives 18–19 m/day and 20–21 m, about 30 % slow on average and 3.5–4× on the best day, confirming on a second project that best days are too low;
   - the drive model has an optional learning curve (`learning_days`): about three months to average speed as at Barcelona, with a linear ramp from half speed (assumed). The EPB and Mixshield forecasts show the first 90 days of a new drive (0.78–0.83 of the steady rate) beside the steady forecast;
