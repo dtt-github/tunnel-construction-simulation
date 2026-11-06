@@ -11,7 +11,8 @@ from .hard_rock import RMR_CLASSES, HardRockUtilisation, cutter_change_h_per_km,
 from .ground_response import RockMass, Support, equivalent_mohr_coulomb, ground_reaction, ldp, shield_friction, squeezing_class, squeezing_strain, support_equilibrium
 from .sem import SEM_ROCK_CLASSES, SHOTCRETE, LiningInteraction, early_strength_class, lining_interaction, shotcrete_modulus, shotcrete_strength, sulem_convergence, trigger_level
 from .slurry import Cushion, CushionState, Infiltration, discharge_density, dry_solids_flow, durand_velocity, forms_membrane, infiltration, stagnation_gradient
-from .drill_blast import DESIGNS, SUPPORT_CLASSES, Cycle, Round, design_round, max_charge_per_delay, ppv, round_cycle, ss4604866_limit
+from .drill_blast import (DESIGNS, PRACTICE_SPECIFIC_CHARGE, SUPPORT_CLASSES, Cycle, Round, design_round, max_charge_per_delay,
+                          ppv, practice_specific_charge, round_cycle, ss4604866_limit)
 from .lining import RingForces, annulus_volume, bursting_force, grout_window, jacking_stress, jsce_ring, ring_loads, taper, wood_inertia
 from .scenario import FaceGround, Layer, Scenario
 from .face_support import DAUB_DEFAULTS, FaceSupport, SupportWindow, daub_window, silo_stress, vermeer_limit, wedge_silo

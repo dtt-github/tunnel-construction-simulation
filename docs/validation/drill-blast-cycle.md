@@ -76,8 +76,31 @@ Bolting (12/h) and sprayed concrete (6 m³/h) stay at the NFF contract rates. Th
 - **Against Tunnelbyggetid:** class II gives 37 m/week, against about 48 m/week for the Tunnelbyggetid case. That case uses 109 charged holes, against the demo's 134 (published 120–148 for 80 m² in medium to poor blastability, Jakobsen et al. 2024). It is also a model, not a log, and its downtime assumptions are not open.
 - **Against Ulvin:** the logged 23 m/week was for a 120 m² profile, so it is a lower bound.
 
+## Specific charge and charged holes against current practice
+
+**Data:** [Gjengedal & Jakobsen 2025](https://airdrive.eventsair.com/eventsairwesteuprod/production-atlanticmice-public/927385ad0d3e425bbbf6581c4573f524), Eurock 2025, Trondheim (ISBN 978-82-8208-079-8, open on the conference site). They compiled 353 logged blast rounds from four Norwegian tunnels driven in 2021–2025, with explosive weight per round from the contractors' reports to the authorities, mostly bulk emulsion. Their Fig. 5 gives each project's best-fit trend of specific charge (kg per m³ of solid rock) against cross-section A. At the T10.5 area (74.6 m²):
+
+| Project | Trend (Fig. 5) | At 74.6 m² (kg/m³) |
+|---|---|---|
+| Pro. 12, rural road, poor blastability | 13.6 A^−0.35 | 3.01 |
+| Pro. 13, rural road, poor blastability | 11.515 A^−0.339 | 2.67 |
+| Pro. 15, rural road, good blastability | 11.63 A^−0.321 | 2.92 |
+| Pro. 14, urban utility tunnel with blasting limits | 14.327 A^−0.452 | 2.04 |
+| NTNU prognosis model, 48 mm holes (read from Fig. 5) | – | about 1.2–1.45 |
+| **Demo, Norwegian practice pattern, textbook charging** | – | **1.81** |
+
+**Charged holes (Fig. 4):** the logged rounds at 75–80 m² have about 125–180 charged holes; the demo's 134 is inside, as against the earlier published 126–158.
+
+**What this shows:**
+- **Hole count matches practice;** the hole pattern was fitted to published counts (see Changes made), so this is a consistency check.
+- **Specific charge is about a third low** (32–40 % below the road-tunnel trends), though above the NTNU model. The authors find that current road practice uses about twice the NTNU model and suspect over-consumption of bulk emulsion.
+- **Not fitted:** charging every column fully gives only 2.3 kg/m³. Matching practice would need assumptions about contour charging, stemming and waste that no open source gives hole by hole, so the design is unchanged and the demo shows the logged range beside its own value.
+- **Consequence for vibration:** the vibration estimate uses the designed charge per delay, so it is likely low by a similar factor.
+
 ## Limits
 
 - Only one logged round breakdown is open (Ulvin, 120 m², 2013). The T10.5 activity times are one contractor's estimate.
 - Weekly advance by support class is not published openly, so the class IV rate (22 m/week) is untested.
+- Charging time per hole is still an assumption (0.6 min per hole, two lines); no open source times it. Searched again 6 Nov 2026.
+- The specific charge is about a third below logged road-tunnel practice (see above); the design is not fitted to it.
 - Activities do not overlap. On site, ventilation often overlaps mucking, and charging sometimes overlaps drilling: at Ulvin by 16 min a round.

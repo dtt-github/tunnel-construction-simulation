@@ -368,6 +368,24 @@ RATES = {
 }
 HOURS_PER_WEEK = 101.0  # production basis of Tunnelbyggetid (about 30 recent Norwegian projects); Ulvin 105 h
 
+# Specific charge in current Norwegian practice: best-fit power curves y = a A^b (kg of explosive per m^3 of solid rock,
+# A the cross-section in m^2) through 353 logged blasts in four tunnels, 2021-2025, mostly bulk emulsion (Gjengedal &
+# Jakobsen 2025, Current practice D&B tunnelling versus the NTNU prognosis model for D&B blast design, Eurock 2025,
+# Trondheim, ISBN 978-82-8208-079-8, Fig. 5 and Table 1, https://airdrive.eventsair.com/eventsairwesteuprod/production-atlanticmice-public/927385ad0d3e425bbbf6581c4573f524).
+# The three rural road tunnels plot about twice the NTNU model; the urban utility tunnel with blasting limits lower.
+PRACTICE_SPECIFIC_CHARGE = {
+    "Pro. 12, rural road, poor SPR": (13.6, -0.35),
+    "Pro. 13, rural road, poor SPR": (11.515, -0.339),
+    "Pro. 15, rural road, good SPR": (11.63, -0.321),
+    "Pro. 14, urban utility, blasting limits": (14.327, -0.452),
+}
+
+
+def practice_specific_charge(area: float, road_only: bool = True) -> tuple[float, float]:
+    """Lowest and highest project trend (kg/m^3 solid) at cross-section `area` (m^2), road tunnels only by default."""
+    ys = [a * area ** b for name, (a, b) in PRACTICE_SPECIFIC_CHARGE.items() if not road_only or "road" in name]
+    return min(ys), max(ys)
+
 
 def support_quantities(width: float, wall_height: float, pull: float, cls: str) -> dict:
     """Bolts and sprayed concrete for one round of length `pull` in a support class."""

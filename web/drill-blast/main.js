@@ -8,7 +8,7 @@
 
 import {
   designRound, roundCycle, HOURS_PER_WEEK, supportQuantities, SUPPORT_CLASSES, horseshoe, holeCharge, bottomCharge, ppv, maxChargePerDelay,
-  ss4604866Limit, NORTHERN_LINK, emptyHolesForDepth, overbreakPercent,
+  ss4604866Limit, NORTHERN_LINK, emptyHolesForDepth, overbreakPercent, practiceSpecificCharge,
 } from "../../models/js/index.js";
 import { THREE, createScene, label, placeLabels, mat, box, fmt, dl, CUT, BEHIND_FACE, AHEAD_OF_FACE } from "../hard-rock/common.js";
 
@@ -430,6 +430,8 @@ function hud() {
     ["Charged holes", `${rd.n_charged} (Norwegian rounds of 71–95 m²: 126–158)`],
     ["Drill metres", `${fmt(rd.drill_metres, 0)} m (${fmt(rd.specific_drilling, 2)} m/m³)`],
     ["Explosive", `${fmt(rd.explosive, 0)} kg bulk emulsion, ${fmt(rd.specific_charge, 2)} kg/m³`],
+    // logged practice, rural road tunnels 2021-2024 (Gjengedal & Jakobsen 2025, Eurock 2025, Fig. 5 trends)
+    ["Road tunnels logged 2021–24", `${practiceSpecificCharge(AREA).map((v) => fmt(v, 1)).join("–")} kg/m³ at this size: textbook charging is about a third lower`],
   ]);
   // cycle: step bars with the current position
   const total = cy.total_h, done = cy.steps.slice(0, S.step).reduce((a, [, h]) => a + h, 0) + (hours - S.left / 3600);

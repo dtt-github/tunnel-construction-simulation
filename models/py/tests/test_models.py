@@ -217,3 +217,13 @@ def test_deflection_modification_factor():
     assert centred["hog"] is None and centred["sag"][0] == 20
     side = deflection_ratios(t.settlement, 20, 40, t.i, t.i)
     assert side["sag"] is None and side["hog"][1] > 0
+
+
+def test_practice_specific_charge():
+    from tunnelsim_models import design_round, practice_specific_charge
+
+    lo, hi = practice_specific_charge(74.59)  # Gjengedal & Jakobsen (2025) road-tunnel trends at the T10.5 area
+    assert (round(lo, 2), round(hi, 2)) == (2.67, 3.01)
+    assert practice_specific_charge(74.59, road_only=False)[0] < 2.1  # the urban tunnel with blasting limits
+    # the demo's Norwegian-practice round charges less than the road tunnels logged in 2021-2024
+    assert design_round(10.6, 2.9, 5.2).specific_charge < 0.7 * lo

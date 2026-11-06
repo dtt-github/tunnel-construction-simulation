@@ -256,6 +256,7 @@ dbv["basic"] = {"qb": db.bottom_charge(38, 1.5, 0.8), "b": db.burden(38, 1.36), 
                 "h": db.hole_depth(0.204), "cut": db.cut_sections(0.204, 5.2), "x50": db.kuz_ram_x50(7, 0.6, 34.79),
                 "n": db.uniformity_index(2.5, 2.44, 89, 0.1, 8, 9.5), "ppv": db.ppv(40, 8), "qmax": db.max_charge_per_delay(50, 20),
                 "ss": [db.ss4604866_limit(d_, "rock", g) for d_ in (15, 60, 500) for g in ("rock", "sand_gravel", "clay")]}
+dbv["practice"] = [{"in": [a, r], "out": list(db.practice_specific_charge(a, r))} for a in (30, 74.59, 120) for r in (True, False)]
 write("drill_blast", dbv)
 from tunnelsim_models import lining as ln  # noqa: E402
 

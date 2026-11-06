@@ -6,6 +6,10 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ### Changed
 
+- **Drill & blast specific charge checked against logged practice** ([Gjengedal & Jakobsen 2025](https://airdrive.eventsair.com/eventsairwesteuprod/production-atlanticmice-public/927385ad0d3e425bbbf6581c4573f524), Eurock 2025, 353 logged rounds):
+  - the demo's T10.5 round (134 charged holes, 1.81 kg/m³ with textbook charging) has the logged number of charged holes but about a third less explosive than three Norwegian road tunnels in 2021–24 (2.67–3.01 kg/m³ at this size); it is above the NTNU model;
+  - not fitted: full columns give only 2.3 kg/m³, and matching would need unsourced assumptions. The demo now shows the logged range beside its own value, and notes that the vibration estimate is likely low for the same reason (`practice_specific_charge` in Python and JavaScript).
+
 - **Building deflection ratio with building stiffness** (EPB and Mixshield demos; `deflection_ratios`, `deflection_modification_factor`, `frame_bending_stiffness`, `relative_bending_stiffness` in Python and JavaScript):
   - each building shows its greenfield deflection ratio Δ/L in sagging or hogging and the value with its bending stiffness, from Potts & Addenbrooke's (1997) modification factors as plotted by [Mair 1997](https://www.issmge.org/uploads/publications/1/31/1997_04_0052.pdf), digitised to about ±0.03;
   - the building's EI is an assumed upper estimate from storeys (floor slabs bending together); the damage category stays on greenfield horizontal strain, because no open source gives the horizontal-strain factors.

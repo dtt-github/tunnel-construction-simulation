@@ -93,6 +93,7 @@
 | T10.5 class II activities | Furunes & Strype (2022), NTNU, contractor estimate | All inside P5–P95; drilling, mucking and spraying above the median | Independent, except ventilation and scaling, set at the median |
 | Round time and weekly advance by class | NFF Publication 14 | 12.7 h against "about 12 h" | Matches; production hours set from the Tunnelbyggetid basis |
 | Hole count, T10.5 | published counts | 134 and 45 against 126–158 and 45–50 | Matches, but the contour spacing and burden were fitted to these counts |
+| Specific charge, T10.5 | [Gjengedal & Jakobsen 2025](https://airdrive.eventsair.com/eventsairwesteuprod/production-atlanticmice-public/927385ad0d3e425bbbf6581c4573f524): 353 logged rounds, three rural road tunnels 2021–24 | 1.81 against 2.67–3.01 kg/m³ (trend at 74.6 m²); charged holes 134 against about 125–180 | Independent: fails, about a third low; not fitted (see the drill & blast page) |
 
 ### Face support, chamber, slurry and lining (analytical)
 
@@ -135,7 +136,7 @@ Ranked by how much each changes what a user sees, then by whether open data coul
 | 5 | Chamber model (screw efficiency, decay length, paste weight) unchecked; the GPU chamber is blocked | EPB | Chamber pressure dynamics illustrative | Botlek gradients (Bezuijen 2005) are now in hand; needs the MPM fix or an analytical gradient model |
 | 6 | ~~Face support: DAUB factors unverified; no seepage forces~~ Closed 6 Nov 2026: factors and deviations checked against DAUB (2016), example 8.1 reproduced; seepage arises only below the groundwater pressure. The Mixshield's operating range is as narrow as 36 kPa in places | EPB, Mixshield | – | – |
 | 7 | Gripper force, stroke and ring-build time for a 10 m double shield are not published | Double shield | Cycle times assumed | Manufacturer or thesis data |
-| 8 | Drill & blast specific charge (1.8 kg/m³), charging time per hole and support-work overlap | Drill & blast | Round time and peak weeks | Norwegian theses (NTNU) with logged rounds |
+| 8 | Drill & blast: specific charge about a third below logged practice (checked 6 Nov 2026, not fitted); charging time per hole and support-work overlap still unsourced | Drill & blast | Round time and peak weeks | Norwegian theses (NTNU) with logged rounds |
 | 9 | SEM: Sulem time law from one claystone site; sand-lens position illustrative; the whole-ring term transferred | SEM | Convergence history is illustrative | A convergence time series in comparable ground |
 | 10 | Building damage uses greenfield strain only. **Partly addressed 6 Nov 2026:** the greenfield and stiffness-modified deflection ratio are shown per building (Potts & Addenbrooke via Mair 1997, digitised; EI assumed); the category still uses greenfield horizontal strain | EPB, Mixshield | Damage categories conservative | Relative-stiffness factors of Potts & Addenbrooke (1997). Searched 6 Nov 2026: the method and the deflection-ratio chart are in Mair (1997, [ISSMGE library](https://www.issmge.org/uploads/publications/1/31/1997_04_0052.pdf)), scanned; the horizontal-strain curves the demos need (M vs α*) were not found in any open source |
 
