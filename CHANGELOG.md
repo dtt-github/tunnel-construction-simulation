@@ -6,6 +6,8 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ### Changed
 
+- **Double shield installed thrust 95 MN** (was 150 MN; `web/hard-rock/double.js`): the main thrust of the 10.71 m Brenner double shields (Maggio 2020, Table 3.2), the one open figure for a 10 m double shield. In the fault zone (148 MN sliding, 229 MN to restart) the jamming check now reports the shield jammed, where it reported a risk after standstill. The auxiliary thrust is not published; the alarm does not stop the drive.
+
 - **Thames chalk trough: K 0.4, volume loss 0.20 %** (`models/scenarios/thames-plumstead-north-woolwich.json`; Mixshield demo; [settlement validation](docs/validation/settlement.md)):
   - K from three chalk sources not used for the volume-loss fit, all narrower than the old 0.5: Store Road 0.39–0.40, CTRL 0.43, Round Hill 0.25–0.30. The second bore's K towards and away from the first is 0.4 too;
   - volume loss refitted to the same 17 Plumstead – Woolwich sections: 0.20 % (0.08–0.45 %). Smax predictions are unchanged; the trough is narrower and steeper;
@@ -82,6 +84,12 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 - **Second-bore horizontal strain in the EPB and Mixshield demos:** with "after both drives" shown, the ground movement of both bores was directed at the first bore's axis, which overstated the strain about 3× on the second bore's side. Each bore's movement now points to its own axis. With both bores at 1 % volume loss, buildings at category 2 or worse go from 26 to 0 (EPB) and 10 to 0 (Mixshield); at 2 %, from 31 to 20 and 18 to 8. At the scenario defaults none reach category 2, before or after.
 
 ### Added
+
+- **Double shield cycle checked against open sources** (`models/py/validation/double_shield_cycle.py`; [hard-rock projects](docs/validation/hard-rock-projects.md#double-shield-cycle)):
+  - ring build: 15 min (5.06 m Bheri Babai, stated) and 67 min (6.53 m, logged over the first 200 m; Comis et al., WTC 2016) bracket the demo's 30 min. In double-shield mode it is hidden while shorter than boring one ring (51–56 min), so only the 67 min would slow the Follo case (−5 %);
+  - main strokes are the ring width plus 0.1–0.2 m (Comis et al.; Brenner S-1054); the demo's stroke equal to the ring gives the right regrips per km;
+  - Guadarrama's four machines bored (with ring build) 32 % of the time to December 2004 (Melis Maynar 2006, Revista de Obras Públicas), against the model's 28 %: the first independent utilisation check for the double shield;
+  - the 10.71 m Brenner double shields have 95 MN nominal main thrust and 450 mm segments (Maggio 2020, Politecnico di Torino), against the demo's 320 mm segments (kept, a bracket).
 
 - **Chalk trough width: a third source** (`models/py/validation/settlement_chalk_independent.py`; [settlement validation](docs/validation/settlement.md)):
   - A20 Round Hill tunnels in Lower Chalk, hand-mined by NATM: K 0.25–0.30 on four arrays (Pound & Beveridge 2002, [ISSMGE library, open](https://www.issmge.org/uploads/publications/6/10/2002_060.pdf)). With Store Road (0.40) and CTRL (0.43), all three are narrower than the Thames default 0.5;

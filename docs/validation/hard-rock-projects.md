@@ -22,7 +22,7 @@ The documents are read and cited, not redistributed. Only their numbers are quot
 | Brenner, Mules main-tunnel double shields 10.65 m | 14.4 and 15.9 mm/rev at 2.6–2.75 rpm over 500 m of calcschist; typical 15 m/day, record month 860 m | Maggio (2020), PoliTo MSc, pp. 98–113, [PDF](https://webthesis.biblio.polito.it/15216/1/tesi.pdf); BBT SE newsroom (March 2021) | yes |
 | Niagara, 14.4 m Robbins main beam | UCS mostly 40–100 MPa; 18 m/day by April 2007; with spiling about 3 m/day (maximum 5) over about 500 m; overbreak up to 3 m | Robbins (2010), WTC, [PDF](https://www.robbinstbm.com/wp-content/uploads/2010/07/Large-Diameter-TBMs_WTC2010.pdf), §2 | yes |
 
-**Not found in any open source:** utilisation (boring time over total time) or a downtime breakdown for any of these projects; regrip and ring-build times; Follo segment thickness. An NTNU thesis analysing Follo utilisation (Andreev 2017) is embargoed.
+**Not found in any open source:** utilisation or a downtime breakdown for Follo, Gotthard or Brenner; ring-build time for a 10 m double shield; gripper and auxiliary thrust for a 10 m machine; Follo segment thickness. Guadarrama's time split and double-shield cycle data from smaller machines are in [Double shield cycle](#double-shield-cycle) below. An NTNU thesis analysing Follo utilisation (Andreev 2017) is embargoed.
 
 ## Penetration: Follo TBM1
 
@@ -159,6 +159,38 @@ The downtime model is fed the measured net penetration rate (1.92 m/h) and Follo
 | Niagara | main beam 14.4 m | about 3 m/day with spiling; 18 m/day in better ground | Robbins 2010 |
 
 None of these publish the rock and machine inputs needed to run the model section by section, so they bracket the demos rather than test them.
+
+## Double shield cycle
+
+- **Script:** [`models/py/validation/double_shield_cycle.py`](../../models/py/validation/double_shield_cycle.py). Nothing is fitted. One default changed: installed thrust 150 → 95 MN (see below).
+- **What is checked:** the demo's assumed ring build (30 min), main stroke (equal to the 1.8 m ring), installed thrust (150 MN) and segment thickness (320 mm).
+
+**Data** (open):
+- **Comis, Younis & Goodfellow (2016)**, WTC 2016, [Robbins](https://www.robbinstbm.com/wp-content/uploads/2017/04/5_SegmentDesign_WTC2016.pdf). Table 1: main strokes of three 6.1–6.5 m double shields. The text gives the rule: stroke = segment width + 100–200 mm for a radially inserted key. Table 2, Job B (6.53 m double shield, 1.66 m rings of 4 segments): 7,990 min of ring building for 120 rings over the first 199 m, learning curve included.
+- **Bheri Babai, 5.06 m Robbins double shield:** the contractor gives about 15 min per ring, in single-shield mode after boring ([NASTT, 2018](https://nastt.org/2018/08/29/robbins-double-shield-himalayas/)).
+- **Maggio (2020)**, [Politecnico di Torino thesis](https://webthesis.biblio.polito.it/15216/1/tesi.pdf), Brenner Mules 2–3. Table 3.2, 10.71 m Herrenknecht double shields: 95,000 kN nominal main thrust, 450 mm segments, 1.75 m long, 6+1. Table 4.9: logged main thrust, mean 14.2 MN (281 values).
+- **Alfero (2022)**, [Politecnico di Torino thesis](https://webthesis.biblio.polito.it/23141/1/tesi.pdf). Brenner exploratory double shield (6.8 m): main stroke 1.70 m for 1.5 m rings; gripper force about 37 MN.
+- **Melis Maynar (2006)**, [Revista de Obras Públicas 3472](https://quickclick.es/rop/pdf/publico/2006/2006_diciembre_3472_02.pdf), Tables 5 and 7. Guadarrama's four TBMs: 439–549 m/month over whole drives, and machine time by activity to December 2004. The paper does not name the machine type or the rock; the press gives 9.5 m double shields in granite and gneiss.
+
+**Results:**
+
+| Item | Demo | Sources | What it means |
+|---|---|---|---|
+| Ring build | 30 min (assumed) | 15 min (5.06 m, stated); 67 min (6.53 m, logged, first 200 m) | In double-shield mode the ring is built while boring. At the Follo rate one 1.8 m ring takes 56 min to bore (51 min in the demo's gneiss), so anything shorter is hidden. Only the 67 min would show: 12.4 instead of 13.1 m/day in the Follo case (−5 %) |
+| Main stroke | 1.80 m, equal to the ring | ring + 0.10 to +0.35 m on three of four machines (one is 0.10 m short) | The demo's stroke is the advance per regrip, one per ring, so the regrip time per km is right; a real cylinder is 0.1–0.2 m longer |
+| Boring (with ring build) / all time | 28 % (Follo case) | Guadarrama 32 % | Consistent. The first independent utilisation check for the double shield |
+| Disc inspection and change / all time | 26 % (Follo's own cutter changes) | Guadarrama 19 % | Follo changed more cutters per metre bored (disc time / boring 0.93 against 0.61); the rock is different |
+| Installed thrust | 150 MN, now 95 MN | 95 MN main nominal (10.71 m Brenner) | Adopted: the one open figure for a 10 m double shield. Auxiliary thrust for single-shield mode is not published |
+| Logged thrust | 18.0 MN on the cutters (Follo) | 14.2 MN mean main thrust (Brenner, 10.71 m) | Same order; different rock |
+| Segment thickness | 320 mm (Guadarrama, press) | 450 mm (10.71 m Brenner) | Bracket: 320–450 mm for 9.5–10.7 m |
+
+**What this shows:**
+- **Ring build is not limiting** in double-shield mode for any published value up to about 50 min. The 30 min assumption only matters in single-shield mode, where boring and ring building alternate.
+- **Utilisation agrees** with the one open time split for a large double-shield drive.
+- **Installed thrust changed to 95 MN** (6 Nov 2026). The old 150 MN was the low end of a general range for 10 m shields (Ramoni & Anagnostou); the only open 10 m double shield has 95 MN main thrust. In the fault zone (300 m cover) the shield needs about 148 MN to keep sliding and 229 MN to restart:
+  - with 150 MN the demo said "Jamming risk after any standstill";
+  - with 95 MN it says "Shield jammed: skin friction 148 MN exceeds the installed thrust".
+  - The auxiliary thrust that pushes in single-shield mode is not published, so this stays a screening estimate. The alarm is a warning only: the demo keeps boring through the zone.
 
 ## Changes made
 
