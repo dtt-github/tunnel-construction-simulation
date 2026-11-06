@@ -45,19 +45,24 @@ export function shieldThrust(diameter, shieldLength, axisDepth, gamma, pAxis, {
 export const toolTorque = (nTools, tangentialForce, radius, radiusFactor = 0.5) => nTools * tangentialForce * radiusFactor * radius;
 
 /** Cutterhead torque components (kNm). sigmaN: radial ground stress on the rim (kPa). */
+// Middle of the 1-3 kPa laboratory range for conditioned EPB muck (Bezuijen et al. 2005; see thrust_torque.py).
+export const PASTE_SHEAR_KPA = 2.0;
+
 export function cutterheadTorque(diameter, pAxis, sigmaN, {
   openingRatio = 0.3, mu = 0.15, muRim = 0.07, muChamber = 0.1, rimWidth = 0.5, nArms = 0, armArea = 0, armRadius = 0,
-  tools = 0, seals = 0,
+  tools = 0, seals = 0, tauPaste = null,
 } = {}) {
   if (!(openingRatio >= 0 && openingRatio < 1)) throw new RangeError("opening ratio must be in [0, 1)");
   const r = diameter / 2;
-  const disc = (2 / 3) * Math.PI * (1 - openingRatio) * r ** 3 * pAxis;
+  const lever = (2 / 3) * Math.PI * (1 - openingRatio) * r ** 3;
+  // with a conditioned paste, its shear strength caps the face, back and arm shear (Bezuijen et al. 2005: 1-3 kPa)
+  const shear = (coef) => (tauPaste === null ? coef * pAxis : Math.min(coef * pAxis, tauPaste));
   const t = {
     tools,
-    face: mu * disc,
+    face: shear(mu) * lever,
     rim: 2 * Math.PI * r * r * rimWidth * muRim * sigmaN,
-    back: muChamber * disc,
-    arms: nArms * muChamber * pAxis * armArea * armRadius,
+    back: shear(muChamber) * lever,
+    arms: nArms * shear(muChamber) * armArea * armRadius,
     seals,
   };
   t.total = t.tools + t.face + t.rim + t.back + t.arms + t.seals;
