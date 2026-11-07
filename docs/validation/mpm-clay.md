@@ -27,7 +27,7 @@ The paper is open in the [ISSMGE library](https://www.issmge.org/uploads/publica
 | Heading supported to the face, P/D = 0 (Fig. 9) | 1.5 / 3.0 | 7.05 / 9.0 |
 | Unlined heading, C/D 3.0 (Fig. 9) | P/D 0.5 / 1.0 / 2.0 / 3.0 | 7.75 / 6.85 / 5.6 / 5.05 |
 
-**Not modelled:** headings with unlined length (P/D > 0). They need pressure on the heading walls, and Newton's colliders cannot apply a traction.
+**Unlined headings (P/D > 0):** Kimura's air bag pressed evenly on the face and the unlined walls. Newton's colliders cannot apply a traction, so the scene lines the unlined length with segments that retract inward at the face plate's rate (displacement control, as the plane-strain ring); see [unlined headings](#unlined-headings-7-nov-2026).
 
 ## Results (PIC, jitter 0.25 h, as of 5 Nov 2026)
 
@@ -205,6 +205,19 @@ The script is [`diagnostics/ringpile.py`](../../server/diagnostics/ringpile.py).
 | Kimura & Mair, centrifuge | 3.5 | 4.3 | 4.2 |
 | GIMP, jitter 0.05 h / Kimura | 0.98 | 0.92 (D/20: 0.90) | 0.97 |
 
+**All five plane-strain covers with the default** (GIMP, jitter 0.05 h; N at 5 % of R):
+
+| C/D | 1.2 | 1.8 | 2.0 | 2.3 | 2.8 |
+|---|---|---|---|---|---|
+| MPM, D/10 | 3.43 | 3.87 | 3.95 | 4.01 | 4.06 |
+| MPM, D/20 | – | 3.84 | 3.89 | 3.88 | – |
+| Kimura & Mair | 3.5 | 3.7 | 4.3 | 3.8–4.2 | 4.2 |
+| MPM (D/10) / Kimura | 0.98 | 1.04 | 0.92 | inside the range | 0.97 |
+
+- Four of the five are within about ±0.2 of Kimura's N, the accuracy of the digitised figures; C/D 2.0 is 0.35 low.
+- Like Kimura's, the MPM N levels off at about 4 above C/D 2.
+- D/20 changes N at 5 % of R by at most 3 %. Read at 2 % of R, D/20 is 13–21 % lower than D/10, so the ratio is read at 5 %.
+
 **3D headings at P/D 0** (GIMP, jitter 0.05 h): C/D 1.5, D 7.5 m: N 7.3 against 7.05 (1.04); C/D 3.0, D 4.5 m: N 7.3 against 9.0 (0.81). N = (σv at the axis − face pressure at 5 % of D) / cu.
 
 **Other checks with the default:**
@@ -222,8 +235,24 @@ The jitter sweep (0.25, 0.1, 0.05 and 0 h) showed that the creep stops at 0.1 h 
 - with `pic8`: slab 0.045 m; but the chamber pressure rises from 214 to 344 kPa while the cutterhead turns, and the clay tunnel is weaker (3.23 / 3.23 / 3.06).
 - Not adopted: unreleased, and not better on the clay tunnel. To test again when it is released.
 
+## Unlined headings (7 Nov 2026)
+
+- **Code:** `FaceSandConfig.unlined_over_d` (`runner.py face_sand --unlined`). The face moves forward by P; the shield tube ends at the start of the unlined length; 16 kinematic segments line the unlined walls in the half model and retract towards the axis at the face plate's rate. With P/D 0 the scene is unchanged (the earlier heading repeats to within the GPU's run-to-run noise).
+- **Support pressure:** the force on face and walls divided by their area, read when the face has moved 5 % of D (the walls by the same amount). N = (σz at the axis − support pressure) / cu.
+- **Case:** C/D 3.0, D 4.5 m, kaolin cu 26 kPa, GIMP, jitter 0.05 h, D/10. Records `fu_kaolin_c3.0_D4.5_p*_g05`.
+
+| P/D | 0 | 0.5 | 1.0 | 2.0 | 3.0 |
+|---|---|---|---|---|---|
+| MPM N | 7.26 | 7.04 | 5.92 | 4.94 | 4.26 |
+| Kimura & Mair | 9.0 | 7.75 | 6.85 | 5.6 | 5.05 |
+| MPM / Kimura | 0.81 | 0.91 | 0.86 | 0.88 | 0.84 |
+
+- **The trend is reproduced:** N falls with the unlined length, by 41 % from P/D 0 to 3 (Kimura: 44 %).
+- **The level is 9–19 % low** at this cover, in every case. The plane-strain tunnel and the shallower heading (C/D 1.5) are within 0.92–1.05, so the shortfall is specific to the deep 3D heading.
+- **Not like Kimura:** the walls move at a set rate, so the wall pressure is not uniform as under an air bag; at P/D 3 the face pressure becomes negative late in the retraction (suction on a cohesive face, which an air bag cannot apply).
+
 ## Where this leaves WP3
 
-- **Unblocked.** In plane strain the clay tunnel is within 2–8 % of Kimura & Mair at three covers and at two resolutions; the 3D headings are at 0.81 and 1.04.
-- **Still to do:** the rest of Kimura & Mair's series (C/D 1.8 and 2.3 in plane strain; unlined headings at P/D 0.5–3.0); settlement above the collapse; the heading at C/D 3.0 is 19 % weak.
+- **Unblocked.** In plane strain the clay tunnel is within 0.92–1.05 of Kimura & Mair at all five covers and at two resolutions; the heading at C/D 1.5 is at 1.04; at C/D 3.0 the heading series is 0.81–0.91 with and without an unlined length, with Kimura's trend.
+- **Still to do:** why the deep heading is 9–19 % weak (resolution, the rate of the moving walls); settlement above the collapse.
 - **Chamber (WP4):** still loses about a fifth of its pressure while the cutterhead turns ([chamber](mpm-chamber.md)).

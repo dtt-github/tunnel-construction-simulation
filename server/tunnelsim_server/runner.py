@@ -54,7 +54,7 @@ def run(args) -> dict:
                                 match=args.match)
         if args.dilatancy:  # sensitivity only (WP2): not a calibrated parameter
             soil = dataclasses.replace(soil, dilatancy=args.dilatancy, name=soil.name + f", dilatancy {args.dilatancy}")
-        cfg = face_sand.FaceSandConfig(diameter=args.diameter, cover=args.cover, retract_over_d=args.retract, voxel_per_d=args.vpd, control=args.control, target_kpa=args.target_kpa, rate_over_d=args.rate,
+        cfg = face_sand.FaceSandConfig(diameter=args.diameter, cover=args.cover, retract_over_d=args.retract, voxel_per_d=args.vpd, control=args.control, target_kpa=args.target_kpa, rate_over_d=args.rate, unlined_over_d=args.unlined,
                                        iterations=args.iterations, seed=args.seed)
         result, _ = face_sand.run(cfg, soil)
         return record("face_sand", {**face_sand.params(cfg, soil), **_packing(args)}, result, UNCALIBRATED, gpu)
@@ -121,6 +121,7 @@ def main() -> None:
             s.add_argument("--target-kpa", type=float, default=0.0)
             s.add_argument("--dilatancy", type=float, default=0.0, help="Newton dilatancy factor 0-1 (sensitivity only)")
             s.add_argument("--rate", type=float, default=0.025, help="retraction speed, D per second (displacement control)")
+            s.add_argument("--unlined", type=float, default=0.0, help="unlined length behind the face, / D (Kimura & Mair Fig. 9)")
             s.add_argument("--psi", type=float, default=0.0, help="dilation angle (deg), mapped with phi (WP1b)")
             s.add_argument("--match", choices=["plane_strain", "triaxial"], default="plane_strain",
                            help="Drucker-Prager cone matched to phi in plane strain (weakest) or triaxial compression (strongest)")

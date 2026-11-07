@@ -4,6 +4,11 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## [Unreleased]
 
+### Added
+
+- **MPM clay tunnel at all five of Kimura & Mair's plane-strain covers** ([MPM clay](docs/validation/mpm-clay.md#gimp-integration-and-particle-jitter-6-and-7-nov-2026)): C/D 1.8 gives N 3.87 against 3.7 and C/D 2.3 gives 4.01 against 3.8–4.2, so all five covers are within 0.92–1.05; D/20 is within 3 % of D/10. Records `t2d_kaolin_c1.8_*_g05`, `t2d_kaolin_c2.3_*_g05`.
+- **Unlined clay headings** (`FaceSandConfig.unlined_over_d`, `runner.py face_sand --unlined`): the unlined length behind the face is lined with segments that retract with the face plate. At C/D 3.0 against Kimura & Mair's Fig. 9, N is 7.04, 5.92, 4.94 and 4.26 at P/D 0.5, 1, 2 and 3 (measured 7.75, 6.85, 5.6, 5.05): 0.84–0.91, with the measured fall of N with P/D. Default 0 leaves the scene unchanged; GPU tests pass ([MPM clay](docs/validation/mpm-clay.md#unlined-headings-7-nov-2026)).
+
 ### Changed
 
 - **MPM default jitter 0.05 h** (`server/tunnelsim_server/scenes/common.py`; the chamber and face scenes now use the shared setting): with the initial jitter of ±0.25 h, the P0 condition is not met at disordered particles and yielding material creeps (the Newton maintainer's finding on [newton-physics/newton#5180](https://github.com/newton-physics/newton/issues/5180)). With GIMP and 0.05 h the clay tunnel reaches 0.98, 0.92 and 0.97 of Kimura & Mair's stability ratio at C/D 1.2, 2.0 and 2.8 (0.90 at D/20), and the 3D headings 1.04 and 0.81; the clay slab comes to rest; the chamber keeps 162 of 207 kPa while the cutterhead turns. The sand faces stay within about 8 % of before; all server tests pass; the WP0b runs are repeated as `*_g05` records. The Phase 0 golden face keeps 0.25 h. WP3 is unblocked ([MPM clay](docs/validation/mpm-clay.md#gimp-integration-and-particle-jitter-6-and-7-nov-2026)).

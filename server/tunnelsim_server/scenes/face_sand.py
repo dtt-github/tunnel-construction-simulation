@@ -53,6 +53,10 @@ class FaceSandConfig:
     iterations: int = 50
     seed: int = 0
     moving_threshold_over_d: float = 0.002  # displacement that marks the failure zone, / D
+    # Unlined length P behind the face, / D (Kimura & Mair 1981, Fig. 9). 0: the shield tube reaches the face. Above 0 the
+    # face moves forward by P and the unlined walls are a ring of kinematic segments that retract inward at the plate's
+    # rate (displacement control, as tunnel_2d); Kimura's air bag pressed evenly on face and walls instead.
+    unlined_over_d: float = 0.0
 
 
 class Face:
@@ -68,7 +72,8 @@ class Face:
         dx = D / cfg.voxel_per_d
         zc = R + 0.75 * D
         zs = zc + R + cfg.cover * D
-        x_back, x_front, half_w = 0.75 * D, 2.5 * D, 1.5 * D
+        lu = cfg.unlined_over_d * D  # unlined length: the face is at x = lu, the tube ends at x = 0
+        x_back, x_front, half_w = 0.75 * D, lu + 2.5 * D, 1.5 * D
         t = max(0.025 * D, dx)  # walls at least one voxel thick (Phase 0)
 
         b = newton.ModelBuilder()
@@ -85,7 +90,20 @@ class Face:
                             ((0.5 * (x_front - x_back), -w, zs / 2), (x_front + x_back, w, zs)),  # symmetry plane y = 0
                             ((0.5 * (x_front - x_back), half_w + w, zs / 2), (x_front + x_back, w, zs))])
         b.add_ground_plane()
-        plate = b.add_body(xform=wp.transform(wp.vec3(-t / 2, 0.0, zc), wp.quat_identity()), mass=100.0, is_kinematic=True)
+        # unlined walls: one kinematic body per segment, half circle y > 0 (the model is symmetric about y = 0)
+        walls, wall_dirs = [], []
+        if lu > 0:
+            for k in range(n_seg):
+                th = 2 * math.pi * (k + 0.5) / n_seg
+                if math.cos(th) <= 0:
+                    continue
+                body = b.add_body(xform=wp.transform_identity(), mass=1.0, is_kinematic=True)
+                c = wp.vec3(lu / 2, (R + t / 2) * math.cos(th), zc + (R + t / 2) * math.sin(th))
+                qs = wp.quat_from_axis_angle(wp.vec3(1.0, 0.0, 0.0), th - math.pi / 2)
+                b.add_shape_box(body, xform=wp.transform(c, qs), hx=lu / 2, hy=1.08 * R * math.tan(math.pi / n_seg), hz=t / 2)
+                walls.append(body)
+                wall_dirs.append(np.array([0.0, math.cos(th), math.sin(th)]))
+        plate = b.add_body(xform=wp.transform(wp.vec3(lu - t / 2, 0.0, zc), wp.quat_identity()), mass=100.0, is_kinematic=True)
         b.add_shape_cylinder(plate, xform=wp.transform(wp.vec3(0.0), wp.quat_from_axis_angle(wp.vec3(0.0, 1.0, 0.0), math.pi / 2)),
                              radius=R - 0.25 * t, half_height=t / 2)
         cm = b.finalize()
@@ -98,9 +116,11 @@ class Face:
         pts += rng.uniform(-common.JITTER * h, common.JITTER * h, pts.shape)  # as fill_box
         pts[:, 1] = np.abs(pts[:, 1])
         r_axis = np.hypot(pts[:, 1], pts[:, 2] - zc)
-        pts = pts[~((pts[:, 0] < h / 2) & (r_axis < R + t + h / 2))].astype(np.float32)
+        pts = pts[~((pts[:, 0] < lu + h / 2) & (r_axis < R + t + h / 2))].astype(np.float32)
         pm = make_particles(pts, h, soil).finalize()
-        solver = make_solver(pm, cm, dx, cfg.iterations, {-1: 0.5, tube: cfg.steel_friction, side: 0.0, plate: cfg.steel_friction})
+        friction = {-1: 0.5, tube: cfg.steel_friction, side: 0.0, plate: cfg.steel_friction}
+        friction.update({w: cfg.steel_friction for w in walls})
+        solver = make_solver(pm, cm, dx, cfg.iterations, friction)
         st = cm.state()
         s = pm.state()
         s.body_q, s.body_qd, s.body_f = wp.clone(st.body_q), wp.zeros_like(st.body_qd), wp.zeros_like(st.body_f)
@@ -110,11 +130,14 @@ class Face:
         q = s.body_q.numpy()
         qd = np.zeros((cm.body_count, 6), dtype=np.float32)
         area = 0.5 * math.pi * (R - 0.25 * t) ** 2  # half model
+        wall_area = (2 * math.pi * R / n_seg) * lu  # one segment's soil-side area
         gamma = soil.density * G
 
         self.cfg, self.soil, self.D, self.R, self.zc, self.zs, self.t, self.h = cfg, soil, D, R, zc, zs, t, h
         self.pts, self.solver, self.s, self.cm, self.plate, self.body_index = pts, solver, s, cm, plate, body_index
         self.dt, self.q, self.qd, self.area, self.gamma = dt, q, qd, area, gamma
+        self.lu, self.walls, self.wall_dirs, self.wall_area = lu, walls, wall_dirs, wall_area
+        self.wall_p = 0.0  # mean pressure on the unlined walls over the last step, Pa
         self.box = (np.array([-x_back, 0.0, 0.0]), np.array([x_front, half_w, zs]))
 
     def servo_speed(self, log: list, target_kpa: float) -> float:
@@ -132,16 +155,22 @@ class Face:
 
         s, q, qd, dt, plate = self.s, self.q, self.qd, self.dt, self.plate
         q[plate, 0] -= v * dt
-        s.body_q.assign(q)
         qd[plate, 0] = -v
+        for w, u in zip(self.walls, self.wall_dirs):  # the unlined walls retract towards the axis at the same rate
+            q[w, 0:3] -= v * dt * u
+            qd[w, 0:3] = -v * u
+        s.body_q.assign(q)
         s.body_qd.assign(qd)
         wp.synchronize()
         t0 = time.perf_counter()
         self.solver.step(s, s, contacts=None, control=None, dt=dt)
         wp.synchronize()
         elapsed = time.perf_counter() - t0
-        fx = float(collider_forces(self.solver, s, self.body_index, dt).get(plate, np.zeros(3))[0])
-        delta = max(0.0, -(q[plate, 0] - (-self.t / 2)))
+        forces = collider_forces(self.solver, s, self.body_index, dt)
+        fx = float(forces.get(plate, np.zeros(3))[0])
+        if self.walls:  # same sign convention as the plate: positive when the soil presses on the wall
+            self.wall_p = float(np.mean([forces.get(w, np.zeros(3)) @ u for w, u in zip(self.walls, self.wall_dirs)])) / self.wall_area
+        delta = max(0.0, -(q[plate, 0] - (self.lu - self.t / 2)))
         return delta, fx / self.area, elapsed
 
 
@@ -160,18 +189,18 @@ def run(cfg: FaceSandConfig, soil: Soil) -> tuple[dict, dict]:
             v = cfg.rate_over_d * D if cfg.control == "displacement" else face.servo_speed(log, cfg.target_kpa)
         delta, p, elapsed = face.step(v)
         times.append(elapsed)
-        log.append((delta, p))
+        log.append((delta, p, face.wall_p))
 
     log = np.array(log)
     ctrl = log[cfg.settle:]
 
-    def p_at(frac: float) -> float | None:
+    def p_at(frac: float, col: int = 1) -> float | None:
         d = ctrl[:, 0] / D
         k = np.where(d >= frac)[0]
         if not len(k):
             return None
         i = k[0]
-        return float(np.mean(ctrl[max(i - 3, 0):i + 4, 1]) / 1e3)
+        return float(np.mean(ctrl[max(i - 3, 0):i + 4, col]) / 1e3)
 
     # failure zone from the displacement since control started
     p_end = s.particle_q.numpy()
@@ -205,6 +234,15 @@ def run(cfg: FaceSandConfig, soil: Soil) -> tuple[dict, dict]:
         "gamma_kN_m3": round(gamma / 1e3, 3),
         "ms_per_frame": round(float(np.mean(times[5:]) * 1000), 2),
     }
+    if face.walls:  # unlined heading: wall pressure and the area-weighted support pressure on face and walls
+        a_face, a_wall = face.area, face.wall_area * len(face.walls)
+        result["unlined_over_D"] = cfg.unlined_over_d
+        result["sigma_z_axis_kPa"] = round(gamma * (zs - zc) / 1e3, 3)
+        for tag, frac in (("1pct", 0.01), ("3pct", 0.03), ("5pct", 0.0499)):
+            pf, pw = p_at(frac), p_at(frac, 2)
+            result[f"p_wall_{tag}_kPa"] = _r(pw)
+            result[f"p_support_{tag}_kPa"] = None if pf is None else round((pf * a_face + pw * a_wall) / (a_face + a_wall), 3)
+        result["p_wall_settled_kPa"] = round(float(log[cfg.settle - 10:cfg.settle, 2].mean()) / 1e3, 3)
     return result, {"log": log}
 
 
