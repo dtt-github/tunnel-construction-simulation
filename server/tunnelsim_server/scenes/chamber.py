@@ -58,6 +58,9 @@ class ChamberConfig:
     kp_rpm_per_kpa: float = 0.2  # screw PI controller on the axis pressure
     ki_rpm_per_kpa_s: float = 0.05
     max_screw_rpm: float = 22.0  # EPB demo's screw range
+    # WP4 leak diagnosis only: paste pushed into the shell wall is put back inside each frame (radius R - h/2, radial
+    # velocity removed), so no paste is lost through the shell
+    seal_shell: bool = False
     fps: float = 60.0
     iterations: int = 50
     seed: int = 0
@@ -190,6 +193,7 @@ def run(cfg: ChamberConfig) -> tuple[dict, dict]:
     p_hist: list[float] = []
     log, times = [], []
     removed = 0
+    resealed = 0
     n_total = int(round((cfg.pressurise_max_s + cfg.hold_s + cfg.excavate_s + cfg.stop_s) * cfg.fps))
     for f in range(n_total):
         p_axis_avg = float(np.mean(p_hist[-6:])) / 1e3 if p_hist else 0.0
@@ -237,6 +241,20 @@ def run(cfg: ChamberConfig) -> tuple[dict, dict]:
         solver.step(s, s, contacts=None, control=None, dt=dt)
         wp.synchronize()
         times.append(time.perf_counter() - t0)
+        if cfg.seal_shell:
+            xq, vq = s.particle_q.numpy(), s.particle_qd.numpy()
+            ry, rz = xq[:, 1], xq[:, 2] - zc
+            r = np.hypot(ry, rz)
+            out = (r > R - h / 4) & (xq[:, 0] > -t) & (xq[:, 0] < x_p - t / 2)
+            if out.any():
+                ny, nz = ry[out] / r[out], rz[out] / r[out]
+                vr = vq[out, 1] * ny + vq[out, 2] * nz
+                vq[out, 1] -= np.maximum(vr, 0) * ny
+                vq[out, 2] -= np.maximum(vr, 0) * nz
+                xq[out, 1], xq[out, 2] = (R - h / 2) * ny, zc + (R - h / 2) * nz
+                s.particle_q.assign(xq)
+                s.particle_qd.assign(vq)
+                resealed += int(out.sum())
 
         imp, pos, cid = solver.collect_collider_impulses(s)
         imp, pos, cid = imp.numpy(), pos.numpy(), cid.numpy()
@@ -297,11 +315,12 @@ def run(cfg: ChamberConfig) -> tuple[dict, dict]:
         "advance_m": round(float(log[-1, 7]), 3),
         "particles_removed": int(removed),
         "particles_escaped": escaped,
+        "particle_reseals": resealed,
         "escaped_back_front_side": [int(esc_back.sum()), int(esc_front.sum()), int(esc_side.sum())],
         "particles_per_m3_start_end": [round(len(pts) / (area * x_face)), round((n_active - escaped) / vol_now)],
         "ms_per_frame": round(float(np.mean(times[5:]) * 1000), 2),
     }
-    return res, {"log": log}
+    return res, {"log": log, "q_end": s.particle_q.numpy(), "active": (flags & active) != 0, "x_cutter": x_ch, "zc": zc}
 
 
 def params(cfg: ChamberConfig) -> dict:

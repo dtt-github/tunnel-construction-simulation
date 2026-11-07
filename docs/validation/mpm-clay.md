@@ -226,13 +226,13 @@ The script is [`diagnostics/ringpile.py`](../../server/diagnostics/ringpile.py).
 |---|---|---|
 | Clay slab round a fixed lining, 4 s (stiff control 0.03 m) | 0.62 m, still creeping at 25 mm/s | 0.25 m, at rest (0.6 mm/s) |
 | Tresca Rankine wall, K at H/10, H/20, H/40 (theory 0.760) | 0.765 at H/20 | 0.735, 0.762, 0.730 |
-| EPB chamber, bulkhead pressure, hold → cutterhead turning | 197 → 103 kPa | 207 → 162 kPa |
+| EPB chamber, bulkhead pressure, hold → cutterhead turning for 4 s (corrected 7 Nov: over 20 s, 51 kPa under GIMP and 31 under PIC; see [chamber](mpm-chamber.md#gimp-and-the-20-s-excavation-7-nov-2026)) | 197 → 103 kPa | 207 → 162 kPa |
 
 The jitter sweep (0.25, 0.1, 0.05 and 0 h) showed that the creep stops at 0.1 h and below under PIC, and that jitter barely moves the Rankine walls (within 2 %).
 
 **Newton pull request #5021** (the maintainer's branch at `6fea33f0`, Newton 1.8.0.dev0, installed apart from the server environment; GIMP, jitter 0.25 h):
-- with the `S2` collider: slab 0.10 m, at rest; K0 0.53 against 0.73 on 1.7.0 (target 0.44); chamber 210 → 173 kPa; clay tunnel N 3.28 / 3.49 / 3.53;
-- with `pic8`: slab 0.045 m; but the chamber pressure rises from 214 to 344 kPa while the cutterhead turns, and the clay tunnel is weaker (3.23 / 3.23 / 3.06).
+- with the `S2` collider: slab 0.10 m, at rest; K0 0.53 against 0.73 on 1.7.0 (target 0.44); chamber 210 → 173 kPa over a 4 s excavation (not rerun over 20 s); clay tunnel N 3.28 / 3.49 / 3.53;
+- with `pic8`: slab 0.045 m; but the chamber pressure rises from 214 to 344 kPa while the cutterhead turns (4 s), and the clay tunnel is weaker (3.23 / 3.23 / 3.06).
 - Not adopted: unreleased, and not better on the clay tunnel. To test again when it is released.
 
 ## Unlined headings (7 Nov 2026)
@@ -296,4 +296,4 @@ At 10 % of R, D/10 and D/20 agree to 0.3 %.
 - **Unblocked.** With the collapse definition above, the plane-strain tunnel is within 0.98–1.11 of Kimura & Mair at all five covers and two resolutions, and the heading at C/D 1.5 is at 1.00. At C/D 3.0 the heading series is 0.80–0.88, with Kimura's trend.
 - **Open gap:** the deep heading is 12–20 % weak. Resolution, retraction rate, hold time and the crack setting are ruled out.
 - **Still to do:** settlement above the collapse; why the ground comes to rest again after large movement.
-- **Chamber (WP4):** still loses about a fifth of its pressure while the cutterhead turns ([chamber](mpm-chamber.md)).
+- **Chamber (WP4):** blocked. Over a 20 s excavation it falls from 207 to 51 kPa; the earlier "a fifth lost" was read after 4 s ([chamber](mpm-chamber.md#gimp-and-the-20-s-excavation-7-nov-2026)).
