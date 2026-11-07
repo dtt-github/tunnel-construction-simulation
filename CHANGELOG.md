@@ -11,6 +11,11 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ### Changed
 
+- **WP3 collapse definition: load control, as Kimura & Mair** ([MPM clay](docs/validation/mpm-clay.md#collapse-definition-load-control-7-nov-2026)):
+  - plane strain: N read at a movement of 10 % of R (was 5 %): 1.04, 1.11, 0.98, 1.02 and 1.03 of Kimura & Mair's N at C/D 1.2, 1.8, 2.0, 2.3 and 2.8; D/20 within 0.3 %;
+  - headings: stepped load control (`runner.py face_sand --control stepped --hold <s>`; `FaceSandConfig.collapse_over_d` 0.05), collapse at face movement 5 % of D. C/D 1.5: 1.00; C/D 3.0 at P/D 0, 0.5, 1, 2 and 3: 0.80, 0.88, 0.83, 0.85, 0.81. 4 s and 15 s holds agree within 0.14 in N;
+  - the threshold for the headings was fixed after the 15 s runs were seen (it is the plane-strain one, not fitted). The first step that keeps moving is not used: with 15 s holds the ground comes to rest again after large movement. Newton's crack setting (`critical_fraction` 0.9) changes nothing, so tension is not the cause;
+  - open gap: the deep heading (C/D 3.0) is 12–20 % weak; resolution, rate, hold time and the crack setting are ruled out. Records `fs_kaolin_c*_g05`, `*_h15_g05`, `*_h15_cf09_g05`, `hd_c3.0_D4.5_*`, `t2d_kaolin_c2.0_d10_cf09_g05`.
 - **MPM default jitter 0.05 h** (`server/tunnelsim_server/scenes/common.py`; the chamber and face scenes now use the shared setting): with the initial jitter of ±0.25 h, the P0 condition is not met at disordered particles and yielding material creeps (the Newton maintainer's finding on [newton-physics/newton#5180](https://github.com/newton-physics/newton/issues/5180)). With GIMP and 0.05 h the clay tunnel reaches 0.98, 0.92 and 0.97 of Kimura & Mair's stability ratio at C/D 1.2, 2.0 and 2.8 (0.90 at D/20), and the 3D headings 1.04 and 0.81; the clay slab comes to rest; the chamber keeps 162 of 207 kPa while the cutterhead turns. The sand faces stay within about 8 % of before; all server tests pass; the WP0b runs are repeated as `*_g05` records. The Phase 0 golden face keeps 0.25 h. WP3 is unblocked ([MPM clay](docs/validation/mpm-clay.md#gimp-integration-and-particle-jitter-6-and-7-nov-2026)).
 
 ### Fixed

@@ -38,7 +38,7 @@ class FaceSandConfig:
     cover: float = 1.0  # C/D above the crown
     voxel_per_d: float = 10.0  # D / voxel
     ppc: int = 2
-    control: str = "displacement"  # or "pressure"
+    control: str = "displacement"  # or "pressure", or "stepped" (load control in steps: WP3 collapse, as Kimura & Mair)
     retract_over_d: float = 0.05  # total plate retraction / D (displacement control)
     rate_over_d: float = 0.025  # retraction speed / D per second
     target_kpa: float = 0.0  # pressure control: target support pressure on the face
@@ -57,6 +57,19 @@ class FaceSandConfig:
     # face moves forward by P and the unlined walls are a ring of kinematic segments that retract inward at the plate's
     # rate (displacement control, as tunnel_2d); Kimura's air bag pressed evenly on face and walls instead.
     unlined_over_d: float = 0.0
+    # stepped load control: the support pressure (face, or face and unlined walls by area) is lowered from step_start_kpa
+    # (default 0.6 x the overburden at the axis) in steps of step_kpa, each held hold_s seconds by the servo. Collapse
+    # (WP3) is the support pressure at which the face has moved collapse_over_d D at the end of a hold, interpolated
+    # between steps: 5 % of D is the 10 % of R read in plane strain. The run stops at the first step at which the face is
+    # still moving at the end of the hold (faster than at_rest_over_d D per second over the last second), or has moved
+    # max_over_d D. With long holds the face can come to rest again after large movement, so that step is not used as
+    # collapse.
+    step_kpa: float = 5.0
+    step_start_kpa: float | None = None
+    hold_s: float = 4.0
+    collapse_over_d: float = 0.05
+    at_rest_over_d: float = 0.002
+    max_over_d: float = 0.3
 
 
 class Face:
@@ -144,9 +157,16 @@ class Face:
         """Retract-only servo: the face gives way while the soil presses harder than the target, and stops otherwise.
         Retract-only: pushing the plate back into the soil spikes the pressure and makes the loop oscillate."""
         cfg = self.cfg
-        p_avg = float(np.mean([e[1] for e in log[-6:]])) if log else 0.0  # average over 0.1 s: the probe is noisy
+        p_avg = float(np.mean([self.support(e) for e in log[-6:]])) if log else 0.0  # average over 0.1 s: the probe is noisy
         vmax = cfg.servo_max_rate_over_d * self.D
         return float(np.clip(cfg.servo_gain * self.D * (p_avg - target_kpa * 1e3) / (self.gamma * self.D) * cfg.fps, 0.0, vmax))
+
+    def support(self, entry) -> float:
+        """Support pressure of a log entry (retraction, face p, wall p): the face pressure, or face and unlined walls by area."""
+        if not self.walls:
+            return entry[1]
+        a_face, a_wall = self.area, self.wall_area * len(self.walls)
+        return (entry[1] * a_face + entry[2] * a_wall) / (a_face + a_wall)
 
     def step(self, v: float) -> tuple[float, float, float]:
         """Move the plate back at v (m/s) for one frame and step the soil. Returns (plate retraction m, face pressure
@@ -174,25 +194,67 @@ class Face:
         return delta, fx / self.area, elapsed
 
 
+def p_at_movement(steps: list[dict], frac: float) -> float | None:
+    """Support pressure (kPa) at which the face has moved frac x D at the end of a hold, interpolated linearly between
+    load steps; None if the face moved that far in the first step or never did."""
+    for a, b in zip(steps, steps[1:]):
+        if a["face_over_D"] < frac <= b["face_over_D"]:
+            t = (frac - a["face_over_D"]) / (b["face_over_D"] - a["face_over_D"])
+            return round(a["support_kPa"] + t * (b["support_kPa"] - a["support_kPa"]), 2)
+    return None
+
+
 def run(cfg: FaceSandConfig, soil: Soil) -> tuple[dict, dict]:
     face = Face(cfg, soil)
     D, R, zc, zs, h, pts, s, gamma = face.D, face.R, face.zc, face.zs, face.h, face.pts, face.s, face.gamma
     dx = D / cfg.voxel_per_d
     n_ctrl = int(round(cfg.duration * cfg.fps)) if cfg.control == "pressure" else int(round(cfg.retract_over_d / cfg.rate_over_d * cfg.fps))
+    sigma_z = gamma * (zs - zc)
+    n_hold = int(round(cfg.hold_s * cfg.fps))
+    if cfg.control == "stepped":
+        start = cfg.step_start_kpa if cfg.step_start_kpa is not None else 0.6 * sigma_z / 1e3
+        targets = [start - k * cfg.step_kpa for k in range(int(start // cfg.step_kpa) + 1)]
+        n_ctrl = n_hold * len(targets)
 
-    log, times, ref = [], [], None
+    log, times, ref, steps = [], [], None, []
     for f in range(cfg.settle + n_ctrl):
         if f == cfg.settle:
             ref = s.particle_q.numpy().copy()  # positions when control starts: the displacement field is measured from here
         v = 0.0
         if f >= cfg.settle:
-            v = cfg.rate_over_d * D if cfg.control == "displacement" else face.servo_speed(log, cfg.target_kpa)
+            if cfg.control == "displacement":
+                v = cfg.rate_over_d * D
+            elif cfg.control == "pressure":
+                v = face.servo_speed(log, cfg.target_kpa)
+            else:
+                k = (f - cfg.settle) // n_hold
+                v = face.servo_speed(log, targets[k])
         delta, p, elapsed = face.step(v)
         times.append(elapsed)
         log.append((delta, p, face.wall_p))
+        if cfg.control == "stepped" and f >= cfg.settle and (f - cfg.settle + 1) % n_hold == 0:
+            k = (f - cfg.settle) // n_hold
+            hold = log[-n_hold:]
+            speed = float(hold[-1][0] - log[-int(cfg.fps)][0]) / D  # D per second over the last second of the hold
+            steps.append({"target_kPa": round(targets[k], 2), "support_kPa": round(float(np.mean([face.support(e) for e in hold[-6:]])) / 1e3, 2),
+                          "face_over_D": round(float(delta) / D, 4), "speed_D_per_s": round(speed, 5),
+                          "at_rest": bool(speed <= cfg.at_rest_over_d and delta < cfg.max_over_d * D)})
+            if not steps[-1]["at_rest"]:
+                break
 
     log = np.array(log)
     ctrl = log[cfg.settle:]
+    if cfg.control == "stepped":  # the displacement-based readings below do not apply; report the load steps
+        stable = [st for st in steps if st["at_rest"]]
+        failed = [st for st in steps if not st["at_rest"]]
+        result = {"diameter_m": D, "cover_over_D": cfg.cover, "voxel_per_D": cfg.voxel_per_d, "particles": len(pts), "control": "stepped",
+                  "unlined_over_D": cfg.unlined_over_d, "sigma_z_axis_kPa": round(sigma_z / 1e3, 3),
+                  "p_collapse_kPa": p_at_movement(steps, cfg.collapse_over_d), "collapse_over_D": cfg.collapse_over_d,
+                  "p_last_at_rest_kPa": stable[-1]["target_kPa"] if stable else None,
+                  "p_not_at_rest_kPa": failed[0]["target_kPa"] if failed else None,
+                  "face_displacement_over_D": round(float(ctrl[-1, 0] / D), 4), "steps": steps,
+                  "ms_per_frame": round(float(np.mean(times[5:]) * 1000), 2)}
+        return result, {"log": log}
 
     def p_at(frac: float, col: int = 1) -> float | None:
         d = ctrl[:, 0] / D

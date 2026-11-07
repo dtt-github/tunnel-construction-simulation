@@ -5,7 +5,7 @@
   - [`server/tunnelsim_server/scenes/tunnel_2d.py`](../../server/tunnelsim_server/scenes/tunnel_2d.py), a plane-strain tunnel with a closing ring of segments;
   - [`face_sand.py`](../../server/tunnelsim_server/scenes/face_sand.py) with the kaolin soil;
   - records `t2d_*` and `fc_*` in [`server/results/`](../../server/results/).
-- **Status:** **unblocked (7 Nov 2026).** With PIC integration and the initial particle jitter of 0.25 h, the MPM clay tunnel collapsed at about half the stability ratio measured by Kimura & Mair (1981). With GIMP integration and a jitter of 0.05 h, the defaults since 7 Nov 2026, it reaches 0.92–0.98 of Kimura's N in plane strain and 0.81–1.04 in the two 3D headings ([current results](#gimp-integration-and-particle-jitter-6-and-7-nov-2026)). The history below is kept: it explains how the volume loss was found.
+- **Status:** **unblocked (7 Nov 2026).** With PIC integration and the initial particle jitter of 0.25 h, the MPM clay tunnel collapsed at about half the stability ratio measured by Kimura & Mair (1981). With GIMP integration and a jitter of 0.05 h, the defaults since 7 Nov 2026, it reaches 0.98–1.11 of Kimura's N in plane strain and 0.79–1.00 in the 3D headings, read with the [collapse definition adopted on 7 Nov 2026](#collapse-definition-load-control-7-nov-2026) (10 % of R in plane strain; stepped load control and face movement of 5 % of D for the headings). The history below is kept: it explains how the volume loss was found.
   - The first diagnosis blamed Newton's packing constraint (`critical_fraction`). WP0b withdrew it: that apparent gain came from compaction (see [WP0b correction](#wp0b-correction-5-nov-2026)).
   - The clay piling up against the ring is the tunnel-scale sign of a numerical volume loss in yielding clay. It comes from the default element (Q1 velocities, P0 strains), not from the colliders. The one element that removes it locks (see [piling](#the-piling-investigated-5-nov-2026)).
 - **Run on:** 5 Nov 2026; GIMP and jitter runs 6–7 Nov 2026
@@ -251,8 +251,49 @@ The jitter sweep (0.25, 0.1, 0.05 and 0 h) showed that the creep stops at 0.1 h 
 - **The level is 9–19 % low** at this cover, in every case. The plane-strain tunnel and the shallower heading (C/D 1.5) are within 0.92–1.05, so the shortfall is specific to the deep 3D heading.
 - **Not like Kimura:** the walls move at a set rate, so the wall pressure is not uniform as under an air bag; at P/D 3 the face pressure becomes negative late in the retraction (suction on a cohesive face, which an air bag cannot apply).
 
+## Collapse definition: load control (7 Nov 2026)
+
+Kimura & Mair lowered the air pressure until the tunnel failed and read collapse from their pressure–deformation plots. The scenes above retract the support at a set rate (displacement control) and read the pressure at a set movement. Since 7 Nov 2026 WP3 reads collapse as follows:
+
+- **Plane strain:** N at a crown and wall movement of 10 % of R (it was 5 %). The pressure–movement curve has flattened by then.
+- **Headings:** stepped load control. The support pressure (face, or face and unlined walls by area) is lowered from 0.6 σz in steps of 5 kPa, each held by a retract-only servo; collapse is the pressure at which the face has moved 5 % of D (the same 10 % of R) at the end of a hold, interpolated between steps.
+- **Code:** `runner.py face_sand --control stepped --hold <s>`; `FaceSandConfig.collapse_over_d` = 0.05; records `fs_kaolin_c*_g05` (4 s holds) and `fs_kaolin_c*_h15_g05` (15 s holds).
+- **When it was chosen:** the movement threshold for the headings was fixed after the 15 s runs had been seen. It is not fitted to Kimura's values: it is the plane-strain threshold, applied to the face.
+
+**Why not the first step that keeps moving.** With 4 s holds the first step at which the face is still moving gave N 0.79–0.90 of Kimura. With 15 s holds the same reading lost its meaning: after 0.15–0.3 D of face movement the ground comes to rest again, and at P/D 0.5 and 1 the heading stood down to 1 kPa. The clay carries tension and cracks are not modelled, so we tested Newton's crack setting (`critical_fraction` 0.9, which removes cohesion where the material is no longer compact): it changed every heading by less than one 5 kPa step, and plane strain at C/D 2.0 by 0.1 % (N 4.20 against 4.21). Tension is not the cause; the large-movement behaviour is left open. Newton's `tensile_yield_ratio` cannot help: it can only add tensile strength, and its default of 0 already allows none in mean stress.
+
+**Plane strain, N at 10 % of R** (GIMP, jitter 0.05 h; records `t2d_kaolin_c*_g05`):
+
+| C/D | 1.2 | 1.8 | 2.0 | 2.3 | 2.8 |
+|---|---|---|---|---|---|
+| MPM, D/10 | 3.66 | 4.11 | 4.21 | 4.28 | 4.33 |
+| MPM, D/20 | – | 4.11 | 4.20 | 4.29 | – |
+| Kimura & Mair | 3.5 | 3.7 | 4.3 | 3.8–4.2 | 4.2 |
+| MPM (D/10) / Kimura | 1.04 | 1.11 | 0.98 | 1.02 (against 4.2) | 1.03 |
+
+At 10 % of R, D/10 and D/20 agree to 0.3 %.
+
+**Headings, N at face movement 5 % of D** (stepped load control, 15 s holds; GIMP, jitter 0.05 h, D/10):
+
+| Heading | Kimura & Mair | MPM, 15 s holds | MPM, 4 s holds | MPM / Kimura (15 s) |
+|---|---|---|---|---|
+| C/D 1.5, D 7.5 m, P/D 0 | 7.05 | 7.02 | 7.16 | 1.00 |
+| C/D 3.0, D 4.5 m, P/D 0 | 9.0 | 7.17 | not reached¹ | 0.80 |
+| C/D 3.0, P/D 0.5 | 7.75 | 6.84 | 6.77 | 0.88 |
+| C/D 3.0, P/D 1.0 | 6.85 | 5.72 | 5.82 | 0.83 |
+| C/D 3.0, P/D 2.0 | 5.6 | 4.77 | 4.78 | 0.85 |
+| C/D 3.0, P/D 3.0 | 5.05 | 4.11 | 4.13 | 0.81 |
+
+¹ The 4 s run stopped at 0.0498 D, when the face was still moving at the end of a hold.
+
+- **Hold time no longer matters:** 4 s and 15 s holds agree to within 0.14 in N. With the crack setting on, the 15 s values change by at most 0.09 (records `*_h15_cf09_g05`).
+- **The trend is reproduced:** N falls by 43 % from P/D 0 to 3 (Kimura: 44 %).
+- **The deep heading is 12–20 % weak.** Not from resolution or rate (displacement control at C/D 3.0, P/D 0, N at 5 % of D): D/20 gives 6.57 and a five times slower retraction 6.92, against 7.26 at D/10 (records `hd_c3.0_D4.5_d20`, `hd_c3.0_D4.5_slow`). A pressure servo held 30 s at 30, 20 and 10 kPa gives the same pressure at 5 % of D (41 kPa, N 7.14; records `hd_c3.0_D4.5_servo*`).
+- **The run records** written before this definition were re-read from their stored steps (`face_sand.p_at_movement`), with a note in each; nothing was rerun.
+
 ## Where this leaves WP3
 
-- **Unblocked.** In plane strain the clay tunnel is within 0.92–1.05 of Kimura & Mair at all five covers and at two resolutions; the heading at C/D 1.5 is at 1.04; at C/D 3.0 the heading series is 0.81–0.91 with and without an unlined length, with Kimura's trend.
-- **Still to do:** why the deep heading is 9–19 % weak (resolution, the rate of the moving walls); settlement above the collapse.
+- **Unblocked.** With the collapse definition above, the plane-strain tunnel is within 0.98–1.11 of Kimura & Mair at all five covers and two resolutions, and the heading at C/D 1.5 is at 1.00. At C/D 3.0 the heading series is 0.80–0.88, with Kimura's trend.
+- **Open gap:** the deep heading is 12–20 % weak. Resolution, retraction rate, hold time and the crack setting are ruled out.
+- **Still to do:** settlement above the collapse; why the ground comes to rest again after large movement.
 - **Chamber (WP4):** still loses about a fifth of its pressure while the cutterhead turns ([chamber](mpm-chamber.md)).
