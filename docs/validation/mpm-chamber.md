@@ -1,9 +1,10 @@
 # MPM EPB chamber under pressure (Phase 2, WP4): first runs, blocked
 
 - **Plan:** [Phase 2, WP4](../plans/phase2-mpm-face-chamber.md#wp4-epb-chamber-with-a-pressure-controlled-shove-about-3-weeks).
-- **Code:** [`server/tunnelsim_server/scenes/chamber.py`](../../server/tunnelsim_server/scenes/chamber.py). Runs with `python -m tunnelsim_server.runner chamber ...`; records `ch_*` in [`server/results/`](../../server/results/).
-- **Status:** **uncalibrated, blocked.** Newton's default element loses the paste's volume as soon as the cutterhead shears it, so the chamber cannot hold pressure. The alternative element holds the pressure, but it locks and gives the wrong vertical gradient. This is the same limitation that blocks the clay ([mpm-clay](mpm-clay.md#the-piling-investigated-5-nov-2026)).
-- **Run on:** 5 Nov 2026
+- **Code:** [`server/tunnelsim_server/scenes/chamber.py`](../../server/tunnelsim_server/scenes/chamber.py). Runs with `python -m tunnelsim_server.runner chamber ...`; records `ch_*` in [`server/results/`](../../server/results/). `ChamberConfig.seal_shell` (default off) is a diagnosis option: paste pushed into the shell wall is put back inside each frame.
+- **Status:** **uncalibrated, blocked.** The paste loses its pressure while the cutterhead shears it, under every solver setting tried: GIMP integration slows the loss but does not stop it ([20 s runs, 7 Nov 2026](#gimp-and-the-20-s-excavation-7-nov-2026)). The alternative element (P1d) holds the pressure, but it locks and gives the wrong vertical gradient. This is the same limitation that blocked the clay ([mpm-clay](mpm-clay.md#the-piling-investigated-5-nov-2026)).
+  - **Correction (7 Nov 2026):** from 6 Nov the docs, the v1.0.0 release notes and our comment on [newton-physics/newton#5180](https://github.com/newton-physics/newton/issues/5180) said that under GIMP the chamber keeps 162 of 207 kPa (172 of 216 before the scaling fix), "a fifth lost". Those runs excavated for 4 s only. Over the scene's 20 s excavation the pressure falls to 51 kPa.
+- **Run on:** 5 Nov 2026; GIMP and 20 s diagnosis runs 7 Nov 2026
 
 ## Set-up
 
@@ -81,11 +82,42 @@ The Guangzhou–Foshan data ([doi:10.17632/cjwbjttf88.1](https://doi.org/10.1763
    - **Fixed:** a gap under a voxel between the ground piston and the shell leaked, and the piston now overlaps the shell.
    - **Remaining:** about 1 % of the paste escapes through the polygonal shell and the bulkhead. That must also be fixed before any calibration.
 
+## GIMP and the 20 s excavation (7 Nov 2026)
+
+Under P0 with GIMP integration and a jitter of 0.05 h (the defaults since 7 Nov 2026), the chamber was first checked over a 4 s excavation and kept 162 of 207 kPa. Over the full 20 s it does not hold: the loss continues. The runs below find where the pressure goes.
+
+- **Set-up:** as above, voxel 0.25 m, 2 rpm and 60 mm/min unless stated. Records `ch_*_20s` and `ch_gimp_j0.05_60s`.
+- **Reading:** the bulkhead pressure at the axis, mean over each 5 s of excavation; target 200 kPa.
+
+| Run | Standstill | 0–5 s | 5–10 s | 10–15 s | 15–20 s | Paste escaped |
+|---|---|---|---|---|---|---|
+| Default (GIMP, jitter 0.05 h) | 207 | 160 | 95 | 69 | 51 | 1.8 % |
+| Cutterhead stopped | 207 | 210 | 216 | 220 | 220 | 0.1 % |
+| Paste that cannot yield (cohesion 10 MPa) | 213 | 285 | 266 | 253 | 239 | 0.3 % |
+| Advance 1 mm/min | 207 | 157 | 89 | 64 | 48 | 1.8 % |
+| Cutterhead 1 rpm | 207 | 159 | 173 | 104 | 117 | 1.1 % |
+| Cutterhead 4 rpm | 207 | 119 | 52 | 36 | 32 | 3.2 % |
+| Shell sealed, 2 rpm | 206 | 157 | 90 | 63 | 46 | 0 |
+| Shell sealed, 1 rpm | 206 | 157 | 168 | 98 | 108 | 0 |
+| Shell sealed, 4 rpm | 206 | 115 | 48 | 34 | 31 | 0 |
+| PIC, jitter 0.05 h | 202 | 116 | 49 | 35 | 31 | 2.0 % |
+| GIMP, jitter 0.25 h | 206 | 156 | 87 | 60 | 46 | 1.9 % |
+
+**What this shows:**
+
+1. **The loss needs a turning cutterhead and a paste that yields.** With the cutterhead stopped, or with a paste too strong to yield, the pressure holds and the screw controls it. The advance rate makes no difference.
+2. **It follows the cutterhead's rotation, not time.** After about a third of a revolution, 1, 2 and 4 rpm are all near 95–120 kPa. Over a 60 s excavation it levels off at about 30 kPa (15 % of the target), and it does not recover at the standstill after.
+3. **It is not the leak.** About 2 % of the paste escapes by pushing into the 0.5 m shell wall, mostly in the lower half, not through the plate joints. With the shell sealed (`seal_shell`: paste that enters the wall is put back inside), nothing escapes and the pressure falls the same way, 3–10 kPa lower. The leak remains a fault of its own.
+4. **It is stress lost in the yielding paste, under every solver setting.** GIMP slows it (51 kPa after 20 s against 31 under PIC); the jitter barely matters (46 kPa at 0.25 h). The screw stays shut throughout, as the pressure is below the target.
+5. **The 5 Nov PIC result stands:** 32 kPa over the second half of a 20 s excavation at voxel 0.15 m (table above). The 4 s PIC runs of 6 Nov (197 → 103 kPa) were read too early, as were the GIMP ones.
+
+The paste that cannot yield also needs 12 MNm of cutterhead torque, more than the 9.8 MNm installed: it is a test, not a remedy.
+
 ## Where this leaves WP4
 
 - The chamber scene, the pressure controller and the open validation data are in place.
-- The physics is blocked on the same question as WP3: incompressible or near-incompressible plastic flow in Newton without volume loss or locking.
-- A draft issue to the Newton developers, with both repros, is ready for the owner to post.
+- **Blocked:** the yielding paste loses its pressure under the turning cutterhead with every solver setting in Newton 1.7.0. Reported on [newton-physics/newton#5180](https://github.com/newton-physics/newton/issues/5180).
+- **Also to fix:** about 2 % of the paste pushes into the shell wall in 20 s.
 - Nothing from the MPM chamber is used on the console.
 
 **If Newton offers no route, the fall-backs are:**
