@@ -1,0 +1,355 @@
+# Changelog
+
+Notable changes to this project. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Releases are tagged on main (v1.0.0 is Release 1); changes before it are grouped by date.
+
+## [Unreleased]
+
+### Added
+
+- **MPM clay tunnel at all five of Kimura & Mair's plane-strain covers** ([MPM clay](docs/validation/mpm-clay.md#gimp-integration-and-particle-jitter-6-and-7-nov-2026)): C/D 1.8 gives N 3.87 against 3.7 and C/D 2.3 gives 4.01 against 3.8–4.2, so all five covers are within 0.92–1.05; D/20 is within 3 % of D/10. Records `t2d_kaolin_c1.8_*_g05`, `t2d_kaolin_c2.3_*_g05`.
+- **Unlined clay headings** (`FaceSandConfig.unlined_over_d`, `runner.py face_sand --unlined`): the unlined length behind the face is lined with segments that retract with the face plate. At C/D 3.0 against Kimura & Mair's Fig. 9, N is 7.04, 5.92, 4.94 and 4.26 at P/D 0.5, 1, 2 and 3 (measured 7.75, 6.85, 5.6, 5.05): 0.84–0.91, with the measured fall of N with P/D. Default 0 leaves the scene unchanged; GPU tests pass ([MPM clay](docs/validation/mpm-clay.md#unlined-headings-7-nov-2026)).
+
+### Changed
+
+- **WP3 collapse definition: load control, as Kimura & Mair** ([MPM clay](docs/validation/mpm-clay.md#collapse-definition-load-control-7-nov-2026)):
+  - plane strain: N read at a movement of 10 % of R (was 5 %): 1.04, 1.11, 0.98, 1.02 and 1.03 of Kimura & Mair's N at C/D 1.2, 1.8, 2.0, 2.3 and 2.8; D/20 within 0.3 %;
+  - headings: stepped load control (`runner.py face_sand --control stepped --hold <s>`; `FaceSandConfig.collapse_over_d` 0.05), collapse at face movement 5 % of D. C/D 1.5: 1.00; C/D 3.0 at P/D 0, 0.5, 1, 2 and 3: 0.80, 0.88, 0.83, 0.85, 0.81. 4 s and 15 s holds agree within 0.14 in N;
+  - the threshold for the headings was fixed after the 15 s runs were seen (it is the plane-strain one, not fitted). The first step that keeps moving is not used: with 15 s holds the ground comes to rest again after large movement. Newton's crack setting (`critical_fraction` 0.9) changes nothing, so tension is not the cause;
+  - open gap: the deep heading (C/D 3.0) is 12–20 % weak; resolution, rate, hold time and the crack setting are ruled out. Records `fs_kaolin_c*_g05`, `*_h15_g05`, `*_h15_cf09_g05`, `hd_c3.0_D4.5_*`, `t2d_kaolin_c2.0_d10_cf09_g05`.
+- **MPM default jitter 0.05 h** (`server/tunnelsim_server/scenes/common.py`; the chamber and face scenes now use the shared setting): with the initial jitter of ±0.25 h, the P0 condition is not met at disordered particles and yielding material creeps (the Newton maintainer's finding on [newton-physics/newton#5180](https://github.com/newton-physics/newton/issues/5180)). With GIMP and 0.05 h the clay tunnel reaches 0.98, 0.92 and 0.97 of Kimura & Mair's stability ratio at C/D 1.2, 2.0 and 2.8 (0.90 at D/20), and the 3D headings 1.04 and 0.81; the clay slab comes to rest; the chamber keeps 162 of 207 kPa while the cutterhead turns. The sand faces stay within about 8 % of before; all server tests pass; the WP0b runs are repeated as `*_g05` records. The Phase 0 golden face keeps 0.25 h. WP3 is unblocked ([MPM clay](docs/validation/mpm-clay.md#gimp-integration-and-particle-jitter-6-and-7-nov-2026)).
+
+### Fixed
+
+- **Particle-volume scaling under GIMP** (`material_scale()` in `common.py`): the GIMP switch in v1.0.0 stopped dividing cohesion and stiffness by the packing 2.744, on a misread test. Under GIMP they scale with particle volume as under PIC, so the GIMP clay and paste were 2.744× too strong. The v1.0.0 statement that the clay tunnel is too strong to collapse under GIMP came from this error, not from the solver. The published demos are not affected.
+
+## 1.0.0 (2026-11-06): Release 1
+
+The six browser demos (urban EPB, Mixshield, gripper and double shield TBMs, drill & blast, SEM/NATM), each checked against open published data and labelled independent, calibrated or bracket in the [validation report](docs/validation/REPORT.md), plus one recorded GPU sand face. Not in it: the MPM clay tunnel and EPB chamber (blocked). Sources, labels and licences audited in [docs/RELEASE-AUDIT.md](docs/RELEASE-AUDIT.md). Tag: `v1.0.0`.
+
+### Changed
+
+- **README, validation report and roadmap at the Release 1 state:** the README status, demo checks, GPU physics and documentation table updated, and Release 1 added to the roadmap at a glance; the [validation report](docs/validation/REPORT.md) gains today's checks (Brenner penetration and torque, Tehran torque, Fréjus time law, drill & blast rate brackets, GIMP results for the clay tunnel and chamber); the [roadmap](docs/ROADMAP.md) gains a Release 1 section (scope, stop line, what is done for it). NOTICE now lists the third-party data the scenarios carry (BGS, OS, Environment Agency, Historic England, OpenStreetMap) with their attribution statements.
+
+- **MPM scenes use GIMP integration** (`server/tunnelsim_server/scenes/common.py`, `runner.py --integration`; [MPM clay](docs/validation/mpm-clay.md#gimp-integration-and-particle-jitter-6-and-7-nov-2026)), on the Newton maintainer's advice in [newton-physics/newton#5180](https://github.com/newton-physics/newton/issues/5180):
+  - the volume loss of yielding material is gone: the clay slab round a fixed lining settles 0.185 m and stops (PIC 0.62 m, still creeping), with no particles piling against or inside the lining; the EPB chamber keeps 172 of 216 kPa while the cutterhead turns (PIC 103 of 197 kPa);
+  - under GIMP, cohesion and stiffness are no longer divided by the particle packing 2.744 (`material_scale()`); the stress readout keeps the factor;
+  - sand faces, the K0 column and the golden tests are within about 10 % of before; the sand Rankine wall is a little weaker and weakens with refinement (0.96–0.86 of theory);
+  - **open gap:** the undrained clay tunnel no longer collapses at Kimura & Mair's stability ratios. In plane strain it stands unsupported at N ≥ 4.2–8.2 against the measured 3.5–4.3, at least 1.2–2× too strong, while the Tresca wall test still matches theory. WP3 stays blocked.
+
+- **Double shield installed thrust by mode** (was 150 MN; `web/hard-rock/double.js`): from the 10.71 m Brenner double shields (Giacomin et al. 2022, [TAC 2022, open](https://www.tunnelcanada.ca/members/documents/2022/papers/SESO3I569Z2AV8KEI_Long_and_deep_hard_rock_TBM_Tunnelling_under_the_Alps_Brenner_Base_Tunnel_Italian_section_-_Giacomin_et_al.pdf)): 95 MN nominal and 210 MN exceptional main thrust; up to 200 MN from the auxiliary cylinders on the last ring in single-shield mode. The jamming check uses 210 MN in double-shield mode and 200 MN in single-shield mode. In the fault zone (148 MN sliding, 229 MN to restart) it reports a jamming risk after any standstill. The alarm does not stop the drive.
+
+- **Thames chalk trough: K 0.4, volume loss 0.20 %** (`models/scenarios/thames-plumstead-north-woolwich.json`; Mixshield demo; [settlement validation](docs/validation/settlement.md)):
+  - K from three chalk sources not used for the volume-loss fit, all narrower than the old 0.5: Store Road 0.39–0.40, CTRL 0.43, Round Hill 0.25–0.30. The second bore's K towards and away from the first is 0.4 too;
+  - volume loss refitted to the same 17 Plumstead – Woolwich sections: 0.20 % (0.08–0.45 %). Smax predictions are unchanged; the trough is narrower and steeper;
+  - Mixshield demo, both bores, buildings at category 2 or worse: none at the default or up to 1 % VL (as before), 3 at 1.5 % (was 2), 13 at 2 % (was 8). Final Smax of both bores at the start 6.0 mm (was 6.5), against 3–10 mm measured;
+  - the demo's default line now names its basis ("VL fitted to 17 Crossrail sections, K from three chalk sites").
+
+- **Building damage categories by the second-stage assessment of Mair, Taylor & Burland (1996)** (`building_strains` in Python and JavaScript; EPB and Mixshield demos; [ISSMGE library, open](https://www.issmge.org/uploads/publications/6/8/1996_118.pdf)):
+  - each footprint is split at the trough's points of inflection into hogging and sagging spans (limited to 2.5 i); each span's Δ/L gives the bending and diagonal strain of a masonry deep beam (E/G 2.6), combined with its average horizontal strain (Eqs 7–10). Before, the category used the largest local horizontal strain only, which missed bending over the tunnel;
+  - checked against the paper's Fig. 4: with L/H = 1 in hogging and no horizontal strain, the category 2/3 boundary falls at Δ/L 0.16 %, as plotted;
+
+- **Buildings: horizontal strain with building stiffness** (`strain_modification_factor`, `frame_axial_stiffness`, `relative_axial_stiffness` in Python and JavaScript; EPB and Mixshield demos):
+  - Potts & Addenbrooke's modification factors for horizontal strain, against the relative axial stiffness α* = EA / (E_s H), digitised from Fig. 5 of their 1996 IS-London paper ([ISSMGE library, open](https://www.issmge.org/uploads/publications/6/8/1996_093.pdf)). The earlier search had found only the deflection-ratio chart;
+  - each building shows its tensile strain with stiffness beside the greenfield value, with EA from the same floor slabs as EI (assumed). For the buildings checked, α* is about 2–22 and the strain with stiffness at most a few per cent of greenfield;
+  - the damage category stays on greenfield strain: the slab stiffness is assumed, and a category with stiffness needs the bending and horizontal strains combined, which is not done.
+
+- **EPB screw pressure checked against the Botlek screw gauges** (`Screw(entrance_factor=...)`, `decay_length` in Python and JavaScript; EPB demo; script `models/py/validation/epb_botlek_screw.py`):
+  - the old illustrative 3 m decay length left 1.4–25× too little pressure along the screw (12–25× at 11.5 m) compared with the gauges at 2.5, 5 and 11.5 m on the Botlek EPB ([Bezuijen et al. 2005](https://www.issmge.org/uploads/publications/6/11/2005_023.pdf), Figs 8–9);
+  - the screw now has a pressure drop at its entrance (factor 0.85) and a 16 m decay length, set between the two rings the authors show as extremes (0.77–0.94, 10.9–22.7 m): within 0.73–1.54× at every gauge. Calibrated on Botlek, not tested on another machine;
+  - the EPB console's screw outlet pressure goes from about 0.1 bar to about 1.2 bar at 3 bar in the chamber. Chamber pressure control is unchanged: it uses the screw's discharge, not its pressure profile.
+
+- **Thames chalk settlement defaults tested on data not used to set them** (script `models/py/validation/settlement_chalk_independent.py`):
+  - at the Store Road Inlet, North Woolwich ([Liew 2016](https://learninglegacy.crossrail.co.uk/documents/observations-tunnelling-effects-large-diameter-jointed-concrete-pipe-crossrail-contract-c310-north-woolwich-newham-london/), same slurry shields, chalk face, not one of the 17 calibration sections), the defaults give 5.6 mm against 9 mm for the first bore and 6.8 against 5 mm for the second;
+  - the measured volume loss (0.32 % and 0.165 %) is consistent with 0.25 %, and so is CTRL Contract 220's 0.28 % in sand over chalk ([Wongsaroj et al. 2006](https://www.issmge.org/uploads/publications/6/11/2005_044.pdf)); both sites give K about 0.4, narrower than the default 0.5;
+  - the second bore lost about half the first's volume there, against the demo's 1.2×: the Thames second-bore setting is now marked unconfirmed. One site is not enough to refit, so no defaults change.
+
+- **Slurry drive checked on a second project** ([Betuweroute, Jonker 2004](https://www.cementonline.nl/artikelen/boortunnels-in-de-betuweroute); script `models/py/validation/slurry_betuweroute_advance.py`):
+  - on the Sophia and PanKan slurry tunnels (8.65 m, Dutch sand), the drive model with each tunnel's published boring and ring-build times gives 0.78–0.98× the measured whole-drive advance, so the Thames drive's 2× shortfall is that drive's own (river crossing, interventions, one TBM at a time);
+  - with the day-to-day variation fitted on Crossrail, best days come out 37–45 m against 36 and best weeks 180–215 m against 213–216: a second independent test of it;
+  - slurry pipe extensions run during ring build ([Mimura et al. 1992](https://www.iaarc.org/publications/fulltext/Automatic_extension_%20robot_%20for_slurry_transport_pipes.PDF)) and add only 2–3 min per ring, so they are left out. No open source gives separation-plant stops by cause. No model change.
+
+- **Disc-cutter penetration checked on a second project** ([Queens Water Tunnel No. 3](https://media.geolsoc.org.uk/iaeg2006/PAPERS/IAEG_383.PDF), Yagiz 2006; machine from [Khalighi & Diehl 1997](https://robbinstbm.com/wp-content/uploads/2010/09/QueensWaterTunnel_RETC_1997.pdf); script `models/py/validation/queens_csm.py`):
+  - the CSM model with ψ −0.1, fitted at Follo, is run unchanged on the 10 open stations: median 1.02× the measured penetration (0.71–1.82×). The earlier ψ +0.1 would have been 1.89×;
+  - massive rock comes out a median 1.51× fast and fractured rock 0.91×: the model has no fracture term. Queens is also gneiss, so other rock types stay untested;
+  - the source's "mm/rev" column is in cm/rev; penetration is taken from the advance rate at 8.3 rpm. No model change.
+
+- **Best days and weeks: day-to-day variation, fitted on Crossrail, tested on Barcelona** (`day_sigma`, `day_rho` in `simulate_drive`, Python and JavaScript; EPB demo):
+  - a daily productivity factor (lognormal, mean 1, correlated day to day) scales boring, ring build and per-cycle activities, so whole days run fast or slow while the mean stays the same;
+  - fitted to Crossrail drives X and Y ([King et al. 2017](https://learninglegacy.crossrail.co.uk/wp-content/uploads/2017/04/Machine-driven-tunnels-on-the-Elizabeth-line-London.pdf): best day 3.0×, best week 1.94× the mean) as σ 0.4, ρ 0.7; tested on [Barcelona Line 9](https://www.mdpi.com/2071-1050/17/9/3966), not used for the fit: best day 2.65–2.71× the mean against 2.67–3.16× measured;
+  - the EPB forecast's best day rises from about 14 to about 42 m; the reference rates add Crossrail's best day and week and Barcelona's best day. The Mixshield keeps no variation: its Thames drive varies less.
+
+- **A second advance check and a learning curve** ([Barcelona Line 9](https://www.mdpi.com/2071-1050/17/9/3966), Sustainability 2025, CC BY):
+  - Barcelona's 9.40 m EPBs averaged 26.4–28.5 m/day with best days of 72–90 m; the drive model gives 18–19 m/day and 20–21 m, about 30 % slow on average and 3.5–4× on the best day, confirming on a second project that best days are too low;
+  - the drive model has an optional learning curve (`learning_days`): about three months to average speed as at Barcelona, with a linear ramp from half speed (assumed). The EPB and Mixshield forecasts show the first 90 days of a new drive (0.78–0.83 of the steady rate) beside the steady forecast;
+  - no open breakdown of delays by cause was found, so the Tabriz distributions stay.
+
+- **EPB torque in conditioned ground: paste shear** (`cutterhead_torque(..., tau_paste=...)` in Python and JavaScript; EPB demo):
+  - in fine-grained ground conditioned with foam, the face, back and mixing-arm shear is capped at the paste's shear strength, 2 kPa from the laboratory range in [Bezuijen et al. 2005](https://www.issmge.org/uploads/publications/6/11/2005_023.pdf) (1–3 kPa), not fitted;
+  - Sofia's torque in conditioned clays and silty sands goes from 2.7× to 0.98–1.14× measured. Changsha (rock) and Mashhad (dense dry sand) keep friction, which fits them; paste shear would halve them. The split by ground type is this project's reading of the data, stated as such;
+  - the EPB demo uses paste shear in London Clay, Lambeth Group, Thanet Sand and the made ground and alluvium, friction in gravel and Chalk: torque at the start of the drive is about 3.5 MNm (was about 6).
+
+- **EPB chamber gradient checked against the Botlek bulkhead** ([Bezuijen et al. 2005](https://www.issmge.org/uploads/publications/6/11/2005_023.pdf)): the gauge's paste weight, 18 kN/m³ less the foam air, gives about 16 kPa/m at FIR 40 %, inside the 10–20+ kPa/m measured; the demo now shows the gradient with the measured range. The yield-stress part of the gradient is not modelled.
+
+- **Drill & blast specific charge checked against logged practice** ([Gjengedal & Jakobsen 2025](https://airdrive.eventsair.com/eventsairwesteuprod/production-atlanticmice-public/927385ad0d3e425bbbf6581c4573f524), Eurock 2025, 353 logged rounds):
+  - the demo's T10.5 round (134 charged holes, 1.81 kg/m³ with textbook charging) has the logged number of charged holes but about a third less explosive than three Norwegian road tunnels in 2021–24 (2.67–3.01 kg/m³ at this size); it is above the NTNU model;
+  - not fitted: full columns give only 2.3 kg/m³, and matching would need unsourced assumptions. The demo now shows the logged range beside its own value, and notes that the vibration estimate is likely low for the same reason (`practice_specific_charge` in Python and JavaScript).
+
+- **Building deflection ratio with building stiffness** (EPB and Mixshield demos; `deflection_ratios`, `deflection_modification_factor`, `frame_bending_stiffness`, `relative_bending_stiffness` in Python and JavaScript):
+  - each building shows its greenfield deflection ratio Δ/L in sagging or hogging and the value with its bending stiffness, from Potts & Addenbrooke's (1997) modification factors as plotted by [Mair 1997](https://www.issmge.org/uploads/publications/1/31/1997_04_0052.pdf), digitised to about ±0.03;
+  - the building's EI is an assumed upper estimate from storeys (floor slabs bending together); the damage category stays on greenfield horizontal strain, because no open source gives the horizontal-strain factors.
+
+- **Volume loss responds to face pressure in London Clay** (EPB demo; `settlement.load_factor`, `macklin_volume_loss`, `face_volume_loss` in Python and JavaScript):
+  - Macklin's (1999) relation VL = 0.23 % × e^(4.4 LF), quoted from [Divall et al. 2023](https://openaccess.city.ac.uk/id/eprint/31563/), with the load factor LF = N / N_TC at the face and N_TC from Kimura & Mair (1981) for a face supported up to the cutterhead;
+  - each 10 m of drive keeps the larger of the measured volume loss and the mean Macklin value while it was dug. At the normal 2.2 bar it gives 0.51 % (measured 0.5 %); at 1 bar 0.65 %, about 30 % more settlement over that stretch. Undrained strength is the Crossrail Paddington design profile (85 + 5z kPa);
+  - applied only where London Clay is at the axis (106 of 213 zones). The Mixshield in Chalk and other ground keep the measured value.
+
+- **Face support window checked against DAUB (2016)** ([free PDF](https://www.daub-ita.de/fileadmin/documents/daub/gtcrec1/2016-10_DAUB_Recommendations_for_Face_Support_Pressure_Calculations_for_Shield_Tunnelling_in_Soft_Ground.pdf)):
+  - the safety factors (1.5 earth, 1.05 water) and the 0.9 blow-out limit are confirmed; the blow-out limit now uses the minimum unit weights and no surface load, as DAUB does;
+  - the set point must now stay inside the window by the machine's support-pressure deviation (±30 kPa EPB, ±10 kPa slurry). The EPB and Mixshield demos show this operating range at the crown and raise an alarm if it is empty; along both drives it stays open (narrowest 36 kPa, Mixshield);
+  - DAUB's worked example 8.1 is reproduced (critical angle 66.56°, earth force 4,121 against 4,122 kN, operating range 200.8–219.5 kPa) and is now a test vector in Python and JavaScript;
+  - seepage forces are not added: DAUB applies them only when the support is below the groundwater pressure, which the 1.05 factor excludes in closed mode.
+
+### Fixed
+
+- **Release audit** ([docs/RELEASE-AUDIT.md](docs/RELEASE-AUDIT.md)): nothing from the owner's system in the repository; four findings fixed:
+  - the EPB and Mixshield pages now carry the OGL attribution statements for OS, Environment Agency and Historic England data, and the SEM page the BGS statement;
+  - the drill & blast preset `pull_fraction` (search snippets only, unused) is set to null with the reason;
+  - cited works now have a DOI or an open link where one exists (DOIs checked in Crossref), or are marked "not openly published"; Yeh's paper is dated 1997, not 1996.
+
+- **Double shield jamming check said "jammed" in the fault zone** (published earlier on 6 Nov 2026): it compared the single-shield skin friction (148 MN) with the 95 MN nominal main thrust, but in single-shield mode the auxiliary cylinders push off the last ring, up to 200 MN on the Brenner machines. Now a restart risk, as before the 95 MN change.
+
+- **Second-bore horizontal strain in the EPB and Mixshield demos:** with "after both drives" shown, the ground movement of both bores was directed at the first bore's axis, which overstated the strain about 3× on the second bore's side. Each bore's movement now points to its own axis. With both bores at 1 % volume loss, buildings at category 2 or worse go from 26 to 0 (EPB) and 10 to 0 (Mixshield); at 2 %, from 31 to 20 and 18 to 8. At the scenario defaults none reach category 2, before or after.
+
+### Added
+
+- **Realism checklist template** ([docs/realism/TEMPLATE.md](docs/realism/TEMPLATE.md)): header links (demo, class preset, method card, rules, models, validation), the six realism rules under fixed names, and optional sections for sources, assumed values and browser checks. The six demo checklists now follow it: rule names unified, class preset and validation links added where missing. Closes the last open Phase R item.
+
+- **SEM convergence time law against a second site** (`models/py/validation/sem_time_law.py`; [SEM convergence](docs/validation/sem-convergence.md#sulem-time-law-a-second-site)); no default changed:
+  - the Fréjus road tunnel fit of the same Sulem law (de La Fuente et al. 2020, free-access version on HAL): X 0.9 D, m 4.5, n 0.3, T 0.5–5 days, against the demo's 0.885 D, 5.7, 0.3 and 6 days;
+  - the demo's curve lies inside the Fréjus band up to 100 days; at one year it is 3.5 % above, and its final value 22 % higher (m 5.7 against 4.5).
+
+- **Drill & blast rates bracketed** (`models/py/validation/drill_blast_cycle.py`; [drill & blast cycle](docs/validation/drill-blast-cycle.md#rates-against-practitioner-statements-and-the-ntnu-model)); no default changed:
+  - charging 100 holes/h and drilling about 990 ft/h per three-boom jumbo, against a practitioner's 80–100 holes/h and 800–1,200 ft/h (Jennemyr 2020, Tunnel Business Magazine);
+  - charging, ventilation and scaling per round inside NTNU-model times for a 77–82 m² road tunnel (Kim & Lee 2021, Applied Sciences, CC BY);
+  - no open time study of charging per hole was found; it stays an assumption.
+
+- **Hard-rock cutterhead torque on a second project** (`models/py/validation/hard_rock_torque.py`; [hard-rock projects](docs/validation/hard-rock-projects.md#cutterhead-torque-on-a-second-project)); no default changed:
+  - Tehran Metro Line 6, an open-mode EPB in limestone (Samadi & Hassanpour 2024, Heliyon): logged torque 0.56–0.80 of the model; with Brenner (0.41–0.67), the model torque is 1.25–2.4× high on both projects;
+  - Follo's open thesis data log no torque;
+  - halving the torque changes the demos' advance in one zone only (gripper in mica schist, 13.8 → 15 mm/rev); the torque and power shown would halve.
+
+- **Penetration and torque on the Brenner double shields** (`models/py/validation/brenner_csm.py`; [hard-rock projects](docs/validation/hard-rock-projects.md#penetration-and-torque-on-the-brenner-double-shields)); nothing refitted:
+  - logged means of three Herrenknecht double shields in Bündner schist (Maggio 2020, Politecnico di Torino): the CSM reproduces the logged penetration at UCS 53–85 MPa, inside the published 30–120 MPa (Giacomin et al. 2022). Consistent, not tested: the range is too wide;
+  - torque: the model gives 1.5–2.4× the logged torque on all three machines, independent of UCS. Recorded as an open gap; no default changed.
+
+- **Double shield cycle checked against open sources** (`models/py/validation/double_shield_cycle.py`; [hard-rock projects](docs/validation/hard-rock-projects.md#double-shield-cycle)):
+  - ring build: 15 min (5.06 m Bheri Babai, stated) and 67 min (6.53 m, logged over the first 200 m; Comis et al., WTC 2016) bracket the demo's 30 min. In double-shield mode it is hidden while shorter than boring one ring (51–56 min), so only the 67 min would slow the Follo case (−5 %);
+  - main strokes are the ring width plus 0.1–0.2 m (Comis et al.; Brenner S-1054); the demo's stroke equal to the ring gives the right regrips per km;
+  - Guadarrama's four machines bored (with ring build) 32 % of the time to December 2004 (Melis Maynar 2006, Revista de Obras Públicas), against the model's 28 %: the first independent utilisation check for the double shield;
+  - the 10.71 m Brenner double shields have 95 MN nominal main thrust and 450 mm segments (Maggio 2020, Politecnico di Torino), against the demo's 320 mm segments (kept, a bracket).
+
+- **Chalk trough width: a third source** (`models/py/validation/settlement_chalk_independent.py`; [settlement validation](docs/validation/settlement.md)):
+  - A20 Round Hill tunnels in Lower Chalk, hand-mined by NATM: K 0.25–0.30 on four arrays (Pound & Beveridge 2002, [ISSMGE library, open](https://www.issmge.org/uploads/publications/6/10/2002_060.pdf)). With Store Road (0.40) and CTRL (0.43), all three are narrower than the Thames default 0.5;
+  - the script now shows what K would change: refitting VL to the 17 Thames sections gives 0.20 % at K 0.4 and the same Smax at every site, so only the trough's width and the building categories move (the default is now K 0.4, under Changed);
+  - no further open chalk TBM site with section depths was found. Crossrail's C310 monitoring close-out reports are scanned plan views of point readings, and the Tideway papers give no chalk trough parameters.
+
+- **Phase 2, WP7: recorded GPU sand face in the EPB demo** (`server/tunnelsim_server/record.py`, `web/epb/recordings/face-sand-cd1.tsr.gz`):
+  - the WP2 dry-sand face recorded on the GPU through a scripted support-pressure timeline: it holds at 20 kPa, gives way at 3 kPa with the chimney reaching the surface, and stops when the pressure is raised again;
+  - the "Ground physics" panel now plays the recording in real time when no live server is given (TSR0 replay, 0.4 MB), with the calibration label, the measured and analytical references, and a link to the validation page.
+
+- **Phase 2, WP6 (face only, local): live ground physics** (`server/tunnelsim_server/live.py`, `web/epb/ground.js`):
+  - a WebSocket server runs the WP2 dry-sand face on the GPU; the EPB demo opened with `?ground=ws://…` shows a "Ground physics" panel with the face section coloured by movement, a support-pressure control, and the measured (Idinger), MPM-bracket and analytical (Vermeer) values beside the calibration label;
+  - below the limit the face gives way and the chimney reaches the surface; raising the pressure stops it. About 0.2× real time on the shared GPU. The public demo is unchanged;
+  - `face_sand.py` now builds the scene once and steps it frame by frame (same numbers as before).
+
+- **Phase 2, WP4: EPB chamber under pressure, first runs, blocked** ([results](docs/validation/mpm-chamber.md)):
+  - a chamber scene for the Crossrail EPB (7.08 m) with the paste's bulk modulus from the analytical chamber model, an analytical screw sink and a PI screw controller; the server now uses `models/py` directly;
+  - open validation data: Bezuijen et al. (2005), Botlek Rail Tunnel, vertical gradients on the bulkhead high while excavating (10–20+ kPa/m) and lower at standstill;
+  - Newton's default element loses the paste's volume once the cutterhead turns (2 bar falls to about 0.3 bar); P1d keeps the pressure but locks and gives no vertical gradient. The chamber stays analytical on the console.
+
+- **Phase 2, WP0b: particle packing** ([details](docs/validation/mpm-clay.md#wp0b-correction-5-nov-2026)):
+  - Newton's effective cohesion and stiffness scale with the particle fill of each cell (shown with a Tresca Rankine wall). Scenes now use particle radius 0.7 h with yield stress and stiffness divided by the packing, which cuts the start-up compaction from 2.7 % to 0.8 %;
+  - WP1 repeats within 0.5 % and WP2 within 1–6 %; the face servo is slowed to 0.01 D/s; the golden face test is re-pinned (settled pressure 8.22 → 7.61 kPa, limit unchanged);
+  - the WP3 diagnosis is corrected: `critical_fraction` is not the cause. The clay's low stability ratio comes with a numerical volume loss in yielding clay (Q1–P0 element). The P1d and pic8 bases remove it but lock, so clay stays blocked.
+
+- **Phase 2, WP3: undrained clay, blocked** ([status](docs/validation/mpm-clay.md)):
+  - Kimura & Mair's (1981) centrifuge data digitised from their figures; the kaolin's unit weight derived from Figs 6 and 10 (γD/cu ≈ 2.5);
+  - a plane-strain tunnel scene with a closing ring;
+  - the MPM clay tunnel collapses at about half the measured stability ratio in 2D and 3D alike, below the plasticity lower bound. Cohesion scaling, stress level, leakage, friction, rate, convergence, resolution, the yield condition and equilibrium are ruled out;
+  - a first diagnosis blamed Newton's packing constraint (`critical_fraction`); WP0b withdrew it (see above). Clay is not used anywhere.
+
+- **Phase 2, WP1b: dilatancy** ([element tests](docs/validation/mpm-element-tests.md#dilatancy-wp1b), [face](docs/validation/mpm-face-sand.md#prediction-with-dilation-from-bolton-wp1b)):
+  - Newton's dilatancy factor derived from its flow rule: a Drucker–Prager potential with β = θμ. The plane-strain mapping now takes (φ′, ψ), and an element test reproduces ψ within 0.5°;
+  - ψ from Bolton (1986) for Idinger's loose sand (4.7°): face settlement halves and pressure falls about 10 %, but the chimney still reaches the surface;
+  - the remaining gap is the round Drucker–Prager cone. Idinger's face pressures lie between its plane-strain and triaxial matches at every cover, so the face is reported as that bracket and stays uncalibrated.
+
+- **Phase 2, WP2: tunnel face in dry sand on the GPU** ([results](docs/validation/mpm-face-sand.md)), still **uncalibrated**:
+  - half-model with displacement control (as the experiments) and a retract-only pressure servo (as the live view will need); the servo holds above the limit pressure and gives way below it;
+  - face pressure within ±25 % of Wang et al. (2024) at D/10, but 40–100 % above Idinger et al.'s (2011) measured range at C/D ≤ 1; finer grids add about 20 % and converge at D/20–D/30;
+  - the mechanism and settlement do not match: with no dilation the chimney always reaches the surface. Dilatancy controls all of it, so a WP1b sets it from an independent source before WP2 is repeated.
+
+- **Phase 2, WP0 and WP1: GPU ground physics groundwork** ([plan](docs/plans/phase2-mpm-face-chamber.md), [element tests](docs/validation/mpm-element-tests.md)):
+  - `server/`: Newton MPM package with run records, a GPU-load check and a golden test reproducing Phase 0 exactly;
+  - Newton's yield criterion read from the solver: √J2 ≤ s + μp. The Mohr–Coulomb mapping is μ = sin φ′ (plane strain, ψ = 0), confirmed by a Rankine active-wall test within ±6 % for φ′ ≤ 34°; Phase 0's μ = tan φ′ was not a valid match;
+  - the at-rest state cannot come from the MPM (K 0.74–0.86, independent of ν); it comes from the analytical model;
+  - granular column collapse against Rousseau et al. (2022, CC-BY data): 7 of 8 measured runouts within ±17 %, as close as the source's own simulation.
+
+- **Mixshield demo checked against the Thames Tunnel drive** ([validation](docs/validation/slurry-thames-advance.md)):
+  - ring build 32 min (Crossrail average), was 35 min; two 12 h shifts by default on the Thames route; the 80 mm/min advance limit now sourced (T&T 2014);
+  - the forecast panel shows drive H (Sophia and Mary, King et al. 2017) beside the model. The working day is 7–58 % fast (10.7–12.5 against 7.9–10.0 rings), the best week close (77–92 against 91–100); separation-plant stops are not modelled and no open source quantifies them.
+
+- **EPB demo checked against the Crossrail drives** ([validation](docs/validation/epb-crossrail-advance.md)):
+  - the ring is now Crossrail's: 1.6 m, 7 segments + small key, 300 mm (King, Thomas & Stenning 2017). It was 1.2 m and 6 + key, taken from a Moscow metro source;
+  - ring build 32 min, the Crossrail average (Tunnels & Tunnelling 2021), was 35 min; shield 12 m (Crossrail station-transits paper), was an assumed 9.5 m, which raises the shield-friction thrust;
+  - two 12 h shifts a day, seven days a week, as on Crossrail, by default on the London route;
+  - the forecast panel shows Crossrail's Table 3 beside the model. The average working day matches (11.8–12.5 rings against 12.3–14.9); the best day and week stay well below Crossrail's, which is stated as a limit.
+
+- **Drill & blast cycle checked against Norwegian data** ([validation](docs/validation/drill-blast-cycle.md)):
+  - logged rounds at the Ulvin rail tunnel (Messelt 2013): mucking 220 m³/h and downtime 13 % of the round are now in the model, which had no downtime;
+  - a contractor's T10.5 estimate (Furunes & Strype 2022): ventilation 20 min and scaling 1.5 h, replacing assumed 0.5 h and 1 h. Every activity of the demo's round is inside the estimate's P5–P95;
+  - 101 production hours a week (Tunnelbyggetid basis, was 110);
+  - class I is now 12.7 h per round and 39 m/week (was 10.9 h and 50 m/week), against NFF's "about 12 h" and a Tunnelbyggetid model case of about 48 m/week.
+
+- **Second bore** ([settlement](docs/validation/settlement.md)):
+  - the twin-trough model takes the second bore's trough width away from the first bore as well as towards it;
+  - Hyde Park (Wan et al. 2017): the second bore is 16.2 m away, read from the paper's vector figure, with 1.5–1.9× the first bore's volume loss, Ky 0.44 towards the first bore and 0.33 away;
+  - Thames chalk: reading the table's "WB & EB" column as the second bore's own volume loss reproduces the 17 measured Smax values (median ratio 1.10, was 1.57), so the first-bore default drops from 0.35 % to 0.25 %, with the second bore 17 m away at 1.2×;
+  - the EPB and Mixshield demos have a "Second bore" choice: "after both drives" shows the final settlement of both bores over the buildings, with the second tunnel drawn at its offset.
+
+- **Hard-rock TBMs checked against real projects** ([validation](docs/validation/hard-rock-projects.md)):
+  - the CSM disc-cutter model over-predicted the Follo Line TBM1 mean penetration by 1.9×. Its pressure-distribution exponent ψ is now −0.1, inside Rostami's range, which reproduces 6.32 mm/rev (6.36);
+  - with Follo's measured penetration and cutter changes, the downtime model gives 12.9–14.9 m/day against the measured 14.1 m/day average;
+  - double shield demo: 71 discs as at Follo; default thrust and speed are the logged Follo means. In gneiss it gives 6.85 mm/rev and 15.6 m/day (was 12.6 mm/rev and about 21 m/day);
+  - gripper demo: the Gotthard 9.58 m machine data (8,526 kNm, 3,500 kW, 58 discs at 26 t, 2 m stroke), replacing a torque that belonged to the 9.33 m S-210;
+  - Guadarrama, Brenner, Gotthard and Niagara averages listed as brackets; no open source gives their utilisation.
+  - Follo section by section (18 sections read from the thesis's vector charts): CSM is within about ±27 % with mean rock strength and each section's thrust and speed, but 0.4–2.9× with single-test UCS. The Yinsong dataset turned out not to be open.
+  - the hard-rock demos show the penetration with the Follo section scatter as a band (about ±27 %), and the limits panel says how far the CSM check goes.
+
+- **SEM demo on real London ground** ([checklist](docs/realism/sem-heading.md), [validation](docs/validation/sem-convergence.md#farringdon-platform-tunnels-undrained-ground-london-clays)):
+  - the SEM demo now opens on the Crossrail Farringdon platform tunnel: an 11 m sprayed-concrete enlargement of a 6.2 m TBM pilot, on the Farringdon – Liverpool Street scenario, with Crossrail's undrained design lines;
+  - the sequence follows Farringdon: 1 m top headings, 2 m bench and invert, the ring closed 5–10 m back, 400 mm fibre-reinforced lining without girders. A water-bearing sand lens brings wellpoints, face pockets and 4 m spiles. The heading keeps the published 1.1 m/day (0.5 m/day in the lens);
+  - the predicted crown settlement (about 10.5–14 mm) is shown beside the measured 10.3–16.5 mm outside compensation grouting and Crossrail's 10 mm FE;
+  - the weak-rock heading stays selectable (`?ground=rock`);
+  - Reset now puts the camera on the new face.
+- **Crown settlement in undrained clay:** `sem.crown_settlement` (Python and JS, with test vectors) scales the ring movement to the crown with the Kirsch factor and adds 2–3 mm settlement of the whole ring measured at Crossrail Whitechapel. The Farringdon prediction moves from 5–8 mm (low by 1.3–2.7×) to 10.4–13.7 mm, inside the measured 10.3–16.5 mm. In-tunnel readings levelled out within days of ring closure, so consolidation is ruled out as the cause.
+- **Undrained ground response:** the ground reaction curve handles φ = 0 (Tresca) as the limit of Duncan Fama, in Python and JavaScript, with a test and test vectors. Script: `models/py/validation/sem_farringdon.py`.
+- **Urban EPB demo** (Slice A, [live](https://dtt-github.github.io/tunnel-construction-simulation/web/epb/)):
+  - a 7 m EPB laid out front to back, with an articulated shield and 16 pairs of thrust cylinders;
+  - push and ring-build cycle with a universal 6 + key ring;
+  - chamber pressure against the DAUB window, with automatic or manual screw control and foam conditioning;
+  - thrust and torque breakdown;
+  - surface settlement with Burland categories for buildings.
+  - Assumptions and gaps are listed in its [realism checklist](docs/realism/epb-slice-a.md).
+- **Real buildings and measured settlement** ([buildings](docs/SCENARIOS.md), [settlement](docs/validation/settlement.md)):
+  - both London scenarios carry the buildings within 60 m of the line: OS OpenMap Local footprints, Environment Agency LIDAR heights, Historic England listing (all OGL), built by `models/scenarios/build_buildings.py`;
+  - the EPB and Mixshield demos place them at their real footprints, follow the face with the settlement surface, and list the most affected buildings near the face;
+  - default volume loss and trough width from measured Crossrail settlement: Thames 0.35 %, K 0.5; Farringdon – Liverpool Street 0.5 %, K 0.43 (from Hyde Park). The trough reproduces Hyde Park (8.1 mm against 8.3 mm); in the Thames chalk the published volume losses do not reproduce the published Smax, and the volume loss that does is used.
+- **Thames crossing for the Mixshield** ([sources](docs/SCENARIOS.md)): the Crossrail Thames Tunnel, Plumstead to North Woolwich, from 15 BGS/Crossrail boreholes (four over the river; OGL) and the OpenStreetMap line, built by `models/scenarios/build_thames.py`. The Mixshield demo drives through it by default, with the river in the long section. Under the river the support window is 2.96–3.57 bar (Crossrail: above 3 bar). The scenario format gains `river`, `d10` per unit and `ends`.
+- **River above the ground:** the DAUB support window and the grout window now add the river column to the total overburden when the water level is above the ground surface.
+- **Ground scenarios and real London geology** ([format and sources](docs/SCENARIOS.md)):
+  - a scenario file format (`tunnelsim-scenario/1`) and loader (Python + JavaScript): ground surface, upper water table and deep aquifer head, units interpolated between boreholes, the ground at the face;
+  - the first scenario: 2.1 km of the Elizabeth line from Farringdon to Liverpool Street, built from 14 Crossrail boreholes held by the British Geological Survey (Open Government Licence) by `models/scenarios/build_london.py`, with unit parameters from open sources;
+  - the EPB demo now drives through it by default, with a geological long section, ground, depth and water changing every 10 m; the illustrative ground stays selectable.
+- **Segment lining:** the vertical load is now reduced by Terzaghi's formula (ITA 2000, Formula 2.2.1), and the lateral coefficient is checked at the active and at-rest ends of the ITA range; ring overstress raises an alarm.
+- **Ground response against measured convergence** ([write-up](docs/validation/sem-convergence.md)): the Hoek–Brown, ground-reaction and LDP chain against 14 monitored sections of a headrace tunnel in weak flysch (Terron-Almenara & Panthi 2025, CC BY 4.0, via Zenodo 10.5281/zenodo.23040284). Every reading is reproduced within the installed support capacity; no defaults changed. Script: `models/py/validation/sem_convergence.py`.
+- **Validation against open field data** ([write-up](docs/validation/epb-open-data.md)): the EPB thrust and torque models against 281 rings of Changsha Metro Line 4 and 1,197 records of the Guangzhou–Foshan railway (CC BY 4.0, Mendeley Data), and published operating points from Mashhad Line 3 and Sofia Line 3. Script: `models/py/validation/epb_open_data.py`.
+- **Changed:** shield and rim friction defaults are now 0.17 and 0.07, fitted on Changsha; they were 0.3, illustrative. Thrust is within about ±25 % on three projects. The EPB and Mixshield thrust and torque bars drop accordingly.
+- **Segment lining model** (Python + JavaScript, `lining`): ring forces by the elastic equation method (ITA WG2 2000, reproduces its Design Example 1) with Wood's joint reduction, jacking stress and bursting under the shoes, annulus grout volume and pressure window, taper. The EPB and Mixshield demos show a Segment lining panel with these checks.
+- **Drill & blast road tunnel** (Slice E, `web/drill-blast/`):
+  - a Norwegian T10.5 road tunnel driven round by round: survey, drilling with a three-boom jumbo, charging, blast, ventilation, scaling, mucking with a loader and trucks, bolting and sprayed concrete;
+  - the face pattern and charges from published rules (Holmberg cut, Olofsson burden, smooth contour), with a "Norwegian practice" setting fitted to published hole counts;
+  - support classes I–IV with reinforced ribs of sprayed concrete in the fault; half-barrels on unsprayed walls;
+  - vibration at a house above against the SS 460 48 66 guide value, firing one hole or one row per delay;
+  - New `drill_blast` model (Python + JavaScript); its realism checklist is [here](docs/realism/drill-blast-heading.md).
+- Labels of hidden equipment are no longer shown in the hard-rock, SEM and drill & blast demos.
+- **Urban slurry shield (Mixshield)** (Slice C, `web/slurry/`):
+  - a 7.08 m Crossrail-class Mixshield built from the EPB page: submerged wall, air cushion over the working-chamber slurry, pressure bulkhead, jaw crusher at the suction, DN300 feed and discharge lines, ring of 7 segments + key;
+  - support pressure held by the air regulator within ±10 kPa; discharge pump on level control or manual, with pump interlocks; circuit in bypass between pushes;
+  - filter cake or penetration at the face from the bentonite yield point and the ground's d₁₀, with the share of support transferred;
+  - discharge density, dry-mass balance against the theoretical, pipe velocities against the deposit limit.
+  - New `slurry` model (Python + JavaScript); its realism checklist is [here](docs/realism/slurry-mixshield.md).
+- **SEM / NATM heading** (Slice D, `web/sem/`):
+  - top heading, bench and invert by FHWA ground class;
+  - lattice girders, pipe canopies and a temporary invert in the fault zone, with ring closure within one diameter;
+  - shotcrete stiffening with age;
+  - lining load and safety from Oreste's method;
+  - convergence monitoring with Crossrail trigger levels and the final-lining criterion.
+  - New `sem` model (Python + JavaScript) for shotcrete ageing, lining interaction, sequence rules and the Sulem convergence law.
+- **Ground response model** (Python + JavaScript):
+  - equivalent Mohr–Coulomb parameters, ground reaction curve and longitudinal displacement profile;
+  - squeezing classes;
+  - support curves and equilibrium;
+  - shield friction (screening estimate) and gripper bearing.
+  - It reproduces the published worked examples.
+  - In the hard-rock demos:
+    - the fault zone now closes in;
+    - the double shield reports skin friction against its installed thrust, with a jamming-risk alarm;
+    - the gripper checks shoe pressure against rock-mass strength and steel-set equilibrium.
+- **Hard-rock double shield TBM** in the same page (`?machine=double`):
+  - Follo-class 9.9 m machine with telescopic, gripper and tail shields;
+  - main and auxiliary thrust cylinders, segment rings built while boring, pea gravel and grout;
+  - single-shield mode in the fault zone.
+  - The page is split into shared parts (`common.js`) and one module per machine.
+  - The double-shield class preset now carries the verified Follo values.
+  - The downtime model counts regrips for double shields (a few minutes to 15–30 min).
+- **Hard-rock open gripper TBM demo** (Slice B, `web/hard-rock/`), replacing the early prototype at `web/`:
+  - flat disc cutterhead with buckets, muck ring and belt;
+  - roof shield, main beam, grippers with propel cylinders and the regrip cycle;
+  - rock bolts, mesh and ring beams at L1 and shotcrete at L2 by RMR class, with invert segments;
+  - geology with a fault zone, cutting limits and downtime per stroke from the per-km model.
+- **Hard-rock models:**
+  - CSM drive with constant torque, then constant power;
+  - gauge-cutter speed limit and penetration cap;
+  - cutter wear from CAI, with cutter-change downtime;
+  - RMR support classes;
+  - utilisation as downtime per km (Farrokh 2018), reproducing the paper's worked example within 3 %.
+- **Utilisation and downtime model** (Python + JavaScript, seeded and bit-identical random stream):
+  - ring build, general activities, train delays and per-cycle maintenance from distributions fitted on a 6.88 m metro EPB (Moosazadeh et al. 2018);
+  - published shift patterns and cutting-tool interventions;
+  - check of best day, week and month against published EPB rates and the world record of the diameter class.
+  - Wired into the EPB demo: live shifts and stoppages, and a 90-day forecast panel.
+- Documentation index ([docs/README.md](docs/README.md)), this changelog, and a GitHub Actions workflow that runs the JavaScript and Python model tests on every push and pull request.
+
+### Changed
+
+- README rewritten:
+  - live demo links and a screenshot;
+  - current status, documentation map, roadmap summary.
+- Model catalogue restructured into one section per model.
+
+## 2026-11-04
+
+### Added
+
+- **Realism baseline.**
+  - [Methods reference](docs/research/methods-reference.md): sourced cards for every tunnelling method (layout, support and lining, cycle, numbers, ground pairing).
+  - Realism rules in the [roadmap](docs/ROADMAP.md).
+- **Machine class presets** ([machine-classes.json](models/presets/machine-classes.json)): every field carries a source and a verified flag; a test enforces this.
+- **Models** (Python reference + JavaScript twin + shared vectors):
+  - face support: wedge-silo with a DAUB operating window;
+  - EPB chamber pressure from a volume balance with foam conditioning, and the screw conveyor;
+  - shield thrust and cutterhead torque components;
+  - settlement extended with volume-loss components along the drive, method presets, twin tunnels and a longitudinal width.
+- **Phase 0, GPU platform on the DGX Spark** ([results](phase0/RESULTS.md)):
+  - Newton implicit-MPM benchmarks for face stability and an EPB chamber;
+  - WebSocket particle streaming (TSP0);
+  - TSR0 record and replay with a browser viewer.
+- **Public demo site** on GitHub Pages.
+
+### Changed
+
+- The thrust and torque plausibility check uses a table of built machines with sources, instead of the Krause α·D³ band, which modern EPBs exceed.
+- The replay viewer labels recorded values as recorded and states the limits of each run.
+- The hard-rock prototype is labelled "being rebuilt" until it matches real machines.
+
+### Removed
+
+- References to private material from the public documentation.
+
+## 2026-11-04: initial release
+
+### Added
+
+- Model library: CSM disc cutter, Hoek–Brown, Gaussian settlement and Burland categories.
+- Hard-rock TBM browser prototype.
+- Research and industry surveys.
