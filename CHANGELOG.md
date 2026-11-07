@@ -4,6 +4,14 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## [Unreleased]
 
+### Changed
+
+- **MPM default jitter 0.05 h** (`server/tunnelsim_server/scenes/common.py`; the chamber and face scenes now use the shared setting): with the initial jitter of ±0.25 h, the P0 condition is not met at disordered particles and yielding material creeps (the Newton maintainer's finding on [newton-physics/newton#5180](https://github.com/newton-physics/newton/issues/5180)). With GIMP and 0.05 h the clay tunnel reaches 0.98, 0.92 and 0.97 of Kimura & Mair's stability ratio at C/D 1.2, 2.0 and 2.8 (0.90 at D/20), and the 3D headings 1.04 and 0.81; the clay slab comes to rest; the chamber keeps 162 of 207 kPa while the cutterhead turns. The sand faces stay within about 8 % of before; all server tests pass; the WP0b runs are repeated as `*_g05` records. The Phase 0 golden face keeps 0.25 h. WP3 is unblocked ([MPM clay](docs/validation/mpm-clay.md#gimp-integration-and-particle-jitter-6-and-7-nov-2026)).
+
+### Fixed
+
+- **Particle-volume scaling under GIMP** (`material_scale()` in `common.py`): the GIMP switch in v1.0.0 stopped dividing cohesion and stiffness by the packing 2.744, on a misread test. Under GIMP they scale with particle volume as under PIC, so the GIMP clay and paste were 2.744× too strong. The v1.0.0 statement that the clay tunnel is too strong to collapse under GIMP came from this error, not from the solver. The published demos are not affected.
+
 ## 1.0.0 (2026-11-06): Release 1
 
 The six browser demos (urban EPB, Mixshield, gripper and double shield TBMs, drill & blast, SEM/NATM), each checked against open published data and labelled independent, calibrated or bracket in the [validation report](docs/validation/REPORT.md), plus one recorded GPU sand face. Not in it: the MPM clay tunnel and EPB chamber (blocked). Sources, labels and licences audited in [docs/RELEASE-AUDIT.md](docs/RELEASE-AUDIT.md). Tag: `v1.0.0`.
@@ -12,7 +20,7 @@ The six browser demos (urban EPB, Mixshield, gripper and double shield TBMs, dri
 
 - **README, validation report and roadmap at the Release 1 state:** the README status, demo checks, GPU physics and documentation table updated, and Release 1 added to the roadmap at a glance; the [validation report](docs/validation/REPORT.md) gains today's checks (Brenner penetration and torque, Tehran torque, Fréjus time law, drill & blast rate brackets, GIMP results for the clay tunnel and chamber); the [roadmap](docs/ROADMAP.md) gains a Release 1 section (scope, stop line, what is done for it). NOTICE now lists the third-party data the scenarios carry (BGS, OS, Environment Agency, Historic England, OpenStreetMap) with their attribution statements.
 
-- **MPM scenes use GIMP integration** (`server/tunnelsim_server/scenes/common.py`, `runner.py --integration`; [MPM clay](docs/validation/mpm-clay.md#gimp-integration-6-nov-2026)), on the Newton maintainer's advice in [newton-physics/newton#5180](https://github.com/newton-physics/newton/issues/5180):
+- **MPM scenes use GIMP integration** (`server/tunnelsim_server/scenes/common.py`, `runner.py --integration`; [MPM clay](docs/validation/mpm-clay.md#gimp-integration-and-particle-jitter-6-and-7-nov-2026)), on the Newton maintainer's advice in [newton-physics/newton#5180](https://github.com/newton-physics/newton/issues/5180):
   - the volume loss of yielding material is gone: the clay slab round a fixed lining settles 0.185 m and stops (PIC 0.62 m, still creeping), with no particles piling against or inside the lining; the EPB chamber keeps 172 of 216 kPa while the cutterhead turns (PIC 103 of 197 kPa);
   - under GIMP, cohesion and stiffness are no longer divided by the particle packing 2.744 (`material_scale()`); the stress readout keeps the factor;
   - sand faces, the K0 column and the golden tests are within about 10 % of before; the sand Rankine wall is a little weaker and weakens with refinement (0.96–0.86 of theory);

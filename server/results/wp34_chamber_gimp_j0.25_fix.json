@@ -1,0 +1,113 @@
+{
+  "scene": "chamber",
+  "time": "2026-11-07T02:24:54",
+  "git": "4ec45d2+dirty",
+  "versions": {
+    "newton": "1.7.0",
+    "warp": "1.19.0",
+    "numpy": "2.5.4",
+    "python": "3.12.3"
+  },
+  "params": {
+    "diameter": 7.08,
+    "chamber": 0.8,
+    "slab": 0.6,
+    "voxel": 0.25,
+    "ppc": 2,
+    "paste_density": 1330.0,
+    "paste_friction": 0.35,
+    "paste_cohesion": 2000.0,
+    "paste_poisson": 0.3,
+    "fir": 0.4,
+    "fer": 10.0,
+    "target_kpa": 200.0,
+    "advance_mm_min": 60.0,
+    "cutter_rpm": 2.0,
+    "pressurise_speed": 0.1,
+    "pressurise_max_s": 8.0,
+    "hold_s": 3.0,
+    "excavate_s": 4.0,
+    "stop_s": 6.0,
+    "kp_rpm_per_kpa": 0.2,
+    "ki_rpm_per_kpa_s": 0.05,
+    "max_screw_rpm": 22.0,
+    "fps": 60.0,
+    "iterations": 50,
+    "seed": 0,
+    "soil": {
+      "name": "EPB chamber paste",
+      "density": 1330.0,
+      "friction": 0.35,
+      "source": "density: Bezuijen et al. (2005) 13 kN/m3 mixture; stiffness: foam-paste bulk modulus of the analytical chamber model at 200 kPa, FIR 0.4, FER 10; friction and cohesion assumed",
+      "yield_stress": 2000.0,
+      "young_modulus": 3367732.605511265,
+      "poisson_ratio": 0.3,
+      "dilatancy": 0.0,
+      "phi_deg": null,
+      "cohesion": 0.0,
+      "match": "none",
+      "extra": {
+        "bulk_modulus_Pa": 2806444
+      }
+    },
+    "critical_fraction": 0.0,
+    "radius_over_h": 0.7,
+    "strain_basis": "P0",
+    "integration_scheme": "gimp"
+  },
+  "gpu_before": {
+    "name": "NVIDIA GB10",
+    "utilisation_percent": 83,
+    "driver": "580.178.04",
+    "other_processes": [
+      "python",
+      "python"
+    ]
+  },
+  "timing_valid_for_decisions": false,
+  "timing_note": "GPU shared with other processes: timings are lower bounds",
+  "calibration": "uncalibrated",
+  "result": {
+    "diameter_m": 7.08,
+    "voxel_m": 0.25,
+    "particles": 26785,
+    "paste_bulk_modulus_kPa": 2806,
+    "rho_g_kPa_per_m": 13.05,
+    "pressurised_after_s": 1.5,
+    "p_axis_hold_kPa": 206.3,
+    "gradient_hold_kPa_per_m": 4.71,
+    "p_axis_excavate_kPa": 155.7,
+    "p_axis_excavate_band_kPa": [
+      143.3,
+      172.0
+    ],
+    "gradient_excavate_kPa_per_m": 5.79,
+    "gradient_stop_kPa_per_m": 7.73,
+    "screw_rpm_excavate": 0.0,
+    "screw_rpm_feedforward": 9.95,
+    "bulkhead_thrust_MN_excavate": 5.7,
+    "p_axis_times_area_MN": 6.13,
+    "cutter_torque_MNm_excavate": 6.561,
+    "p_piston_hold_excavate_kPa": [
+      288.9,
+      147.3
+    ],
+    "cutter_axial_MN_hold_excavate": [
+      2.55,
+      -0.0
+    ],
+    "advance_m": 0.156,
+    "particles_removed": 9,
+    "particles_escaped": 162,
+    "escaped_back_front_side": [
+      0,
+      1,
+      161
+    ],
+    "particles_per_m3_start_end": [
+      486,
+      543
+    ],
+    "ms_per_frame": 29.03
+  }
+}

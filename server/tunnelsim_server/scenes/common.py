@@ -4,8 +4,11 @@ from __future__ import annotations
 import numpy as np
 
 
-# Initial particle jitter as a fraction of the spacing (0.25 in Phase 0 and WP0-WP3; WP0b tests 0).
-JITTER = 0.25
+# Initial particle jitter as a fraction of the spacing. 0.05 since 7 Nov 2026: with 0.25 (Phase 0, WP0-WP3, WP0b) the
+# P0 incompressibility condition is not met at disordered particles and yielding material creeps (newton#5180); at 0.05
+# the clay slab comes to rest and the clay tunnel reaches 0.92-0.98 of Kimura & Mair's N (docs/validation/mpm-clay.md).
+# The Phase 0 golden face (face.py) keeps its own 0.25.
+JITTER = 0.05
 
 
 def fill_box(lo, hi, h: float, seed: int = 0, jitter: float | None = None) -> np.ndarray:
@@ -44,10 +47,11 @@ def packing() -> float:
 
 
 def material_scale() -> float:
-    """Factor by which Newton's effective cohesion and stiffness exceed the input values. With PIC integration it is the
-    packing (diagnostics/cohesion_scale.py); with GIMP the cohesion comes out at the input value (Tresca Rankine wall
-    1.06-1.10 x theory unscaled, against about 0.5 with the PIC correction), so it is 1."""
-    return 1.0 if INTEGRATION_SCHEME == "gimp" else packing()
+    """Factor by which Newton's effective cohesion and stiffness exceed the input values: the packing, with PIC and with
+    GIMP integration alike (diagnostics/cohesion_scale.py; Tresca Rankine wall under GIMP, cu/gamma H 0.06: K 0.366
+    unscaled against 0.341 for 2.744 cu, theory 0.760). A first reading on 6 Nov 2026 put it at 1 under GIMP; that test
+    already divided by the packing inside make_particles, so it was misread."""
+    return packing()
 
 
 def _attributes(soil, n: int) -> dict:

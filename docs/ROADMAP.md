@@ -197,7 +197,7 @@ Demo: [web/drill-blast/](../web/drill-blast/) ([live](https://dtt-github.github.
 
 ## Phase 2: server ground physics (Newton on the DGX Spark)
 
-- [~] Work packages ([plan](plans/phase2-mpm-face-chamber.md)): WP0 to WP2 and WP7 done (element tests, dry-sand face, recorded face in the EPB demo); WP3 clay and WP4 chamber blocked. GIMP integration (6 Nov 2026, [newton#5180](https://github.com/newton-physics/newton/issues/5180)) removed the volume loss, but the clay tunnel is now too strong ([MPM clay](validation/mpm-clay.md))
+- [~] Work packages ([plan](plans/phase2-mpm-face-chamber.md)): WP0 to WP2 and WP7 done (element tests, dry-sand face, recorded face in the EPB demo); WP3 clay unblocked on 7 Nov 2026: with GIMP integration and an initial particle jitter of 0.05 h ([newton#5180](https://github.com/newton-physics/newton/issues/5180)) the clay tunnel is within 2–8 % of Kimura & Mair in plane strain ([MPM clay](validation/mpm-clay.md)); WP4 chamber blocked (a fifth of the pressure lost)
 - [ ] MPM face and chamber two-way coupled to the cutterhead, screw and shield, with a pressure-controlled shove; screw inlet resolved
 - [ ] Calibrate against the analytical face pressure and screw discharge
 - [ ] Slurry variant with the pump circuit; mode switching (variable density, crossover rock/EPB)

@@ -30,7 +30,7 @@
 | [Double shield](../../web/hard-rock/) | Follo advance 12.9–14.9 against 14.1 m/day (tests the downtime model only); share of time boring 28 % against Guadarrama's 32 % | Penetration on the Follo 4.5 km mean; discs, thrust and rpm are the Follo means | Penetration does not follow section-to-section strength (0.41–2.89×); cutter changes about 40 % too few; torque 1.25–2.4× the logged value; ring build and gripper force at 10 m bracketed only |
 | [Drill & blast](../../web/drill-blast/) | Ulvin drilling 0.88× and charging 1.26× (logged round); every T10.5 activity inside a contractor's P5–P95 range | Mucking rate and downtime share at Ulvin; ventilation and scaling at the contractor median | Weekly advance by support class not published, so class IV is untested; activities do not overlap |
 | [SEM / NATM](../../web/sem/) | Farringdon crown settlement 10.4–13.7 mm against 10.3–16.5 measured; Albanian flysch convergence of the right order | None fitted; the 2.5 mm whole-ring term is taken from Whitechapel | Prediction sits in the lower half of the measured range; not a tight test. The Sulem time law agrees with a second site (Fréjus) for 100 days, then runs high |
-| [Ground physics (GPU MPM)](../../web/epb/) | Element tests: Rankine within ±6 %, column collapse 7 of 8 within ±17 % | The friction mapping μ = sin φ′ was chosen from the Rankine test | Face pressure only bracketed (Idinger); K0 failed; GIMP integration removed the volume loss, but the clay tunnel is now too strong to collapse and the chamber still loses a fifth of its pressure |
+| [Ground physics (GPU MPM)](../../web/epb/) | Element tests: Rankine within ±6 %, column collapse 7 of 8 within ±17 % | The friction mapping μ = sin φ′ was chosen from the Rankine test | Face pressure only bracketed (Idinger); K0 failed; the chamber still loses a fifth of its pressure. Clay tunnel (GIMP, jitter 0.05 h): 0.92–0.98 of Kimura & Mair's N in plane strain |
 
 ## Checks by model
 
@@ -124,15 +124,15 @@
 
 | Check | Data | Result | Kind | Page |
 |---|---|---|---|---|
-| Rankine active wall, sand (friction mapping) | Rankine theory | Within −6 % to +6 % for φ′ ≤ 34° with PIC; with GIMP, 0.96, 0.90 and 0.86 of theory at H/10, H/20, H/40 | Calibrated: μ = sin φ′ chosen from this test | [element tests](mpm-element-tests.md) |
-| Granular column collapse | Rousseau et al. (2022), CC BY | 7 of 8 runouts within ±17 % (G10 58 % long) | Independent | [element tests](mpm-element-tests.md) |
+| Rankine active wall, sand (friction mapping) | Rankine theory | Within −6 % to +6 % for φ′ ≤ 34° with PIC; with GIMP and jitter 0.05 h, K 0.305 against 0.283 at H/20 (0.93 of tan φ′) | Calibrated: μ = sin φ′ chosen from this test | [element tests](mpm-element-tests.md) |
+| Granular column collapse | Rousseau et al. (2022), CC BY | 7 of 8 runouts within ±17 % (G10 58 % long), with PIC; with GIMP and jitter 0.05 h, B00 0.90× and G00 0.74× (the other six not rerun) | Independent | [element tests](mpm-element-tests.md) |
 | Dilatancy mapping | Newton's flow rule (derived) | ψ within 0.5° | Independent | [element tests](mpm-element-tests.md) |
-| At-rest stress K0 | 1 − sin φ′ | 0.74–0.86 for any target (GIMP 0.76 at a target of 0.44) | Failed: the analytical value is used | [element tests](mpm-element-tests.md) |
+| At-rest stress K0 | 1 − sin φ′ | 0.74–0.86 for any target (GIMP, jitter 0.05 h: 0.73 at a target of 0.44) | Failed: the analytical value is used | [element tests](mpm-element-tests.md) |
 | Face pressure, dry sand | Idinger et al. (2011), centrifuge | Measured 4.5–6.0 kPa lies inside the MPM bracket 4.0–8.7 kPa at C/D 1, at every cover | Bracket: no single soil match fits pressure, wedge and settlement | [face sand](mpm-face-sand.md) |
 | Face pressure, dry sand | Wang et al. (2024) / Liu et al. | 0.93–1.22 at D/10; 1.17–1.55 at D/20 | Independent: matches at D/10 only | [face sand](mpm-face-sand.md) |
 | Face mechanism and settlement | Idinger et al. (2011) | Wedge 10–14° too flat; settlement 1.1–3× with Bolton dilation | Failed | [face sand](mpm-face-sand.md) |
-| Clay tunnel stability ratio | Kimura & Mair (1981) | PIC: about 0.5× the measured N. GIMP: no collapse, N ≥ 4.2–8.2 against 3.5–4.3 | Blocked: PIC loses volume; GIMP is too strong round the opening ([newton#5180](https://github.com/newton-physics/newton/issues/5180)) | [clay](mpm-clay.md#gimp-integration-6-nov-2026) |
-| EPB chamber pressure and gradient | Bezuijen et al. (2005), Botlek | PIC: 197 → 103 kPa under cutterhead rotation. GIMP: 216 → 172 kPa | Blocked: a fifth of the pressure still lost | [chamber](mpm-chamber.md), [clay](mpm-clay.md#gimp-integration-6-nov-2026) |
+| Clay tunnel stability ratio | Kimura & Mair (1981) | GIMP, jitter 0.05 h: plane strain 0.98, 0.92 and 0.97 of the measured N at C/D 1.2, 2.0 and 2.8 (0.90 at D/20); 3D headings 1.04 and 0.81. PIC with jitter 0.25 h: about 0.5× | Independent; settled by the solver setting, not fitted ([newton#5180](https://github.com/newton-physics/newton/issues/5180)) | [clay](mpm-clay.md#gimp-integration-and-particle-jitter-6-and-7-nov-2026) |
+| EPB chamber pressure and gradient | Bezuijen et al. (2005), Botlek | PIC: 197 → 103 kPa under cutterhead rotation. GIMP, jitter 0.05 h: 207 → 162 kPa | Blocked: a fifth of the pressure still lost | [chamber](mpm-chamber.md), [clay](mpm-clay.md#gimp-integration-and-particle-jitter-6-and-7-nov-2026) |
 
 ## What is still assumed or unchecked
 

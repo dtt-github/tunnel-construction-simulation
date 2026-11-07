@@ -1,14 +1,14 @@
-# MPM tunnel in undrained clay (Phase 2, WP3): blocked
+# MPM tunnel in undrained clay (Phase 2, WP3): unblocked, checks continuing
 
 - **Plan:** [Phase 2, WP3](../plans/phase2-mpm-face-chamber.md#wp3-undrained-clay-face-about-2-weeks).
 - **Code:**
   - [`server/tunnelsim_server/scenes/tunnel_2d.py`](../../server/tunnelsim_server/scenes/tunnel_2d.py), a plane-strain tunnel with a closing ring of segments;
   - [`face_sand.py`](../../server/tunnelsim_server/scenes/face_sand.py) with the kaolin soil;
   - records `t2d_*` and `fc_*` in [`server/results/`](../../server/results/).
-- **Status:** **blocked, now from the other side.** With PIC integration the MPM clay tunnel collapsed at about half the stability ratio measured by Kimura & Mair (1981). Since 6 Nov 2026 the scenes use GIMP integration, on the Newton maintainer's advice: the volume loss is gone, but the clay tunnel no longer collapses at all at the measured ratios (see [GIMP integration](#gimp-integration-6-nov-2026)). This is an open gap.
+- **Status:** **unblocked (7 Nov 2026).** With PIC integration and the initial particle jitter of 0.25 h, the MPM clay tunnel collapsed at about half the stability ratio measured by Kimura & Mair (1981). With GIMP integration and a jitter of 0.05 h, the defaults since 7 Nov 2026, it reaches 0.92–0.98 of Kimura's N in plane strain and 0.81–1.04 in the two 3D headings ([current results](#gimp-integration-and-particle-jitter-6-and-7-nov-2026)). The history below is kept: it explains how the volume loss was found.
   - The first diagnosis blamed Newton's packing constraint (`critical_fraction`). WP0b withdrew it: that apparent gain came from compaction (see [WP0b correction](#wp0b-correction-5-nov-2026)).
   - The clay piling up against the ring is the tunnel-scale sign of a numerical volume loss in yielding clay. It comes from the default element (Q1 velocities, P0 strains), not from the colliders. The one element that removes it locks (see [piling](#the-piling-investigated-5-nov-2026)).
-- **Run on:** 5 Nov 2026; GIMP runs 6 Nov 2026
+- **Run on:** 5 Nov 2026; GIMP and jitter runs 6–7 Nov 2026
 
 ## Data: Kimura & Mair (1981)
 
@@ -29,7 +29,9 @@ The paper is open in the [ISSMGE library](https://www.issmge.org/uploads/publica
 
 **Not modelled:** headings with unlined length (P/D > 0). They need pressure on the heading walls, and Newton's colliders cannot apply a traction.
 
-## Results
+## Results (PIC, jitter 0.25 h, as of 5 Nov 2026)
+
+Superseded by [GIMP integration and particle jitter](#gimp-integration-and-particle-jitter-6-and-7-nov-2026); kept for the record.
 
 Rigid-plastic Tresca (friction 0, `yield_stress` = cu). The tunnel wall or face plate is frictionless, as a pressurised bag would be. N is read at 5 % of R (2D) or D (3D) of movement. The pressure keeps falling with further movement and never levels off.
 
@@ -184,50 +186,44 @@ The script is [`diagnostics/ringpile.py`](../../server/diagnostics/ringpile.py).
 - **pic8**, a strain basis per particle, gets the closest (N 3.8 at C/D 2), but it locks even more: about 13 % on friction and about 30 % on cohesion.
 - **Neither is adopted.** P0 stays: it is the element that passes the element tests.
 
-## GIMP integration (6 Nov 2026)
+## GIMP integration and particle jitter (6 and 7 Nov 2026)
 
-- **Source of the change:** we reported the volume loss to Newton ([newton-physics/newton#5180](https://github.com/newton-physics/newton/issues/5180)). A maintainer reproduced it: with PIC integration the P0 incompressibility condition is summed at the particle positions, which is not exact when the particles are jittered, so yielding material creeps. GIMP integrates over the particle–cell overlaps instead. Their runs used an open pull request (#5021); ours are on plain Newton 1.7.0 with the default `S2` collider.
-- **Code:** `common.INTEGRATION_SCHEME = "gimp"` is now the default; `runner.py --integration pic` repeats the earlier runs. Records end in `_gimp`.
-- **Particle-volume scaling:** under GIMP, cohesion and stiffness come out at the input values, so they are no longer divided by 2.744 (`material_scale()`). The stored particle stress is still per particle volume, so the stress readout keeps the factor: the K0 column reads σv / γz 0.37 without it and 1.01 with it.
+- **Source of the change:** we reported the volume loss to Newton ([newton-physics/newton#5180](https://github.com/newton-physics/newton/issues/5180)). A maintainer reproduced it and found two causes: with PIC integration the P0 incompressibility condition is summed at the particle positions, which is not exact when the particles are disordered; and our initial jitter of ±0.25 h was enough to make yielding material creep. Two remedies: GIMP integration (over particle–cell overlaps) or a smaller jitter.
+- **Code:** `common.INTEGRATION_SCHEME = "gimp"` and `common.JITTER = 0.05` are the defaults since 7 Nov 2026; `runner.py --integration pic` repeats the PIC runs. The Phase 0 golden face keeps its own 0.25 h.
+- **Particle-volume scaling:** cohesion and stiffness scale with the particle volume (2r/h)³ = 2.744 under GIMP as under PIC, and so does the stored particle stress. The scenes divide `yield_stress` and E by 2.744 and multiply the stress readout by it, in both schemes.
 
-**What GIMP fixes:**
+**Correction (7 Nov 2026).** The first version of this section, committed on 6 Nov and part of v1.0.0, said that GIMP removes the 2.744 scaling and that the clay tunnel under GIMP is too strong to collapse. Both were wrong. The test that seemed to show no scaling under GIMP already divided by 2.744 inside the scene's particle builder; the switch then left the clay 2.744× too strong, which is why the tunnel stood unsupported. Rerun properly, the Tresca wall under GIMP gives K 0.366 with the input cohesion (theory with 2.744 cu: 0.341) and 0.730–0.762 with cohesion / 2.744 (theory 0.760).
 
-| Check | PIC | GIMP |
-|---|---|---|
-| Clay slab round a fixed lining, 4 s: surface drop, speed | 0.62 m, still creeping (25 mm/s) | 0.185 m, at rest from 2 s (0.5 mm/s) |
-| Clay slab: particles in the shell next to the lining (308 at start) / inside it | 519 / 85 | 308 / 0 |
-| Stiff control slab (never yields) | 0.03 m | 0.033 m |
-| EPB chamber paste, bulkhead pressure, cutterhead still → turning | 197 → 103 kPa | 216 → 172 kPa |
-| Tresca Rankine wall, strength / theory at H/10, H/20, H/40 | about 0.98 at H/20 (with the 2.744 correction) | 1.10, 1.06, 1.10 |
+**Clay tunnel, plane strain, N at 5 % of R** (Newton 1.7.0, `S2` collider, D/10 unless stated):
 
-The chamber still loses a fifth of its pressure while the cutterhead turns, and particles leak through a side gap with either scheme (about 165), which is our scene.
-
-**What it changes elsewhere** (WP0b runs repeated, `*_gimp` against `*_r07`):
-- **Sand faces:** face pressure at 5 % of D within about 10 % of before (Idinger 8.3–8.8 kPa, Wang 9.5–9.7 kPa; Vermeer 8.4 and 9.3). The Phase 0 golden face run and the GPU tests pass unchanged.
-- **Sand element tests:** the Rankine wall is a little weaker: K 0.316 against 0.302 at H/20 (theory 0.283), and it weakens further as the grid is refined (strength / theory 0.96, 0.90, 0.86 at H/10, H/20, H/40). The maintainer's runs with #5021 show the same direction, less steeply (0.97, 0.945, 0.94).
-- **Column collapse:** B00 runout 0.168 m (measured 0.18), G00 0.084 m (measured 0.11).
-
-**The clay tunnel no longer collapses.** The support is withdrawn and the clay stands: the pressure on it falls to about zero and stays there, so the N shown is only the overburden ratio, a lower bound.
-
-| Case | PIC N | GIMP | Kimura N |
+| Setting | C/D 1.2 | C/D 2.0 | C/D 2.8 |
 |---|---|---|---|
-| Plane strain, C/D 1.2, D/10 | 2.4 | ≥ 4.2, stands unsupported | 3.5 |
-| Plane strain, C/D 2.0, D/10 and D/20 | 1.9 | ≥ 6.2, stands | 4.3 |
-| Plane strain, C/D 2.8, D/10 | 1.8 | ≥ 8.2, stands | 4.2 |
-| Heading at P/D 0, C/D 1.5, D 7.5 m | p 104 kPa at 5 % | p ≈ 0, no settlement | N 7.05: needs about 30 kPa |
-| Heading at P/D 0, C/D 3.0, D 4.5 m | p 127 kPa | p ≈ 0 | N 9.0: about at collapse |
+| PIC, jitter 0.25 h (WP0b) | 2.4 | 1.9 | 1.8 |
+| PIC, jitter 0.05 h | 3.42 | 3.50 | 2.97 |
+| GIMP, jitter 0.25 h | 3.18 | 3.41 | 3.55 |
+| **GIMP, jitter 0.05 h (default)** | **3.43** | **3.95 (D/20: 3.89)** | **4.06** |
+| Kimura & Mair, centrifuge | 3.5 | 4.3 | 4.2 |
+| GIMP, jitter 0.05 h / Kimura | 0.98 | 0.92 (D/20: 0.90) | 0.97 |
 
-- In plane strain the clay is now at least 1.2–2× too strong. At C/D 2.8 it stands unsupported where Kimura's tunnel collapsed at N 4.2.
-- The Tresca wall test still matches theory, so the overstrength appears only when the clay has to flow round the opening. That points to locking under GIMP, not to the cohesion value.
-- **Not yet known:** whether #5021 or the `pic8` collider changes this; the maintainer's runs did not include a clay tunnel.
+**3D headings at P/D 0** (GIMP, jitter 0.05 h): C/D 1.5, D 7.5 m: N 7.3 against 7.05 (1.04); C/D 3.0, D 4.5 m: N 7.3 against 9.0 (0.81). N = (σv at the axis − face pressure at 5 % of D) / cu.
+
+**Other checks with the default:**
+
+| Check | PIC, jitter 0.25 h | GIMP, jitter 0.05 h |
+|---|---|---|
+| Clay slab round a fixed lining, 4 s (stiff control 0.03 m) | 0.62 m, still creeping at 25 mm/s | 0.25 m, at rest (0.6 mm/s) |
+| Tresca Rankine wall, K at H/10, H/20, H/40 (theory 0.760) | 0.765 at H/20 | 0.735, 0.762, 0.730 |
+| EPB chamber, bulkhead pressure, hold → cutterhead turning | 197 → 103 kPa | 207 → 162 kPa |
+
+The jitter sweep (0.25, 0.1, 0.05 and 0 h) showed that the creep stops at 0.1 h and below under PIC, and that jitter barely moves the Rankine walls (within 2 %).
+
+**Newton pull request #5021** (the maintainer's branch at `6fea33f0`, Newton 1.8.0.dev0, installed apart from the server environment; GIMP, jitter 0.25 h):
+- with the `S2` collider: slab 0.10 m, at rest; K0 0.53 against 0.73 on 1.7.0 (target 0.44); chamber 210 → 173 kPa; clay tunnel N 3.28 / 3.49 / 3.53;
+- with `pic8`: slab 0.045 m; but the chamber pressure rises from 214 to 344 kPa while the cutterhead turns, and the clay tunnel is weaker (3.23 / 3.23 / 3.06).
+- Not adopted: unreleased, and not better on the clay tunnel. To test again when it is released.
 
 ## Where this leaves WP3
 
-- With PIC, the clay tunnel's low N came with a numerical volume loss in yielding clay, about 5 % in a few seconds, which no undrained clay can have.
-- With GIMP the volume loss is gone, but the clay tunnel is too strong to collapse at the measured ratios.
-- So no configuration yet gives incompressible plastic flow round a tunnel without locking.
-- **Possible routes:**
-  1. Report the clay-tunnel result to the Newton developers on #5180, and test #5021 and `pic8` once merged.
-  2. Accept clay as out of scope for the MPM and keep the analytical clay models.
-
-Until then WP3 stays blocked and the clay face is not used anywhere.
+- **Unblocked.** In plane strain the clay tunnel is within 2–8 % of Kimura & Mair at three covers and at two resolutions; the 3D headings are at 0.81 and 1.04.
+- **Still to do:** the rest of Kimura & Mair's series (C/D 1.8 and 2.3 in plane strain; unlined headings at P/D 0.5–3.0); settlement above the collapse; the heading at C/D 3.0 is 19 % weak.
+- **Chamber (WP4):** still loses about a fifth of its pressure while the cutterhead turns ([chamber](mpm-chamber.md)).

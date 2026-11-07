@@ -26,6 +26,7 @@ import numpy as np
 
 from ..materials import Soil
 from ..probes import collider_forces
+from . import common
 from .common import add_walls, make_particles, make_solver
 
 G = 9.81
@@ -94,7 +95,7 @@ class Face:
         gx, gy, gz = np.arange(-x_back + h / 2, x_front, h), np.arange(h / 2, half_w, h), np.arange(h / 2, zs, h)
         X, Y, Z = np.meshgrid(gx, gy, gz, indexing="ij")
         pts = np.stack([X.ravel(), Y.ravel(), Z.ravel()], axis=1)
-        pts += rng.uniform(-0.25 * h, 0.25 * h, pts.shape)
+        pts += rng.uniform(-common.JITTER * h, common.JITTER * h, pts.shape)  # as fill_box
         pts[:, 1] = np.abs(pts[:, 1])
         r_axis = np.hypot(pts[:, 1], pts[:, 2] - zc)
         pts = pts[~((pts[:, 0] < h / 2) & (r_axis < R + t + h / 2))].astype(np.float32)

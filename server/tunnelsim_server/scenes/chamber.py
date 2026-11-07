@@ -28,6 +28,7 @@ from dataclasses import asdict, dataclass
 import numpy as np
 
 from ..materials import Soil
+from . import common
 from .common import add_walls, make_particles, make_solver
 
 G = 9.81
@@ -151,7 +152,8 @@ def run(cfg: ChamberConfig) -> tuple[dict, dict]:
     X, Y, Z = np.meshgrid(gx, gy, gz, indexing="ij")
     pts = np.stack([X.ravel(), Y.ravel(), Z.ravel()], axis=1)
     pts = pts[np.hypot(pts[:, 1], pts[:, 2] - zc) < R - h / 2]
-    pts = (pts + rng.uniform(-0.25 * h, 0.25 * h, pts.shape)).astype(np.float32)
+    j = common.JITTER  # initial jitter, a fraction of h (as fill_box)
+    pts = (pts + rng.uniform(-j * h, j * h, pts.shape)).astype(np.float32)
     pm = make_particles(pts, h, soil).finalize()
     solver = make_solver(pm, cm, dx, cfg.iterations, {shell: 0.3, bulkhead: 0.3, cutter: 0.3, piston: 0.5, -1: 0.5})
     st = cm.state()
