@@ -1,0 +1,126 @@
+{
+  "scene": "chamber",
+  "time": "2026-11-08T21:08:12",
+  "git": "4e02308+dirty",
+  "versions": {
+    "newton": "1.7.0",
+    "warp": "1.19.0",
+    "numpy": "2.5.4",
+    "python": "3.12.3"
+  },
+  "params": {
+    "diameter": 7.08,
+    "chamber": 0.8,
+    "slab": 0.6,
+    "voxel": 0.15,
+    "ppc": 2,
+    "paste_density": 1330.0,
+    "paste_friction": 0.0,
+    "paste_cohesion": 7000.0,
+    "paste_poisson": 0.3,
+    "fir": 0.4,
+    "fer": 10.0,
+    "target_kpa": 200.0,
+    "advance_mm_min": 60.0,
+    "cutter_rpm": 2.0,
+    "pressurise_speed": 0.1,
+    "pressurise_max_s": 8.0,
+    "hold_s": 3.0,
+    "excavate_s": 20.0,
+    "stop_s": 6.0,
+    "kp_rpm_per_kpa": 0.2,
+    "ki_rpm_per_kpa_s": 0.05,
+    "max_screw_rpm": 22.0,
+    "seal_shell": 1.0,
+    "wall_friction": 0.3,
+    "stress_log": 1.0,
+    "vb_from_hold": false,
+    "volume_balance": 3.0,
+    "fps": 60.0,
+    "iterations": 50,
+    "seed": 0,
+    "soil": {
+      "name": "EPB chamber paste",
+      "density": 1330.0,
+      "friction": 0.0,
+      "source": "density: Bezuijen et al. (2005) 13 kN/m3 mixture; stiffness: foam-paste bulk modulus of the analytical chamber model at 200 kPa, FIR 0.4, FER 10; strength: undrained cu, Scientific Reports (2026)",
+      "yield_stress": 7000.0,
+      "young_modulus": 3367732.605511265,
+      "poisson_ratio": 0.3,
+      "dilatancy": 0.0,
+      "phi_deg": null,
+      "cohesion": 0.0,
+      "match": "none",
+      "extra": {
+        "bulk_modulus_Pa": 2806444
+      }
+    }
+  },
+  "gpu_before": {
+    "note": "not captured: WP4 diagnosis script"
+  },
+  "timing_valid_for_decisions": false,
+  "timing_note": "diagnosis run on a shared GPU; GPU state not recorded",
+  "calibration": "uncalibrated",
+  "diagnosis": "WP4 volume balance, 8-9 Nov 2026: volume balance from excavation start, cu 7 kPa, 50 iterations",
+  "result": {
+    "diameter_m": 7.08,
+    "voxel_m": 0.15,
+    "particles": 130112,
+    "paste_bulk_modulus_kPa": 2806,
+    "rho_g_kPa_per_m": 13.05,
+    "pressurised_after_s": 2.13,
+    "p_axis_hold_kPa": 204.1,
+    "gradient_hold_kPa_per_m": 8.65,
+    "p_axis_excavate_kPa": 201.8,
+    "p_axis_excavate_band_kPa": [
+      196.8,
+      207.2
+    ],
+    "gradient_excavate_kPa_per_m": 11.64,
+    "gradient_stop_kPa_per_m": 12.9,
+    "screw_rpm_excavate": 10.44,
+    "screw_rpm_feedforward": 9.95,
+    "bulkhead_thrust_MN_excavate": 8.86,
+    "p_axis_times_area_MN": 7.95,
+    "cutter_torque_MNm_excavate": 0.791,
+    "p_piston_hold_excavate_kPa": [
+      235.9,
+      226.7
+    ],
+    "cutter_axial_MN_hold_excavate": [
+      0.31,
+      -0.08
+    ],
+    "advance_m": 0.235,
+    "particles_removed": 1865,
+    "particles_escaped": 921,
+    "volume_balance_repaired": 0,
+    "particle_reseals": 137609,
+    "escaped_back_front_side": [
+      157,
+      603,
+      161
+    ],
+    "particles_per_m3_start_end": [
+      2361,
+      2776
+    ],
+    "ms_per_frame": 75.28,
+    "p_axis_by_5s_excavate_kPa": [
+      198.8,
+      200.7,
+      201.7,
+      201.9
+    ],
+    "paste_stress_gradient_excavate_kPa_per_m": 13.67,
+    "chamber_mean_p_excavate_start_end_kPa": [
+      209.5,
+      213.6
+    ],
+    "screw_removed_m3": 0.79,
+    "piston_displaced_m3_excavate": 0.79,
+    "volume_balance_solver_drift_per_step_max": 0.0015,
+    "volume_balance_degenerate_particles_max": 0
+  }
+}

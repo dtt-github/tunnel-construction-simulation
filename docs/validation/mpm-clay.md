@@ -296,4 +296,4 @@ At 10 % of R, D/10 and D/20 agree to 0.3 %.
 - **Unblocked.** With the collapse definition above, the plane-strain tunnel is within 0.98–1.11 of Kimura & Mair at all five covers and two resolutions, and the heading at C/D 1.5 is at 1.00. At C/D 3.0 the heading series is 0.80–0.88, with Kimura's trend.
 - **Open gap:** the deep heading is 12–20 % weak. Resolution, retraction rate, hold time and the crack setting are ruled out.
 - **Still to do:** settlement above the collapse; why the ground comes to rest again after large movement.
-- **Chamber (WP4):** blocked. Over a 20 s excavation it falls from 207 to 51 kPa; the earlier "a fifth lost" was read after 4 s ([chamber](mpm-chamber.md#gimp-and-the-20-s-excavation-7-nov-2026)).
+- **Chamber (WP4):** with the Phase 0 paste and no correction it falls from 207 to 51 kPa over a 20 s excavation; the earlier "a fifth lost" was read after 4 s. Since 9 Nov 2026 it holds 200 kPa with a volume balance by region and a sourced undrained paste ([chamber](mpm-chamber.md#volume-balance-and-a-sourced-paste-8-9-nov-2026)).

@@ -1,10 +1,14 @@
-# MPM EPB chamber under pressure (Phase 2, WP4): first runs, blocked
+# MPM EPB chamber under pressure (Phase 2, WP4): holds pressure with a volume correction
 
 - **Plan:** [Phase 2, WP4](../plans/phase2-mpm-face-chamber.md#wp4-epb-chamber-with-a-pressure-controlled-shove-about-3-weeks).
-- **Code:** [`server/tunnelsim_server/scenes/chamber.py`](../../server/tunnelsim_server/scenes/chamber.py). Runs with `python -m tunnelsim_server.runner chamber ...`; records `ch_*` in [`server/results/`](../../server/results/). `ChamberConfig.seal_shell` (default off) is a diagnosis option: paste pushed into the shell wall is put back inside each frame.
-- **Status:** **uncalibrated, blocked.** The paste loses its pressure while the cutterhead shears it, under every solver setting tried: GIMP integration slows the loss but does not stop it ([20 s runs, 7 Nov 2026](#gimp-and-the-20-s-excavation-7-nov-2026)). The alternative element (P1d) holds the pressure, but it locks and gives the wrong vertical gradient. This is the same limitation that blocked the clay ([mpm-clay](mpm-clay.md#the-piling-investigated-5-nov-2026)).
+- **Code:** [`server/tunnelsim_server/scenes/chamber.py`](../../server/tunnelsim_server/scenes/chamber.py). Runs with `python -m tunnelsim_server.runner chamber ...`; records `ch_*` in [`server/results/`](../../server/results/), the volume-balance runs as `ch_vb_*`. `ChamberConfig.seal_shell` (default off) is a diagnosis option: paste pushed into the shell wall is put back inside each frame.
+- **Status:** **uncalibrated; holds the chamber pressure with a correction** ([9 Nov 2026](#volume-balance-and-a-sourced-paste-8-9-nov-2026)).
+  - Newton's implicit MPM loses paste volume wherever a solid moves through it, so the chamber loses its pressure under the turning cutterhead ([newton-physics/newton#5180](https://github.com/newton-physics/newton/issues/5180)). A volume balance by region corrects this: it holds the mean elastic volume of each region of the paste to what the piston and the screw leave.
+  - With that correction, an undrained paste and wall friction from open sources, the chamber holds 200 kPa through a 20 s excavation at voxel 0.15 m and 0.12 m. The vertical gradient is inside Botlek's range, and the screw removes about the volume the piston displaces.
+  - **Open:** the gradient differs by about a quarter between the two voxels; 0.25 m does not hold; the pressure band is narrower than on a machine; the paste leaks into the shell wall unless it is sealed; the torque is the paste's only.
+  - The runs before 8 Nov, below, used the Phase 0 paste and no correction. They stand as the record of the loss.
   - **Correction (7 Nov 2026):** from 6 Nov the docs, the v1.0.0 release notes and our comment on [newton-physics/newton#5180](https://github.com/newton-physics/newton/issues/5180) said that under GIMP the chamber keeps 162 of 207 kPa (172 of 216 before the scaling fix), "a fifth lost". Those runs excavated for 4 s only. Over the scene's 20 s excavation the pressure falls to 51 kPa.
-- **Run on:** 5 Nov 2026; GIMP and 20 s diagnosis runs 7 Nov 2026
+- **Run on:** 5 Nov 2026; GIMP and 20 s diagnosis runs 7 Nov 2026; volume balance and sourced paste 8–9 Nov 2026
 
 ## Set-up
 
@@ -12,7 +16,7 @@
 
 **Advance:** a ground piston pushes the ground in at 60 mm/min.
 
-**Paste:**
+**Paste (runs to 7 Nov; the paste from 8 Nov is in [its section](#volume-balance-and-a-sourced-paste-8-9-nov-2026)):**
 
 | Property | Value | Source |
 |---|---|---|
@@ -113,13 +117,63 @@ Under P0 with GIMP integration and a jitter of 0.05 h (the defaults since 7 Nov 
 
 The paste that cannot yield also needs 12 MNm of cutterhead torque, more than the 9.8 MNm installed: it is a test, not a remedy.
 
+## Volume balance and a sourced paste (8–9 Nov 2026)
+
+### What was found
+
+1. **Newton loses volume around a moving solid, not only in yielding paste.** In a box test, an elastic paste loses pressure around a moving paddle but not around a cylinder. The paste compresses ahead of the paddle and expands round its tips, and the net is a loss. Newton takes the elastic strain from its stress solve, so nothing restores the volume.
+2. **A volume balance by region holds the pressure.**
+   - **Regions:** the paste is split into 1.2 m columns across the section, each cut into three slices along the axis.
+   - **Each step:** the mean log elastic volume of each region is set to its value when pressurising ended, adjusted by the chamber volume the piston has taken and the paste the screw has removed. The solver keeps the deviations within each region.
+   - **Without it,** the same run falls from 205 to 28 kPa (`ch_vb_off_v015`).
+3. **The Phase 0 paste arched between the walls.** With friction 0.35 under 200 kPa it had about 70 kPa of shear strength, so the walls carried its weight (as in a silo) and the gradient was 3–4 kPa/m. The screw then ran fast: the bulkhead axis reading sat above the chamber mean, so the controller removed 1.5 times the piston's volume (`ch_vb_phase0paste_*`).
+   - **Wall friction 0** gave a Botlek gradient but almost no torque, and the paste leaked through the shell.
+   - Wall friction 0.1 and 0 were sensitivity runs only: the open data below support about 0.3.
+
+### Paste and walls from open sources
+
+| Property | Value | Source |
+|---|---|---|
+| Strength | undrained, cu 5 kPa, no friction | the middle of the 3–7 kPa target for conditioned soil, [Scientific Reports (2026)](https://doi.org/10.1038/s41598-026-38868-y) (from the abstract; the full text was not open to us) |
+| Paste on steel (shell, bulkhead, piston) | Coulomb 0.3 | conditioned soil on steel by inclined plate, 0.31–0.58 ([Applied Sciences 10 (2020) 3300](https://doi.org/10.3390/app10093300), Fig. 15); kaolin on steel, 0.33 back-fitted to Geo-Tribometer tests ([Henke & Wiesenthal, WCCM 2024](https://scipedia.com/wd/images/c/cf/Draft_Sanchez_Pinedo_347100632118.pdf)) |
+| Density, bulk modulus, Poisson's ratio | as above | as above |
+
+None of these was tuned to Botlek or DAUB. The cutterhead's own friction stays at 0.3 (assumed).
+
+### Results
+
+20 s excavation at 2 rpm and 60 mm/min, shell sealed (`seal_shell`), volume balance from the end of pressurising.
+
+| Record | Voxel, iterations | Axis pressure, mean (5–95 %) (kPa) | Gradient, excavating / stop (kPa/m) | Screw (rpm) | Removed / piston displaced (m³) | Torque (MNm) |
+|---|---|---|---|---|---|---|
+| `ch_vb_v015` | 0.15 m, 100 | **200 (197–204)** | **12.2 / 11.7** | 9.9 | 0.78 / 0.79 | 0.51 |
+| `ch_vb_v012` | 0.12 m, 100 | **199 (195–205)** | **15.5 / 17.3** | 11.9 | 1.00 / 0.79 | 0.44 |
+| `ch_vb_v015_it50` | 0.15 m, 50 | 204 (200–208) | 12.6 / 13.6 | 11.4 | 0.84 / 0.79 | 0.52 |
+| `ch_vb_v012_it50` | 0.12 m, 50 | diverges at 13 s | — | — | — | — |
+| `ch_vb_v025` | 0.25 m, 50 | 153 (136–166) | 12.0 / 11.6 | 0 | 0.11 / 0.79 | 0.70 |
+| `ch_vb_off_v015` (no balance) | 0.15 m, 50 | 30 (25–35) | 13.0 / 13.3 | 0 | 0.02 / 0.79 | 0.80 |
+| Check | | 200 ± 30 (DAUB 2016) | Botlek 10–20+, muck 13 | feed-forward 10 | equal | 9.8 installed, whole machine |
+
+Undrained strength across the sourced range (0.15 m, 50 iterations, balance from the start of excavation): cu 3 kPa gives 200 kPa (192–208) and 12.5 kPa/m, but leaks much more into the shell and the screw nearly stops; cu 5 kPa gives 204 kPa and 12.6 kPa/m; cu 7 kPa gives 202 kPa and 11.6 kPa/m, with the screw at 10.4 rpm (`ch_vb_cu*`).
+
+**What this shows:**
+
+1. **Pressure and screw:** at 0.15 m and 0.12 m the chamber holds its set point, and the screw runs near the feed-forward speed. At 0.15 m it removes the volume the piston displaces to within 2 %; at 0.12 m it removes 27 % more.
+2. **Gradient:** 12–17 kPa/m, inside Botlek's range during excavation and close to the muck's own 13 kPa/m. It does not fall at the stop as Botlek's does. The two voxels differ by about a quarter, and the paste's own stress beside the bulkhead (10–18 kPa/m) differs from the contact force by up to 5 kPa/m. So the gradient is not converged.
+3. **Iterations:** at 0.12 m, 50 iterations let the solver's volume error grow fifteenfold at about 13 s and the run diverges. 100 iterations hold it. The error per step still grows with refinement (about 0.003 at 0.15 m, 0.005 at 0.12 m), which the balance corrects.
+4. **0.25 m does not hold:** the pressure falls about 50 kPa in excavation whichever regions are used. It is too coarse for this paste.
+
+### Open
+
+- **Pressure band:** ±4–5 kPa against DAUB's ±30 kPa. The scene has no ring builds, screw surges or ground entering at the face, so a narrow band is expected, but it is not yet checked against a field record.
+- **Torque:** the scene cuts no ground; it stirs the paste. 0.4–0.5 MNm agrees with a hand estimate (cu × both faces of the cutterhead × mean lever arm, about 0.9 MNm). Comparing with the installed 9.8 MNm needs the face-cutting torque of the demo's torque model added. That is not done.
+- **Gradient at a stop:** Botlek's falls; ours does not.
+- **Leak:** the runs seal the shell. Without it, the paste pushes into the 0.5 m shell wall.
+- **The correction is ours, not Newton's.** It sets the volume by region and leaves the solver's local deviations. Whether Newton can conserve volume around a moving solid itself is open on newton#5180.
+
 ## Where this leaves WP4
 
-- The chamber scene, the pressure controller and the open validation data are in place.
-- **Blocked:** the yielding paste loses its pressure under the turning cutterhead with every solver setting in Newton 1.7.0. Reported on [newton-physics/newton#5180](https://github.com/newton-physics/newton/issues/5180).
-- **Also to fix:** about 2 % of the paste pushes into the shell wall in 20 s.
-- Nothing from the MPM chamber is used on the console.
-
-**If Newton offers no route, the fall-backs are:**
-1. keep the chamber analytical, as it is now;
-2. use the MPM only for things that do not depend on the chamber pressure, such as the mixing pattern and torque trends, clearly labelled.
+- The chamber scene, the pressure controller, a volume correction and the open validation data are in place. The scene's defaults are the sourced paste, wall friction 0.3, the balance by region and 100 iterations.
+- **Checked:** the set point holds, the gradient is in Botlek's range, the screw balances the excavated volume, at 0.15 m and 0.12 m.
+- **Not done:** gradient convergence, the stop gradient, the band against a field record, the leak without sealing, torque with the face.
+- Nothing from the MPM chamber is used on the console yet.

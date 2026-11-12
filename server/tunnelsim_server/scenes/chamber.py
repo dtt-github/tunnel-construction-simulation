@@ -42,8 +42,10 @@ class ChamberConfig:
     voxel: float = 0.15
     ppc: int = 2
     paste_density: float = 1330.0  # kg/m3: 13 kN/m3 foam-water-sand mixture, Bezuijen et al. (2005)
-    paste_friction: float = 0.35  # assumed (Phase 0)
-    paste_cohesion: float = 2000.0  # Pa, assumed (Phase 0)
+    # undrained paste: no friction, cu 5 kPa, the middle of the 3-7 kPa target for conditioned soil in Scientific Reports
+    # (2026), doi:10.1038/s41598-026-38868-y (abstract). Phase 0's assumed 0.35 / 2 kPa arched between the walls
+    paste_friction: float = 0.0
+    paste_cohesion: float = 5000.0  # Pa
     paste_poisson: float = 0.3  # assumed
     fir: float = 0.4  # foam injection ratio (fraction)
     fer: float = 10.0  # foam expansion ratio
@@ -61,8 +63,18 @@ class ChamberConfig:
     # WP4 leak diagnosis only: paste pushed into the shell wall is put back inside each frame (radius R - h/2, radial
     # velocity removed), so no paste is lost through the shell
     seal_shell: bool = False
+    # paste on steel (shell, bulkhead, piston): 0.3, within conditioned soil on steel by inclined plate, 0.31-0.58
+    # (Applied Sciences 10 (2020) 3300, doi:10.3390/app10093300), and kaolin on steel, 0.33 (Henke & Wiesenthal, WCCM
+    # 2024); < 0 keeps the Phase 0 values 0.3 / 0.3 / 0.5
+    wall_friction: float = 0.3
+    stress_log: bool = False  # log the paste's own stress beside the bulkhead next to the contact-force reading
+    # WP4 correction for Newton's volume drift where a solid moves through the paste (newton#5180): once pressurised,
+    # the mean elastic volume strain of each region follows the chamber's volume balance (piston advance, paste removed
+    # by the screw); deviations within a region are the solver's own
+    vb_from_hold: bool = True  # take the balance reference when pressurising ends, not when excavation starts
+    volume_balance: int = 3  # 0 off, 1 whole chamber, 2 by region (columns ~1.2 m across, the chamber's length), 3 as 2 cut in 3 along the axis
     fps: float = 60.0
-    iterations: int = 50
+    iterations: int = 100  # 50 diverges at voxel 0.12 m (WP4, 9 Nov 2026)
     seed: int = 0
 
 
@@ -83,7 +95,7 @@ def paste(cfg: ChamberConfig) -> Soil:
     e = 3 * k * (1 - 2 * cfg.paste_poisson)
     return Soil("EPB chamber paste", cfg.paste_density, cfg.paste_friction,
                 "density: Bezuijen et al. (2005) 13 kN/m3 mixture; stiffness: foam-paste bulk modulus of the analytical "
-                f"chamber model at {cfg.target_kpa:g} kPa, FIR {cfg.fir:g}, FER {cfg.fer:g}; friction and cohesion assumed",
+                f"chamber model at {cfg.target_kpa:g} kPa, FIR {cfg.fir:g}, FER {cfg.fer:g}; strength: undrained cu, Scientific Reports (2026)",
                 yield_stress=cfg.paste_cohesion, young_modulus=e, poisson_ratio=cfg.paste_poisson,
                 extra={"bulk_modulus_Pa": round(k)})
 
@@ -158,7 +170,7 @@ def run(cfg: ChamberConfig) -> tuple[dict, dict]:
     j = common.JITTER  # initial jitter, a fraction of h (as fill_box)
     pts = (pts + rng.uniform(-j * h, j * h, pts.shape)).astype(np.float32)
     pm = make_particles(pts, h, soil).finalize()
-    solver = make_solver(pm, cm, dx, cfg.iterations, {shell: 0.3, bulkhead: 0.3, cutter: 0.3, piston: 0.5, -1: 0.5})
+    solver = make_solver(pm, cm, dx, cfg.iterations, {shell: wf if (wf := cfg.wall_friction) >= 0 else 0.3, bulkhead: wf if wf >= 0 else 0.3, cutter: 0.3, piston: wf if wf >= 0 else 0.5, -1: 0.5})
     st = cm.state()
     s = pm.state()
     s.body_q, s.body_qd, s.body_f = wp.clone(st.body_q), wp.zeros_like(st.body_qd), wp.zeros_like(st.body_f)
@@ -194,6 +206,10 @@ def run(cfg: ChamberConfig) -> tuple[dict, dict]:
     log, times = [], []
     removed = 0
     resealed = 0
+    vb_ref = None
+    vb_log: list = []
+    vb_repaired = 0
+    stress_log: list = []
     n_total = int(round((cfg.pressurise_max_s + cfg.hold_s + cfg.excavate_s + cfg.stop_s) * cfg.fps))
     for f in range(n_total):
         p_axis_avg = float(np.mean(p_hist[-6:])) / 1e3 if p_hist else 0.0
@@ -241,6 +257,51 @@ def run(cfg: ChamberConfig) -> tuple[dict, dict]:
         solver.step(s, s, contacts=None, control=None, dt=dt)
         wp.synchronize()
         times.append(time.perf_counter() - t0)
+        if cfg.volume_balance and phase != "pressurise":
+            act = (flags & active) != 0
+            fe = s.mpm.particle_elastic_strain.numpy()
+            if cfg.volume_balance == 2:  # region of each particle: a column of the cross-section, the chamber's length
+                xq_ = s.particle_q.numpy()
+                n_side = max(1, round(2 * R / 1.2))
+                iy = np.clip(((xq_[:, 1] + R) / (2 * R) * n_side).astype(int), 0, n_side - 1)
+                iz = np.clip(((xq_[:, 2] - zc + R) / (2 * R) * n_side).astype(int), 0, n_side - 1)
+                reg = np.where(act, iy * n_side + iz, -1)
+            elif cfg.volume_balance == 3:  # as 2, cut in three along the axis, as fractions of the current chamber length
+                xq_ = s.particle_q.numpy()
+                n_side, n_ax = max(1, round(2 * R / 1.2)), 3
+                iy = np.clip(((xq_[:, 1] + R) / (2 * R) * n_side).astype(int), 0, n_side - 1)
+                iz = np.clip(((xq_[:, 2] - zc + R) / (2 * R) * n_side).astype(int), 0, n_side - 1)
+                ix = np.clip((xq_[:, 0] / (x_p - t / 2) * n_ax).astype(int), 0, n_ax - 1)
+                reg = np.where(act, (ix * n_side + iy) * n_side + iz, -1)
+            else:
+                reg = np.where(act, 0, -1)
+            n_reg = int(reg.max()) + 1 if (reg >= 0).any() else 1
+            if vb_ref is None and (phase == "excavate" or cfg.vb_from_hold):  # reference: the pressurised paste
+                lnj = np.log(np.linalg.det(fe))
+                ok = act & np.isfinite(lnj)
+                cnt = np.bincount(reg[ok], minlength=n_reg).astype(float)
+                vb_ref = (np.bincount(reg[ok], weights=lnj[ok], minlength=n_reg) / np.maximum(cnt, 1), x_p, cnt)
+            if vb_ref is not None:
+                lnj = np.log(np.linalg.det(fe))
+                ok = act & np.isfinite(lnj)  # a degenerate particle (det <= 0) must not spread NaN to all others
+                m = len(vb_ref[2])
+                r_ok = np.where(ok & (reg < m), reg, -1)
+                use = r_ok >= 0
+                cnt = np.bincount(r_ok[use], minlength=m).astype(float)
+                mean = np.bincount(r_ok[use], weights=lnj[use], minlength=m) / np.maximum(cnt, 1)
+                ref_mean, ref_cnt = vb_ref[0], vb_ref[2]
+                valid = (ref_cnt >= 50) & (cnt > 0)
+                target = ref_mean + math.log((x_p - t / 2) / (vb_ref[1] - t / 2)) - np.log(np.where(valid, cnt / np.maximum(ref_cnt, 1), 1.0))
+                shift = np.where(valid, target - mean, 0.0)
+                vb_log.append((f * dt, float(target[valid].mean()), float(mean[valid].mean()), int(act.sum()), x_p, int((act & ~ok).sum())))
+                fac = np.ones(len(fe))
+                fac[use] = np.exp(shift[r_ok[use]] / 3.0)
+                fe *= fac[:, None, None]
+                bad = act & ~ok & (reg >= 0) & (reg < m)  # degenerate inside Newton: back to its region's isotropic target
+                if bad.any():
+                    fe[bad] = np.exp(np.where(valid, target, ref_mean)[reg[bad]] / 3.0)[:, None, None] * np.eye(3)
+                    vb_repaired += int(bad.sum())
+                s.mpm.particle_elastic_strain.assign(fe.astype(np.float32))
         if cfg.seal_shell:
             xq, vq = s.particle_q.numpy(), s.particle_qd.numpy()
             ry, rz = xq[:, 1], xq[:, 2] - zc
@@ -272,6 +333,20 @@ def run(cfg: ChamberConfig) -> tuple[dict, dict]:
         torque = float(np.cross(pos[m] - np.array([x_ch, 0.0, zc]), F[m])[:, 0].sum())
         f_cutter_x = -float(F[m, 0].sum())  # soil pushing the cutterhead back (towards -x)
         p_piston = float(F[bid == piston, 0].sum()) / area  # soil pushing the piston forwards (+x)
+        if cfg.stress_log:  # the paste's own stress: within one voxel of the bulkhead, by band, and the chamber mean
+            sig = common.particle_stress(s)
+            xq_ = s.particle_q.numpy()
+            a_ = (flags & active) != 0
+            near = a_ & (xq_[:, 0] < dx) & (np.abs(xq_[:, 1]) > y_min)
+            zp = xq_[near, 2] - zc
+            sxx = -sig[near, 0, 0]
+            pp = -np.trace(sig[near], axis1=1, axis2=2) / 3
+            sb = np.array([sxx[(zp >= lo) & (zp < hi)].mean() if ((zp >= lo) & (zp < hi)).any() else np.nan for lo, hi in zip(edges[:-1], edges[1:])])
+            pb = np.array([pp[(zp >= lo) & (zp < hi)].mean() if ((zp >= lo) & (zp < hi)).any() else np.nan for lo, hi in zip(edges[:-1], edges[1:])])
+            okb = np.isfinite(sb)
+            g_s = -float(np.polyfit(band_z[okb], sb[okb], 1)[0]) if okb.sum() > 2 else np.nan
+            p_all = float((-np.trace(sig[a_], axis1=1, axis2=2) / 3).mean())
+            stress_log.append((f * dt, p_band[axis_band] / 1e3, sb[axis_band] / 1e3, pb[axis_band] / 1e3, grad / 1e3, g_s / 1e3, p_all / 1e3, int(near.sum())))
         p_hist.append(float(p_band[axis_band]))
         log.append((f * dt, ["pressurise", "hold", "excavate", "stop"].index(phase), p_band[axis_band] / 1e3, grad / 1e3,
                     rpm, thrust / 1e6, abs(torque) / 1e6, x_face + t / 2 - x_p, removed, p_piston / 1e3, f_cutter_x / 1e6))
@@ -315,12 +390,13 @@ def run(cfg: ChamberConfig) -> tuple[dict, dict]:
         "advance_m": round(float(log[-1, 7]), 3),
         "particles_removed": int(removed),
         "particles_escaped": escaped,
+        "volume_balance_repaired": vb_repaired,
         "particle_reseals": resealed,
         "escaped_back_front_side": [int(esc_back.sum()), int(esc_front.sum()), int(esc_side.sum())],
         "particles_per_m3_start_end": [round(len(pts) / (area * x_face)), round((n_active - escaped) / vol_now)],
         "ms_per_frame": round(float(np.mean(times[5:]) * 1000), 2),
     }
-    return res, {"log": log, "q_end": s.particle_q.numpy(), "active": (flags & active) != 0, "x_cutter": x_ch, "zc": zc}
+    return res, {"log": log, "q_end": s.particle_q.numpy(), "active": (flags & active) != 0, "x_cutter": x_ch, "zc": zc, "vb": np.array(vb_log), "stress": np.array(stress_log)}
 
 
 def params(cfg: ChamberConfig) -> dict:

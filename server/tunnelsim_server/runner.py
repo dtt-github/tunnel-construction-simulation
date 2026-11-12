@@ -95,7 +95,7 @@ def main() -> None:
     for name, voxel in (("face", 0.1), ("face_sand", 0.0), ("tunnel_2d", 0.0), ("k0", 0.1), ("rankine", 0.1), ("collapse", 0.005), ("chamber", 0.15)):
         s = sub.add_parser(name)
         s.add_argument("--voxel", type=float, default=voxel)
-        s.add_argument("--iterations", type=int, default=50)
+        s.add_argument("--iterations", type=int, default=100 if name == "chamber" else 50)
         s.add_argument("--seed", type=int, default=0)
         s.add_argument("--name", type=str, default=None)
         s.add_argument("--critical-fraction", type=float, default=0.0, help="Newton packing constraint (0 = off, as WP0-WP3)")
@@ -139,8 +139,8 @@ def main() -> None:
             s.add_argument("--advance", type=float, default=60.0, help="advance rate, mm/min")
             s.add_argument("--cutter-rpm", type=float, default=2.0)
             s.add_argument("--excavate-s", type=float, default=20.0)
-            s.add_argument("--paste-friction", type=float, default=0.35, help="assumed")
-            s.add_argument("--paste-cohesion", type=float, default=2000.0, help="Pa, assumed")
+            s.add_argument("--paste-friction", type=float, default=0.0, help="undrained paste (WP4)")
+            s.add_argument("--paste-cohesion", type=float, default=5000.0, help="Pa, undrained cu (WP4: 3-7 kPa sourced)")
         if name == "collapse":
             s.add_argument("--run", type=str, default="B00")
             s.add_argument("--gate-speed", type=float, default=1.0, help="m/s (assumed); 0 removes the gate at once")
