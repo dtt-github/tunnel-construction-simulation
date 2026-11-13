@@ -22,6 +22,7 @@ the muck at about 13 kPa/m), the pressure held within the control band, and the 
 from __future__ import annotations
 
 import math
+import os
 import time
 from dataclasses import asdict, dataclass
 
@@ -73,6 +74,11 @@ class ChamberConfig:
     # by the screw); deviations within a region are the solver's own
     vb_from_hold: bool = True  # take the balance reference when pressurising ends, not when excavation starts
     volume_balance: int = 3  # 0 off, 1 whole chamber, 2 by region (columns ~1.2 m across, the chamber's length), 3 as 2 cut in 3 along the axis
+    # density-coupled volume correction (scenes/volume_correction.py), from the first frame: rate per frame, 0 off;
+    # replaces the regional balance above
+    volume_correction: float = 0.0
+    vc_support: str = "node"  # node | cell
+    vc_interior: bool = True  # use only the grid nodes clear of every solid
     fps: float = 60.0
     iterations: int = 100  # 50 diverges at voxel 0.12 m (WP4, 9 Nov 2026)
     seed: int = 0
@@ -210,6 +216,33 @@ def run(cfg: ChamberConfig) -> tuple[dict, dict]:
     vb_log: list = []
     vb_repaired = 0
     stress_log: list = []
+    vc = None
+    if cfg.volume_correction > 0:
+        from .volume_correction import VolumeCorrection
+
+        spokes = [(2 * math.pi * k / 6, (r0 + r1) / 2, (r1 - r0) / 2, 0.0, 0.1, 0.15) for k in range(6)]
+        arms = [(2 * math.pi * k / 6 + math.pi / 6, 0.6 * R, 0.08, -0.3, 0.25, 0.08) for k in range(6)]
+
+        def vc_static(p):  # shell, bulkhead
+            return (np.hypot(p[:, 1], p[:, 2] - zc) >= R) | (p[:, 0] <= 0.0)
+
+        def vc_moving(p):  # ground piston and cutterhead, at their current pose
+            out = p[:, 0] >= x_p - t / 2
+            near = np.where((p[:, 0] > x_ch - 0.56) & (p[:, 0] < x_ch + 0.11) & ~out)[0]
+            xl, yw, zw = p[near, 0] - x_ch, p[near, 1], p[near, 2] - zc
+            c_, s_ = math.cos(ang), math.sin(ang)
+            yl, zl = c_ * yw + s_ * zw, -s_ * yw + c_ * zw  # into the cutterhead's frame
+            hit = (abs(xl) < 0.1) & (np.hypot(yl, zl) < r0)
+            for th, rc, hr, xc, hx, ht in spokes + arms:  # boxes: radial, axial and tangential half sizes
+                rho, tau = yl * math.cos(th) + zl * math.sin(th), yl * math.sin(th) - zl * math.cos(th)
+                hit |= (abs(xl - xc) < hx) & (abs(tau) < ht) & (abs(rho - rc) < hr)
+            out[near[hit]] = True
+            return out
+
+        lo_vc = np.floor(np.array([0.0, -R, zc - R]) / dx) * dx
+        vc = VolumeCorrection(dx, lo_vc, (x_face, R, zc + R), vc_moving, rate=cfg.volume_correction, support=cfg.vc_support, samples=3, static=vc_static, interior=cfg.vc_interior)
+        vc.calibrate(s.particle_q.numpy(), s.mpm.particle_elastic_strain.numpy(), (flags & active) != 0, h)
+        vc_log: list = []
     n_total = int(round((cfg.pressurise_max_s + cfg.hold_s + cfg.excavate_s + cfg.stop_s) * cfg.fps))
     for f in range(n_total):
         p_axis_avg = float(np.mean(p_hist[-6:])) / 1e3 if p_hist else 0.0
@@ -257,7 +290,20 @@ def run(cfg: ChamberConfig) -> tuple[dict, dict]:
         solver.step(s, s, contacts=None, control=None, dt=dt)
         wp.synchronize()
         times.append(time.perf_counter() - t0)
-        if cfg.volume_balance and phase != "pressurise":
+        if vc is not None:
+            s.mpm.particle_elastic_strain.assign(vc.apply(s.particle_q.numpy(), s.mpm.particle_elastic_strain.numpy(), (flags & active) != 0, h).astype(np.float32))
+            vc_log.append((phase == "excavate", vc.stats["mismatch_mean"], vc.stats["mismatch_rms"], vc.stats["clipped"]))
+            if os.environ.get("VC_DEBUG") and f % 20 == 0:  # where the mismatch sits: zones of the chamber
+                ok_, dp_, tot_, out_ = vc.last
+                xq_ = s.particle_q.numpy()[ok_]
+                rr_ = np.hypot(xq_[:, 1], xq_[:, 2] - zc)
+                zones = {"cutter": (xq_[:, 0] > x_ch - 0.56) & (xq_[:, 0] < x_ch + 0.11), "piston": xq_[:, 0] > x_p - t / 2 - 2 * dx,
+                         "bulkhead": xq_[:, 0] < 2 * dx, "shell": rr_ > R - 2 * dx}
+                zones["interior"] = ~np.any(list(zones.values()), axis=0)
+                lnj_ = np.log(np.linalg.det(s.mpm.particle_elastic_strain.numpy()[ok_]))
+                print("VCDBG", f, phase, f"p {p_axis_avg:.0f} n {len(dp_)} mat/spc {tot_:.4f} outside {out_:.4f} clipped {vc.stats['clipped']}",
+                      " ".join(f"{k} n{int(m.sum())} dp {dp_[m].mean() * 1e3:.0f}/{dp_[m].std() * 1e3:.0f} lnJ {lnj_[m].mean() * 1e3:.0f}" for k, m in zones.items() if m.any()), flush=True)
+        elif cfg.volume_balance and phase != "pressurise":
             act = (flags & active) != 0
             fe = s.mpm.particle_elastic_strain.numpy()
             if cfg.volume_balance == 2:  # region of each particle: a column of the cross-section, the chamber's length
@@ -391,6 +437,7 @@ def run(cfg: ChamberConfig) -> tuple[dict, dict]:
         "particles_removed": int(removed),
         "particles_escaped": escaped,
         "volume_balance_repaired": vb_repaired,
+        "volume_correction_mismatch_mean_rms_excavate": [round(float(np.mean([r[k] for r in vc_log if r[0]])), 5) for k in (1, 2)] if vc is not None and any(r[0] for r in vc_log) else None,
         "particle_reseals": resealed,
         "escaped_back_front_side": [int(esc_back.sum()), int(esc_front.sum()), int(esc_side.sum())],
         "particles_per_m3_start_end": [round(len(pts) / (area * x_face)), round((n_active - escaped) / vol_now)],
