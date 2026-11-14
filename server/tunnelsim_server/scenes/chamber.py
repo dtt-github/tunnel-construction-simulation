@@ -61,6 +61,24 @@ class ChamberConfig:
     kp_rpm_per_kpa: float = 0.2  # screw PI controller on the axis pressure
     ki_rpm_per_kpa_s: float = 0.05
     max_screw_rpm: float = 22.0  # EPB demo's screw range
+    # WP4 screw-speed step: this long into the excavation the controller is switched off and the screw held at its
+    # mean speed of the 2 s before, changed by screw_step_rpm; 0 s: no step
+    screw_step_s: float = 0.0
+    screw_step_rpm: float = 0.0
+    # WP4 shove under thrust: during excavation the ground piston is not driven at advance_mm_min but moves as the
+    # machine would under a set net thrust (the jacks' thrust less shield friction, tail seal and backup drag):
+    # M dv/dt = F_set - F_ground - c v, F_ground the paste's force on the piston. F_set is thrust_factor times the
+    # force that held the piston at standstill; the screw turns at the fixed speed that discharges advance_mm_min
+    thrust_control: bool = False
+    thrust_factor: float = 1.0
+    thrust_step_s: float = 0.0  # this long into the excavation the set thrust is multiplied by thrust_step_factor; 0: no step
+    thrust_step_factor: float = 1.0
+    machine_mass: float = 5.0e5  # kg, assumed (shield and cutterhead); it shapes the transient only
+    # assumed: the jacks' damping as a multiple of critical (machine mass on the paste's stiffness K A / length).
+    # Flow-limited hydraulics are far over critical; at 30 the advance settles in about 5 s, the damping force at
+    # 60 mm/min is about 4 % of the thrust, and the +-40 kN noise of the piston force moves the advance by a few mm/min
+    jack_damping_ratio: float = 30.0
+    advance_max_mm_min: float = 120.0  # assumed cap of the thrust hydraulics
     # WP4 leak diagnosis only: paste pushed into the shell wall is put back inside each frame (radius R - h/2, radial
     # velocity removed), so no paste is lost through the shell
     seal_shell: bool = False
@@ -176,6 +194,7 @@ def run(cfg: ChamberConfig) -> tuple[dict, dict]:
     j = common.JITTER  # initial jitter, a fraction of h (as fill_box)
     pts = (pts + rng.uniform(-j * h, j * h, pts.shape)).astype(np.float32)
     pm = make_particles(pts, h, soil).finalize()
+    mass_p = pm.particle_mass.numpy()
     solver = make_solver(pm, cm, dx, cfg.iterations, {shell: wf if (wf := cfg.wall_friction) >= 0 else 0.3, bulkhead: wf if wf >= 0 else 0.3, cutter: 0.3, piston: wf if wf >= 0 else 0.5, -1: 0.5})
     st = cm.state()
     s = pm.state()
@@ -216,6 +235,9 @@ def run(cfg: ChamberConfig) -> tuple[dict, dict]:
     vb_log: list = []
     vb_repaired = 0
     stress_log: list = []
+    step = None
+    f_set, c_jack, v_dyn = None, 0.0, 0.0
+    pp_hist: list = []
     vc = None
     if cfg.volume_correction > 0:
         from .volume_correction import VolumeCorrection
@@ -261,6 +283,22 @@ def run(cfg: ChamberConfig) -> tuple[dict, dict]:
             integ += err * dt
             rpm = float(np.clip(screw.rpm_for_flow(area * v_adv) + cfg.kp_rpm_per_kpa * err + cfg.ki_rpm_per_kpa_s * integ,
                                 0.0, cfg.max_screw_rpm))
+            if cfg.thrust_control:
+                if f_set is None:
+                    f_set = cfg.thrust_factor * float(np.mean(pp_hist[-int(cfg.fps):])) * area
+                    c_jack = cfg.jack_damping_ratio * 2.0 * math.sqrt(soil.extra["bulk_modulus_Pa"] * area / (x_p - t / 2) * cfg.machine_mass)
+                f_now = f_set * (cfg.thrust_step_factor if cfg.thrust_step_s > 0 and t_phase >= cfg.thrust_step_s else 1.0)
+                f_ground = float(np.mean(pp_hist[-3:])) * area
+                # implicit in the damping: c dt / M is well above 2
+                v_dyn = float(np.clip((v_dyn + (f_now - f_ground) / cfg.machine_mass * dt) / (1.0 + c_jack * dt / cfg.machine_mass), 0.0, cfg.advance_max_mm_min / 6e4))
+                v_piston = v_dyn
+                rpm = screw.rpm_for_flow(area * v_adv)  # fixed screw speed: under thrust it sets the advance rate
+            if cfg.screw_step_s > 0 and t_phase >= cfg.screw_step_s:  # open loop from the step on
+                if step is None:
+                    rpm_before = float(np.mean([r[4] for r in log[-int(2 * cfg.fps):]]))
+                    step = {"t_s": f * dt, "rpm_before": rpm_before, "rpm_after": float(np.clip(rpm_before + cfg.screw_step_rpm, 0.0, cfg.max_screw_rpm)),
+                            "paste_volume_m3": area * (x_p - t / 2)}
+                rpm = step["rpm_after"]
             ang += w_c * dt
         x_p -= v_piston * dt
         q[piston, 0] = x_p
@@ -379,23 +417,36 @@ def run(cfg: ChamberConfig) -> tuple[dict, dict]:
         torque = float(np.cross(pos[m] - np.array([x_ch, 0.0, zc]), F[m])[:, 0].sum())
         f_cutter_x = -float(F[m, 0].sum())  # soil pushing the cutterhead back (towards -x)
         p_piston = float(F[bid == piston, 0].sum()) / area  # soil pushing the piston forwards (+x)
+        pp_hist.append(p_piston)
         if cfg.stress_log:  # the paste's own stress: within one voxel of the bulkhead, by band, and the chamber mean
             sig = common.particle_stress(s)
             xq_ = s.particle_q.numpy()
             a_ = (flags & active) != 0
             near = a_ & (xq_[:, 0] < dx) & (np.abs(xq_[:, 1]) > y_min)
             zp = xq_[near, 2] - zc
-            sxx = -sig[near, 0, 0]
-            pp = -np.trace(sig[near], axis1=1, axis2=2) / 3
+            sxx = sig[near, 0, 0]  # the solver's particle stress comes out compression positive here (checked against the contact pressure)
+            pp = np.trace(sig[near], axis1=1, axis2=2) / 3
             sb = np.array([sxx[(zp >= lo) & (zp < hi)].mean() if ((zp >= lo) & (zp < hi)).any() else np.nan for lo, hi in zip(edges[:-1], edges[1:])])
             pb = np.array([pp[(zp >= lo) & (zp < hi)].mean() if ((zp >= lo) & (zp < hi)).any() else np.nan for lo, hi in zip(edges[:-1], edges[1:])])
             okb = np.isfinite(sb)
             g_s = -float(np.polyfit(band_z[okb], sb[okb], 1)[0]) if okb.sum() > 2 else np.nan
-            p_all = float((-np.trace(sig[a_], axis1=1, axis2=2) / 3).mean())
-            stress_log.append((f * dt, p_band[axis_band] / 1e3, sb[axis_band] / 1e3, pb[axis_band] / 1e3, grad / 1e3, g_s / 1e3, p_all / 1e3, int(near.sum())))
+            p_part = np.trace(sig, axis1=1, axis2=2) / 3
+            p_all = float(p_part[a_].mean())
+            # gradient of the paste's mean stress over the whole chamber (bulkhead to the cutterhead's spokes), and over
+            # its core, two voxels clear of the shell and the bulkhead
+            rr_ = np.hypot(xq_[:, 1], xq_[:, 2] - zc)
+            in_ch = a_ & (xq_[:, 0] > 0) & (xq_[:, 0] < x_ch - 0.1) & (rr_ < R) & np.isfinite(p_part)
+            core = in_ch & (xq_[:, 0] > 2 * dx) & (rr_ < R - 2 * dx)
+            g_ch = -float(np.polyfit(xq_[in_ch, 2], p_part[in_ch], 1)[0]) if in_ch.sum() > 100 else np.nan
+            g_core = -float(np.polyfit(xq_[core, 2], p_part[core], 1)[0]) if core.sum() > 100 else np.nan
+            stress_log.append((f * dt, p_band[axis_band] / 1e3, sb[axis_band] / 1e3, pb[axis_band] / 1e3, grad / 1e3, g_s / 1e3, p_all / 1e3, int(near.sum()), g_ch / 1e3, g_core / 1e3,
+                               ["pressurise", "hold", "excavate", "stop"].index(phase),
+                               # vertical balance: the paste's weight in the chamber and the vertical force it puts on each solid (N, down positive)
+                               float(mass_p[a_ & (xq_[:, 0] > 0) & (rr_ < R)].sum()) * G,
+                               -float(F[bid == shell, 2].sum()), -float(F[bid == bulkhead, 2].sum()), -float(F[bid == piston, 2].sum()), -float(F[bid == cutter, 2].sum())))
         p_hist.append(float(p_band[axis_band]))
         log.append((f * dt, ["pressurise", "hold", "excavate", "stop"].index(phase), p_band[axis_band] / 1e3, grad / 1e3,
-                    rpm, thrust / 1e6, abs(torque) / 1e6, x_face + t / 2 - x_p, removed, p_piston / 1e3, f_cutter_x / 1e6))
+                    rpm, thrust / 1e6, abs(torque) / 1e6, x_face + t / 2 - x_p, removed, p_piston / 1e3, f_cutter_x / 1e6, v_piston * 6e4))
         t_phase += dt
 
     log = np.array(log)
@@ -416,10 +467,39 @@ def run(cfg: ChamberConfig) -> tuple[dict, dict]:
         return rows[a:z]
 
     ex, hold, stop = window(2), window(1), window(3, (0.5, 1.0))
+    step_res = None
+    if step is not None:  # pressure rate after the step against the volume balance K dQ / V
+        exc = log[log[:, 1] == 2]
+        before = exc[(exc[:, 0] >= step["t_s"] - 2.0) & (exc[:, 0] < step["t_s"])]
+        after = exc[exc[:, 0] >= step["t_s"]]
+        ex = exc[(exc[:, 0] >= step["t_s"] / 2) & (exc[:, 0] < step["t_s"])]  # the closed-loop figures: before the step only
+        d_q = screw.discharge(step["rpm_after"]) - screw.discharge(step["rpm_before"])
+        k_kpa = soil.extra["bulk_modulus_Pa"] / 1e3
+        p0 = float(before[:, 2].mean())
+        moved = np.where(abs(after[:, 2] - p0) >= 30.0)[0]
+        step_res = {
+            "at_s_into_excavation": cfg.screw_step_s, "rpm_before": round(step["rpm_before"], 2), "rpm_after": round(step["rpm_after"], 2),
+            "discharge_change_l_per_s": round(d_q * 1e3, 2), "p_axis_before_kPa": round(p0, 1),
+            "p_axis_rate_kPa_per_s": round(float(np.polyfit(after[:, 0], after[:, 2], 1)[0]), 3),
+            "p_axis_rate_first_5s_kPa_per_s": round(float(np.polyfit(after[:int(5 * cfg.fps), 0], after[:int(5 * cfg.fps), 2], 1)[0]), 3),
+            "rate_volume_balance_kPa_per_s": round(-k_kpa * d_q / step["paste_volume_m3"], 3),
+            "s_to_30_kPa": round(float(after[moved[0], 0] - step["t_s"]), 2) if len(moved) else None,
+            "p_axis_end_kPa": round(float(after[-int(cfg.fps):, 2].mean()), 1),
+        }
     res = {
         "diameter_m": D, "voxel_m": dx, "particles": int(len(pts)), "paste_bulk_modulus_kPa": round(soil.extra["bulk_modulus_Pa"] / 1e3),
         "rho_g_kPa_per_m": round(cfg.paste_density * G / 1e3, 2),
         "pressurised_after_s": round(float(log[log[:, 1] == 0][-1, 0]) if (log[:, 1] == 0).any() else 0.0, 2),
+        "screw_step": step_res,
+        "thrust_control": None if f_set is None else {
+            "net_thrust_set_MN": round(f_set / 1e6, 3), "thrust_factor": cfg.thrust_factor,
+            "thrust_step": [cfg.thrust_step_s, cfg.thrust_step_factor] if cfg.thrust_step_s > 0 else None,
+            "advance_mm_min_excavate": round(float(ex[:, 11].mean()), 1), "advance_band_mm_min": [round(float(np.percentile(ex[:, 11], 5)), 1), round(float(np.percentile(ex[:, 11], 95)), 1)],
+            "advance_from_screw_discharge_mm_min": round(float(np.mean([screw.discharge(r) for r in ex[:, 4]])) / area * 6e4, 1),
+            "p_piston_excavate_kPa": round(float(ex[:, 9].mean()), 1), "jack_damping_force_kN_at_mean_advance": round(c_jack * float(ex[:, 11].mean()) / 6e4 / 1e3, 2),
+            "advance_last_5s_mm_min": round(float(log[log[:, 1] == 2][-int(5 * cfg.fps):, 11].mean()), 1), "p_axis_last_5s_kPa": round(float(log[log[:, 1] == 2][-int(5 * cfg.fps):, 2].mean()), 1),
+            "p_piston_last_5s_kPa": round(float(log[log[:, 1] == 2][-int(5 * cfg.fps):, 9].mean()), 1),
+        },
         "p_axis_hold_kPa": round(float(hold[:, 2].mean()), 1) if len(hold) else None,
         "gradient_hold_kPa_per_m": round(float(hold[:, 3].mean()), 2) if len(hold) else None,
         "p_axis_excavate_kPa": round(float(ex[:, 2].mean()), 1) if len(ex) else None,

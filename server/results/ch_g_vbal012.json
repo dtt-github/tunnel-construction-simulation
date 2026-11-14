@@ -1,0 +1,164 @@
+{
+ "scene": "chamber",
+ "time": "2026-11-14T04:51:42",
+ "git": "ba2c86c+dirty",
+ "versions": {
+  "newton": "1.7.0",
+  "warp": "1.19.0",
+  "numpy": "2.5.4",
+  "python": "3.12.3"
+ },
+ "params": {
+  "diameter": 7.08,
+  "chamber": 0.8,
+  "slab": 0.6,
+  "voxel": 0.12,
+  "ppc": 2,
+  "paste_density": 1330.0,
+  "paste_friction": 0.0,
+  "paste_cohesion": 5000.0,
+  "paste_poisson": 0.3,
+  "fir": 0.4,
+  "fer": 10.0,
+  "target_kpa": 200.0,
+  "advance_mm_min": 60.0,
+  "cutter_rpm": 2.0,
+  "pressurise_speed": 0.1,
+  "pressurise_max_s": 8.0,
+  "hold_s": 3.0,
+  "excavate_s": 20.0,
+  "stop_s": 6.0,
+  "kp_rpm_per_kpa": 0.2,
+  "ki_rpm_per_kpa_s": 0.05,
+  "max_screw_rpm": 22.0,
+  "screw_step_s": 0.0,
+  "screw_step_rpm": 0.0,
+  "thrust_control": false,
+  "thrust_factor": 1.0,
+  "thrust_step_s": 0.0,
+  "thrust_step_factor": 1.0,
+  "machine_mass": 500000.0,
+  "jack_damping_ratio": 30.0,
+  "advance_max_mm_min": 120.0,
+  "seal_shell": true,
+  "wall_friction": 0.3,
+  "stress_log": true,
+  "vb_from_hold": true,
+  "volume_balance": 3,
+  "volume_correction": 0.0,
+  "vc_support": "node",
+  "vc_interior": true,
+  "fps": 60.0,
+  "iterations": 100,
+  "seed": 0
+ },
+ "gpu_before": {
+  "note": "not captured: WP4 diagnosis script"
+ },
+ "timing_valid_for_decisions": false,
+ "timing_note": "diagnosis run on a shared GPU; GPU state not recorded",
+ "calibration": "uncalibrated",
+ "diagnosis": "WP4, 13-14 Nov 2026: gradient readings and vertical force balance, voxel 0.12 m",
+ "result": {
+  "diameter_m": 7.08,
+  "voxel_m": 0.12,
+  "particles": 247043,
+  "paste_bulk_modulus_kPa": 2806,
+  "rho_g_kPa_per_m": 13.05,
+  "pressurised_after_s": 2.37,
+  "screw_step": null,
+  "thrust_control": null,
+  "p_axis_hold_kPa": 211.5,
+  "gradient_hold_kPa_per_m": 11.24,
+  "p_axis_excavate_kPa": 199.8,
+  "p_axis_excavate_band_kPa": [
+   196.0,
+   205.6
+  ],
+  "gradient_excavate_kPa_per_m": 15.53,
+  "gradient_stop_kPa_per_m": 17.21,
+  "screw_rpm_excavate": 13.17,
+  "screw_rpm_feedforward": 9.95,
+  "bulkhead_thrust_MN_excavate": 7.84,
+  "p_axis_times_area_MN": 7.87,
+  "cutter_torque_MNm_excavate": 0.443,
+  "p_piston_hold_excavate_kPa": [
+   221.1,
+   200.6
+  ],
+  "cutter_axial_MN_hold_excavate": [
+   0.17,
+   -0.03
+  ],
+  "advance_m": 0.258,
+  "particles_removed": 4856,
+  "particles_escaped": 2021,
+  "volume_balance_repaired": 4304,
+  "volume_correction_mismatch_mean_rms_excavate": null,
+  "particle_reseals": 388677,
+  "escaped_back_front_side": [
+   423,
+   1539,
+   59
+  ],
+  "particles_per_m3_start_end": [
+   4482,
+   5343
+  ],
+  "ms_per_frame": 467.72,
+  "gradients_kPa_per_m_second_half_of_phase": {
+   "pressurise": {
+    "bulkhead_contact": 9.86,
+    "paste_stress_at_bulkhead": 6.89,
+    "paste_stress_chamber": 6.64,
+    "paste_stress_core": 6.33,
+    "vertical_kN_down": {
+     "paste_weight": 695.1,
+     "on_shell": 529.0,
+     "on_bulkhead": 66.8,
+     "on_piston": 21.5,
+     "on_cutterhead": 78.3
+    }
+   },
+   "hold": {
+    "bulkhead_contact": 11.24,
+    "paste_stress_at_bulkhead": 6.27,
+    "paste_stress_chamber": 5.71,
+    "paste_stress_core": 4.78,
+    "vertical_kN_down": {
+     "paste_weight": 693.6,
+     "on_shell": 544.9,
+     "on_bulkhead": 56.5,
+     "on_piston": 23.5,
+     "on_cutterhead": 71.3
+    }
+   },
+   "excavate": {
+    "bulkhead_contact": 15.53,
+    "paste_stress_at_bulkhead": 8.26,
+    "paste_stress_chamber": 8.71,
+    "paste_stress_core": 11.02,
+    "vertical_kN_down": {
+     "paste_weight": 680.6,
+     "on_shell": 691.4,
+     "on_bulkhead": -13.2,
+     "on_piston": 10.2,
+     "on_cutterhead": -5.0
+    }
+   },
+   "stop": {
+    "bulkhead_contact": 17.21,
+    "paste_stress_at_bulkhead": 2.21,
+    "paste_stress_chamber": 9.79,
+    "paste_stress_core": 13.45,
+    "vertical_kN_down": {
+     "paste_weight": 675.9,
+     "on_shell": 730.8,
+     "on_bulkhead": -20.7,
+     "on_piston": 4.7,
+     "on_cutterhead": -34.8
+    }
+   }
+  }
+ }
+}

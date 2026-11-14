@@ -204,6 +204,13 @@ Each package ends with a check. A package is done only when its check passes, or
 - **P1d holds the pressure, but:** the vertical gradient is near zero or negative (Botlek 10–20+ kPa/m), the material is too strong, and the pressure swings ±45 kPa.
 - **Same block as WP3:** volume-preserving plastic flow in Newton. A draft issue for the Newton developers is ready.
 
+**Status (14 Nov 2026): outputs produced, gradient not converged** ([results](../validation/mpm-chamber.md#cause-of-the-loss-screw-step-thrust-and-the-gradient-13-and-14-nov-2026)).
+- **Pressure:** held at 200 kPa within ±5 kPa at voxel 0.15 m and 0.12 m, with a volume balance by region that corrects Newton's volume loss (cause found and reported on newton-physics/newton#5180).
+- **Screw step:** the pressure responds at 77–80 % of the analytical chamber model's rate. No field record to check it against yet.
+- **Shove under thrust:** in place for the net thrust on the chamber face; shield friction, tail seal and backup drag are not added. Machine mass, jack damping and the advance cap are assumed.
+- **Gradient:** 9–17 kPa/m by bulkhead contact (Botlek 10–20), but not converged; the 0.10 m chamber does not hold its pressure. The check named above (Guangzhou–Foshan and Changsha records) was replaced by Botlek on 5 Nov.
+- **Torque:** 0.4–0.6 MNm from mixing, below 9.8 MNm; the face-cutting torque is not included.
+
 ### WP5: screw conveyor (about 3 weeks)
 
 - **Resolved inlet:** at least 8 voxels across the screw, with local refinement in the casing. Walls at least one voxel thick, as Phase 0 learnt.

@@ -2,13 +2,15 @@
 
 - **Plan:** [Phase 2, WP4](../plans/phase2-mpm-face-chamber.md#wp4-epb-chamber-with-a-pressure-controlled-shove-about-3-weeks).
 - **Code:** [`server/tunnelsim_server/scenes/chamber.py`](../../server/tunnelsim_server/scenes/chamber.py). Runs with `python -m tunnelsim_server.runner chamber ...`; records `ch_*` in [`server/results/`](../../server/results/), the volume-balance runs as `ch_vb_*`. `ChamberConfig.seal_shell` (default off) is a diagnosis option: paste pushed into the shell wall is put back inside each frame.
-- **Status:** **uncalibrated; holds the chamber pressure with a correction** ([9 Nov 2026](#volume-balance-and-a-sourced-paste-8-9-nov-2026)).
+- **Status:** **uncalibrated; holds the chamber pressure with a correction** ([9 Nov 2026](#volume-balance-and-a-sourced-paste-89-nov-2026)).
   - Newton's implicit MPM loses paste volume wherever a solid moves through it, so the chamber loses its pressure under the turning cutterhead ([newton-physics/newton#5180](https://github.com/newton-physics/newton/issues/5180)). A volume balance by region corrects this: it holds the mean elastic volume of each region of the paste to what the piston and the screw leave.
   - With that correction, an undrained paste and wall friction from open sources, the chamber holds 200 kPa through a 20 s excavation at voxel 0.15 m and 0.12 m. The vertical gradient is inside Botlek's range, and the screw removes about the volume the piston displaces.
-  - **Open:** the gradient differs by about a quarter between the two voxels; 0.25 m does not hold; the pressure band is narrower than on a machine; the paste leaks into the shell wall unless it is sealed; the torque is the paste's only.
+  - **Cause found and reported ([13 Nov 2026](#cause-of-the-loss-screw-step-thrust-and-the-gradient-13-and-14-nov-2026)):** Newton's elastic volume follows the velocity divergence only and is not tied to the particle density. A density-coupled correction recovers part of the loss; the balance by region stays the default.
+  - **Screw step and thrust (13 Nov 2026):** the pressure responds to a screw-speed step at 77–80 % of the chamber model's rate. Under a set thrust the screw sets the advance and the thrust sets the pressure.
+  - **Open:** the gradient is not converged: with refinement the bulkhead contact reading rises and the paste's own stress gradient falls, and the 0.10 m chamber does not hold its pressure. 0.25 m does not hold either; the pressure band is narrower than on a machine; the paste leaks into the shell wall unless it is sealed; the torque is the paste's only.
   - The runs before 8 Nov, below, used the Phase 0 paste and no correction. They stand as the record of the loss.
   - **Correction (7 Nov 2026):** from 6 Nov the docs, the v1.0.0 release notes and our comment on [newton-physics/newton#5180](https://github.com/newton-physics/newton/issues/5180) said that under GIMP the chamber keeps 162 of 207 kPa (172 of 216 before the scaling fix), "a fifth lost". Those runs excavated for 4 s only. Over the scene's 20 s excavation the pressure falls to 51 kPa.
-- **Run on:** 5 Nov 2026; GIMP and 20 s diagnosis runs 7 Nov 2026; volume balance and sourced paste 8–9 Nov 2026
+- **Run on:** 5 Nov 2026; GIMP and 20 s diagnosis runs 7 Nov 2026; volume balance and sourced paste 8–9 Nov 2026; cause, screw step, thrust and gradient 13–14 Nov 2026
 
 ## Set-up
 
@@ -16,7 +18,7 @@
 
 **Advance:** a ground piston pushes the ground in at 60 mm/min.
 
-**Paste (runs to 7 Nov; the paste from 8 Nov is in [its section](#volume-balance-and-a-sourced-paste-8-9-nov-2026)):**
+**Paste (runs to 7 Nov; the paste from 8 Nov is in [its section](#volume-balance-and-a-sourced-paste-89-nov-2026)):**
 
 | Property | Value | Source |
 |---|---|---|
@@ -167,13 +169,97 @@ Undrained strength across the sourced range (0.15 m, 50 iterations, balance from
 
 - **Pressure band:** ±4–5 kPa against DAUB's ±30 kPa. The scene has no ring builds, screw surges or ground entering at the face, so a narrow band is expected, but it is not yet checked against a field record.
 - **Torque:** the scene cuts no ground; it stirs the paste. 0.4–0.5 MNm agrees with a hand estimate (cu × both faces of the cutterhead × mean lever arm, about 0.9 MNm). Comparing with the installed 9.8 MNm needs the face-cutting torque of the demo's torque model added. That is not done.
-- **Gradient at a stop:** Botlek's falls; ours does not.
+- **Gradient at a stop:** Botlek's falls; ours does not. (Identical runs differ by about 2 kPa/m at the stop, see [13–14 Nov](#gradient-readings-refinement-and-a-vertical-force-balance).)
 - **Leak:** the runs seal the shell. Without it, the paste pushes into the 0.5 m shell wall.
 - **The correction is ours, not Newton's.** It sets the volume by region and leaves the solver's local deviations. Whether Newton can conserve volume around a moving solid itself is open on newton#5180.
+
+## Cause of the loss, screw step, thrust and the gradient (13 and 14 Nov 2026)
+
+Voxel 0.15 m, 100 iterations, shell sealed, balance by region, unless stated. Records `ch_step_*`, `ch_thr_*`, `ch_g_*` in [`server/results/`](../../server/results/).
+
+### Cause of the pressure loss
+
+- **Cause:** Newton updates a particle's elastic volume from the divergence of the velocity only. Nothing ties it to how densely the particles are packed. Around a moving solid the particles bunch and then spread, and the update records a net expansion.
+- **In the chamber:** over 6 s of excavation without a correction, the interior becomes about 10 % denser (material per free volume +2.6 % to +12.9 %) while the recorded elastic volume strain relaxes from −0.068 to −0.008. The pressure falls from 200 to 33 kPa.
+- **In a box** ([`moving_collider_box.py`](../../server/diagnostics/moving_collider_box.py)): a paddle moving through elastic paste takes 197 kPa down to 20–31 kPa.
+- **Reported** on [newton-physics/newton#5180](https://github.com/newton-physics/newton/issues/5180#issuecomment-6855321863).
+- **A density-coupled correction** ([`volume_correction.py`](../../server/tunnelsim_server/scenes/volume_correction.py)) pulls each particle's elastic volume towards what its local density implies. It is partial:
+  - in the box it holds 184–190 kPa at 240 steps/s and 60–130 kPa at 60 steps/s;
+  - in the chamber the free volume cannot be measured reliably beside the walls, so it is applied to the interior only. Excavation then holds 144–157 kPa (33 without any correction, 200 with the balance by region), and at standstill the pressure sags from 207 to 177 kPa in 3 s.
+- **The balance by region stays the default.** It uses what the piston and the screw do to the chamber's volume; the density-coupled correction uses only the particles, and is the one that could go into the solver.
+
+### Response to a screw-speed step
+
+Screw controller switched off 10 s into a 30 s excavation and the screw speed stepped. The predicted rate is the chamber model's: bulk modulus × change in discharge / chamber volume (K 2,806 kPa).
+
+| Record | Screw (rpm) | Discharge change (l/s) | Predicted (kPa/s) | Measured (kPa/s) | Axis pressure (kPa) | Time to ±30 kPa (s) |
+|---|---|---|---|---|---|---|
+| `ch_step_stop` | 10.5 → 0 | −41.5 | +2.45 | +1.87 | 203 → 236 | 14.6 |
+| `ch_step_up` | 10.6 → 20.6 | +39.6 | −2.34 | −1.88 | 203 → 163 | 11.3 |
+
+- The pressure responds at 77–80 % of the predicted rate, in both directions.
+- The shortfall is not explained. Paste leaving the chamber would fit the stopped screw but not the faster one.
+- Checked against the analytical chamber model only. No open record of a screw step on a machine has been found.
+
+### Shove under thrust
+
+The ground piston is no longer driven at the advance rate. It moves under a set net thrust against the paste's force on it, with the screw at the fixed speed that discharges 60 mm/min.
+
+| Quantity | Value | Status |
+|---|---|---|
+| Net thrust | 9.16 MN, the force that held the piston at standstill | from the run |
+| Moving mass | 500 t | assumed |
+| Jack damping | 30 × critical | assumed; lower values let the advance chatter between 0 and the cap |
+| Advance cap | 120 mm/min | assumed |
+
+| Record | Change at 12 s | Advance (mm/min) | Piston pressure (kPa) | Axis pressure (kPa) |
+|---|---|---|---|---|
+| `ch_thr_base` | none | 62 (55–70); the screw's discharge equals 60 | 222 | 199 |
+| `ch_thr_f110` | thrust +10 % | to the cap, then 73 and falling | 222 → 243 | 197 → 219 |
+| `ch_thr_screw` | screw +50 % | 65 → 91 (90 from the discharge) | 222 → 217 | 196 → 195 |
+
+- **The screw sets the advance and the thrust sets the pressure,** as on a machine in EPB mode: more thrust raises the pressure by the same 10 % and the advance returns towards the screw's rate; a faster screw raises the advance and leaves the pressure.
+- The gradient (11.4–12.2 kPa/m) and torque (0.45–0.55 MNm) are as under a driven piston.
+- **Not included:** shield friction, the tail seal and backup drag. The thrust here is the net force on the face of the chamber, not the machine's total.
+
+### Gradient: readings, refinement and a vertical force balance
+
+Four readings of the vertical gradient, each the mean over the second half of the phase:
+- from the contact force on the bulkhead, in bands (as before);
+- from the paste's own stress within one voxel of the bulkhead;
+- from the paste's mean stress over the whole chamber;
+- the same over its core, two voxels clear of the shell and the bulkhead.
+
+Excavation (kPa/m; the paste's own weight is 13.05):
+
+| Record | Voxel, iterations | Axis pressure (kPa) | Bulkhead contact | Stress at bulkhead | Stress, chamber | Stress, core | Particles leaving the chamber |
+|---|---|---|---|---|---|---|---|
+| `ch_g_v015` | 0.15 m, 100 | 199 | 12.3 | 19.8 | 10.6 | 13.8 | 717 |
+| `ch_g_v012` | 0.12 m, 100 | 199 | 15.7 | 8.4 | 8.7 | 11.1 | 2,600 |
+| `ch_g_v010` | 0.10 m, 100 | 176; collapses at the stop | 16.8 | 3.7 | 7.3 | 7.4 | 5,851 |
+| `ch_g_v010_it200` | 0.10 m, 200 | 187 | 17.2 | 2.1 | 6.3 | 6.4 | 6,243 |
+
+Vertical force of the paste on each solid (kN, downwards), and the gradient that the end walls' share implies (13.05 × shell share):
+
+| Record, phase | Paste weight | Shell | Bulkhead | Piston | Cutterhead | Implied | Bulkhead contact | Stress, chamber |
+|---|---|---|---|---|---|---|---|---|
+| `ch_g_vbal` (0.15 m), standstill | 714 | 569 | 40 | 73 | 35 | 10.4 | 9.3 | 8.6 |
+| `ch_g_vbal` (0.15 m), excavation | 703 | 773 | −35 | −29 | −3 | 14.3 | 12.1 | 11.4 |
+| `ch_g_vbal012` (0.12 m), standstill | 694 | 545 | 57 | 24 | 71 | 10.2 | 11.2 | 5.7 |
+| `ch_g_vbal012` (0.12 m), excavation | 681 | 691 | −13 | 10 | −5 | 13.3 | 15.5 | 8.7 |
+
+**What this shows:**
+
+1. **The vertical balance closes** within 1 % in every phase at both voxels: the solids together carry the paste's weight.
+2. **The end walls shift the gradient.** At standstill the bulkhead, piston and cutterhead hold up about a fifth of the paste's weight, so the gradient sits below the paste's own. During excavation they hold up none of it, or press down. A paste of 5 kPa strength between end walls 1.4 m apart could shift the gradient by up to about ±7 kPa/m; the runs use −3 to +1 kPa/m of that.
+3. **The gradient is not converged, and the two kinds of reading diverge.** With refinement the contact reading rises (12 → 16 → 17 kPa/m) and the stress readings fall (11–14 → 6 kPa/m). The balance is the same at both voxels, so the forces are not the cause; how the pressure is distributed over the height is. The cause is not found.
+4. **0.10 m is not a valid third point.** The chamber does not hold its set point (176–187 kPa with the screw shut), eight times as many particles leave it as at 0.15 m, and with 100 iterations it collapses at the stop.
+5. **Repeatability:** `ch_g_v015` and `ch_g_vbal` have the same settings. During excavation they agree (12.3 and 12.1 kPa/m by contact); at the stop they give 13.7 and 11.6.
 
 ## Where this leaves WP4
 
 - The chamber scene, the pressure controller, a volume correction and the open validation data are in place. The scene's defaults are the sourced paste, wall friction 0.3, the balance by region and 100 iterations.
-- **Checked:** the set point holds, the gradient is in Botlek's range, the screw balances the excavated volume, at 0.15 m and 0.12 m.
-- **Not done:** gradient convergence, the stop gradient, the band against a field record, the leak without sealing, torque with the face.
+- **Checked:** the set point holds and the screw balances the excavated volume at 0.15 m and 0.12 m; the vertical force balance closes; the bulkhead contact gradient (9–17 kPa/m) is in or near Botlek's 10–20.
+- **WP4 outputs produced:** bulkhead pressure in bands, its gradient, mixing torque, the response to a screw-speed step, and a shove under thrust.
+- **Not done:** a converged gradient (the readings diverge with refinement and 0.10 m does not hold), the stop gradient, the band against a field record, the leak without sealing, torque with the face, shield friction in the thrust, a field record for the screw step.
 - Nothing from the MPM chamber is used on the console yet.
