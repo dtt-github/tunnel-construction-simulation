@@ -1,0 +1,317 @@
+{
+ "scene": "chamber",
+ "time": "2026-11-15T15:02:04",
+ "git": "5d65acd",
+ "versions": {
+  "newton": "1.7.0",
+  "warp": "1.19.0",
+  "numpy": "2.5.4",
+  "python": "3.12.3"
+ },
+ "params": {
+  "diameter": 7.08,
+  "chamber": 0.8,
+  "slab": 0.6,
+  "voxel": 0.15,
+  "ppc": 2,
+  "paste_density": 1330.0,
+  "paste_friction": 0.0,
+  "paste_cohesion": 5000.0,
+  "paste_poisson": 0.3,
+  "fir": 0.4,
+  "fer": 10.0,
+  "target_kpa": 200.0,
+  "advance_mm_min": 60.0,
+  "cutter_rpm": 2.0,
+  "pressurise_speed": 0.1,
+  "pressurise_max_s": 8.0,
+  "hold_s": 3.0,
+  "excavate_s": 20.0,
+  "stop_s": 6.0,
+  "kp_rpm_per_kpa": 0.2,
+  "ki_rpm_per_kpa_s": 0.05,
+  "max_screw_rpm": 22.0,
+  "screw_step_s": 0.0,
+  "screw_step_rpm": 0.0,
+  "thrust_control": false,
+  "thrust_factor": 1.0,
+  "thrust_step_s": 0.0,
+  "thrust_step_factor": 1.0,
+  "machine_mass": 500000.0,
+  "jack_damping_ratio": 30.0,
+  "advance_max_mm_min": 120.0,
+  "seal_shell": true,
+  "wall_friction": 0.3,
+  "stress_log": true,
+  "vb_from_hold": true,
+  "volume_balance": 3,
+  "volume_correction": 0.0,
+  "vc_support": "node",
+  "vc_interior": true,
+  "fps": 60.0,
+  "iterations": 100,
+  "seed": 1
+ },
+ "gpu_before": "not recorded; node gn100-8aa4",
+ "timing_valid_for_decisions": false,
+ "timing_note": "diagnosis run; node shared with other projects",
+ "calibration": "uncalibrated",
+ "diagnosis": "WP4, 15 Nov 2026: paste fill and stress by height, voxel 0.15 m, seed 1",
+ "result": {
+  "diameter_m": 7.08,
+  "voxel_m": 0.15,
+  "particles": 130112,
+  "paste_bulk_modulus_kPa": 2806,
+  "rho_g_kPa_per_m": 13.05,
+  "pressurised_after_s": 1.8,
+  "screw_step": null,
+  "thrust_control": null,
+  "p_axis_hold_kPa": 204.9,
+  "gradient_hold_kPa_per_m": 9.22,
+  "p_axis_excavate_kPa": 199.5,
+  "p_axis_excavate_band_kPa": [
+   195.3,
+   203.3
+  ],
+  "gradient_excavate_kPa_per_m": 12.04,
+  "gradient_stop_kPa_per_m": 12.02,
+  "screw_rpm_excavate": 9.54,
+  "screw_rpm_feedforward": 9.95,
+  "bulkhead_thrust_MN_excavate": 8.8,
+  "p_axis_times_area_MN": 7.86,
+  "cutter_torque_MNm_excavate": 0.508,
+  "p_piston_hold_excavate_kPa": [
+   232.9,
+   223.4
+  ],
+  "cutter_axial_MN_hold_excavate": [
+   0.12,
+   -0.06
+  ],
+  "advance_m": 0.202,
+  "particles_removed": 1809,
+  "particles_escaped": 706,
+  "volume_balance_repaired": 0,
+  "volume_correction_mismatch_mean_rms_excavate": null,
+  "particle_reseals": 377199,
+  "escaped_back_front_side": [
+   506,
+   120,
+   80
+  ],
+  "particles_per_m3_start_end": [
+   2361,
+   2705
+  ],
+  "ms_per_frame": 47.13,
+  "gradients_kPa_per_m_second_half_of_phase": {
+   "pressurise": {
+    "bulkhead_contact": 9.03,
+    "stress_at_bulkhead": 9.41,
+    "stress_chamber": 8.92,
+    "stress_core": 9.15,
+    "prisms_particle_stress": 7.81,
+    "prisms_stress_times_fill": 8.86,
+    "prisms_stress_times_fill_without_bottom_bin": 9.83,
+    "prisms_particle_stress_without_bottom_bin": 9.11
+   },
+   "hold": {
+    "bulkhead_contact": 9.22,
+    "stress_at_bulkhead": 9.78,
+    "stress_chamber": 8.66,
+    "stress_core": 9.53,
+    "prisms_particle_stress": 10.13,
+    "prisms_stress_times_fill": 11.78,
+    "prisms_stress_times_fill_without_bottom_bin": 12.86,
+    "prisms_particle_stress_without_bottom_bin": 11.05
+   },
+   "excavate": {
+    "bulkhead_contact": 12.04,
+    "stress_at_bulkhead": 18.41,
+    "stress_chamber": 10.71,
+    "stress_core": 13.31,
+    "prisms_particle_stress": 15.3,
+    "prisms_stress_times_fill": 15.23,
+    "prisms_stress_times_fill_without_bottom_bin": 15.32,
+    "prisms_particle_stress_without_bottom_bin": 12.0
+   },
+   "stop": {
+    "bulkhead_contact": 12.02,
+    "stress_at_bulkhead": 15.52,
+    "stress_chamber": 10.69,
+    "stress_core": 13.67,
+    "prisms_particle_stress": 16.36,
+    "prisms_stress_times_fill": 15.31,
+    "prisms_stress_times_fill_without_bottom_bin": 15.7,
+    "prisms_particle_stress_without_bottom_bin": 12.17
+   }
+  },
+  "profile_by_height": {
+   "z_over_R": [
+    -0.7200000000000001,
+    -0.56,
+    -0.4,
+    -0.24,
+    -0.08000000000000007,
+    0.08000000000000007,
+    0.24,
+    0.3999999999999999,
+    0.56,
+    0.72
+   ],
+   "pressurise": {
+    "fill": [
+     1.0907,
+     1.0341,
+     1.0958,
+     1.0134,
+     1.0743,
+     1.0849,
+     1.0248,
+     1.0774,
+     1.0295,
+     1.0412
+    ],
+    "p_particle_kPa": [
+     128.7076,
+     131.2587,
+     129.0656,
+     129.175,
+     120.5271,
+     120.7948,
+     121.0497,
+     110.0004,
+     101.1148,
+     84.3004
+    ],
+    "p_space_kPa": [
+     140.3838,
+     135.7301,
+     141.4284,
+     130.9042,
+     129.4874,
+     131.0519,
+     124.0551,
+     118.5179,
+     104.0994,
+     87.7751
+    ]
+   },
+   "hold": {
+    "fill": [
+     1.1091,
+     1.0892,
+     1.1282,
+     1.0728,
+     1.1377,
+     1.1293,
+     1.0993,
+     1.0945,
+     1.1181,
+     1.0646
+    ],
+    "p_particle_kPa": [
+     242.042,
+     236.2736,
+     235.8394,
+     236.3577,
+     230.8221,
+     223.7896,
+     225.9334,
+     211.8126,
+     194.8606,
+     186.6228
+    ],
+    "p_space_kPa": [
+     268.4372,
+     257.3595,
+     266.0672,
+     253.5686,
+     262.61,
+     252.7332,
+     248.3762,
+     231.8186,
+     217.8683,
+     198.6872
+    ]
+   },
+   "excavate": {
+    "fill": [
+     1.0037,
+     1.1934,
+     1.1302,
+     1.1044,
+     1.1024,
+     1.0953,
+     1.1344,
+     1.1569,
+     1.1393,
+     1.0824
+    ],
+    "p_particle_kPa": [
+     279.4916,
+     229.6854,
+     234.6477,
+     228.9588,
+     224.6408,
+     214.7049,
+     202.7089,
+     191.4937,
+     185.8585,
+     188.5796
+    ],
+    "p_space_kPa": [
+     280.5206,
+     274.0984,
+     265.2089,
+     252.8672,
+     247.6387,
+     235.1759,
+     229.9571,
+     221.5377,
+     211.7578,
+     204.1094
+    ]
+   },
+   "stop": {
+    "fill": [
+     0.967,
+     1.2378,
+     1.0591,
+     1.1053,
+     1.1308,
+     1.1291,
+     1.1163,
+     1.1951,
+     1.1622,
+     1.0413
+    ],
+    "p_particle_kPa": [
+     294.6382,
+     228.1712,
+     254.7187,
+     235.9528,
+     228.0619,
+     216.4769,
+     205.9756,
+     189.0689,
+     184.6972,
+     206.275
+    ],
+    "p_space_kPa": [
+     284.9098,
+     282.4341,
+     269.7851,
+     260.7945,
+     257.9017,
+     244.415,
+     229.9213,
+     225.9618,
+     214.6499,
+     214.8041
+    ]
+   }
+  },
+  "profile_note": "prisms R/4 < |y| < R/2, |z - zc| < 0.8 R, bulkhead to the spokes; sums over all frames of each phase; fill = mass / (paste density x bin volume); p_space = particle stress x fill"
+ }
+}

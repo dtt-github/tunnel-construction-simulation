@@ -281,13 +281,25 @@ Gradient in the prisms (kPa/m; in brackets without the lowest bin):
 2. **Stress × fill agrees between the voxels:** 15.4 and 14.9 kPa/m during excavation (15.6 and 15.8 without the lowest bin), where the particle stress alone gives 15.1 and 12.1 (12.0 and 10.8). The fall of the stress readings with refinement was in part this bias. At standstill and after the stop the two voxels agree to about 1 kPa/m.
 3. **The level is consistent with the denser paste.** At a fill of 1.10–1.15 the paste in the prisms weighs 14.4–15.0 kPa/m, not the nominal 13.05.
 4. **The contact reading is not explained.** It still moves from 12.1 to 15.8 kPa/m. At 0.12 m it is within 1 kPa/m of stress × fill; at 0.15 m it is 3 kPa/m below.
-5. **Limits:** one run per voxel, and identical runs have differed by about 2 kPa/m at the stop; the prisms leave out the paste near the shell and the screw inlet; the lowest bin is an outlier in every profile (high stress, low fill), which is why both fits are given; 0.10 m is still not a valid third point.
+5. **Limits:** identical settings have differed by about 2 kPa/m at the stop (the table is seed 0; repeats below); the prisms leave out the paste near the shell and the screw inlet; the lowest bin is an outlier in every profile (high stress, low fill), which is why both fits are given; 0.10 m is still not a valid third point.
+
+**Repeats with two more seeds** (the seed sets the initial particle jitter; records `ch_pf_v015_s1`, `_s2`, `ch_pf_v012_s1`, `_s2`). Stress × fill in the prisms and the bulkhead contact reading, kPa/m, seeds 0 / 1 / 2:
+
+| Phase | Stress × fill, 0.15 m | Stress × fill, 0.12 m | Contact, 0.15 m | Contact, 0.12 m |
+|---|---|---|---|---|
+| Standstill | 12.0 / 11.8 / 12.4 | 10.8 / 11.5 / 13.7 | 9.3 / 9.2 / 9.5 | 11.5 / 12.3 / 14.1 |
+| Excavation | 15.4 / 15.2 / 15.3 | 14.9 / failed / 15.1 | 12.1 / 12.0 / 12.2 | 15.8 / failed / 15.5 |
+| After the stop | 16.4 / 15.3 / 15.1 | 15.7 / failed / 16.9 | 12.7 / 12.0 / 12.0 | 17.1 / failed / 17.7 |
+
+- **Excavation repeats to 0.2–0.3 kPa/m** in both readings at both voxels. The interior gradient of about 15 kPa/m stands, and so does the unexplained step in the contact reading (12.1 → 15.7): it is not scatter.
+- **Standstill at 0.12 m scatters by about 3 kPa/m** between seeds (0.6 at 0.15 m); after the stop the scatter is 1.2–1.3 kPa/m at both voxels.
+- **One of the three 0.12 m runs lost its chamber** (`ch_pf_v012_s1`). It held 203 kPa at standstill; during excavation the pressure sagged to 180–195 kPa from about 10 s with the screw throttled almost shut, and fell to zero at about 20 s. The volume balance made 189 million repairs in that run, against about 3,000–5,500 in the other two: it ran away instead of holding. The shell was sealed and the particles leaving the chamber were as in the other runs. The cause is not found. At 0.15 m all three seeds hold.
 
 ## Where this leaves WP4
 
 - The chamber scene, the pressure controller, a volume correction and the open validation data are in place. The scene's defaults are the sourced paste, wall friction 0.3, the balance by region and 100 iterations.
-- **Checked:** the set point holds and the screw balances the excavated volume at 0.15 m and 0.12 m; the vertical force balance closes; the bulkhead contact gradient (9–17 kPa/m) is in or near Botlek's 10–20.
+- **Checked:** the set point holds and the screw balances the excavated volume at 0.15 m (three seeds of three) and at 0.12 m in two seeds of three (the third lost its chamber, 15 Nov); the vertical force balance closes; the bulkhead contact gradient (9–17 kPa/m) is in or near Botlek's 10–20.
 - **WP4 outputs produced:** bulkhead pressure in bands, its gradient, mixing torque, the response to a screw-speed step, and a shove under thrust.
 - **Gradient (15 Nov 2026):** multiplied by the fill, the paste's stress gradient in the interior is about 15 kPa/m during excavation at both 0.15 m and 0.12 m; the paste there is about a tenth denser than nominal.
-- **Not done:** a converged contact gradient (12 → 16 kPa/m from 0.15 m to 0.12 m; 0.10 m does not hold), repeats of the density profile, the stop gradient, the band against a field record, the leak without sealing, torque with the face, shield friction in the thrust, a field record for the screw step.
+- **Not done:** the cause of the lost chamber in one 0.12 m run (the volume balance ran away), a converged contact gradient (12 → 16 kPa/m from 0.15 m to 0.12 m; 0.10 m does not hold), the stop gradient, the band against a field record, the leak without sealing, torque with the face, shield friction in the thrust, a field record for the screw step.
 - Nothing from the MPM chamber is used on the console yet.
