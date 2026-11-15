@@ -293,13 +293,36 @@ Gradient in the prisms (kPa/m; in brackets without the lowest bin):
 
 - **Excavation repeats to 0.2–0.3 kPa/m** in both readings at both voxels. The interior gradient of about 15 kPa/m stands, and so does the unexplained step in the contact reading (12.1 → 15.7): it is not scatter.
 - **Standstill at 0.12 m scatters by about 3 kPa/m** between seeds (0.6 at 0.15 m); after the stop the scatter is 1.2–1.3 kPa/m at both voxels.
-- **One of the three 0.12 m runs lost its chamber** (`ch_pf_v012_s1`). It held 203 kPa at standstill; during excavation the pressure sagged to 180–195 kPa from about 10 s with the screw throttled almost shut, and fell to zero at about 20 s. The volume balance made 189 million repairs in that run, against about 3,000–5,500 in the other two: it ran away instead of holding. The shell was sealed and the particles leaving the chamber were as in the other runs. The cause is not found. At 0.15 m all three seeds hold.
+- **One of the three 0.12 m runs lost its chamber** (`ch_pf_v012_s1`; cause and remedy [below](#the-lost-chamber-at-012-m-overfilled-corner-regions-15-nov-2026)). It held 203 kPa at standstill; during excavation the pressure sagged to 180–195 kPa from about 10 s with the screw throttled almost shut, and fell to zero at about 20 s. The volume balance made 189 million repairs in that run, against about 3,000–5,500 in the other two: it ran away instead of holding. The shell was sealed and the particles leaving the chamber were as in the other runs. At 0.15 m all three seeds hold.
+
+### The lost chamber at 0.12 m: overfilled corner regions (15 Nov 2026)
+
+The failed seed was rerun with a per-frame log of the volume balance (record `ch_vb_v012_s1`); it failed again, at 16.5 s.
+
+- **The trigger:** the balance works on 108 regions (1.2 m columns, three slices along the axis). A full region holds about 3,000 particles at 0.12 m; the four corner columns of each slice are cut by the round shell and hold 80–125. During excavation paste collects in the two bottom corners beside the cutterhead: one went from 120 to 1,354 particles, 12.5 times its reference.
+- **The mechanism:** the balance takes more particles in a region as paste that must be compressed, by the log of the count ratio. At 12.5 times that is a volume ratio of 0.08. The first degenerate particle (elastic volume ≤ 0) appears at 6.7 s, a few dozen by 14 s, and at 16.5 s the whole chamber degenerates within a few frames. The "repairs" counted earlier are these degenerate particles, summed over frames.
+- **Regions under 50 reference particles were already left out.** At 0.15 m the corners hold about 60 and mostly fall under that; at 0.12 m they do not.
+
+Two remedies were run (seeds 0 / 1 / 2 at 0.12 m, seed 0 at 0.15 m and 0.10 m; records `ch_vbf_*`, `ch_vbm_*`):
+
+| Variant | Axis pressure, 0.12 m (kPa) | Contact gradient, 0.12 m | Stress × fill, 0.12 m | 0.15 m: pressure; screw volume against 0.79 m³ displaced |
+|---|---|---|---|---|
+| As before | 200.7 / lost / 200.3 | 15.8 / – / 15.5 | 14.9 / – / 15.1 | 199.9; 0.79 |
+| Corners left out of the balance | 196.5 / 197.4 / 196.8 | 15.6 / 15.4 / 15.7 | 15.2 / 14.9 / 15.3 | 198.1; 0.69 |
+| **Corners merged into the next region towards the axis** | 200.8 / 201.1 / 200.2 | 15.7 / 15.4 / 15.8 | 15.3 / 14.8 / 15.1 | 200.6; 0.78 |
+
+- **Merging is adopted as the default** (`ChamberConfig.vb_merge_region_frac` = 0.1: a region with less than a tenth of the fullest region's particles joins the next one towards the axis, in the same slice; 96 regions remain, the smallest at about half the fullest). All three seeds hold the set point at 0.12 m with at most one degenerate particle in a frame, and 0.15 m is unchanged within the seed scatter.
+- **Leaving the corners out is rejected:** their paste is then open to the volume loss, the pressure sits 2–4 kPa low and the screw discharges 12 % less than the machine displaces at 0.15 m.
+- **The tenth is an assumed numerical setting,** not from a source and not fitted to any validation figure. At these voxels only the 12 corner regions fall under it; a second fraction was not run.
+- **The gradients do not change** with either remedy, so the readings above stand.
+- **0.10 m is not fixed by this.** No region overfills there (at most 1.25 times its reference). With merging it holds 187 kPa at standstill and 169 kPa in excavation with the screw shut, and degenerates after the stop: a volume loss the balance does not cover at that voxel.
+- **Screw volume at 0.12 m:** 0.84–1.01 m³ against 0.79 displaced, with or without merging (counted at the nominal particle volume; the paste being about a tenth denser explains about half of the excess). Open.
 
 ## Where this leaves WP4
 
-- The chamber scene, the pressure controller, a volume correction and the open validation data are in place. The scene's defaults are the sourced paste, wall friction 0.3, the balance by region and 100 iterations.
-- **Checked:** the set point holds and the screw balances the excavated volume at 0.15 m (three seeds of three) and at 0.12 m in two seeds of three (the third lost its chamber, 15 Nov); the vertical force balance closes; the bulkhead contact gradient (9–17 kPa/m) is in or near Botlek's 10–20.
+- The chamber scene, the pressure controller, a volume correction and the open validation data are in place. The scene's defaults are the sourced paste, wall friction 0.3, the balance by region with its corner regions merged (since 15 Nov 2026) and 100 iterations.
+- **Checked:** the set point holds and the screw balances the excavated volume at 0.15 m (three seeds of three); at 0.12 m the set point holds in three seeds of three once the corner regions of the balance are merged (15 Nov; one seed lost its chamber before), but the screw discharges 0.84–1.01 m³ against 0.79 displaced; the vertical force balance closes; the bulkhead contact gradient (9–17 kPa/m) is in or near Botlek's 10–20.
 - **WP4 outputs produced:** bulkhead pressure in bands, its gradient, mixing torque, the response to a screw-speed step, and a shove under thrust.
 - **Gradient (15 Nov 2026):** multiplied by the fill, the paste's stress gradient in the interior is about 15 kPa/m during excavation at both 0.15 m and 0.12 m; the paste there is about a tenth denser than nominal.
-- **Not done:** the cause of the lost chamber in one 0.12 m run (the volume balance ran away), a converged contact gradient (12 → 16 kPa/m from 0.15 m to 0.12 m; 0.10 m does not hold), the stop gradient, the band against a field record, the leak without sealing, torque with the face, shield friction in the thrust, a field record for the screw step.
+- **Not done:** the screw volume at 0.12 m, the 0.10 m chamber (a volume loss the balance does not cover), a converged contact gradient (12 → 16 kPa/m from 0.15 m to 0.12 m; 0.10 m does not hold), the stop gradient, the band against a field record, the leak without sealing, torque with the face, shield friction in the thrust, a field record for the screw step.
 - Nothing from the MPM chamber is used on the console yet.

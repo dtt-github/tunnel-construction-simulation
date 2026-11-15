@@ -86,6 +86,10 @@ class ChamberConfig:
     # (Applied Sciences 10 (2020) 3300, doi:10.3390/app10093300), and kaolin on steel, 0.33 (Henke & Wiesenthal, WCCM
     # 2024); < 0 keeps the Phase 0 values 0.3 / 0.3 / 0.5
     wall_friction: float = 0.3
+    # volume balance 3: join regions smaller than this fraction of the fullest to the next one towards the axis (0: off).
+    # An assumed numerical setting; at 0.12-0.15 m only the 12 corner regions fall under a tenth (15 Nov 2026).
+    vb_merge_region_frac: float = 0.1
+    vb_min_region_frac: float = 0.0  # volume balance: leave out regions with fewer reference particles than this fraction of the fullest region
     stress_log: bool = False  # log the paste's own stress beside the bulkhead next to the contact-force reading
     # WP4 correction for Newton's volume drift where a solid moves through the paste (newton#5180): once pressurised,
     # the mean elastic volume strain of each region follows the chamber's volume balance (piston advance, paste removed
@@ -233,6 +237,7 @@ def run(cfg: ChamberConfig) -> tuple[dict, dict]:
     resealed = 0
     vb_ref = None
     vb_log: list = []
+    vb_map = None
     vb_repaired = 0
     stress_log: list = []
     n_prof, prof, prof_x = 10, np.zeros((4, 4, 10)), 0.0  # by phase: mass, summed mean stress, particle count, frames; per height bin
@@ -361,6 +366,28 @@ def run(cfg: ChamberConfig) -> tuple[dict, dict]:
             else:
                 reg = np.where(act, 0, -1)
             n_reg = int(reg.max()) + 1 if (reg >= 0).any() else 1
+            if vb_map is None and cfg.volume_balance == 3 and cfg.vb_merge_region_frac > 0 and (phase == "excavate" or cfg.vb_from_hold):
+                # regions cut small by the shell join the next region towards the axis, in the same slice, until the joined
+                # region holds vb_merge_region_frac of the fullest one. Fixed when the reference is taken.
+                raw = np.bincount(reg[reg >= 0], minlength=n_side * n_side * n_ax).astype(float)
+                vb_map, c_mid = np.arange(len(raw)), (n_side - 1) / 2
+                order = sorted(range(len(raw)), key=lambda rq: -max(abs((rq // n_side) % n_side - c_mid), abs(rq % n_side - c_mid)))
+                for rq in order:
+                    if raw[rq] == 0 or raw[rq] >= cfg.vb_merge_region_frac * raw.max():
+                        continue
+                    qx, qy, qz = rq // (n_side * n_side), (rq // n_side) % n_side, rq % n_side
+                    dy_, dz_ = abs(qy - c_mid), abs(qz - c_mid)
+                    if dy_ >= dz_ and dy_ > 0.5:
+                        qy += 1 if qy < c_mid else -1
+                    if dz_ >= dy_ and dz_ > 0.5:
+                        qz += 1 if qz < c_mid else -1
+                    tgt = (qx * n_side + qy) * n_side + qz
+                    if tgt != rq:
+                        vb_map[vb_map == rq] = tgt
+                        raw[tgt] += raw[rq]
+                        raw[rq] = 0
+            if vb_map is not None:
+                reg = np.where(reg >= 0, vb_map[np.clip(reg, 0, len(vb_map) - 1)], -1)
             if vb_ref is None and (phase == "excavate" or cfg.vb_from_hold):  # reference: the pressurised paste
                 lnj = np.log(np.linalg.det(fe))
                 ok = act & np.isfinite(lnj)
@@ -375,10 +402,17 @@ def run(cfg: ChamberConfig) -> tuple[dict, dict]:
                 cnt = np.bincount(r_ok[use], minlength=m).astype(float)
                 mean = np.bincount(r_ok[use], weights=lnj[use], minlength=m) / np.maximum(cnt, 1)
                 ref_mean, ref_cnt = vb_ref[0], vb_ref[2]
-                valid = (ref_cnt >= 50) & (cnt > 0)
+                # regions cut small by the shell are left uncorrected: fewer than 50 reference particles, or (vb_min_region_frac)
+                # less than that fraction of the fullest region. A sliver's count can grow many times over as particles
+                # collect in it, and the count term then compresses them until their strain degenerates (15 Nov 2026).
+                valid = (ref_cnt >= max(50.0, cfg.vb_min_region_frac * ref_cnt.max())) & (cnt > 0)
                 target = ref_mean + math.log((x_p - t / 2) / (vb_ref[1] - t / 2)) - np.log(np.where(valid, cnt / np.maximum(ref_cnt, 1), 1.0))
                 shift = np.where(valid, target - mean, 0.0)
-                vb_log.append((f * dt, float(target[valid].mean()), float(mean[valid].mean()), int(act.sum()), x_p, int((act & ~ok).sum())))
+                vb_log.append((f * dt, float(target[valid].mean()), float(mean[valid].mean()), int(act.sum()), x_p, int((act & ~ok).sum()),
+                               # diagnosis of a runaway: the regions in use, the emptiest one against its reference count, the largest
+                               # correction of a frame (in ln J), and the region that takes it
+                               int(valid.sum()), float((cnt / np.maximum(ref_cnt, 1))[valid].min()), float(np.abs(shift).max()), int(np.abs(shift).argmax()),
+                               float(cnt[int(np.abs(shift).argmax())]), float(ref_cnt[int(np.abs(shift).argmax())])))
                 fac = np.ones(len(fe))
                 fac[use] = np.exp(shift[r_ok[use]] / 3.0)
                 fe *= fac[:, None, None]

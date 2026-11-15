@@ -1,0 +1,161 @@
+{
+ "scene": "chamber",
+ "time": "2026-11-15T16:18:32",
+ "git": "d06bf36+dirty",
+ "versions": {
+  "newton": "1.7.0",
+  "warp": "1.19.0",
+  "numpy": "2.5.4",
+  "python": "3.12.3"
+ },
+ "params": {
+  "diameter": 7.08,
+  "chamber": 0.8,
+  "slab": 0.6,
+  "voxel": 0.12,
+  "ppc": 2,
+  "paste_density": 1330.0,
+  "paste_friction": 0.0,
+  "paste_cohesion": 5000.0,
+  "paste_poisson": 0.3,
+  "fir": 0.4,
+  "fer": 10.0,
+  "target_kpa": 200.0,
+  "advance_mm_min": 60.0,
+  "cutter_rpm": 2.0,
+  "pressurise_speed": 0.1,
+  "pressurise_max_s": 8.0,
+  "hold_s": 3.0,
+  "excavate_s": 20.0,
+  "stop_s": 6.0,
+  "kp_rpm_per_kpa": 0.2,
+  "ki_rpm_per_kpa_s": 0.05,
+  "max_screw_rpm": 22.0,
+  "screw_step_s": 0.0,
+  "screw_step_rpm": 0.0,
+  "thrust_control": false,
+  "thrust_factor": 1.0,
+  "thrust_step_s": 0.0,
+  "thrust_step_factor": 1.0,
+  "machine_mass": 500000.0,
+  "jack_damping_ratio": 30.0,
+  "advance_max_mm_min": 120.0,
+  "seal_shell": true,
+  "wall_friction": 0.3,
+  "vb_min_region_frac": 0.1,
+  "stress_log": true,
+  "vb_from_hold": true,
+  "volume_balance": 3,
+  "volume_correction": 0.0,
+  "vc_support": "node",
+  "vc_interior": true,
+  "fps": 60.0,
+  "iterations": 100,
+  "seed": 2
+ },
+ "gpu_before": "not recorded; node gn100-8aa4",
+ "timing_valid_for_decisions": false,
+ "timing_note": "diagnosis run; node shared with other projects",
+ "calibration": "uncalibrated",
+ "diagnosis": "WP4, 15 Nov 2026: corner regions left out of the balance (vb_min_region_frac 0.1): rejected variant",
+ "result": {
+  "diameter_m": 7.08,
+  "voxel_m": 0.12,
+  "particles": 247043,
+  "paste_bulk_modulus_kPa": 2806,
+  "rho_g_kPa_per_m": 13.05,
+  "pressurised_after_s": 2.33,
+  "screw_step": null,
+  "thrust_control": null,
+  "p_axis_hold_kPa": 208.6,
+  "gradient_hold_kPa_per_m": 13.66,
+  "p_axis_excavate_kPa": 196.8,
+  "p_axis_excavate_band_kPa": [
+   192.7,
+   200.5
+  ],
+  "gradient_excavate_kPa_per_m": 15.73,
+  "gradient_stop_kPa_per_m": 17.67,
+  "screw_rpm_excavate": 9.96,
+  "screw_rpm_feedforward": 9.95,
+  "bulkhead_thrust_MN_excavate": 7.71,
+  "p_axis_times_area_MN": 7.75,
+  "cutter_torque_MNm_excavate": 0.455,
+  "p_piston_hold_excavate_kPa": [
+   211.5,
+   197.6
+  ],
+  "cutter_axial_MN_hold_excavate": [
+   0.01,
+   -0.03
+  ],
+  "advance_m": 0.255,
+  "particles_removed": 3947,
+  "particles_escaped": 1781,
+  "volume_balance_repaired": 1188,
+  "volume_correction_mismatch_mean_rms_excavate": null,
+  "particle_reseals": 303368,
+  "escaped_back_front_side": [
+   468,
+   1265,
+   48
+  ],
+  "particles_per_m3_start_end": [
+   4482,
+   5353
+  ],
+  "ms_per_frame": 85.25,
+  "gradients_kPa_per_m_second_half_of_phase": {
+   "pressurise": {
+    "bulkhead_contact": 10.03,
+    "stress_chamber": 6.86,
+    "prisms_particle_stress": 7.47,
+    "prisms_stress_times_fill": 8.2,
+    "prisms_stress_times_fill_without_bottom_bin": 9.38
+   },
+   "hold": {
+    "bulkhead_contact": 13.66,
+    "stress_chamber": 8.53,
+    "prisms_particle_stress": 9.72,
+    "prisms_stress_times_fill": 13.32,
+    "prisms_stress_times_fill_without_bottom_bin": 13.75
+   },
+   "excavate": {
+    "bulkhead_contact": 15.73,
+    "stress_chamber": 9.42,
+    "prisms_particle_stress": 12.86,
+    "prisms_stress_times_fill": 15.26,
+    "prisms_stress_times_fill_without_bottom_bin": 15.99
+   },
+   "stop": {
+    "bulkhead_contact": 17.67,
+    "stress_chamber": 10.54,
+    "prisms_particle_stress": 15.69,
+    "prisms_stress_times_fill": 16.14,
+    "prisms_stress_times_fill_without_bottom_bin": 16.99
+   }
+  },
+  "volume_balance_log": {
+   "regions_in_use_min_max": [
+    96,
+    96
+   ],
+   "degenerate_particles_max_in_a_frame": 1,
+   "first_frame_with_over_1000_degenerate_s": null,
+   "largest_count_over_reference_of_the_region_with_the_largest_correction": 1.42
+  },
+  "screw_volume_m3_at_nominal_particle_volume": 0.853,
+  "p_axis_kPa_every_2s_of_excavation": [
+   209.2,
+   205.4,
+   210.3,
+   199.9,
+   202.8,
+   198.9,
+   194.7,
+   199.1,
+   191.6,
+   198.4
+  ]
+ }
+}

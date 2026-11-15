@@ -53,4 +53,9 @@ if pf is not None and pf["sums"][:, 3].max() > 0:  # by height: fill, particle s
         prof_out[nm] = {"fill": fill.tolist(), "p_particle_kPa": pk.tolist(), "p_space_kPa": (pk * fill).tolist()}
         print(f"profile {nm:10s} gradient kPa/m: particle stress {-np.polyfit(z, pk, 1)[0]:5.2f}   stress x fill {-np.polyfit(z, pk * fill, 1)[0]:5.2f}   fill top to bottom", " ".join(f"{v:.3f}" for v in fill[::-1]))
         print(f"        {nm:10s} particle stress kPa top to bottom", " ".join(f"{v:.0f}" for v in pk[::-1]))
-json.dump({"profile": prof_out, "params": dataclasses.asdict(cfg), "result": res, "log": log.tolist(), "stress": st.tolist() if st is not None else None}, open(os.path.join(d, sys.argv[1] + ".json"), "w"))
+vb = extra.get("vb")
+if vb is not None and len(vb) and vb.shape[1] >= 12:  # volume balance by frame: t, degenerate particles, regions, emptiest region, largest correction
+    print("balance: t s, degenerate, regions, least count/ref, largest |shift| ln J, its region, count, ref count")
+    for r in vb[:: max(1, len(vb) // 40)]:
+        print(f"balance {r[0]:6.2f} {int(r[5]):7d} {int(r[6]):4d} {r[7]:6.3f} {r[8]:9.4f} {int(r[9]):5d} {int(r[10]):6d} {int(r[11]):6d}")
+json.dump({"vb": np.nan_to_num(vb, nan=-1.0, posinf=1e30, neginf=-1e30).tolist() if vb is not None and len(vb) else None, "profile": prof_out, "params": dataclasses.asdict(cfg), "result": res, "log": log.tolist(), "stress": st.tolist() if st is not None else None}, open(os.path.join(d, sys.argv[1] + ".json"), "w"))
