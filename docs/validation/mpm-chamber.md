@@ -315,8 +315,40 @@ Two remedies were run (seeds 0 / 1 / 2 at 0.12 m, seed 0 at 0.15 m and 0.10 m; r
 - **Leaving the corners out is rejected:** their paste is then open to the volume loss, the pressure sits 2–4 kPa low and the screw discharges 12 % less than the machine displaces at 0.15 m.
 - **The tenth is an assumed numerical setting,** not from a source and not fitted to any validation figure. At these voxels only the 12 corner regions fall under it; a second fraction was not run.
 - **The gradients do not change** with either remedy, so the readings above stand.
-- **0.10 m is not fixed by this.** No region overfills there (at most 1.25 times its reference). With merging it holds 187 kPa at standstill and 169 kPa in excavation with the screw shut, and degenerates after the stop: a volume loss the balance does not cover at that voxel.
+- **0.10 m is not fixed by this** ([next section](#the-010-m-chamber-over-packed-by-the-piston-push-15-nov-2026)).
 - **Screw volume at 0.12 m:** 0.84–1.01 m³ against 0.79 displaced, with or without merging (counted at the nominal particle volume; the paste being about a tenth denser explains about half of the excess). Open.
+
+### The 0.10 m chamber: over-packed by the piston push (15 Nov 2026)
+
+With the corner regions merged, the 0.10 m chamber still does not hold. The logs of the three voxels side by side (seed 0, records `ch_vbm_*`):
+
+| | 0.15 m | 0.12 m | 0.10 m |
+|---|---|---|---|
+| Piston travel to reach 200 kPa | 0.18 m | 0.24 m | 0.35 m |
+| Fill at standstill (paste mass over nominal density and space) | 1.11 | 1.13 | 1.27 |
+| Mean elastic volume change at standstill, ln J | −0.075 | −0.068 | −0.056 |
+| Pressure at standstill (kPa) | 205 | 209 | 187 |
+| Balance correction undone by the solver per frame in excavation, ln J | 0.002 | 0.002 | 0.023 |
+
+- **The piston push over-packs the paste, more at finer voxels.** To carry 200 kPa the paste needs about 7 % of elastic compression (K = 2.8 MPa). The piston delivers 11–27 % more paste into the space, because Newton sheds elastic volume while the piston moves and the balance is not active in that phase.
+- **At 0.10 m the chamber starts excavation below the set point,** the controller shuts the screw, and the solver undoes ten times more of the balance each frame than at the coarser voxels. The pressure settles at 169 kPa and the paste degenerates after the stop.
+- **A check on the density reading above:** at all three voxels the pressure on the piston equals the mean particle stress times the fill within 1 % (234 against 233 kPa, 218 against 219, 200 against 198).
+
+Four remedies were run at 0.10 m. None holds the set point:
+
+| Remedy | Record | Outcome |
+|---|---|---|
+| Corner regions merged | `ch_vbm_v010_s0` | no effect: no region overfills at 0.10 m (at most 1.25 times its reference) |
+| Piston push at a quarter of the speed | `ch_v010_slow` | worse: 0.8 m of travel in 32 s without reaching 200 kPa; the paste is packed to 2.4 times its density and degenerates. The loss runs with time under load, not with piston speed |
+| 400 solver iterations | `ch_v010_it400` | partial: 199 kPa at standstill, 185 kPa in excavation with the screw shut (192 by the end), paste valid; fill still 1.29 and 0.021 undone per frame |
+| Pre-stressed start (`prestress`: elastic volume set to −p/K with the paste's weight, no push) | `ch_pre_v015`, `_v012`, `_v010` | sheds 38 / 44 / 57 % of the pressure within half a second (124 / 112 / 86 kPa at 0.15 / 0.12 / 0.10 m) and does not recover in 20 s. The paste stays at nominal density (fill 0.96–0.99), valid, with 0.002–0.005 undone per frame |
+| Pre-stress followed by the push (`prestress_top_up`) | `ch_pret_*` | 0.10 m: the same travel and fill as without (3.7 s, 1.27), lost in excavation. 0.15 m: fill 1.03 and 204 kPa, but the screw discharges 1.03 m³ against 0.79 displaced, where the standard start balances. 0.12 m: little change |
+
+**What follows:**
+- The loss is in how the solver carries elastic volume, and it grows as the voxel shrinks: the behaviour reported on [newton#5180](https://github.com/newton-physics/newton/issues/5180). No change to the scene removes it.
+- **The gradient can be compared at 0.15 m and 0.12 m only.** A third voxel is out of reach with this solver at an affordable iteration count (400 iterations at 0.10 m: 0.22 s per frame on the GPU alone, and still 15 kPa short).
+- **The fill of 1.11–1.13 at 0.15 m and 0.12 m is the same effect at a smaller size.** The gradients above are for paste about a tenth denser than nominal.
+- Both pre-stress options stay in the code, off.
 
 ## Where this leaves WP4
 
@@ -324,5 +356,5 @@ Two remedies were run (seeds 0 / 1 / 2 at 0.12 m, seed 0 at 0.15 m and 0.10 m; r
 - **Checked:** the set point holds and the screw balances the excavated volume at 0.15 m (three seeds of three); at 0.12 m the set point holds in three seeds of three once the corner regions of the balance are merged (15 Nov; one seed lost its chamber before), but the screw discharges 0.84–1.01 m³ against 0.79 displaced; the vertical force balance closes; the bulkhead contact gradient (9–17 kPa/m) is in or near Botlek's 10–20.
 - **WP4 outputs produced:** bulkhead pressure in bands, its gradient, mixing torque, the response to a screw-speed step, and a shove under thrust.
 - **Gradient (15 Nov 2026):** multiplied by the fill, the paste's stress gradient in the interior is about 15 kPa/m during excavation at both 0.15 m and 0.12 m; the paste there is about a tenth denser than nominal.
-- **Not done:** the screw volume at 0.12 m, the 0.10 m chamber (a volume loss the balance does not cover), a converged contact gradient (12 → 16 kPa/m from 0.15 m to 0.12 m; 0.10 m does not hold), the stop gradient, the band against a field record, the leak without sealing, torque with the face, shield friction in the thrust, a field record for the screw step.
+- **Not done:** the screw volume at 0.12 m, a third voxel size (the 0.10 m chamber is over-packed by the piston push and four remedies failed, 15 Nov), a converged contact gradient (12 → 16 kPa/m from 0.15 m to 0.12 m; 0.10 m does not hold), the stop gradient, the band against a field record, the leak without sealing, torque with the face, shield friction in the thrust, a field record for the screw step.
 - Nothing from the MPM chamber is used on the console yet.

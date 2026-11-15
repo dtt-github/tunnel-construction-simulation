@@ -55,6 +55,11 @@ class ChamberConfig:
     cutter_rpm: float = 2.0
     pressurise_speed: float = 0.1  # m/s, piston speed while pressurising
     pressurise_max_s: float = 8.0
+    # Start the paste already at the target pressure (elastic volume set to -p/K, with the paste's own weight below the
+    # axis) and skip the piston push. The push packs 11-29 % more paste into the chamber than its nominal density, more at
+    # finer voxels, because Newton loses elastic volume while the piston moves (15 Nov 2026).
+    prestress: bool = False
+    prestress_top_up: bool = False  # after the pre-stress, let the piston push to the target as usual
     hold_s: float = 3.0  # standstill before excavation
     excavate_s: float = 20.0
     stop_s: float = 6.0  # standstill after excavation
@@ -230,6 +235,13 @@ def run(cfg: ChamberConfig) -> tuple[dict, dict]:
     x_p = x_face + t / 2
     ang = 0.0
     phase, t_phase = "pressurise", 0.0
+    if cfg.prestress:
+        z0 = s.particle_q.numpy()[:, 2]
+        p0 = cfg.target_kpa * 1e3 + soil.density * G * (zc - z0)
+        fe0 = np.exp(-p0 / soil.extra["bulk_modulus_Pa"] / 3.0)[:, None, None] * np.eye(3)[None]
+        s.mpm.particle_elastic_strain.assign(fe0.astype(np.float32))
+        if not cfg.prestress_top_up:  # otherwise the piston makes up what the first steps shed (38-57 % of the pressure)
+            phase = "hold"
     rpm, integ, owed = 0.0, 0.0, 0.0
     p_hist: list[float] = []
     log, times = [], []
