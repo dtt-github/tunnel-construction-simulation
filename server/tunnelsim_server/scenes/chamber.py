@@ -235,6 +235,7 @@ def run(cfg: ChamberConfig) -> tuple[dict, dict]:
     vb_log: list = []
     vb_repaired = 0
     stress_log: list = []
+    n_prof, prof, prof_x = 10, np.zeros((4, 4, 10)), 0.0  # by phase: mass, summed mean stress, particle count, frames; per height bin
     step = None
     f_set, c_jack, v_dyn = None, 0.0, 0.0
     pp_hist: list = []
@@ -444,6 +445,19 @@ def run(cfg: ChamberConfig) -> tuple[dict, dict]:
                                # vertical balance: the paste's weight in the chamber and the vertical force it puts on each solid (N, down positive)
                                float(mass_p[a_ & (xq_[:, 0] > 0) & (rr_ < R)].sum()) * G,
                                -float(F[bid == shell, 2].sum()), -float(F[bid == bulkhead, 2].sum()), -float(F[bid == piston, 2].sum()), -float(F[bid == cutter, 2].sum())))
+            # profile by height in two prisms clear of the shell (R/4 < |y| < R/2, |z - zc| < 0.8 R, bulkhead to the
+            # spokes): paste mass and mean stress per bin, summed over the frames of each phase. Fill = mass / (paste
+            # density x bin volume); Newton's stress acts per unit of particle volume, so the stress the paste carries per
+            # unit of space is the particle stress times the fill.
+            pr = in_ch & (np.abs(xq_[:, 1]) > R / 4) & (np.abs(xq_[:, 1]) < R / 2)
+            kb = np.floor((xq_[pr, 2] - zc + 0.8 * R) / (1.6 * R / n_prof)).astype(int)
+            okp = (kb >= 0) & (kb < n_prof)
+            ph_i = ["pressurise", "hold", "excavate", "stop"].index(phase)
+            prof[ph_i, 0] += np.bincount(kb[okp], weights=mass_p[pr][okp], minlength=n_prof)
+            prof[ph_i, 1] += np.bincount(kb[okp], weights=p_part[pr][okp], minlength=n_prof)
+            prof[ph_i, 2] += np.bincount(kb[okp], minlength=n_prof)
+            prof[ph_i, 3] += 1.0
+            prof_x = x_ch - 0.1
         p_hist.append(float(p_band[axis_band]))
         log.append((f * dt, ["pressurise", "hold", "excavate", "stop"].index(phase), p_band[axis_band] / 1e3, grad / 1e3,
                     rpm, thrust / 1e6, abs(torque) / 1e6, x_face + t / 2 - x_p, removed, p_piston / 1e3, f_cutter_x / 1e6, v_piston * 6e4))
@@ -523,7 +537,8 @@ def run(cfg: ChamberConfig) -> tuple[dict, dict]:
         "particles_per_m3_start_end": [round(len(pts) / (area * x_face)), round((n_active - escaped) / vol_now)],
         "ms_per_frame": round(float(np.mean(times[5:]) * 1000), 2),
     }
-    return res, {"log": log, "q_end": s.particle_q.numpy(), "active": (flags & active) != 0, "x_cutter": x_ch, "zc": zc, "vb": np.array(vb_log), "stress": np.array(stress_log)}
+    return res, {"log": log, "q_end": s.particle_q.numpy(), "active": (flags & active) != 0, "x_cutter": x_ch, "zc": zc, "vb": np.array(vb_log), "stress": np.array(stress_log),
+                 "profile": {"sums": prof, "z_over_R": (np.arange(n_prof) + 0.5) * 1.6 / n_prof - 0.8, "bin_volume_m3": prof_x * (R / 2) * (1.6 * R / n_prof), "paste_density": cfg.paste_density}}
 
 
 def params(cfg: ChamberConfig) -> dict:

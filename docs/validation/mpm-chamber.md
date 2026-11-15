@@ -7,7 +7,7 @@
   - With that correction, an undrained paste and wall friction from open sources, the chamber holds 200 kPa through a 20 s excavation at voxel 0.15 m and 0.12 m. The vertical gradient is inside Botlek's range, and the screw removes about the volume the piston displaces.
   - **Cause found and reported ([13 Nov 2026](#cause-of-the-loss-screw-step-thrust-and-the-gradient-13-and-14-nov-2026)):** Newton's elastic volume follows the velocity divergence only and is not tied to the particle density. A density-coupled correction recovers part of the loss; the balance by region stays the default.
   - **Screw step and thrust (13 Nov 2026):** the pressure responds to a screw-speed step at 77–80 % of the chamber model's rate. Under a set thrust the screw sets the advance and the thrust sets the pressure.
-  - **Open:** the gradient is not converged: with refinement the bulkhead contact reading rises and the paste's own stress gradient falls, and the 0.10 m chamber does not hold its pressure. 0.25 m does not hold either; the pressure band is narrower than on a machine; the paste leaks into the shell wall unless it is sealed; the torque is the paste's only.
+  - **Open:** the gradient is not converged: with refinement the bulkhead contact reading rises and the paste's own stress gradient falls (in part a density bias: times the fill it is about 15 kPa/m at 0.15 m and 0.12 m, [15 Nov](#gradient-paste-density-by-height-15-nov-2026)), and the 0.10 m chamber does not hold its pressure. 0.25 m does not hold either; the pressure band is narrower than on a machine; the paste leaks into the shell wall unless it is sealed; the torque is the paste's only.
   - The runs before 8 Nov, below, used the Phase 0 paste and no correction. They stand as the record of the loss.
   - **Correction (7 Nov 2026):** from 6 Nov the docs, the v1.0.0 release notes and our comment on [newton-physics/newton#5180](https://github.com/newton-physics/newton/issues/5180) said that under GIMP the chamber keeps 162 of 207 kPa (172 of 216 before the scaling fix), "a fifth lost". Those runs excavated for 4 s only. Over the scene's 20 s excavation the pressure falls to 51 kPa.
 - **Run on:** 5 Nov 2026; GIMP and 20 s diagnosis runs 7 Nov 2026; volume balance and sourced paste 8–9 Nov 2026; cause, screw step, thrust and gradient 13–14 Nov 2026
@@ -252,14 +252,42 @@ Vertical force of the paste on each solid (kN, downwards), and the gradient that
 
 1. **The vertical balance closes** within 1 % in every phase at both voxels: the solids together carry the paste's weight.
 2. **The end walls shift the gradient.** At standstill the bulkhead, piston and cutterhead hold up about a fifth of the paste's weight, so the gradient sits below the paste's own. During excavation they hold up none of it, or press down. A paste of 5 kPa strength between end walls 1.4 m apart could shift the gradient by up to about ±7 kPa/m; the runs use −3 to +1 kPa/m of that.
-3. **The gradient is not converged, and the two kinds of reading diverge.** With refinement the contact reading rises (12 → 16 → 17 kPa/m) and the stress readings fall (11–14 → 6 kPa/m). The balance is the same at both voxels, so the forces are not the cause; how the pressure is distributed over the height is. The cause is not found.
+3. **The gradient is not converged, and the two kinds of reading diverge.** With refinement the contact reading rises (12 → 16 → 17 kPa/m) and the stress readings fall (11–14 → 6 kPa/m). The balance is the same at both voxels, so the forces are not the cause; how the pressure is distributed over the height is. The cause was not found on 14 Nov; part of it is the paste's density ([15 Nov](#gradient-paste-density-by-height-15-nov-2026)).
 4. **0.10 m is not a valid third point.** The chamber does not hold its set point (176–187 kPa with the screw shut), eight times as many particles leave it as at 0.15 m, and with 100 iterations it collapses at the stop.
 5. **Repeatability:** `ch_g_v015` and `ch_g_vbal` have the same settings. During excavation they agree (12.3 and 12.1 kPa/m by contact); at the stop they give 13.7 and 11.6.
+
+### Gradient: paste density by height (15 Nov 2026)
+
+One suspect for the diverging readings was tested: Newton's particle stress acts per unit of particle volume, so the stress the paste carries per unit of space is the particle stress times the fill of that space. If the fill varies with height, the plain particle-stress gradient is biased.
+
+- **Reading:** two prisms clear of the shell (R/4 < |y| < R/2, |z − axis| < 0.8 R, bulkhead to the spokes), ten bins over the height. Per bin, summed over each phase: paste mass and mean particle stress. Fill = mass / (paste density × bin volume).
+- **Code:** `chamber.run` returns the profile with `stress_log`; [`chamber_run.py`](../../server/diagnostics/chamber_run.py) prints it. Records `ch_pf_v015`, `ch_pf_v012`.
+- **Runs:** the settings of `ch_g_vbal` and `ch_g_vbal012`, one run each, on a node shared with other projects.
+
+Gradient in the prisms (kPa/m; in brackets without the lowest bin):
+
+| Phase | Voxel | Bulkhead contact | Stress, chamber (as above) | Particle stress, prisms | Stress × fill, prisms |
+|---|---|---|---|---|---|
+| Standstill | 0.15 m | 9.3 | 8.7 | 10.1 (11.0) | 12.0 (12.9) |
+| Standstill | 0.12 m | 11.5 | 5.8 | 7.3 (7.1) | 10.8 (11.0) |
+| Excavation | 0.15 m | 12.1 | 10.7 | 15.1 (12.0) | **15.4 (15.6)** |
+| Excavation | 0.12 m | 15.8 | 8.8 | 12.1 (10.8) | **14.9 (15.8)** |
+| After the stop | 0.15 m | 12.7 | 10.4 | 17.8 (12.8) | 16.4 (17.2) |
+| After the stop | 0.12 m | 17.1 | 10.0 | 14.5 (12.3) | 15.7 (16.5) |
+
+**What this shows:**
+
+1. **The fill is not 1 and not uniform.** It is mostly 1.05–1.25 in the prisms (0.94–1.08 in the lowest bin): the paste in the interior is about a tenth denser than its nominal density, as found on [13 Nov](#cause-of-the-pressure-loss), and denser towards the bottom. At 0.12 m it rises from 1.10 at the top to 1.25 in the second bin from the bottom.
+2. **Stress × fill agrees between the voxels:** 15.4 and 14.9 kPa/m during excavation (15.6 and 15.8 without the lowest bin), where the particle stress alone gives 15.1 and 12.1 (12.0 and 10.8). The fall of the stress readings with refinement was in part this bias. At standstill and after the stop the two voxels agree to about 1 kPa/m.
+3. **The level is consistent with the denser paste.** At a fill of 1.10–1.15 the paste in the prisms weighs 14.4–15.0 kPa/m, not the nominal 13.05.
+4. **The contact reading is not explained.** It still moves from 12.1 to 15.8 kPa/m. At 0.12 m it is within 1 kPa/m of stress × fill; at 0.15 m it is 3 kPa/m below.
+5. **Limits:** one run per voxel, and identical runs have differed by about 2 kPa/m at the stop; the prisms leave out the paste near the shell and the screw inlet; the lowest bin is an outlier in every profile (high stress, low fill), which is why both fits are given; 0.10 m is still not a valid third point.
 
 ## Where this leaves WP4
 
 - The chamber scene, the pressure controller, a volume correction and the open validation data are in place. The scene's defaults are the sourced paste, wall friction 0.3, the balance by region and 100 iterations.
 - **Checked:** the set point holds and the screw balances the excavated volume at 0.15 m and 0.12 m; the vertical force balance closes; the bulkhead contact gradient (9–17 kPa/m) is in or near Botlek's 10–20.
 - **WP4 outputs produced:** bulkhead pressure in bands, its gradient, mixing torque, the response to a screw-speed step, and a shove under thrust.
-- **Not done:** a converged gradient (the readings diverge with refinement and 0.10 m does not hold), the stop gradient, the band against a field record, the leak without sealing, torque with the face, shield friction in the thrust, a field record for the screw step.
+- **Gradient (15 Nov 2026):** multiplied by the fill, the paste's stress gradient in the interior is about 15 kPa/m during excavation at both 0.15 m and 0.12 m; the paste there is about a tenth denser than nominal.
+- **Not done:** a converged contact gradient (12 → 16 kPa/m from 0.15 m to 0.12 m; 0.10 m does not hold), repeats of the density profile, the stop gradient, the band against a field record, the leak without sealing, torque with the face, shield friction in the thrust, a field record for the screw step.
 - Nothing from the MPM chamber is used on the console yet.

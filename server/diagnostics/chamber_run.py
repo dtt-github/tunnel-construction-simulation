@@ -38,4 +38,19 @@ if st is not None and len(st) and st.shape[1] >= 16:  # vertical balance, kN dow
         r = r[len(r) // 2:]
         if len(r):
             print(f"vertical {nm:10s} weight {r[:, 11].mean() / 1e3:6.1f}  shell {r[:, 12].mean() / 1e3:6.1f}  bulkhead {r[:, 13].mean() / 1e3:6.1f}  piston {r[:, 14].mean() / 1e3:6.1f}  cutter {r[:, 15].mean() / 1e3:6.1f}")
-json.dump({"params": dataclasses.asdict(cfg), "result": res, "log": log.tolist(), "stress": st.tolist() if st is not None else None}, open(os.path.join(d, sys.argv[1] + ".json"), "w"))
+pf = extra.get("profile")
+prof_out = None
+if pf is not None and pf["sums"][:, 3].max() > 0:  # by height: fill, particle stress, and stress per unit of space (= particle stress x fill)
+    prof_out = {"z_over_R": pf["z_over_R"].tolist()}
+    dz = (pf["z_over_R"][1] - pf["z_over_R"][0]) * cfg.diameter / 2
+    for ph, nm in enumerate(["pressurise", "hold", "excavate", "stop"]):
+        m, ps, n, fr = pf["sums"][ph]
+        if fr[0] == 0:
+            continue
+        fill = m / fr / (pf["paste_density"] * pf["bin_volume_m3"])
+        pk = ps / np.maximum(n, 1) / 1e3
+        z = pf["z_over_R"] * cfg.diameter / 2
+        prof_out[nm] = {"fill": fill.tolist(), "p_particle_kPa": pk.tolist(), "p_space_kPa": (pk * fill).tolist()}
+        print(f"profile {nm:10s} gradient kPa/m: particle stress {-np.polyfit(z, pk, 1)[0]:5.2f}   stress x fill {-np.polyfit(z, pk * fill, 1)[0]:5.2f}   fill top to bottom", " ".join(f"{v:.3f}" for v in fill[::-1]))
+        print(f"        {nm:10s} particle stress kPa top to bottom", " ".join(f"{v:.0f}" for v in pk[::-1]))
+json.dump({"profile": prof_out, "params": dataclasses.asdict(cfg), "result": res, "log": log.tolist(), "stress": st.tolist() if st is not None else None}, open(os.path.join(d, sys.argv[1] + ".json"), "w"))
