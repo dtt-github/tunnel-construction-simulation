@@ -1,0 +1,184 @@
+{
+ "scene": "face_sand",
+ "time": "2026-11-14T22:48:09",
+ "git": "e3a6e80+dirty",
+ "versions": {
+  "newton": "1.7.0",
+  "warp": "1.19.0",
+  "numpy": "2.5.4",
+  "python": "3.12.3"
+ },
+ "params": {
+  "diameter": 11.0,
+  "cover": 2.4,
+  "voxel_per_d": 10.0,
+  "ppc": 2,
+  "control": "stepped",
+  "retract_over_d": 0.05,
+  "rate_over_d": 0.025,
+  "target_kpa": 0.0,
+  "servo_gain": 0.05,
+  "servo_max_rate_over_d": 0.01,
+  "duration": 5.0,
+  "steel_friction": 0.3,
+  "half_width_over_d": 3.0,
+  "front_over_d": 4.0,
+  "fps": 60.0,
+  "settle": 60,
+  "iterations": 50,
+  "seed": 0,
+  "moving_threshold_over_d": 0.002,
+  "unlined_over_d": 0.0,
+  "step_kpa": 25.0,
+  "step_start_kpa": null,
+  "hold_s": 15.0,
+  "collapse_over_d": 0.05,
+  "at_rest_over_d": 0.002,
+  "max_over_d": 0.3,
+  "soil": {
+   "name": "strength_reduced",
+   "density": 1997.9612640163098,
+   "friction": 0.0,
+   "source": "see the run's note",
+   "yield_stress": 60000.0,
+   "young_modulus": 1000000000000000.0,
+   "poisson_ratio": 0.49,
+   "dilatancy": 0.0,
+   "phi_deg": 0.0,
+   "cohesion": 60000.0,
+   "match": "tresca",
+   "extra": {}
+  }
+ },
+ "gpu_before": "not recorded; node spark-180c",
+ "timing_valid_for_decisions": false,
+ "timing_note": "diagnosis run; GPU state not recorded, shared with another project where noted",
+ "calibration": "uncalibrated",
+ "diagnosis": "WP3, 14-15 Nov 2026: London geometry, strength-reduced clay cu 60 kPa, wide box; shared GPU at the end",
+ "result": {
+  "diameter_m": 11.0,
+  "cover_over_D": 2.4,
+  "voxel_per_D": 10.0,
+  "particles": 469315,
+  "control": "stepped",
+  "unlined_over_D": 0.0,
+  "sigma_z_axis_kPa": 625.24,
+  "p_collapse_kPa": 128.27,
+  "collapse_over_D": 0.05,
+  "p_last_at_rest_kPa": 125.14,
+  "p_not_at_rest_kPa": 100.14,
+  "face_displacement_over_D": 0.1236,
+  "steps": [
+   {
+    "settlement_over_D": -0.0004,
+    "settlement_ahead_of_face_over_D": 0.33,
+    "target_kPa": 375.14,
+    "support_kPa": 369.64,
+    "face_over_D": 0.0047,
+    "speed_D_per_s": 0.0,
+    "at_rest": true
+   },
+   {
+    "settlement_over_D": -0.00039,
+    "settlement_ahead_of_face_over_D": -0.73,
+    "target_kPa": 350.14,
+    "support_kPa": 347.21,
+    "face_over_D": 0.0052,
+    "speed_D_per_s": 0.0,
+    "at_rest": true
+   },
+   {
+    "settlement_over_D": -0.00038,
+    "settlement_ahead_of_face_over_D": -0.73,
+    "target_kPa": 325.14,
+    "support_kPa": 316.0,
+    "face_over_D": 0.0062,
+    "speed_D_per_s": 0.0,
+    "at_rest": true
+   },
+   {
+    "settlement_over_D": -0.00038,
+    "settlement_ahead_of_face_over_D": -0.73,
+    "target_kPa": 300.14,
+    "support_kPa": 295.71,
+    "face_over_D": 0.0074,
+    "speed_D_per_s": 0.0,
+    "at_rest": true
+   },
+   {
+    "settlement_over_D": -0.00032,
+    "settlement_ahead_of_face_over_D": -0.73,
+    "target_kPa": 275.14,
+    "support_kPa": 273.33,
+    "face_over_D": 0.0097,
+    "speed_D_per_s": 0.0,
+    "at_rest": true
+   },
+   {
+    "settlement_over_D": -0.00028,
+    "settlement_ahead_of_face_over_D": -0.73,
+    "target_kPa": 250.14,
+    "support_kPa": 244.48,
+    "face_over_D": 0.0119,
+    "speed_D_per_s": 0.0,
+    "at_rest": true
+   },
+   {
+    "settlement_over_D": -0.00019,
+    "settlement_ahead_of_face_over_D": 0.33,
+    "target_kPa": 225.14,
+    "support_kPa": 222.39,
+    "face_over_D": 0.0142,
+    "speed_D_per_s": 0.0,
+    "at_rest": true
+   },
+   {
+    "settlement_over_D": -4e-05,
+    "settlement_ahead_of_face_over_D": 0.33,
+    "target_kPa": 200.14,
+    "support_kPa": 193.35,
+    "face_over_D": 0.019,
+    "speed_D_per_s": 0.0,
+    "at_rest": true
+   },
+   {
+    "settlement_over_D": 0.00011,
+    "settlement_ahead_of_face_over_D": 0.58,
+    "target_kPa": 175.14,
+    "support_kPa": 170.92,
+    "face_over_D": 0.0237,
+    "speed_D_per_s": 0.0,
+    "at_rest": true
+   },
+   {
+    "settlement_over_D": 0.00051,
+    "settlement_ahead_of_face_over_D": 0.17,
+    "target_kPa": 150.14,
+    "support_kPa": 147.97,
+    "face_over_D": 0.0315,
+    "speed_D_per_s": 0.0,
+    "at_rest": true
+   },
+   {
+    "settlement_over_D": 0.00344,
+    "settlement_ahead_of_face_over_D": -0.62,
+    "target_kPa": 125.14,
+    "support_kPa": 115.38,
+    "face_over_D": 0.0621,
+    "speed_D_per_s": 0.0015,
+    "at_rest": true
+   },
+   {
+    "settlement_over_D": 0.00895,
+    "settlement_ahead_of_face_over_D": -0.62,
+    "target_kPa": 100.14,
+    "support_kPa": 94.0,
+    "face_over_D": 0.1236,
+    "speed_D_per_s": 0.00267,
+    "at_rest": false
+   }
+  ],
+  "ms_per_frame": 120.95,
+  "N_at_collapse": 8.28
+ }
+}

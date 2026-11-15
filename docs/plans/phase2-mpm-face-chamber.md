@@ -151,7 +151,13 @@ Each package ends with a check. A package is done only when its check passes, or
 - N at collapse inside the published band (3–9 for C/D 1–3), and constant above C/D ≈ 3;
 - N ≈ 6 stays a conservative bound for an unlined heading length below 1D.
 
-**Status (5 Nov 2026, [clay](../validation/mpm-clay.md)): blocked.**
+**Status (15 Nov 2026, [clay](../validation/mpm-clay.md#where-this-leaves-wp3)): checks met, with stated limits.**
+- **Kimura & Mair:** 0.98–1.11 in plane strain; 0.90–1.09 in the headings once the soil box is 3 D wide (it was 1.5 D, a row of tunnels 3 D apart).
+- **N ≈ 6:** conservative for 1 D unlined (N 6.78).
+- **London route:** at the Farringdon geometry both clays stand at zero support, load factor 0.22–0.28; collapse there is at N 8.28.
+- **Limits:** the trend with cover is too flat (+9 % at C/D 1.5, −10 % at 3.0); no runaway collapse, so collapse is read at 5 % of D; "N constant above C/D ≈ 3" was not run.
+
+**Earlier status (5 Nov 2026): blocked.**
 - **The gap:** the MPM clay tunnel collapses at about half Kimura & Mair's stability ratio. That is N 2.0–2.8 against 3.5–4.3 in plane strain, below the weightless plasticity lower bound, and 3.8–4.3 against 7.05–9.0 for the heading at P/D 0.
 - **Ruled out:** cohesion scaling, stress level, leakage, friction, rate, solver convergence, resolution and the yield condition itself.
 - **Diagnosis (same day):**

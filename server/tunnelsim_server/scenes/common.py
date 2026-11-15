@@ -120,6 +120,7 @@ def make_solver(particle_model, collider_model, voxel: float, iterations: int, f
 
 
 def particle_stress(state) -> np.ndarray:
-    """Cauchy stress per particle (n, 3, 3), Pa, tension positive. Newton stores it per unit of particle volume, so it is
+    """Stress per particle (n, 3, 3), Pa, compression positive as Newton 1.7.0 returns it (checked against gravity in
+    the K0 column and against the contact pressure in the chamber). Newton stores it per unit of particle volume, so it is
     scaled by the packing."""
     return state.mpm.particle_stress.numpy() * packing()

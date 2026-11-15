@@ -1,14 +1,14 @@
-# MPM tunnel in undrained clay (Phase 2, WP3): unblocked, checks continuing
+# MPM tunnel in undrained clay (Phase 2, WP3): checks met, with stated limits
 
 - **Plan:** [Phase 2, WP3](../plans/phase2-mpm-face-chamber.md#wp3-undrained-clay-face-about-2-weeks).
 - **Code:**
   - [`server/tunnelsim_server/scenes/tunnel_2d.py`](../../server/tunnelsim_server/scenes/tunnel_2d.py), a plane-strain tunnel with a closing ring of segments;
   - [`face_sand.py`](../../server/tunnelsim_server/scenes/face_sand.py) with the kaolin soil;
   - records `t2d_*` and `fc_*` in [`server/results/`](../../server/results/).
-- **Status:** **unblocked (7 Nov 2026).** With PIC integration and the initial particle jitter of 0.25 h, the MPM clay tunnel collapsed at about half the stability ratio measured by Kimura & Mair (1981). With GIMP integration and a jitter of 0.05 h, the defaults since 7 Nov 2026, it reaches 0.98–1.11 of Kimura's N in plane strain and 0.79–1.00 in the 3D headings, read with the [collapse definition adopted on 7 Nov 2026](#collapse-definition-load-control-7-nov-2026) (10 % of R in plane strain; stepped load control and face movement of 5 % of D for the headings). The history below is kept: it explains how the volume loss was found.
+- **Status:** **checks met (15 Nov 2026), with stated limits.** In a soil box 3 D wide the headings are within 0.90–1.09 of Kimura & Mair, N = 6 is conservative up to 1 D unlined, and the London clays stand unsupported ([box width, friction and London](#box-width-tube-friction-and-the-london-clays-14-and-15-nov-2026)). **Unblocked on 7 Nov 2026:** With PIC integration and the initial particle jitter of 0.25 h, the MPM clay tunnel collapsed at about half the stability ratio measured by Kimura & Mair (1981). With GIMP integration and a jitter of 0.05 h, the defaults since 7 Nov 2026, it reaches 0.98–1.11 of Kimura's N in plane strain and 0.79–1.00 in the 3D headings, read with the [collapse definition adopted on 7 Nov 2026](#collapse-definition-load-control-7-nov-2026) (10 % of R in plane strain; stepped load control and face movement of 5 % of D for the headings). The history below is kept: it explains how the volume loss was found.
   - The first diagnosis blamed Newton's packing constraint (`critical_fraction`). WP0b withdrew it: that apparent gain came from compaction (see [WP0b correction](#wp0b-correction-5-nov-2026)).
   - The clay piling up against the ring is the tunnel-scale sign of a numerical volume loss in yielding clay. It comes from the default element (Q1 velocities, P0 strains), not from the colliders. The one element that removes it locks (see [piling](#the-piling-investigated-5-nov-2026)).
-- **Run on:** 5 Nov 2026; GIMP and jitter runs 6–7 Nov 2026
+- **Run on:** 5 Nov 2026; GIMP and jitter runs 6–7 Nov 2026; box width, friction and London 14–15 Nov 2026
 
 ## Data: Kimura & Mair (1981)
 
@@ -291,9 +291,85 @@ At 10 % of R, D/10 and D/20 agree to 0.3 %.
 - **The deep heading is 12–20 % weak.** Not from resolution or rate (displacement control at C/D 3.0, P/D 0, N at 5 % of D): D/20 gives 6.57 and a five times slower retraction 6.92, against 7.26 at D/10 (records `hd_c3.0_D4.5_d20`, `hd_c3.0_D4.5_slow`). A pressure servo held 30 s at 30, 20 and 10 kPa gives the same pressure at 5 % of D (41 kPa, N 7.14; records `hd_c3.0_D4.5_servo*`).
 - **The run records** written before this definition were re-read from their stored steps (`face_sand.p_at_movement`), with a note in each; nothing was rerun.
 
+## Box width, tube friction and the London clays (14 and 15 Nov 2026)
+
+Two explanations for the weak deep heading were tested, then the London part of WP3 was run.
+
+- **Code:** `FaceSandConfig.half_width_over_d` and `front_over_d` (the soil box), `steel_friction`; surface settlement at the end of each load step (`settlement_over_D` in the step records); [`server/diagnostics/heading_run.py`](../../server/diagnostics/heading_run.py) runs one heading with these options and with a clay other than the kaolin.
+- **Records:** `hw_*` (wide box), `hf_*` (frictionless tube), `lon_*` (London) in [`server/results/`](../../server/results/).
+- **Runs:** stepped load control, 15 s holds, 5 kPa steps (25 and 50 kPa in the London runs), GIMP, jitter 0.05 h, D/10. Several shared the GPU with another project; that affects timing only.
+
+### The box was too narrow
+
+Until now the half model was 1.5 D wide, from the symmetry plane to a frictionless side wall, and reached 2.5 D ahead of the face. A frictionless wall is a mirror, so the scene was a row of tunnels 3 D apart. Kimura & Mair's strongbox was wider than that. With a half width of 3 D and 4 D ahead of the face:
+
+| Heading | Kimura & Mair | MPM, box 1.5 D | MPM, box 3 D | MPM (3 D) / Kimura |
+|---|---|---|---|---|
+| C/D 1.5, D 7.5 m, P/D 0 | 7.05 | 7.02 | 7.66 | 1.09 |
+| C/D 3.0, D 4.5 m, P/D 0 | 9.0 | 7.17 | 8.07 | 0.90 |
+| C/D 3.0, P/D 0.5 | 7.75 | 6.84 | not rerun | – |
+| C/D 3.0, P/D 1.0 | 6.85 | 5.72 | 6.78 | 0.99 |
+| C/D 3.0, P/D 2.0 | 5.6 | 4.77 | 5.48 | 0.98 |
+| C/D 3.0, P/D 3.0 | 5.05 | 4.11 | 4.86 | 0.96 |
+
+- **The box width explains most of the gap.** N rises by 0.6–1.1 in every case. The headings are now within 0.90–1.09 of Kimura & Mair, the same band as the plane-strain tunnel (0.98–1.11).
+- **The box size was not fitted.** One wider box was run (twice the width, 1.6 times the length ahead); a still wider one has not been tried, so convergence with box size is not shown.
+- **The trend with cover is still too flat** at P/D 0: the MPM rises from 7.66 to 8.07 between C/D 1.5 and 3.0, Kimura & Mair from 7.05 to 9.0. The MPM is 9 % strong at the shallow heading and 10 % weak at the deep one.
+- **The trend with unlined length holds:** N falls by 40 % from P/D 0 to 3 (Kimura: 44 %).
+- **The deep heading stands almost unsupported**, as Kimura's N of 9.0 implies for this clay (σz/cu = 8.7): at rest at every step down to 1 kPa, with the face moved 8 % of D.
+- **The narrow-box values above are superseded** as comparisons with Kimura & Mair. They stay in the record: they are what a row of tunnels 3 D apart gives.
+
+**Plan check, N ≈ 6 for an unlined length below 1 D:** with 1 D unlined the heading collapses at N 6.78, so N = 6 is on the safe side by 12 %. In the narrow box the same case gave 5.72 and failed the check.
+
+### Tube friction is not what holds the ground
+
+After 0.15–0.3 D of face movement the ground comes to rest again. One suspect was the clay pushed into the shield tube, held by friction on the steel (up to 4·cu·L/D of support for a plug of length L). With the friction on tube and face plate set to 0 (standard box, C/D 3.0):
+
+| Case | Friction 0.3 | Friction 0 |
+|---|---|---|
+| P/D 0 | 7.17 | 6.83 |
+| P/D 1.0 | 5.72 | 5.17 |
+
+Friction adds 0.3–0.5 to N. Without it the face still comes to rest at each step, moving about 0.05 D per 5 kPa, and at P/D 1.0 the heading still stands down to 1 kPa. The cause of the large-movement behaviour stays open; collapse is therefore still read from the movement, not from a face that fails to stop.
+
+### London Clay and Lambeth Group
+
+The Crossrail platform tunnels at Farringdon, as on the [SEM page](sem-convergence.md#farringdon-platform-tunnels-undrained-ground-london-clays): D 11 m, C/D 2.4 (axis 31.9 m deep), wide box.
+
+- **Strength:** Crossrail's undrained design lines, cu = 85 + 6.5z kPa in London Clay and 95 + 10z kPa in the Lambeth Group, z below the top of the London Clay ([Temporary sprayed concrete lining tunnels in Farringdon Crossrail Station](https://learninglegacy.crossrail.co.uk/documents/temporary-sprayed-concrete-lining-tunnels-farringdon-crossrail-station/)). At the axis along scenario chainage 360–660 m that is 330–377 kPa in the Lambeth Group and 270 kPa in the London Clay; the runs use 350 and 270 kPa, uniform with depth.
+- **Unit weight:** 19.6 kN/m³ (19.5–19.8 in the [scenario](../SCENARIOS.md)), giving σz = 625 kPa at the axis. Pore pressure does not enter: the analysis is undrained, in total stress.
+- **Rigid-plastic clay** (E = 10¹⁵ Pa, as the kaolin), so the movements below are plastic only and are not a prediction of the measured ones.
+
+| Run | cu (kPa) | N at zero support | Result |
+|---|---|---|---|
+| Lambeth Group | 350 | 1.79 | at rest at zero support; face moved 0.18 % of D |
+| London Clay | 270 | 2.32 | at rest at zero support; face moved 0.31 % of D |
+| Strength-reduced | 60 | 10.4 | collapse at 128 kPa: **N 8.28** |
+
+- **Collapse at this geometry** is at N 8.28. Kimura & Mair's 7.05 and 9.0, interpolated linearly to C/D 2.4, give about 8.2.
+- **Load factor** (N at zero support over N at collapse): 0.22 in the Lambeth Group, 0.28 in the London Clay. Both faces stand unsupported with a margin of 3.6–4.6 on strength, which is why these tunnels could be built as open sprayed-concrete headings.
+- **Not covered:** the strength rises with depth in the ground and is uniform here; sand lenses, fissures and drainage with time, which govern real London Clay faces, are outside an undrained continuum.
+
+### Surface settlement above the heading
+
+Recorded at the end of each load step, on the surface near the symmetry plane (runs from 15 Nov; the two lined kaolin runs predate it). At the step nearest collapse (face movement 5 % of D):
+
+| Run | Face movement / D | Largest settlement / D | Its position, x / D |
+|---|---|---|---|
+| Kaolin, C/D 3.0, P/D 1.0 | 0.049 | 0.012 | −0.72 |
+| Kaolin, C/D 3.0, P/D 2.0 | 0.046 | 0.020 | 0.03 |
+| Kaolin, C/D 3.0, P/D 3.0 | 0.049 | 0.027 | −0.37 |
+| London geometry, strength-reduced, P/D 0 | 0.062 | 0.003 | −0.62 |
+
+x is measured along the tunnel from the end of the lining (the face itself at P/D 0), negative behind it. There is no published trough for these tests to compare with, so this is an output, not a validation. In the London Clay run the largest settlement (0.08 % of D) lies at the far end of the box: that is not a trough.
+
 ## Where this leaves WP3
 
-- **Unblocked.** With the collapse definition above, the plane-strain tunnel is within 0.98–1.11 of Kimura & Mair at all five covers and two resolutions, and the heading at C/D 1.5 is at 1.00. At C/D 3.0 the heading series is 0.80–0.88, with Kimura's trend.
-- **Open gap:** the deep heading is 12–20 % weak. Resolution, retraction rate, hold time and the crack setting are ruled out.
-- **Still to do:** settlement above the collapse; why the ground comes to rest again after large movement.
+- **Checks met (15 Nov 2026).** With the collapse definition above and a soil box 3 D wide, the MPM is within 0.98–1.11 of Kimura & Mair in plane strain and 0.90–1.09 in the headings, lined to the face and with 1–3 D unlined. N = 6 is conservative for an unlined length up to 1 D. The London Clay and Lambeth Group faces stand unsupported at a load factor of 0.22–0.28.
+- **Limits:**
+  - the trend of N with cover is too flat for the heading lined to the face (9 % strong at C/D 1.5, 10 % weak at C/D 3.0);
+  - there is no runaway collapse: the ground comes to rest again after large movement, so collapse is read at a face movement of 5 % of D. Hold time, the crack setting and tube friction are ruled out as the cause;
+  - one wider box was run, not a series; P/D 0.5 was not rerun in it;
+  - settlement above the heading is an output without a measurement to check it;
+  - the plan's "N constant above C/D ≈ 3" was not run.
 - **Chamber (WP4):** with the Phase 0 paste and no correction it falls from 207 to 51 kPa over a 20 s excavation; the earlier "a fifth lost" was read after 4 s. Since 9 Nov 2026 it holds 200 kPa with a volume balance by region and a sourced undrained paste ([chamber](mpm-chamber.md#volume-balance-and-a-sourced-paste-8-9-nov-2026)).
