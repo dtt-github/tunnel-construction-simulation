@@ -10,7 +10,26 @@ import sys
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
 if os.environ.get("NEWTON_PATCHED"):
     sys.path.insert(0, os.environ["NEWTON_PATCHED"])
-from tunnelsim_server.scenes import chamber
+from tunnelsim_server.scenes import chamber, common
+
+# diagnosis switches for Newton's solver (15 Nov 2026): TS_SOLVER_OPTIONS="name=value,..." sets SolverImplicitMPM.Config
+# fields (strings, or numbers where they parse); TS_LEFTOVER=1 keeps the strain the iterative solve leaves unexplained
+# in the elastic strain (Newton's compile-time constant _INCLUDE_LEFTOVER_STRAIN, off as shipped).
+for kv in filter(None, os.environ.get("TS_SOLVER_OPTIONS", "").split(",")):
+    k_, v_ = kv.split("=")
+    try:
+        v_ = int(v_)
+    except ValueError:
+        try:
+            v_ = float(v_)
+        except ValueError:
+            pass
+    common.SOLVER_OPTIONS[k_] = tuple(v_.split("+")) if isinstance(v_, str) and "+" in v_ else v_
+if os.environ.get("TS_LEFTOVER"):
+    import warp as wp
+    from newton._src.solvers.implicit_mpm import rheology_solver_kernels as _rk
+
+    _rk._INCLUDE_LEFTOVER_STRAIN = wp.constant(True)
 
 types = {f.name: f.type for f in dataclasses.fields(chamber.ChamberConfig)}
 cast = {"float": float, "int": int, "bool": lambda v: v in ("1", "True", "true"), "str": str}
@@ -58,4 +77,12 @@ if vb is not None and len(vb) and vb.shape[1] >= 12:  # volume balance by frame:
     print("balance: t s, degenerate, regions, least count/ref, largest |shift| ln J, its region, count, ref count")
     for r in vb[:: max(1, len(vb) // 40)]:
         print(f"balance {r[0]:6.2f} {int(r[5]):7d} {int(r[6]):4d} {r[7]:6.3f} {r[8]:9.4f} {int(r[9]):5d} {int(r[10]):6d} {int(r[11]):6d}")
-json.dump({"vb": np.nan_to_num(vb, nan=-1.0, posinf=1e30, neginf=-1e30).tolist() if vb is not None and len(vb) else None, "profile": prof_out, "params": dataclasses.asdict(cfg), "result": res, "log": log.tolist(), "stress": st.tolist() if st is not None else None}, open(os.path.join(d, sys.argv[1] + ".json"), "w"))
+sub = extra.get("sub")
+if sub is not None and len(sub):
+    print("substeps: frames with an invalid particle", int((sub[:, 2] + sub[:, 3] > 0).sum()), "repaired", extra.get("sub_repaired"))
+    for e in extra.get("sub_bad", [])[:10]:
+        print("sub_bad", e)
+    big = np.argsort(sub[:, 4])[-5:]
+    print("sub fastest particle (t, substep, m/s, 99.9 pct):", [(round(float(sub[i, 0]), 2), int(sub[i, 1]), round(float(sub[i, 4]), 2), round(float(sub[i, 5]), 3)) for i in big])
+    print("sub det range min/max:", round(float(np.nanmin(sub[:, 6])), 4), round(float(np.nanmax(sub[:, 7])), 4))
+json.dump({"vrp": extra.get("vrp"), "sub_ext": extra.get("sub_ext"), "sub": np.nan_to_num(sub, nan=-1.0, posinf=1e30, neginf=-1e30).tolist() if sub is not None and len(sub) else None, "vb": np.nan_to_num(vb, nan=-1.0, posinf=1e30, neginf=-1e30).tolist() if vb is not None and len(vb) else None, "profile": prof_out, "params": dataclasses.asdict(cfg), "result": res, "log": log.tolist(), "stress": st.tolist() if st is not None else None}, open(os.path.join(d, sys.argv[1] + ".json"), "w"))

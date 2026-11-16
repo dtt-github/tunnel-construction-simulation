@@ -7,10 +7,11 @@
   - With that correction, an undrained paste and wall friction from open sources, the chamber holds 200 kPa through a 20 s excavation at voxel 0.15 m and 0.12 m. The vertical gradient is inside Botlek's range, and the screw removes about the volume the piston displaces.
   - **Cause found and reported ([13 Nov 2026](#cause-of-the-loss-screw-step-thrust-and-the-gradient-13-and-14-nov-2026)):** Newton's elastic volume follows the velocity divergence only and is not tied to the particle density. A density-coupled correction recovers part of the loss; the balance by region stays the default.
   - **Screw step and thrust (13 Nov 2026):** the pressure responds to a screw-speed step at 77–80 % of the chamber model's rate. Under a set thrust the screw sets the advance and the thrust sets the pressure.
-  - **Open:** the gradient is not converged: with refinement the bulkhead contact reading rises and the paste's own stress gradient falls (in part a density bias: times the fill it is about 15 kPa/m at 0.15 m and 0.12 m, [15 Nov](#gradient-paste-density-by-height-15-nov-2026)), and the 0.10 m chamber does not hold its pressure. 0.25 m does not hold either; the pressure band is narrower than on a machine; the paste leaks into the shell wall unless it is sealed; the torque is the paste's only.
+  - **Three voxels hold ([16 Nov 2026](#solver-substeps-and-a-collapse-at-the-screw-inlet-15-and-16-nov-2026)):** with 4 solver steps of 50 iterations per frame, and the screw taking paste from the middle of its inlet, the set point holds at 0.15 m, 0.12 m and 0.10 m in three seeds of three. Before, the 0.10 m chamber was over-packed by the piston push, and a crushed particle in the screw inlet corner could turn a whole chamber invalid within one solver step.
+  - **Open:** the gradient is not converged. The bulkhead contact reads 10.8 / 14.6 / 12.7 kPa/m at 0.15 / 0.12 / 0.10 m, and the screw speed falls with the voxel. The paste's own stress gradient falls with refinement, in part a density bias: multiplied by the fill it is about 15 kPa/m at 0.15 m and 0.12 m ([15 Nov](#gradient-paste-density-by-height-15-nov-2026)). 0.25 m does not hold; the pressure band is narrower than on a machine; the paste leaks into the shell wall unless it is sealed; the torque is the paste's only.
   - The runs before 8 Nov, below, used the Phase 0 paste and no correction. They stand as the record of the loss.
   - **Correction (7 Nov 2026):** from 6 Nov the docs, the v1.0.0 release notes and our comment on [newton-physics/newton#5180](https://github.com/newton-physics/newton/issues/5180) said that under GIMP the chamber keeps 162 of 207 kPa (172 of 216 before the scaling fix), "a fifth lost". Those runs excavated for 4 s only. Over the scene's 20 s excavation the pressure falls to 51 kPa.
-- **Run on:** 5 Nov 2026; GIMP and 20 s diagnosis runs 7 Nov 2026; volume balance and sourced paste 8–9 Nov 2026; cause, screw step, thrust and gradient 13–14 Nov 2026
+- **Run on:** 5 Nov 2026; GIMP and 20 s diagnosis runs 7 Nov 2026; volume balance and sourced paste 8–9 Nov 2026; cause, screw step, thrust and gradient 13–14 Nov 2026; substeps and the screw inlet 15–16 Nov 2026
 
 ## Set-up
 
@@ -350,11 +351,98 @@ Four remedies were run at 0.10 m. None holds the set point:
 - **The fill of 1.11–1.13 at 0.15 m and 0.12 m is the same effect at a smaller size.** The gradients above are for paste about a tenth denser than nominal.
 - Both pre-stress options stay in the code, off.
 
+### Solver substeps, and a collapse at the screw inlet (15 and 16 Nov 2026)
+
+The chamber loses paste volume in two separate ways, and they need different cures:
+
+1. **Under a standing load**, the solver sheds elastic volume each frame because its iterative solve stops short. This is the loss that over-packs the 0.10 m chamber above.
+2. **Where a solid moves through the paste** (the turning cutterhead), the elastic volume does not follow the particle density ([13 Nov](#cause-of-the-pressure-loss)). The balance by region corrects this one.
+
+**Loss 1: solver options at a standing load.** The 0.10 m chamber was started pre-stressed with no balance (as `ch_pre_v010`), and each solver option was changed on its own. The table gives the axis pressure held at standstill, from 200 kPa set:
+
+| Record | Change | Held at standstill (kPa) | ms per frame |
+|---|---|---|---|
+| `ch_ws_base` | none: 1 solver step of 100 iterations per frame, Newton's default warm start | 73 | 154 |
+| `ch_ws_none` | warm start off | 10 | 145 |
+| `ch_ws_part` | warm start from the particles | 38 | 153 |
+| `ch_ws_left` | the strain the solve leaves unexplained kept in the elastic strain (Newton's `_INCLUDE_LEFTOVER_STRAIN`) | 80 | 155 |
+| `ch_ws_both` | particles warm start and leftover strain | 67 | 156 |
+| `ch_cv_crgs`, `ch_cv_cggs` | a Krylov solve (conjugate residual or conjugate gradient) ahead of Gauss–Seidel | 73, 73 | 157–159 |
+| `ch_cv_sub4` | 4 solver steps of 25 iterations | 112 | 501 |
+| `ch_cv_sub4x100` | 4 steps of 100 | 118 | 617 |
+| `ch_cv_sub8` | 8 steps of 13 | 125 | 977 |
+
+- Only smaller solver steps help much: a quarter of the time step, at the same total iterations, keeps half as much again. More iterations per step add little.
+- **Adopted as the default (15 Nov): 4 solver steps of 50 iterations per frame** (`ChamberConfig.substeps`, `iterations`; the runner's `--iterations` default is now 50). This is an assumed numerical setting, chosen on cost against the table above, not fitted to any validation figure.
+
+**Loss 2 stays:** with 4 × 50 and the balance off, the chamber falls to 29 / 31 / 29 kPa in excavation at 0.15 / 0.12 / 0.10 m (`ch_subnb_*`). The balance by region stays on.
+
+**With 4 × 50 and the balance, all three voxels hold** (seeds 0, 1, 2; records `ch_sub_*`):
+
+| | 0.15 m | 0.12 m | 0.10 m |
+|---|---|---|---|
+| Axis pressure in excavation (kPa) | 200.6 / 200.5 / 200.6 | 197.3 / 196.9 / **lost at 16.5 s** | 198.8 / 198.6 / 199.0 |
+| Contact gradient (kPa/m) | 11.0 / 10.9 / 10.8 | 14.7 / 14.7 / – | 12.7 / 12.6 / 12.8 |
+| Screw (rpm) | 13.5–13.9 | 10.2 | 7.5–7.8 |
+| ms per frame | 167–181 | 289–301 | 464–524 |
+
+- **0.10 m now holds the set point**, for the first time. Seed 2 there went invalid after the stop.
+- **0.12 m seed 2 was lost suddenly:** the pressure was at the set point one moment and gone within a few frames, unlike the slow runaway of the corner regions.
+
+**Cause of the sudden loss: the screw inlet.** The screw is analytical: each frame it removes the paste it owes from a box at the bulkhead/invert corner. Until now it took the particles deepest in its casing first, the ones hard against the bulkhead. Seed 2 at 0.12 m was rerun with a check after every solver step (`ChamberConfig.substep_check`):
+
+- **Emptying that corner drew jets into it.** Paste rushed into the gap at 37–235 m/s, against under 4 m/s anywhere else in the chamber (fastest particle up to 125–235 m/s in runs that held, `ch_sc_v012_s2`, `ch_sr_*`).
+- **The collapse starts with one crushed particle.** In `ch_se_v012_s2` the first invalid particle (elastic volume ≤ 0) appeared at (0.01, 0.07, 0.63) m, in the inlet corner, at 17.6 s. All 244,230 particles were invalid one solver step later: the solver couples every particle, so one invalid particle spoils the whole solve.
+- **A GPU timing fault is ruled out:** the run with a check (and a device sync) after every step also collapsed.
+- **Wall pick, 0.12 m, seed 2, no repair:** 3 of the 4 recorded runs were lost: `ch_sub_v012_s2` at 16.5 s, `ch_se_v012_s2` at 17.6 s and `ch_rp_v012_s2` at 21.4 s. Only `ch_sc_v012_s2` held. A fifth run, which split the discharge over the solver steps, also collapsed, and the script then stopped before writing its record.
+- **Resetting invalid particles after each solver step stops the spread** (`substep_repair`, records `ch_sr_v012_s2`, `_a`, `_b`, `_c`, `ch_sr_v010_s2`): all five held. Only one particle needed a reset, at 12.5 s, at (0.00, −0.20, 0.55) m, in the inlet corner again.
+
+**Fix (16 Nov): take the paste from the middle of the inlet.** `ChamberConfig.screw_pick = "centre"` takes the particles nearest the middle of the box; the old behaviour stays as `"wall"`. At 0.12 m seed 2, four runs held with no particle above 12.1 m/s (`ch_gs_c_a`, once per frame; `ch_gs_cs_a`, `_b`, `_c`, with the discharge split over the solver steps, `screw_per_substep`). Splitting adds nothing visible, so it stays off. The repair stays in the code, off: with the middle pick it has not been needed.
+
+**Check of the new defaults** (4 × 50, middle pick, balance with merged corners; seeds 0 / 1 / 2; records `ch_dv_*`). All nine runs hold through the 20 s excavation and the stop, with no invalid particle:
+
+| | 0.15 m | 0.12 m | 0.10 m |
+|---|---|---|---|
+| Axis pressure at standstill (kPa) | 206.3 / 207.8 / 208.6 | 210.0 / 211.2 / 210.6 | 204.6 / 205.5 / 204.9 |
+| Axis pressure in excavation (kPa) | 200.4 / 200.4 / 200.6 | 197.1 / 196.8 / 197.0 | 199.1 / 198.7 / 199.1 |
+| Lowest after pressurising (kPa) | 194–195 | 191–193 | 194 |
+| Contact gradient in excavation (kPa/m) | 10.9 / 10.8 / 10.8 | 14.6 / 14.6 / 14.6 | 12.7 / 12.7 / 12.8 |
+| Screw in excavation (rpm; 9.95 balances the advance) | 13.6 / 13.3 / 13.9 | 10.2 / 10.2 / 10.3 | 7.7 / 7.9 / 7.8 |
+| Bulkhead thrust (MN) | 8.8 | 7.7 | 8.1 |
+| Mixing torque (MNm) | 0.60–0.61 | 0.54 | 0.40–0.41 |
+| ms per frame (GB10 GPU) | 187–192 | 314–340 | 549–560 |
+
+- **The set point holds at three voxels, in every seed.** In excavation the seeds agree to within 0.4 kPa in pressure and 0.1 kPa/m in gradient. Against the wall pick, the numbers do not change where both held.
+- **Neither the contact gradient nor the screw has converged with the voxel:** the gradient reads 10.8 → 14.6 → 12.7 kPa/m and the screw speed 13.6 → 10.2 → 7.8 rpm from 0.15 m to 0.10 m. The screw speed needed to hold the set point falls as the voxel shrinks, from 37 % above the advance's rate to 22 % below it. Both are open.
+- **Paste escapes the chamber:** 360–780 particles per run leave the chamber and fly ballistically (up to about 370 m away). They take no part in the solve, but they should be deleted. Open.
+
+**Step and thrust runs repeated with 4 × 50** (0.15 m, seed 0, before the middle pick; records `ch_sub_step_*`, `ch_sub_thr_*`; set-up as [above](#response-to-a-screw-speed-step)). The predicted rate here is the balance's own: bulk modulus × change in discharge / chamber volume.
+
+| Record | Change at 10 s (step) or 12 s (thrust) | Result |
+|---|---|---|
+| `ch_sub_step_stop` | screw 14.2 → 0 rpm | +2.34 kPa/s, 73 % of the predicted +3.20; 206 → 252 kPa |
+| `ch_sub_step_up` | screw 14.4 → 22 rpm (the cap) | −2.20 kPa/s, 129 % of the predicted −1.71; 207 → 163 kPa |
+| `ch_sub_thr_base` | none | advance 60 mm/min (50–68), screw's discharge 60; axis 214 kPa over the last 5 s |
+| `ch_sub_thr_f110` | thrust +10 % | axis 235 kPa over the last 5 s, +9.5 %; the advance rises to the cap and returns to 66 |
+| `ch_sub_thr_screw` | screw +50 % | advance 83 mm/min over the last 5 s (90 from the discharge); axis 210 kPa |
+
+- **Under thrust the result stands:** the screw sets the advance and the thrust sets the pressure.
+- **The step response is no longer symmetric:** a stopped screw raises the pressure at 73 % of the predicted rate, but the faster screw lowers it at 129 %. With one solver step, both directions were at 77–80 %. Not explained; the faster step here reached the 22 rpm cap. Open.
+
 ## Where this leaves WP4
 
-- The chamber scene, the pressure controller, a volume correction and the open validation data are in place. The scene's defaults are the sourced paste, wall friction 0.3, the balance by region with its corner regions merged (since 15 Nov 2026) and 100 iterations.
-- **Checked:** the set point holds and the screw balances the excavated volume at 0.15 m (three seeds of three); at 0.12 m the set point holds in three seeds of three once the corner regions of the balance are merged (15 Nov; one seed lost its chamber before), but the screw discharges 0.84–1.01 m³ against 0.79 displaced; the vertical force balance closes; the bulkhead contact gradient (9–17 kPa/m) is in or near Botlek's 10–20.
+- The chamber scene, the pressure controller, a volume correction and the open validation data are in place. The scene's defaults are:
+  - the sourced paste and wall friction 0.3;
+  - the balance by region, with its corner regions merged (since 15 Nov 2026);
+  - 4 solver steps of 50 iterations per frame (since 15 Nov 2026; before, 1 step of 100);
+  - the screw taking paste from the middle of its inlet (since 16 Nov 2026).
+- **Checked (16 Nov 2026):** with these defaults the set point holds through excavation and the stop at 0.15 m, 0.12 m and 0.10 m, in three seeds of three at each voxel ([above](#solver-substeps-and-a-collapse-at-the-screw-inlet-15-and-16-nov-2026)). The vertical force balance closes. The bulkhead contact gradient (10.8–14.6 kPa/m) is inside Botlek's 10–20.
 - **WP4 outputs produced:** bulkhead pressure in bands, its gradient, mixing torque, the response to a screw-speed step, and a shove under thrust.
 - **Gradient (15 Nov 2026):** multiplied by the fill, the paste's stress gradient in the interior is about 15 kPa/m during excavation at both 0.15 m and 0.12 m; the paste there is about a tenth denser than nominal.
-- **Not done:** the screw volume at 0.12 m, a third voxel size (the 0.10 m chamber is over-packed by the piston push and four remedies failed, 15 Nov), a converged contact gradient (12 → 16 kPa/m from 0.15 m to 0.12 m; 0.10 m does not hold), the stop gradient, the band against a field record, the leak without sealing, torque with the face, shield friction in the thrust, a field record for the screw step.
+- **Not done:**
+  - a converged contact gradient (10.8 / 14.6 / 12.7 kPa/m at 0.15 / 0.12 / 0.10 m) and screw speed (13.6 / 10.2 / 7.8 rpm against 9.95 for the advance);
+  - the asymmetric screw-step response with 4 solver steps (73 % and 129 % of the predicted rate);
+  - deleting paste that escapes the chamber;
+  - the screw volume against the volume displaced (0.84–1.01 m³ against 0.79 at 0.12 m on 15 Nov; not rechecked with the new defaults);
+  - the stop gradient, the band against a field record, the leak without sealing, torque with the face, shield friction in the thrust, a field record for the screw step.
 - Nothing from the MPM chamber is used on the console yet.

@@ -107,7 +107,24 @@ class ChamberConfig:
     vc_support: str = "node"  # node | cell
     vc_interior: bool = True  # use only the grid nodes clear of every solid
     fps: float = 60.0
-    iterations: int = 100  # 50 diverges at voxel 0.12 m (WP4, 9 Nov 2026)
+    # Solver steps per frame, and iterations per step. Newton takes each particle's elastic strain from the stress its
+    # iteration has reached and drops the rest, so a solve that has not converged loses elastic volume, more at finer
+    # voxels. With one step of 100 iterations the piston push packed 11 / 13 / 27 % more paste into the chamber at
+    # 0.15 / 0.12 / 0.10 m and 0.10 m did not hold; with 4 steps of 50 it is 8 % at all three and all hold (15 Nov 2026).
+    iterations: int = 50
+    substeps: int = 4
+    substep_check: bool = False  # log invalid particles and speeds after every solver step
+    substep_repair: bool = False  # reset invalid particles after every solver step, not once per frame
+    # where and when the analytical screw takes paste from its inlet. "centre" (default since 16 Nov 2026): the particles
+    # nearest the middle of the inlet. "wall" (before): those deepest in the casing, against the bulkhead; emptying that
+    # corner drew jets of paste into it (up to 235 m/s against under 4 m/s elsewhere), and a particle crushed there turned
+    # the whole chamber invalid within one solver step (0.12 m, seed 2: 3 of 4 recorded runs lost; with "centre" 0 of 5, no
+    # particle above 12 m/s). Per substep: the frame's discharge split over the solver steps (no further effect seen).
+    screw_pick: str = "centre"
+    screw_per_substep: bool = False
+    # diagnosis of Newton PR 5021's volume recovery (16 Nov 2026, needs that PR's Newton with our probe patch): log the packing
+    # fraction it measures against the space it counts free, by distance from the shell, every few frames
+    vr_probe: bool = False
     seed: int = 0
 
 
@@ -205,6 +222,8 @@ def run(cfg: ChamberConfig) -> tuple[dict, dict]:
     pm = make_particles(pts, h, soil).finalize()
     mass_p = pm.particle_mass.numpy()
     solver = make_solver(pm, cm, dx, cfg.iterations, {shell: wf if (wf := cfg.wall_friction) >= 0 else 0.3, bulkhead: wf if wf >= 0 else 0.3, cutter: 0.3, piston: wf if wf >= 0 else 0.5, -1: 0.5})
+    if cfg.vr_probe:
+        solver._ts_probe = True
     st = cm.state()
     s = pm.state()
     s.body_q, s.body_qd, s.body_f = wp.clone(st.body_q), wp.zeros_like(st.body_qd), wp.zeros_like(st.body_f)
@@ -250,6 +269,11 @@ def run(cfg: ChamberConfig) -> tuple[dict, dict]:
     vb_ref = None
     vb_log: list = []
     vb_map = None
+    sub_log: list = []
+    sub_bad: list = []
+    sub_ext: list = []
+    vrp_log: list = []
+    sub_repaired = 0
     vb_repaired = 0
     stress_log: list = []
     n_prof, prof, prof_x = 10, np.zeros((4, 4, 10)), 0.0  # by phase: mass, summed mean stress, particle count, frames; per height bin
@@ -328,22 +352,63 @@ def run(cfg: ChamberConfig) -> tuple[dict, dict]:
         s.body_qd.assign(qd)
 
         # analytical screw: remove the discharged volume from the inlet, deepest-in-the-casing particles first
-        owed += screw.discharge(rpm) * dt / v_particle
-        if owed >= 1.0:
+        def take_from_inlet(owed):
+            nonlocal removed
+            if not owed >= 1.0:  # also NaN, once the chamber has collapsed
+                return owed
             xq = s.particle_q.numpy()
             inside = np.where(((flags & active) != 0) & np.all((xq >= sink_lo) & (xq <= sink_hi), axis=1))[0]
             n = min(int(owed), len(inside))
             if n:
-                take = inside[np.argsort(xq[inside, 0])[:n]]
+                if cfg.screw_pick == "centre":
+                    key = np.linalg.norm(xq[inside] - (sink_lo + sink_hi) / 2, axis=1)
+                else:
+                    key = xq[inside, 0]
+                take = inside[np.argsort(key)[:n]]
                 flags[take] &= ~active
                 pm.particle_flags.assign(flags)
                 solver.notify_model_changed(newton.ModelFlags.MODEL_PROPERTIES)
                 removed += n
-            owed -= int(owed)
+            return owed - int(owed)
+
+        if not cfg.screw_per_substep:
+            owed = take_from_inlet(owed + screw.discharge(rpm) * dt / v_particle)
 
         wp.synchronize()
         t0 = time.perf_counter()
-        solver.step(s, s, contacts=None, control=None, dt=dt)
+        for k_sub in range(cfg.substeps):
+            if cfg.screw_per_substep:
+                owed = take_from_inlet(owed + screw.discharge(rpm) * dt / cfg.substeps / v_particle)
+            solver.step(s, s, contacts=None, control=None, dt=dt / cfg.substeps)
+            if cfg.substep_check or cfg.substep_repair:  # diagnosis of a sudden collapse (16 Nov 2026)
+                fe_ = s.mpm.particle_elastic_strain.numpy()
+                qd_ = s.particle_qd.numpy()
+                act_ = (flags & active) != 0
+                with np.errstate(all="ignore"):
+                    dj_ = np.linalg.det(fe_)
+                bad_fe = act_ & ~(np.isfinite(dj_) & (dj_ > 0))
+                bad_v = act_ & ~np.isfinite(qd_).all(axis=1)
+                spd = np.linalg.norm(np.nan_to_num(qd_[act_]), axis=1)
+                sub_log.append((f * dt, k_sub, int(bad_fe.sum()), int(bad_v.sum()), float(spd.max()), float(np.percentile(spd, 99.9)),
+                                float(np.nanmin(np.where(act_ & ~bad_fe, dj_, np.nan))), float(np.nanmax(np.where(act_ & ~bad_fe, dj_, np.nan)))))
+                ext_ = act_ & ~bad_fe & ((dj_ > 10.0) | (dj_ < 0.1))  # extreme volume change: where, and how many
+                if ext_.any() and len(sub_ext) < 3000:
+                    xq_e = s.particle_q.numpy()
+                    i_hi = int(np.nanargmax(np.where(act_ & ~bad_fe, dj_, np.nan)))
+                    i_v = int(np.argmax(np.where(act_, np.linalg.norm(np.nan_to_num(qd_), axis=1), -1.0)))
+                    sub_ext.append((f * dt, k_sub, int(ext_.sum()), int((act_ & (dj_ > 10.0)).sum()), float(dj_[i_hi]), xq_e[i_hi].round(2).tolist(),
+                                    float(np.linalg.norm(qd_[i_v])), xq_e[i_v].round(2).tolist(), int(i_hi), int(i_v)))
+                if (bad_fe.any() or bad_v.any()) and len(sub_bad) < 20:
+                    xq_b = s.particle_q.numpy()[bad_fe | bad_v][:5]
+                    sub_bad.append((f * dt, k_sub, int(bad_fe.sum()), int(bad_v.sum()), xq_b.round(2).tolist()))
+                if cfg.substep_repair and (bad_fe.any() or bad_v.any()):
+                    good = act_ & ~bad_fe
+                    lj = float(np.log(dj_[good]).mean())
+                    fe_[bad_fe] = math.exp(lj / 3.0) * np.eye(3, dtype=np.float32)
+                    qd_[bad_v] = 0.0
+                    s.mpm.particle_elastic_strain.assign(fe_)
+                    s.particle_qd.assign(qd_)
+                    sub_repaired += int(bad_fe.sum()) + int(bad_v.sum())
         wp.synchronize()
         times.append(time.perf_counter() - t0)
         if vc is not None:
@@ -453,7 +518,7 @@ def run(cfg: ChamberConfig) -> tuple[dict, dict]:
         valid = cid >= 0
         bid = np.full(cid.shape, -2)
         bid[valid] = body_index[np.clip(cid[valid], 0, len(body_index) - 1)]
-        F = imp / dt
+        F = imp / (dt / cfg.substeps)
         on = (bid == bulkhead) & (np.abs(pos[:, 1]) > y_min) & (np.hypot(pos[:, 1], pos[:, 2] - zc) < R)
         zb = pos[on, 2] - zc
         fx = -F[on, 0]  # F is along -x where the soil presses on the bulkhead
@@ -465,6 +530,26 @@ def run(cfg: ChamberConfig) -> tuple[dict, dict]:
         f_cutter_x = -float(F[m, 0].sum())  # soil pushing the cutterhead back (towards -x)
         p_piston = float(F[bid == piston, 0].sum()) / area  # soil pushing the piston forwards (+x)
         pp_hist.append(p_piston)
+        if cfg.vr_probe and f % 6 == 0 and getattr(solver, "_ts_fractions", None):
+            xq_ = s.particle_q.numpy()
+            a_ = (flags & active) != 0
+            n_p = len(xq_)
+            jq_ = np.linalg.det(s.mpm.particle_elastic_strain.numpy())
+            d_sh = (R - np.hypot(xq_[:, 1], xq_[:, 2] - zc)) / dx  # voxels from the shell
+            inner_x = (xq_[:, 0] > 4 * dx) & (xq_[:, 0] < x_p - t / 2 - 4 * dx) & ((xq_[:, 0] < x_ch - 0.56 - 2 * dx) | (xq_[:, 0] > x_ch + 0.11 + 2 * dx))
+            bins = {"sh<0.5": d_sh < 0.5, "sh0.5-1": (d_sh >= 0.5) & (d_sh < 1), "sh1-2": (d_sh >= 1) & (d_sh < 2), "sh2-4": (d_sh >= 2) & (d_sh < 4),
+                    "sh>4": d_sh >= 4, "sh>4 off walls": (d_sh >= 4) & inner_x, "bulkhead<1": (xq_[:, 0] < dx) & (d_sh >= 1), "piston<1": (xq_[:, 0] > x_p - t / 2 - dx) & (d_sh >= 1), "all": np.ones(n_p, bool)}
+            row = {"t": f * dt, "phase": phase}
+            for meas, (m_, a_f) in solver._ts_fractions.items():
+                mv, av = m_.numpy()[:n_p], a_f.numpy()[:n_p]
+                ok = a_ & (av > 0) & np.isfinite(mv) & np.isfinite(jq_)
+                for k_, b_ in bins.items():
+                    sel = ok & b_
+                    if sel.any():
+                        rr_ = mv[sel] / av[sel]
+                        row[f"{meas}:{k_}"] = (int(sel.sum()), float(np.mean(rr_)), float(np.percentile(rr_, 5)), float(np.percentile(rr_, 95)),
+                                               float(np.mean(av[sel])), float(np.mean(jq_[sel])), float(np.mean(rr_ / jq_[sel])))
+            vrp_log.append(row)
         if cfg.stress_log:  # the paste's own stress: within one voxel of the bulkhead, by band, and the chamber mean
             sig = common.particle_stress(s)
             xq_ = s.particle_q.numpy()
@@ -583,7 +668,7 @@ def run(cfg: ChamberConfig) -> tuple[dict, dict]:
         "particles_per_m3_start_end": [round(len(pts) / (area * x_face)), round((n_active - escaped) / vol_now)],
         "ms_per_frame": round(float(np.mean(times[5:]) * 1000), 2),
     }
-    return res, {"log": log, "q_end": s.particle_q.numpy(), "active": (flags & active) != 0, "x_cutter": x_ch, "zc": zc, "vb": np.array(vb_log), "stress": np.array(stress_log),
+    return res, {"log": log, "q_end": s.particle_q.numpy(), "active": (flags & active) != 0, "x_cutter": x_ch, "zc": zc, "vb": np.array(vb_log), "stress": np.array(stress_log), "sub": np.array(sub_log), "sub_bad": sub_bad, "sub_ext": sub_ext, "vrp": vrp_log, "sub_repaired": sub_repaired,
                  "profile": {"sums": prof, "z_over_R": (np.arange(n_prof) + 0.5) * 1.6 / n_prof - 0.8, "bin_volume_m3": prof_x * (R / 2) * (1.6 * R / n_prof), "paste_density": cfg.paste_density}}
 
 

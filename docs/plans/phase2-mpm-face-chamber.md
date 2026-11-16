@@ -217,6 +217,11 @@ Each package ends with a check. A package is done only when its check passes, or
 - **Gradient:** 9–17 kPa/m by bulkhead contact (Botlek 10–20), but not converged; the 0.10 m chamber does not hold its pressure. The check named above (Guangzhou–Foshan and Changsha records) was replaced by Botlek on 5 Nov.
 - **Torque:** 0.4–0.6 MNm from mixing, below 9.8 MNm; the face-cutting torque is not included.
 
+**Status (16 Nov 2026): three voxels hold, gradient not converged** ([results](../validation/mpm-chamber.md#solver-substeps-and-a-collapse-at-the-screw-inlet-15-and-16-nov-2026)).
+- **Pressure:** with 4 solver steps of 50 iterations per frame, and the screw taking paste from the middle of its inlet, the set point holds at 0.15 m, 0.12 m and 0.10 m in three seeds of three (196.8–200.6 kPa in excavation).
+- **Gradient and screw:** the contact gradient reads 10.8 / 14.6 / 12.7 kPa/m at 0.15 / 0.12 / 0.10 m, inside Botlek's 10–20 but not converged. The screw speed falls with the voxel (13.6 / 10.2 / 7.8 rpm against 9.95 for the advance).
+- **Screw step with 4 solver steps:** 73 % (stopped) and 129 % (faster) of the predicted rate, against 77–80 % before; not explained.
+
 ### WP5: screw conveyor (about 3 weeks)
 
 - **Resolved inlet:** at least 8 voxels across the screw, with local refinement in the casing. Walls at least one voxel thick, as Phase 0 learnt.
