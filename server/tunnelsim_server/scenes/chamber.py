@@ -96,6 +96,11 @@ class ChamberConfig:
     vb_merge_region_frac: float = 0.1
     vb_min_region_frac: float = 0.0  # volume balance: leave out regions with fewer reference particles than this fraction of the fullest region
     stress_log: bool = False  # log the paste's own stress beside the bulkhead next to the contact-force reading
+    # gradient diagnosis (16 Nov 2026): the bulkhead contact force summed by grid-node row (world z / voxel) per phase, and
+    # the last frame's per-node forces of each phase, so the gradient can be read without the fixed height bands
+    contact_rows: bool = False
+    # alignment test (16 Nov 2026): raise the whole machine by this much (m), moving its axis relative to the solver grid
+    z_shift: float = 0.0
     # WP4 correction for Newton's volume drift where a solid moves through the paste (newton#5180): once pressurised,
     # the mean elastic volume strain of each region follows the chamber's volume balance (piston advance, paste removed
     # by the screw); deviations within a region are the solver's own
@@ -179,7 +184,7 @@ def run(cfg: ChamberConfig) -> tuple[dict, dict]:
     screw = Screw()
     D, L, dx = cfg.diameter, cfg.chamber, cfg.voxel
     R = D / 2
-    zc = R + 0.5
+    zc = R + 0.5 + cfg.z_shift
     t = max(0.2, 2 * dx)  # walls at least one voxel thick (Phase 0)
     area = math.pi * R**2
 
@@ -239,7 +244,12 @@ def run(cfg: ChamberConfig) -> tuple[dict, dict]:
 
     # bulkhead pressure bands, clear of the screw inlet column |y| < y_min
     y_min = a_s + 0.3
-    edges = np.linspace(-0.9 * R, 0.9 * R, 10)
+    # band edges on the solver grid, a quarter voxel below a vertex row (16 Nov 2026): Newton reports the contact force at
+    # cell centres and at vertices, and a band with fixed edges caught an uneven share of the two lattices, so each band
+    # read 0.8-1.25 times its pressure depending on the voxel (gradient 10.6 / 14.5 / 12.7 kPa/m at 0.15 / 0.12 / 0.10 m
+    # against 11.5 / 13.2 / 11.3 read without it; the 0.15 m chamber was held at 227 kPa for 200). Snapped edges hold the
+    # same number of rows of each lattice.
+    edges = (np.round((zc + np.linspace(-0.9 * R, 0.9 * R, 10)) / dx) - 0.25) * dx - zc
     zz = np.linspace(-R, R, 40001)
     chord = 2 * np.maximum(np.sqrt(np.maximum(R**2 - zz**2, 0)) - y_min, 0)
     band_area = np.array([np.trapezoid(chord * ((zz >= lo) & (zz < hi)), zz) for lo, hi in zip(edges[:-1], edges[1:])])
@@ -276,6 +286,10 @@ def run(cfg: ChamberConfig) -> tuple[dict, dict]:
     sub_repaired = 0
     vb_repaired = 0
     stress_log: list = []
+    n_rows = int(round((zc + R + 1.0) / dx)) + 2
+    crow = np.zeros((4, 2, 2, 2, n_rows))  # by phase, lattice (centres, vertices), points (all, 2 voxels clear of the shell): summed x force, count; per row
+    cframes = np.zeros(4)
+    csnap: dict = {}
     n_prof, prof, prof_x = 10, np.zeros((4, 4, 10)), 0.0  # by phase: mass, summed mean stress, particle count, frames; per height bin
     step = None
     f_set, c_jack, v_dyn = None, 0.0, 0.0
@@ -524,6 +538,22 @@ def run(cfg: ChamberConfig) -> tuple[dict, dict]:
         fx = -F[on, 0]  # F is along -x where the soil presses on the bulkhead
         p_band = np.array([fx[(zb >= lo) & (zb < hi)].sum() for lo, hi in zip(edges[:-1], edges[1:])]) / band_area
         grad = -float(np.polyfit(band_z, p_band, 1)[0])  # pressure rises downwards
+        if cfg.contact_rows:
+            ph_c = ["pressurise", "hold", "excavate", "stop"].index(phase)
+            # Newton's collider forces sit on two lattices: cell centres (z = (k + 1/2) voxel) and vertices (z = k voxel);
+            # each is summed by its own rows, over all points and over those two voxels or more inside the shell
+            zw = pos[on, 2] / dx
+            cen = np.abs(zw % 1.0 - 0.5) < 0.25
+            kr = np.clip(np.where(cen, np.floor(zw), np.round(zw)).astype(int), 0, n_rows - 1)
+            clear = np.hypot(pos[on, 1], pos[on, 2] - zc) < R - 2 * dx
+            for li, lm in ((0, cen), (1, ~cen)):
+                for ci, cmask in ((0, np.ones_like(clear)), (1, clear)):
+                    mm = lm & cmask
+                    crow[ph_c, li, ci, 0] += np.bincount(kr[mm], weights=fx[mm], minlength=n_rows)
+                    crow[ph_c, li, ci, 1] += np.bincount(kr[mm], minlength=n_rows)
+            cframes[ph_c] += 1.0
+            onb = bid == bulkhead
+            csnap[ph_c] = {"pos": pos[onb].tolist(), "fx": (-F[onb, 0]).tolist()}
         thrust = -float(F[bid == bulkhead, 0].sum())
         m = bid == cutter
         torque = float(np.cross(pos[m] - np.array([x_ch, 0.0, zc]), F[m])[:, 0].sum())
@@ -668,7 +698,7 @@ def run(cfg: ChamberConfig) -> tuple[dict, dict]:
         "particles_per_m3_start_end": [round(len(pts) / (area * x_face)), round((n_active - escaped) / vol_now)],
         "ms_per_frame": round(float(np.mean(times[5:]) * 1000), 2),
     }
-    return res, {"log": log, "q_end": s.particle_q.numpy(), "active": (flags & active) != 0, "x_cutter": x_ch, "zc": zc, "vb": np.array(vb_log), "stress": np.array(stress_log), "sub": np.array(sub_log), "sub_bad": sub_bad, "sub_ext": sub_ext, "vrp": vrp_log, "sub_repaired": sub_repaired,
+    return res, {"log": log, "q_end": s.particle_q.numpy(), "active": (flags & active) != 0, "x_cutter": x_ch, "zc": zc, "vb": np.array(vb_log), "stress": np.array(stress_log), "sub": np.array(sub_log), "sub_bad": sub_bad, "sub_ext": sub_ext, "vrp": vrp_log, "sub_repaired": sub_repaired, "contact_rows": {"sums": crow, "frames": cframes, "snap": csnap, "voxel": dx, "zc": zc, "R": R, "y_min": y_min, "edges": edges, "band_z": band_z, "band_area": band_area} if cfg.contact_rows else None,
                  "profile": {"sums": prof, "z_over_R": (np.arange(n_prof) + 0.5) * 1.6 / n_prof - 0.8, "bin_volume_m3": prof_x * (R / 2) * (1.6 * R / n_prof), "paste_density": cfg.paste_density}}
 
 

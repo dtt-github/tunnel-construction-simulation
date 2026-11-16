@@ -8,10 +8,11 @@
   - **Cause found and reported ([13 Nov 2026](#cause-of-the-loss-screw-step-thrust-and-the-gradient-13-and-14-nov-2026)):** Newton's elastic volume follows the velocity divergence only and is not tied to the particle density. A density-coupled correction recovers part of the loss; the balance by region stays the default.
   - **Screw step and thrust (13 Nov 2026):** the pressure responds to a screw-speed step at 77–80 % of the chamber model's rate. Under a set thrust the screw sets the advance and the thrust sets the pressure.
   - **Three voxels hold ([16 Nov 2026](#solver-substeps-and-a-collapse-at-the-screw-inlet-15-and-16-nov-2026)):** with 4 solver steps of 50 iterations per frame, and the screw taking paste from the middle of its inlet, the set point holds at 0.15 m, 0.12 m and 0.10 m in three seeds of three. Before, the 0.10 m chamber was over-packed by the piston push, and a crushed particle in the screw inlet corner could turn a whole chamber invalid within one solver step.
-  - **Open:** the gradient is not converged. The bulkhead contact reads 10.8 / 14.6 / 12.7 kPa/m at 0.15 / 0.12 / 0.10 m, and the screw speed falls with the voxel. The paste's own stress gradient falls with refinement, in part a density bias: multiplied by the fill it is about 15 kPa/m at 0.15 m and 0.12 m ([15 Nov](#gradient-paste-density-by-height-15-nov-2026)). 0.25 m does not hold; the pressure band is narrower than on a machine; the paste leaks into the shell wall unless it is sealed; the torque is the paste's only.
+  - **Gradient at four voxels ([16 Nov 2026](#the-bulkhead-reading-and-the-gradient-at-four-voxels-16-nov-2026)):** the bulkhead pressure bands caught an uneven share of Newton's two lattices of force points, which biased the gradient and held the 0.15 m chamber at about 227 kPa for 200. With the bands on the grid, the contact gradient in excavation is 13.5 / 14.7 / 12.9 / 15.2 kPa/m at 0.15 / 0.12 / 0.10 / 0.08 m: 14.1 ± 1.1 with no trend, about the weight of the paste at its fill (14.1–14.4), and within 1.1 kPa/m of the paste inside the chamber.
+  - **Open:** the scatter of about 1 kPa/m between voxels and of the screw speed (8–14 rpm); a second alias-free reading 1.3–1.9 kPa/m lower. 0.25 m does not hold; the pressure band is narrower than on a machine; the paste leaks into the shell wall unless it is sealed; the torque is the paste's only.
   - The runs before 8 Nov, below, used the Phase 0 paste and no correction. They stand as the record of the loss.
   - **Correction (7 Nov 2026):** from 6 Nov the docs, the v1.0.0 release notes and our comment on [newton-physics/newton#5180](https://github.com/newton-physics/newton/issues/5180) said that under GIMP the chamber keeps 162 of 207 kPa (172 of 216 before the scaling fix), "a fifth lost". Those runs excavated for 4 s only. Over the scene's 20 s excavation the pressure falls to 51 kPa.
-- **Run on:** 5 Nov 2026; GIMP and 20 s diagnosis runs 7 Nov 2026; volume balance and sourced paste 8–9 Nov 2026; cause, screw step, thrust and gradient 13–14 Nov 2026; substeps and the screw inlet 15–16 Nov 2026
+- **Run on:** 5 Nov 2026; GIMP and 20 s diagnosis runs 7 Nov 2026; volume balance and sourced paste 8–9 Nov 2026; cause, screw step, thrust and gradient 13–14 Nov 2026; substeps and the screw inlet 15–16 Nov 2026; bulkhead reading and four voxels 16 Nov 2026
 
 ## Set-up
 
@@ -406,14 +407,14 @@ The chamber loses paste volume in two separate ways, and they need different cur
 | Axis pressure at standstill (kPa) | 206.3 / 207.8 / 208.6 | 210.0 / 211.2 / 210.6 | 204.6 / 205.5 / 204.9 |
 | Axis pressure in excavation (kPa) | 200.4 / 200.4 / 200.6 | 197.1 / 196.8 / 197.0 | 199.1 / 198.7 / 199.1 |
 | Lowest after pressurising (kPa) | 194–195 | 191–193 | 194 |
-| Contact gradient in excavation (kPa/m) | 10.9 / 10.8 / 10.8 | 14.6 / 14.6 / 14.6 | 12.7 / 12.7 / 12.8 |
+| Contact gradient in excavation (kPa/m; fixed bands, [aliased](#the-bulkhead-reading-and-the-gradient-at-four-voxels-16-nov-2026)) | 10.9 / 10.8 / 10.8 | 14.6 / 14.6 / 14.6 | 12.7 / 12.7 / 12.8 |
 | Screw in excavation (rpm; 9.95 balances the advance) | 13.6 / 13.3 / 13.9 | 10.2 / 10.2 / 10.3 | 7.7 / 7.9 / 7.8 |
 | Bulkhead thrust (MN) | 8.8 | 7.7 | 8.1 |
 | Mixing torque (MNm) | 0.60–0.61 | 0.54 | 0.40–0.41 |
 | ms per frame (GB10 GPU) | 187–192 | 314–340 | 549–560 |
 
 - **The set point holds at three voxels, in every seed.** In excavation the seeds agree to within 0.4 kPa in pressure and 0.1 kPa/m in gradient. Against the wall pick, the numbers do not change where both held.
-- **Neither the contact gradient nor the screw has converged with the voxel:** the gradient reads 10.8 → 14.6 → 12.7 kPa/m and the screw speed 13.6 → 10.2 → 7.8 rpm from 0.15 m to 0.10 m. The screw speed needed to hold the set point falls as the voxel shrinks, from 37 % above the advance's rate to 22 % below it. Both are open.
+- **Neither the contact gradient nor the screw seemed to converge with the voxel:** the gradient read 10.8 → 14.6 → 12.7 kPa/m and the screw speed 13.6 → 10.2 → 7.8 rpm from 0.15 m to 0.10 m. The gradient spread was mostly the band reading, and the screw does not keep falling at 0.08 m ([next section](#the-bulkhead-reading-and-the-gradient-at-four-voxels-16-nov-2026)).
 - **Paste escapes the chamber:** 360–780 particles per run leave the chamber and fly ballistically (up to about 370 m away). They take no part in the solve, but they should be deleted. Open.
 
 **Step and thrust runs repeated with 4 × 50** (0.15 m, seed 0, before the middle pick; records `ch_sub_step_*`, `ch_sub_thr_*`; set-up as [above](#response-to-a-screw-speed-step)). The predicted rate here is the balance's own: bulk modulus × change in discharge / chamber volume.
@@ -429,6 +430,51 @@ The chamber loses paste volume in two separate ways, and they need different cur
 - **Under thrust the result stands:** the screw sets the advance and the thrust sets the pressure.
 - **The step response is no longer symmetric:** a stopped screw raises the pressure at 73 % of the predicted rate, but the faster screw lowers it at 129 %. With one solver step, both directions were at 77–80 %. Not explained; the faster step here reached the 22 rpm cap. Open.
 
+### The bulkhead reading and the gradient at four voxels (16 Nov 2026)
+
+The bulkhead contact gradient read 10.8 / 14.6 / 12.7 kPa/m at 0.15 / 0.12 / 0.10 m, while the paste inside the chamber (stress × fill) read 14.3 / 14.7 / 13.6. The contact reading was checked first.
+
+**The cause: two force lattices and fixed bands.**
+- Newton reports the force a solid takes from the paste at two lattices of points: cell centres, half a voxel inside the bulkhead plate (about three quarters of the points and two thirds of the force), and grid vertices on its face, with gaps.
+- The scene summed these forces in nine bands of fixed height (±0.9 R) and divided by each band's area. A band 0.71 m high holds 4–5 rows of each lattice at 0.15 m, 5–6 at 0.12 m and 7–8 at 0.10 m, in a pattern that changes from band to band. Each band read 0.82–1.25 times its pressure.
+- **The gradient and the controlled pressure were both biased.** The controller holds the band at the axis, so at 0.15 m the chamber was held at a mean contact pressure of about 227 kPa for a reading of 200. The bulkhead thrust showed it: 8.81 MN against 7.89 for 200 kPa over the area. At 0.12 m and 0.10 m the error was 1–2 %.
+
+**Logged by row** (`ChamberConfig.contact_rows`: the force summed per row of each lattice over every frame; records `ch_cl_*`, seeds 0 and 1). Summed in 2-voxel bins, each holding two rows of each lattice, the reading has no aliasing:
+
+| Excavation | 0.15 m | 0.12 m | 0.10 m |
+|---|---|---|---|
+| Band reading, fixed edges (kPa/m) | 10.6 / 10.6 | 14.5 / 14.5 | 12.7 / 12.7 |
+| Contact in 2-voxel bins (kPa/m) | 11.4 / 11.5 | 13.2 / 13.2 | 11.3 / 11.3 |
+| Mean contact pressure at the axis (kPa) | 227 / 227 | 198 / 198 | 199 / 199 |
+
+**Fix (16 Nov): band edges on the grid.** Each band edge now sits a quarter voxel below a vertex row, so every band holds the same number of rows of each lattice. Band heights become whole voxels (4–5, 5–6 and 7 at 0.15, 0.12 and 0.10 m). Checked on the logged rows, the bands now lie within ±1.5 % of a straight line, against 0.85–1.09 before. This changes the controlled pressure at 0.15 m.
+
+**Two other readings were tried and dropped or kept aside:**
+- **A fixed-width strip** (1 m each side of the screw column, edges also on the grid, ±0.8 R) needs no area. It changed from 12.1 to 16.7 kPa/m when the machine was raised by half a voxel. Its rows are too narrow for the gaps in the vertex lattice. Dropped.
+- **The 2-voxel bins** stay in the records (`contact_two_voxel_bins`). They read 1.3–1.9 kPa/m below the snapped bands in excavation at every voxel, with the same order across the voxels. The two differ in the weight given to the rows near the shell, where the force points across a row do not fill the chord. Which weighting is right is not settled. The snapped bands are used because they agree with the paste inside the chamber (below).
+
+**Alignment with the grid** (records `ch_sb_v015_zh`, `ch_sb_v012_zh`): raising the whole machine by half a voxel moves the band gradient by 0.6 kPa/m at 0.15 m and 0.1 kPa/m at 0.12 m. The earlier high reading at 0.12 m came from the bands, not from the alignment.
+
+**Four voxels with the fixed reading** (seed 0; records `ch_sb_v015`, `_v012`, `_v010`, `_v008`):
+
+| | 0.15 m | 0.12 m | 0.10 m | 0.08 m |
+|---|---|---|---|---|
+| Particles | 130,112 | 247,043 | 434,812 | 852,040 |
+| Axis pressure in excavation (kPa) | 196.1 | 197.1 | 199.1 | 198.5 |
+| Bulkhead thrust / axis pressure × area (MN) | 7.75 / 7.72 | 7.83 / 7.76 | 8.02 / 7.84 | 7.76 / 7.81 |
+| **Contact gradient, excavation (kPa/m)** | **13.5** | **14.7** | **12.9** | **15.2** |
+| Contact gradient, standstill / after the stop | 13.5 / 13.7 | 13.1 / 15.2 | 12.3 / 11.6 | 13.9 / 15.5 |
+| Paste inside, stress × fill, excavation | 14.6 | 14.7 | 13.6 | 15.1 |
+| Paste weight at its fill (13.05 × fill) | 14.2 | 14.1 | 14.3 | 14.4 |
+| Screw in excavation (rpm; 9.95 balances the advance) | 13.6 | 10.1 | 8.0 | 13.8 |
+| ms per frame (GB10 GPU) | 183 | 311 | 555 | 1,170 |
+
+- **The bulkhead and the paste inside now agree** within 1.1 kPa/m at every voxel (before: up to 3.7).
+- **No trend with the voxel:** in excavation the contact gradient is 14.1 ± 1.1 kPa/m over the four voxels, and the paste inside 14.5 ± 0.6. Both scatter about the weight of the paste at its fill, 14.1–14.4 kPa/m. The paste is about a tenth denser than nominal ([15 Nov](#gradient-paste-density-by-height-15-nov-2026)). All values are inside Botlek's 10–20 kPa/m.
+- **The scatter is not seed noise:** seeds repeat to 0.3 kPa/m at each voxel. 0.10 m is the low one in both readings, also in three earlier seeds (paste inside 13.6–13.7); the reason is not shown.
+- **The screw speed scatters with the voxel too** (8.0–13.8 rpm), against 9.95 for the advance. The earlier statement that it falls as the voxel shrinks does not hold at 0.08 m.
+- **Earlier contact gradients in this page used the fixed bands.** Their pattern across voxels is affected. The 0.15 m runs ran 11–13 % above the set point, measured at the bulkhead as a whole: in every 0.15 m record from 8 Nov on, the bulkhead thrust is 1.11–1.12 times the axis pressure × area (1.00 with the fix); the 0.12 m and 0.10 m runs were within 2 %. The paste-inside readings (stress × fill) do not use the bands and stand.
+
 ## Where this leaves WP4
 
 - The chamber scene, the pressure controller, a volume correction and the open validation data are in place. The scene's defaults are:
@@ -436,11 +482,13 @@ The chamber loses paste volume in two separate ways, and they need different cur
   - the balance by region, with its corner regions merged (since 15 Nov 2026);
   - 4 solver steps of 50 iterations per frame (since 15 Nov 2026; before, 1 step of 100);
   - the screw taking paste from the middle of its inlet (since 16 Nov 2026).
-- **Checked (16 Nov 2026):** with these defaults the set point holds through excavation and the stop at 0.15 m, 0.12 m and 0.10 m, in three seeds of three at each voxel ([above](#solver-substeps-and-a-collapse-at-the-screw-inlet-15-and-16-nov-2026)). The vertical force balance closes. The bulkhead contact gradient (10.8–14.6 kPa/m) is inside Botlek's 10–20.
+- **Checked (16 Nov 2026):** with these defaults the set point holds through excavation and the stop at 0.15 m, 0.12 m and 0.10 m, in three seeds of three at each voxel ([above](#solver-substeps-and-a-collapse-at-the-screw-inlet-15-and-16-nov-2026)). The vertical force balance closes. The bulkhead contact gradient, read with bands on the grid, is 12.9–15.2 kPa/m at four voxels from 0.15 m to 0.08 m, inside Botlek's 10–20 ([16 Nov](#the-bulkhead-reading-and-the-gradient-at-four-voxels-16-nov-2026)).
 - **WP4 outputs produced:** bulkhead pressure in bands, its gradient, mixing torque, the response to a screw-speed step, and a shove under thrust.
 - **Gradient (15 Nov 2026):** multiplied by the fill, the paste's stress gradient in the interior is about 15 kPa/m during excavation at both 0.15 m and 0.12 m; the paste there is about a tenth denser than nominal.
 - **Not done:**
-  - a converged contact gradient (10.8 / 14.6 / 12.7 kPa/m at 0.15 / 0.12 / 0.10 m) and screw speed (13.6 / 10.2 / 7.8 rpm against 9.95 for the advance);
+  - the scatter of the contact gradient between voxels (about ±1 kPa/m about 14.1) and of the screw speed (8.0–13.8 rpm against 9.95 for the advance);
+  - which alias-free weighting of the bulkhead rows is right (snapped bands, or 2-voxel bins 1.3–1.9 kPa/m lower);
+  - the 0.15 m results recorded before 16 Nov ran 11–13 % above the set point; the step and thrust runs at 0.15 m are not repeated at a true 200 kPa;
   - the asymmetric screw-step response with 4 solver steps (73 % and 129 % of the predicted rate);
   - deleting paste that escapes the chamber;
   - the screw volume against the volume displaced (0.84–1.01 m³ against 0.79 at 0.12 m on 15 Nov; not rechecked with the new defaults);

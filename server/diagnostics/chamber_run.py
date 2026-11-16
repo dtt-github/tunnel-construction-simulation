@@ -85,4 +85,7 @@ if sub is not None and len(sub):
     big = np.argsort(sub[:, 4])[-5:]
     print("sub fastest particle (t, substep, m/s, 99.9 pct):", [(round(float(sub[i, 0]), 2), int(sub[i, 1]), round(float(sub[i, 4]), 2), round(float(sub[i, 5]), 3)) for i in big])
     print("sub det range min/max:", round(float(np.nanmin(sub[:, 6])), 4), round(float(np.nanmax(sub[:, 7])), 4))
-json.dump({"vrp": extra.get("vrp"), "sub_ext": extra.get("sub_ext"), "sub": np.nan_to_num(sub, nan=-1.0, posinf=1e30, neginf=-1e30).tolist() if sub is not None and len(sub) else None, "vb": np.nan_to_num(vb, nan=-1.0, posinf=1e30, neginf=-1e30).tolist() if vb is not None and len(vb) else None, "profile": prof_out, "params": dataclasses.asdict(cfg), "result": res, "log": log.tolist(), "stress": st.tolist() if st is not None else None}, open(os.path.join(d, sys.argv[1] + ".json"), "w"))
+cr = extra.get("contact_rows")
+if cr is not None:
+    cr = {k: (v.tolist() if isinstance(v, np.ndarray) else v) for k, v in cr.items()}
+json.dump({"contact_rows": cr, "vrp": extra.get("vrp"), "sub_ext": extra.get("sub_ext"), "sub": np.nan_to_num(sub, nan=-1.0, posinf=1e30, neginf=-1e30).tolist() if sub is not None and len(sub) else None, "vb": np.nan_to_num(vb, nan=-1.0, posinf=1e30, neginf=-1e30).tolist() if vb is not None and len(vb) else None, "profile": prof_out, "params": dataclasses.asdict(cfg), "result": res, "log": log.tolist(), "stress": st.tolist() if st is not None else None}, open(os.path.join(d, sys.argv[1] + ".json"), "w"))
