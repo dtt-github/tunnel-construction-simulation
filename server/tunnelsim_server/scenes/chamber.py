@@ -661,6 +661,21 @@ def run(cfg: ChamberConfig) -> tuple[dict, dict]:
             "s_to_30_kPa": round(float(after[moved[0], 0] - step["t_s"]), 2) if len(moved) else None,
             "p_axis_end_kPa": round(float(after[-int(cfg.fps):, 2].mean()), 1),
         }
+    # screw volume over the whole excavation (17 Nov 2026): the screw speed swings with the pressure controller (period
+    # 40-50 s), so a mean over part of the excavation depends on where the window falls. The volume removed, less the
+    # change of the paste's elastic volume over the excavation (the balance's mean ln J target times the paste's particle
+    # volume), against the volume the piston displaced, does not; it is compared with the paste's fill.
+    screw_vol = None
+    exa = log[log[:, 1] == 2]
+    if len(exa) > 1:
+        rem_v = float(exa[-1, 8] - exa[0, 8]) * v_particle
+        disp_v = area * float(exa[-1, 7] - exa[0, 7])
+        screw_vol = {"removed_m3": round(rem_v, 3), "displaced_m3": round(disp_v, 3), "ratio": round(rem_v / disp_v, 3) if disp_v > 0 else None}
+        if vb_log:
+            vba = np.array(vb_log)
+            v0, v1 = vba[np.argmin(np.abs(vba[:, 0] - exa[0, 0]))], vba[np.argmin(np.abs(vba[:, 0] - exa[-1, 0]))]
+            swing = float(v1[1] - v0[1]) * float(v1[3]) * v_particle
+            screw_vol.update({"elastic_swing_m3": round(swing, 3), "ratio_less_swing": round((rem_v - swing) / disp_v, 3) if disp_v > 0 else None})
     res = {
         "diameter_m": D, "voxel_m": dx, "particles": int(len(pts)), "paste_bulk_modulus_kPa": round(soil.extra["bulk_modulus_Pa"] / 1e3),
         "rho_g_kPa_per_m": round(cfg.paste_density * G / 1e3, 2),
@@ -690,6 +705,7 @@ def run(cfg: ChamberConfig) -> tuple[dict, dict]:
         "cutter_axial_MN_hold_excavate": [round(float(hold[:, 10].mean()), 2) if len(hold) else None, round(float(ex[:, 10].mean()), 2) if len(ex) else None],
         "advance_m": round(float(log[-1, 7]), 3),
         "particles_removed": int(removed),
+        "screw_volume_excavate": screw_vol,
         "particles_escaped": escaped,
         "volume_balance_repaired": vb_repaired,
         "volume_correction_mismatch_mean_rms_excavate": [round(float(np.mean([r[k] for r in vc_log if r[0]])), 5) for k in (1, 2)] if vc is not None and any(r[0] for r in vc_log) else None,

@@ -113,6 +113,14 @@
    2361,
    2598
   ],
-  "ms_per_frame": 191.78
+  "ms_per_frame": 191.78,
+  "screw_volume_excavate": {
+   "removed_m3": 1.046,
+   "displaced_m3": 0.787,
+   "ratio": 1.33,
+   "elastic_swing_m3": 0.177,
+   "ratio_less_swing": 1.105,
+   "note": "computed on 17 Nov 2026 from this run's own logs (the reading added to chamber.run that day)"
+  }
  }
 }

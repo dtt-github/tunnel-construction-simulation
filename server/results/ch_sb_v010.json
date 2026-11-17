@@ -140,6 +140,14 @@
     "gradient_kPa_per_m": 10.06,
     "p_at_axis_kPa": 205.3
    }
+  },
+  "screw_volume_excavate": {
+   "removed_m3": 0.668,
+   "displaced_m3": 0.787,
+   "ratio": 0.849,
+   "elastic_swing_m3": -0.199,
+   "ratio_less_swing": 1.101,
+   "note": "computed on 17 Nov 2026 from this run's own logs (the reading added to chamber.run that day)"
   }
  }
 }
