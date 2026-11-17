@@ -79,7 +79,9 @@
    "p_axis_rate_first_5s_kPa_per_s": -1.005,
    "rate_volume_balance_kPa_per_s": -1.708,
    "s_to_30_kPa": 10.4,
-   "p_axis_end_kPa": 162.6
+   "p_axis_end_kPa": 162.6,
+   "rate_net_flow_kPa_per_s": -2.249,
+   "rate_net_flow_note": "computed on 17 Nov 2026 from this run's own logs: the net flow after the step (piston displacement against the screw's discharge at the paste's particle density), the reading added to chamber.run that day"
   },
   "thrust_control": null,
   "p_axis_hold_kPa": 206.8,

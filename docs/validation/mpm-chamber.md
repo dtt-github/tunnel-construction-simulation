@@ -6,14 +6,14 @@
   - Newton's implicit MPM loses paste volume wherever a solid moves through it, so the chamber loses its pressure under the turning cutterhead ([newton-physics/newton#5180](https://github.com/newton-physics/newton/issues/5180)). A volume balance by region corrects this: it holds the mean elastic volume of each region of the paste to what the piston and the screw leave.
   - With that correction, an undrained paste and wall friction from open sources, the chamber holds 200 kPa through a 20 s excavation at voxel 0.15 m and 0.12 m. The vertical gradient is inside Botlek's range, and the screw removes about the volume the piston displaces.
   - **Cause found and reported ([13 Nov 2026](#cause-of-the-loss-screw-step-thrust-and-the-gradient-13-and-14-nov-2026)):** Newton's elastic volume follows the velocity divergence only and is not tied to the particle density. A density-coupled correction recovers part of the loss; the balance by region stays the default.
-  - **Screw step and thrust (13 Nov 2026):** the pressure responds to a screw-speed step at 77–80 % of the chamber model's rate. Under a set thrust the screw sets the advance and the thrust sets the pressure.
+  - **Screw step and thrust (13 Nov 2026; repeated 17 Nov):** the pressure responds to a screw-speed step at 97–114 % of the rate predicted from the net flow after the step, in both directions ([17 Nov](#screw-step-and-thrust-on-a-settled-chamber-17-nov-2026)). The earlier 77–80 %, and 73 % / 129 % with four solver steps, came from a prediction that assumed the chamber was in balance before the step. Under a set thrust the screw sets the advance and the thrust sets the pressure.
   - **Three voxels hold ([16 Nov 2026](#solver-substeps-and-a-collapse-at-the-screw-inlet-15-and-16-nov-2026)):** with 4 solver steps of 50 iterations per frame, and the screw taking paste from the middle of its inlet, the set point holds at 0.15 m, 0.12 m and 0.10 m in three seeds of three. Before, the 0.10 m chamber was over-packed by the piston push, and a crushed particle in the screw inlet corner could turn a whole chamber invalid within one solver step.
   - **Gradient at four voxels ([16 Nov 2026](#the-bulkhead-reading-and-the-gradient-at-four-voxels-16-nov-2026)):** the bulkhead pressure bands caught an uneven share of Newton's two lattices of force points, which biased the gradient and held the 0.15 m chamber at about 227 kPa for 200. With the bands on the grid, the contact gradient in excavation is 13.5 / 14.7 / 12.9 / 15.2 kPa/m at 0.15 / 0.12 / 0.10 / 0.08 m: 14.1 ± 1.1 with no trend, about the weight of the paste at its fill (14.1–14.4), and within 1.1 kPa/m of the paste inside the chamber. Over a 100 s excavation, 0.15 m and 0.12 m agree within 0.5 kPa/m (15.1 and 15.6) and 0.10 m reads 13.05.
   - **Screw ([17 Nov 2026](#screw-speed-the-controllers-swing-and-the-screw-volume-17-nov-2026)):** the screw speed scattered (8–14 rpm) because the pressure controller swings with a period of 40–50 s, longer than a 20 s excavation. Read by volume over the whole excavation, less the paste's elastic swing, the screw removes the displaced volume times the paste's fill (1.06–1.11) within 2 % at every voxel and seed.
   - **Open:** 0.10 m reads about 2 kPa/m below the other voxels and its controller swing does not die down; a second alias-free bulkhead reading 1.3–1.9 kPa/m lower. 0.25 m does not hold; the pressure band is narrower than on a machine; the paste leaks into the shell wall unless it is sealed; the torque is the paste's only.
   - The runs before 8 Nov, below, used the Phase 0 paste and no correction. They stand as the record of the loss.
   - **Correction (7 Nov 2026):** from 6 Nov the docs, the v1.0.0 release notes and our comment on [newton-physics/newton#5180](https://github.com/newton-physics/newton/issues/5180) said that under GIMP the chamber keeps 162 of 207 kPa (172 of 216 before the scaling fix), "a fifth lost". Those runs excavated for 4 s only. Over the scene's 20 s excavation the pressure falls to 51 kPa.
-- **Run on:** 5 Nov 2026; GIMP and 20 s diagnosis runs 7 Nov 2026; volume balance and sourced paste 8–9 Nov 2026; cause, screw step, thrust and gradient 13–14 Nov 2026; substeps and the screw inlet 15–16 Nov 2026; bulkhead reading and four voxels 16 Nov 2026; screw volume 17 Nov 2026
+- **Run on:** 5 Nov 2026; GIMP and 20 s diagnosis runs 7 Nov 2026; volume balance and sourced paste 8–9 Nov 2026; cause, screw step, thrust and gradient 13–14 Nov 2026; substeps and the screw inlet 15–16 Nov 2026; bulkhead reading and four voxels 16 Nov 2026; screw volume, step and thrust 17 Nov 2026
 
 ## Set-up
 
@@ -200,7 +200,7 @@ Screw controller switched off 10 s into a 30 s excavation and the screw speed st
 | `ch_step_stop` | 10.5 → 0 | −41.5 | +2.45 | +1.87 | 203 → 236 | 14.6 |
 | `ch_step_up` | 10.6 → 20.6 | +39.6 | −2.34 | −1.88 | 203 → 163 | 11.3 |
 
-- The pressure responds at 77–80 % of the predicted rate, in both directions.
+- The pressure responds at 77–80 % of the predicted rate, in both directions. (17 Nov: that prediction assumed the chamber was in balance at the speed before the step; see [the repeat](#screw-step-and-thrust-on-a-settled-chamber-17-nov-2026).)
 - The shortfall is not explained. Paste leaving the chamber would fit the stopped screw but not the faster one.
 - Checked against the analytical chamber model only. No open record of a screw step on a machine has been found.
 
@@ -429,7 +429,7 @@ The chamber loses paste volume in two separate ways, and they need different cur
 | `ch_sub_thr_screw` | screw +50 % | advance 83 mm/min over the last 5 s (90 from the discharge); axis 210 kPa |
 
 - **Under thrust the result stands:** the screw sets the advance and the thrust sets the pressure.
-- **The step response is no longer symmetric:** a stopped screw raises the pressure at 73 % of the predicted rate, but the faster screw lowers it at 129 %. With one solver step, both directions were at 77–80 %. Not explained; the faster step here reached the 22 rpm cap. Open.
+- **The step response is no longer symmetric:** a stopped screw raises the pressure at 73 % of the predicted rate, but the faster screw lowers it at 129 %. With one solver step, both directions were at 77–80 %. Explained on 17 Nov: the prediction assumed the chamber was in balance before the step ([repeat](#screw-step-and-thrust-on-a-settled-chamber-17-nov-2026)).
 
 ### The bulkhead reading and the gradient at four voxels (16 Nov 2026)
 
@@ -512,8 +512,42 @@ Set against the paste's fill (mass over nominal density and space, in the prisms
 - **The screw removes about a tenth more than the piston displaces because the paste is about a tenth denser than nominal,** packed so by the piston push before excavation ([15 Nov](#the-010-m-chamber-over-packed-by-the-piston-push-15-nov-2026)). The budget closes without the paste that escapes the chamber (0.02–0.5 m³ per run); where it escapes was not traced.
 - **The screw speed is not a voxel effect:** averaged over 100 s it is 11.1 / 10.3 / 10.7 rpm, 1.04–1.11 times the advance's rate. The scatter of 8–14 rpm in 20 s runs was the controller's swing.
 - **The gradient needs the long window too at 0.15 m.** Over the last 50 s of the 100 s runs the contact gradient is 15.1 / 15.6 / 13.05 kPa/m at 0.15 / 0.12 / 0.10 m. In 20 s runs 0.15 m read 13.5. So 0.15 m and 0.12 m agree within 0.5 kPa/m once settled, and 0.10 m stays about 2 kPa/m below both. 0.08 m was run for 20 s only.
-- **The screw-step asymmetry probably has the same cause:** the step is made 10 s into the excavation, while the pressure is still moving from the hold. Both measured rates sit 0.5–0.9 kPa/s below the predicted ones (+2.34 against +3.20, −2.20 against −1.71). This fits a drift of about −0.7 kPa/s, which is not yet checked.
+- **The screw-step asymmetry has a related cause:** the step was made while the controller was still swinging, and the prediction assumed the chamber was in balance at the speed before the step ([next section](#screw-step-and-thrust-on-a-settled-chamber-17-nov-2026)).
 - **The controller gains are assumed.** Gains that damp the swing within one period (kp about 0.7 rpm/kPa) would make a 20 s excavation readable, but they would change the step and thrust results, and no open source for an EPB screw controller has been found. Left as they are.
+
+### Screw step and thrust on a settled chamber (17 Nov 2026)
+
+The step and thrust runs were repeated at 0.15 m with the fixed bulkhead reading (a true 200 kPa) and a 90 s excavation, each change made 60 s in (seed 0; records `ch_st_*`).
+
+**Why the step response looked uneven.** The predicted rate was the bulk modulus times the *change* of the screw's discharge, over the paste volume. That assumes the chamber was in balance at the screw speed before the step. It was not: the controller was still swinging, and the screw turned at 13.4–14.4 rpm where about 10.9 rpm balances the advance (9.95 rpm times the paste's fill of 1.09–1.10, [above](#screw-speed-the-controllers-swing-and-the-screw-volume-17-nov-2026)).
+
+**Prediction from the net flow (adopted 17 Nov).** The rate after the step follows from the piston's displacement against the screw's discharge after the step. The discharge is counted at the paste's particle density (particles times their in-situ volume over the chamber space), as the volume balance counts it. `chamber.run` reports it as `rate_net_flow_kPa_per_s` beside the old prediction; it was added to `ch_sub_step_stop` and `_up` from their own logs.
+
+| Record | Screw (rpm) | Measured (kPa/s) | Old prediction | Net-flow prediction | Measured / net flow |
+|---|---|---|---|---|---|
+| `ch_sub_step_stop` (20 s run, step at 10 s, fixed bands) | 14.2 → 0 | +2.34 | +3.20 (73 %) | +2.24 | 1.04 |
+| `ch_sub_step_up` (same) | 14.4 → 22 | −2.20 | −1.71 (129 %) | −2.25 | 0.98 |
+| `ch_st_stop` (90 s run, step at 60 s) | 13.5 → 0 | +2.63 | +3.12 (84 %) | +2.30 | 1.14 |
+| `ch_st_up` (same) | 13.4 → 22 | −2.56 | −2.00 (128 %) | −2.37 | 1.08 |
+
+- **The asymmetry is explained:** both directions agree within 6–7 % in each pair. It was the prediction's assumption, not the chamber.
+- **The 90 s runs read 8–14 % above the net-flow prediction, the 20 s runs within 4 %.** In the 90 s stopped-screw run the pressure climbs from 208 to 282 kPa over the 30 s after the step and the fit runs over all of it; whether the curvature explains the excess is not checked.
+- **At 0.15 m the controller still swings at 60 s:** the screw was at 13.4 rpm when the step came, so "+10 rpm" reached the 22 rpm cap again. The prediction uses the actual speeds.
+- **The 13 Nov results (77–80 %, one solver step) used the same prediction** from the speed before the step. They are not recomputed: those runs did not log the particle count.
+- Still checked against the analytical chamber model only; no open record of a screw step on a machine has been found.
+
+**Shove under thrust at a true set point:**
+
+| Record | Change at 60 s | Axis pressure (kPa) | Advance (mm/min) |
+|---|---|---|---|
+| `ch_st_thr_base` | none | 216 | 55 (52–58); the screw's 60 over the fill of 1.10 is 54.7 |
+| `ch_st_thr_f110` | thrust +10 % | 216 → 237 (+9.9 %) | to the 120 mm/min cap, back to 57 |
+| `ch_st_thr_screw` | screw +50 % | 215 → 210 (−2.6 %) | 55 → 85 (82 from the discharge over the fill) |
+
+- **The screw sets the advance and the thrust sets the pressure,** as found on 13 Nov, and the numbers now close: under a fixed screw the advance is the screw's discharge divided by the paste's fill.
+- **Under thrust the chamber sits at 216 kPa, not 200:** the set thrust is the force that held the piston at standstill, and at 0.15 m the hold ends at about 218 kPa.
+- **The screw volume closes in all five runs:** less the elastic swing it is 1.094–1.099 times the displaced volume, the fill again.
+- The net-flow prediction does not apply under thrust, where the advance changes with the step.
 
 ## Where this leaves WP4
 
@@ -529,8 +563,8 @@ Set against the paste's fill (mass over nominal density and space, in the prisms
   - the 0.10 m gradient, about 2 kPa/m below 0.15 m and 0.12 m when settled (13.05 against 15.1 and 15.6 kPa/m over the last 50 s of 100 s runs), and its undamped controller swing;
   - controller gains from a source (assumed now; a 20 s excavation does not settle);
   - which alias-free weighting of the bulkhead rows is right (snapped bands, or 2-voxel bins 1.3–1.9 kPa/m lower);
-  - the 0.15 m results recorded before 16 Nov ran 11–13 % above the set point; the step and thrust runs at 0.15 m are not repeated at a true 200 kPa;
-  - the asymmetric screw-step response with 4 solver steps (73 % and 129 % of the predicted rate), probably the pressure still moving from the hold; not checked;
+  - the 0.15 m results recorded before 16 Nov ran 11–13 % above the set point (the step and thrust runs are repeated, 17 Nov);
+  - the screw step at 8–14 % above the net-flow prediction in 90 s runs (within 4 % in 20 s runs);
   - deleting paste that escapes the chamber;
   - the stop gradient, the band against a field record, the leak without sealing, torque with the face, shield friction in the thrust, a field record for the screw step.
 - Nothing from the MPM chamber is used on the console yet.

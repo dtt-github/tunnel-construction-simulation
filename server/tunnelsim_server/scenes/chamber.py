@@ -352,7 +352,7 @@ def run(cfg: ChamberConfig) -> tuple[dict, dict]:
             if cfg.screw_step_s > 0 and t_phase >= cfg.screw_step_s:  # open loop from the step on
                 if step is None:
                     rpm_before = float(np.mean([r[4] for r in log[-int(2 * cfg.fps):]]))
-                    step = {"t_s": f * dt, "rpm_before": rpm_before, "rpm_after": float(np.clip(rpm_before + cfg.screw_step_rpm, 0.0, cfg.max_screw_rpm)),
+                    step = {"t_s": f * dt, "n_particles": int(((flags & active) != 0).sum()), "rpm_before": rpm_before, "rpm_after": float(np.clip(rpm_before + cfg.screw_step_rpm, 0.0, cfg.max_screw_rpm)),
                             "paste_volume_m3": area * (x_p - t / 2)}
                 rpm = step["rpm_after"]
             ang += w_c * dt
@@ -658,6 +658,11 @@ def run(cfg: ChamberConfig) -> tuple[dict, dict]:
             "p_axis_rate_kPa_per_s": round(float(np.polyfit(after[:, 0], after[:, 2], 1)[0]), 3),
             "p_axis_rate_first_5s_kPa_per_s": round(float(np.polyfit(after[:int(5 * cfg.fps), 0], after[:int(5 * cfg.fps), 2], 1)[0]), 3),
             "rate_volume_balance_kPa_per_s": round(-k_kpa * d_q / step["paste_volume_m3"], 3),
+            # from the net flow after the step (17 Nov 2026): the piston's displacement against the screw's discharge, the
+            # discharge counted at the paste's particle density (particles x in-situ volume over the chamber space, as the
+            # volume balance counts it). The rate above assumes the chamber was in balance at the speed before the step;
+            # with the controller still swinging it was not, and the two step directions came out at 73 % and 129 %
+            "rate_net_flow_kPa_per_s": round(k_kpa * (area * v_adv / step["paste_volume_m3"] - screw.discharge(step["rpm_after"]) / (step["n_particles"] * v_particle)), 3),
             "s_to_30_kPa": round(float(after[moved[0], 0] - step["t_s"]), 2) if len(moved) else None,
             "p_axis_end_kPa": round(float(after[-int(cfg.fps):, 2].mean()), 1),
         }
