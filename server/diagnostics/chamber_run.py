@@ -88,4 +88,6 @@ if sub is not None and len(sub):
 cr = extra.get("contact_rows")
 if cr is not None:
     cr = {k: (v.tolist() if isinstance(v, np.ndarray) else v) for k, v in cr.items()}
-json.dump({"contact_rows": cr, "vrp": extra.get("vrp"), "sub_ext": extra.get("sub_ext"), "sub": np.nan_to_num(sub, nan=-1.0, posinf=1e30, neginf=-1e30).tolist() if sub is not None and len(sub) else None, "vb": np.nan_to_num(vb, nan=-1.0, posinf=1e30, neginf=-1e30).tolist() if vb is not None and len(vb) else None, "profile": prof_out, "params": dataclasses.asdict(cfg), "result": res, "log": log.tolist(), "stress": st.tolist() if st is not None else None}, open(os.path.join(d, sys.argv[1] + ".json"), "w"))
+vbr = extra.get("vb_regions")
+sf = extra.get("seal_facets")
+json.dump({"vb_regions": vbr.tolist() if vbr is not None else None, "seal_facets": sf.tolist() if sf is not None else None, "seal_fx": extra.get("seal_fx"), "contact_rows": cr, "balance": extra.get("balance"), "vrp": extra.get("vrp"), "sub_ext": extra.get("sub_ext"), "sub": np.nan_to_num(sub, nan=-1.0, posinf=1e30, neginf=-1e30).tolist() if sub is not None and len(sub) else None, "vb": np.nan_to_num(vb, nan=-1.0, posinf=1e30, neginf=-1e30).tolist() if vb is not None and len(vb) else None, "profile": prof_out, "params": dataclasses.asdict(cfg), "result": res, "log": log.tolist(), "stress": st.tolist() if st is not None else None}, open(os.path.join(d, sys.argv[1] + ".json"), "w"))

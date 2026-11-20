@@ -14,7 +14,8 @@ Run phases: pressurise (the piston compresses the chamber to the target, screw s
 at the set rate, cutterhead turning, the screw speed held by a PI controller on the axis pressure), standstill again.
 
 Measured per frame: bulkhead pressure in horizontal bands clear of the screw inlet (as the bulkhead pressure cells
-of an EPB), its vertical gradient (least squares over the bands), cutterhead torque, screw speed and the bulkhead
+of an EPB; the axis band feeds the controller), its vertical gradient (least squares over rows one voxel high across
+the full section, |z - zc| < 0.8 R; the bands' own gradient is kept beside it), cutterhead torque, screw speed and the bulkhead
 thrust. The checks (docs/validation/mpm-chamber.md): the vertical gradient against Bezuijen, Talmon, Joustra & Grote
 (2005, Botlek Rail Tunnel: high during excavation, falling at standstill, between under 10 and over 20 kPa/m with
 the muck at about 13 kPa/m), the pressure held within the control band, and the torque below the installed value.
@@ -87,10 +88,28 @@ class ChamberConfig:
     # WP4 leak diagnosis only: paste pushed into the shell wall is put back inside each frame (radius R - h/2, radial
     # velocity removed), so no paste is lost through the shell
     seal_shell: bool = False
+    # where the seal acts, in particle spacings beyond the shell radius: -0.25 (before 18 Nov) also moved paste resting just
+    # inside the wall; 0 acts on paste in the wall only (18 Nov 2026 diagnosis of the grid-alignment cases)
+    seal_margin: float = -0.25
+    # shell plate thickness in voxels (0: the walls' thickness t, 2 voxels); its inner face stays at R (18 Nov 2026 leak test)
+    shell_voxels: float = 0.0
+    # move the shell's inner face out by this fraction of a voxel (18 Nov 2026 alignment test); the paste is placed and the
+    # seal acts against the moved face, the rest of the machine stays sized by R
+    shell_face_offset: float = 0.0
+    # number of flat plates making up the round shell (48 before 19 Nov 2026; smoother-wall test)
+    shell_facets: int = 48
+    # > 0: the shell is one watertight tube mesh with this many segments (default since 19 Nov 2026); 0: the overlapping flat
+    # plates used before, which leak at some grid alignments.
+    # Newton merges a body's shapes into one collider mesh and signs the distance by the face normals at the closest point;
+    # the plates' buried side faces then sign about a quarter of the grid nodes inside the wall as outside (offline check),
+    # and paste is let into the wall where those nodes sit just behind the face
+    shell_mesh: int = 256
     # paste on steel (shell, bulkhead, piston): 0.3, within conditioned soil on steel by inclined plate, 0.31-0.58
     # (Applied Sciences 10 (2020) 3300, doi:10.3390/app10093300), and kaolin on steel, 0.33 (Henke & Wiesenthal, WCCM
     # 2024); < 0 keeps the Phase 0 values 0.3 / 0.3 / 0.5
     wall_friction: float = 0.3
+    # diagnostic: friction on the bulkhead alone (< 0: as wall_friction)
+    bulkhead_friction: float = -1.0
     # volume balance 3: join regions smaller than this fraction of the fullest to the next one towards the axis (0: off).
     # An assumed numerical setting; at 0.12-0.15 m only the 12 corner regions fall under a tenth (15 Nov 2026).
     vb_merge_region_frac: float = 0.1
@@ -101,6 +120,9 @@ class ChamberConfig:
     contact_rows: bool = False
     # alignment test (16 Nov 2026): raise the whole machine by this much (m), moving its axis relative to the solver grid
     z_shift: float = 0.0
+    # balance diagnosis (18 Nov 2026): per region of the balance, over the excavation, the correction it takes each frame
+    # (mean, mean absolute, frames) and where the region is (particle centroid)
+    vb_region_log: bool = False
     # WP4 correction for Newton's volume drift where a solid moves through the paste (newton#5180): once pressurised,
     # the mean elastic volume strain of each region follows the chamber's volume balance (piston advance, paste removed
     # by the screw); deviations within a region are the solver's own
@@ -155,6 +177,24 @@ def paste(cfg: ChamberConfig) -> Soil:
                 extra={"bulk_modulus_Pa": round(k)})
 
 
+def _tube_mesh(R, zc, t, n, x0, x1):
+    """Watertight tube along x (inner radius R, outer R + t, x0..x1), every face wound away from the solid."""
+    th = 2 * np.pi * np.arange(n) / n
+    ring = lambda r, x: np.stack([np.full(n, x), r * np.cos(th), zc + r * np.sin(th)], 1)
+    V = np.vstack([ring(R, x0), ring(R, x1), ring(R + t, x0), ring(R + t, x1)])
+    k = np.arange(n); j = (k + 1) % n
+    i0, i1, o0, o1 = 0, n, 2 * n, 3 * n
+    quads = [(i0 + k, i1 + k, i1 + j, i0 + j), (o0 + k, o0 + j, o1 + j, o1 + k), (i0 + k, i0 + j, o0 + j, o0 + k), (i1 + k, o1 + k, o1 + j, i1 + j)]
+    T = np.concatenate([np.concatenate([np.stack([a, b, c], 1), np.stack([a, c, d], 1)]) for a, b, c, d in quads])
+    P = V[T]; c = P.mean(1); nrm = np.cross(P[:, 1] - P[:, 0], P[:, 2] - P[:, 0])
+    rad = np.stack([np.zeros(len(c)), c[:, 1], c[:, 2] - zc], 1)
+    rad /= np.linalg.norm(rad, axis=1)[:, None]
+    out = np.concatenate([-rad[:2 * n], rad[2 * n:4 * n], np.tile([-1.0, 0, 0], (2 * n, 1)), np.tile([1.0, 0, 0], (2 * n, 1))])
+    flip = np.einsum("ij,ij->i", nrm, out) < 0
+    T[flip] = T[flip][:, [0, 2, 1]]
+    return V.astype(np.float32), T.astype(np.int32)
+
+
 def _rot_x_plate(c, th):
     import warp as wp
 
@@ -187,15 +227,20 @@ def run(cfg: ChamberConfig) -> tuple[dict, dict]:
     zc = R + 0.5 + cfg.z_shift
     t = max(0.2, 2 * dx)  # walls at least one voxel thick (Phase 0)
     area = math.pi * R**2
+    R_f = R + cfg.shell_face_offset * dx  # the shell's inner face
 
     b = newton.ModelBuilder()
     shell = b.add_body(xform=wp.transform_identity(), mass=1.0, is_kinematic=True, label="shell")
-    n_seg = 48
+    n_seg = cfg.shell_facets
     x0, x1 = -t, L + cfg.slab + 0.5
-    for k in range(n_seg):
+    t_sh = cfg.shell_voxels * dx if cfg.shell_voxels > 0 else t
+    if cfg.shell_mesh > 0:
+        V_sh, T_sh = _tube_mesh(R_f, zc, t_sh, cfg.shell_mesh, x0, x1)
+        b.add_shape_mesh(shell, mesh=newton.Mesh(V_sh, T_sh.ravel(), compute_inertia=False))
+    for k in range(n_seg if cfg.shell_mesh <= 0 else 0):
         th = 2 * math.pi * k / n_seg
-        b.add_shape_box(shell, xform=_rot_x_plate(((x0 + x1) / 2, (R + t / 2) * math.cos(th), zc + (R + t / 2) * math.sin(th)), th),
-                        hx=(x1 - x0) / 2, hy=1.08 * R * math.tan(math.pi / n_seg), hz=t / 2)
+        b.add_shape_box(shell, xform=_rot_x_plate(((x0 + x1) / 2, (R_f + t_sh / 2) * math.cos(th), zc + (R_f + t_sh / 2) * math.sin(th)), th),
+                        hx=(x1 - x0) / 2, hy=1.08 * R_f * math.tan(math.pi / n_seg), hz=t_sh / 2)
     bulkhead = b.add_body(xform=wp.transform_identity(), mass=1.0, is_kinematic=True, label="bulkhead")
     add_walls(b, bulkhead, [((-t / 2, 0.0, zc), (t / 2, R + t, R + t))])
     x_ch = L - 0.15
@@ -218,15 +263,15 @@ def run(cfg: ChamberConfig) -> tuple[dict, dict]:
 
     h = dx / cfg.ppc
     rng = np.random.default_rng(cfg.seed)
-    gx, gy, gz = np.arange(h / 2, x_face, h), np.arange(-R, R, h), np.arange(zc - R, zc + R, h)
+    gx, gy, gz = np.arange(h / 2, x_face, h),np.arange(-R_f, R_f, h), np.arange(zc - R_f, zc + R_f, h)
     X, Y, Z = np.meshgrid(gx, gy, gz, indexing="ij")
     pts = np.stack([X.ravel(), Y.ravel(), Z.ravel()], axis=1)
-    pts = pts[np.hypot(pts[:, 1], pts[:, 2] - zc) < R - h / 2]
+    pts = pts[np.hypot(pts[:, 1], pts[:, 2] - zc) < R_f - h / 2]
     j = common.JITTER  # initial jitter, a fraction of h (as fill_box)
     pts = (pts + rng.uniform(-j * h, j * h, pts.shape)).astype(np.float32)
     pm = make_particles(pts, h, soil).finalize()
     mass_p = pm.particle_mass.numpy()
-    solver = make_solver(pm, cm, dx, cfg.iterations, {shell: wf if (wf := cfg.wall_friction) >= 0 else 0.3, bulkhead: wf if wf >= 0 else 0.3, cutter: 0.3, piston: wf if wf >= 0 else 0.5, -1: 0.5})
+    solver = make_solver(pm, cm, dx, cfg.iterations, {shell: wf if (wf := cfg.wall_friction) >= 0 else 0.3, bulkhead: cfg.bulkhead_friction if cfg.bulkhead_friction >= 0 else (wf if wf >= 0 else 0.3), cutter: 0.3, piston: wf if wf >= 0 else 0.5, -1: 0.5})
     if cfg.vr_probe:
         solver._ts_probe = True
     st = cm.state()
@@ -255,6 +300,16 @@ def run(cfg: ChamberConfig) -> tuple[dict, dict]:
     band_area = np.array([np.trapezoid(chord * ((zz >= lo) & (zz < hi)), zz) for lo, hi in zip(edges[:-1], edges[1:])])
     band_z = np.array([np.trapezoid(chord * zz * ((zz >= lo) & (zz < hi)), zz) for lo, hi in zip(edges[:-1], edges[1:])]) / band_area
     axis_band = len(band_z) // 2
+    # the reported gradient (20 Nov 2026): rows one voxel high across the full section (edges a quarter voxel below the
+    # vertex rows), every bulkhead contact, least squares over |z - zc| < 0.8 R. In a force balance over the excavation the bulkhead read this
+    # way matched the paste's own stress 1-4 voxels out (14.38 / 14.65 kPa/m at 0.10 / 0.12 m against 14.5-14.6), while
+    # the bands, which leave out the strip |y| < y_min round the screw inlet, read 14.41 / 15.25.
+    row_e = (np.arange(np.floor((zc - R) / dx), np.ceil((zc + R) / dx) + 1) - 0.25) * dx - zc
+    chord_full = 2 * np.sqrt(np.maximum(R**2 - zz**2, 0))
+    row_area = np.array([np.trapezoid(chord_full * ((zz >= lo) & (zz < hi)), zz) for lo, hi in zip(row_e[:-1], row_e[1:])])
+    row_ok = row_area > 0
+    row_z = np.where(row_ok, np.array([np.trapezoid(chord_full * zz * ((zz >= lo) & (zz < hi)), zz) for lo, hi in zip(row_e[:-1], row_e[1:])]) / np.where(row_ok, row_area, 1.0), 0.0)
+    row_fit = row_ok & (np.abs(row_z) < 0.8 * R)
 
     dt = 1.0 / cfg.fps
     w_c = cfg.cutter_rpm * 2 * math.pi / 60
@@ -278,6 +333,10 @@ def run(cfg: ChamberConfig) -> tuple[dict, dict]:
     resealed = 0
     vb_ref = None
     vb_log: list = []
+    vb_reg_acc = None
+    seal_facets = np.zeros((2, n_seg), dtype=np.int64)  # resets by shell facet: all phases, excavation only (18 Nov 2026)
+    seal_x_edges = np.arange(-t, x_face + 0.5, 0.1)  # and, over the excavation, by facet and 0.1 m slice along the axis
+    seal_fx = np.zeros((n_seg, len(seal_x_edges) - 1), dtype=np.int64)
     vb_map = None
     sub_log: list = []
     sub_bad: list = []
@@ -286,6 +345,16 @@ def run(cfg: ChamberConfig) -> tuple[dict, dict]:
     sub_repaired = 0
     vb_repaired = 0
     stress_log: list = []
+    # diagnostic (20 Nov 2026), with stress_log: the bulkhead's axial force against the paste's own axial stress, summed
+    # over the excavation. Cuts across the whole section every voxel from the bulkhead (sigma_xx x nominal particle
+    # volume / cut thickness, as checked against the forces in a tank), the other solids' axial forces between, and by
+    # height rows (a quarter voxel below the vertex rows) the bulkhead force and the paste 1-2 and 2-4 voxels out
+    # (cuts run to the ground face, through the mixing arms and the cutterhead: the paste clear of solids is only about
+    # 0.1 m deep, under one voxel)
+    bal_x = np.arange(0.0, x_face + 1e-6, dx)
+    bal_z = (np.arange(np.floor((zc - R) / dx), np.ceil((zc + R) / dx) + 1) - 0.25) * dx
+    bal = {"x_edges": bal_x.tolist(), "z_edges": bal_z.tolist(), "frames": 0, "thrust": 0.0, "cut": np.zeros(len(bal_x) - 1),
+           "other_x": np.zeros(len(bal_x) - 1), "bh_row": np.zeros(len(bal_z) - 1), "paste_row": np.zeros((2, len(bal_z) - 1))}
     n_rows = int(round((zc + R + 1.0) / dx)) + 2
     crow = np.zeros((4, 2, 2, 2, n_rows))  # by phase, lattice (centres, vertices), points (all, 2 voxels clear of the shell): summed x force, count; per row
     cframes = np.zeros(4)
@@ -504,6 +573,18 @@ def run(cfg: ChamberConfig) -> tuple[dict, dict]:
                                # correction of a frame (in ln J), and the region that takes it
                                int(valid.sum()), float((cnt / np.maximum(ref_cnt, 1))[valid].min()), float(np.abs(shift).max()), int(np.abs(shift).argmax()),
                                float(cnt[int(np.abs(shift).argmax())]), float(ref_cnt[int(np.abs(shift).argmax())])))
+                if cfg.vb_region_log and phase == "excavate" and cfg.volume_balance == 3:
+                    if vb_reg_acc is None:
+                        vb_reg_acc = np.zeros((m, 8))  # sum shift, sum |shift|, frames, sum count, sum x, y, z of centroid, valid frames
+                    cx = [np.bincount(r_ok[use], weights=xq_[use, k], minlength=m) / np.maximum(cnt, 1) for k in range(3)]
+                    vb_reg_acc[:, 0] += shift
+                    vb_reg_acc[:, 1] += np.abs(shift)
+                    vb_reg_acc[:, 2] += 1.0
+                    vb_reg_acc[:, 3] += cnt
+                    vb_reg_acc[:, 4] += cx[0]
+                    vb_reg_acc[:, 5] += cx[1]
+                    vb_reg_acc[:, 6] += cx[2] - zc
+                    vb_reg_acc[:, 7] += valid
                 fac = np.ones(len(fe))
                 fac[use] = np.exp(shift[r_ok[use]] / 3.0)
                 fe *= fac[:, None, None]
@@ -516,16 +597,23 @@ def run(cfg: ChamberConfig) -> tuple[dict, dict]:
             xq, vq = s.particle_q.numpy(), s.particle_qd.numpy()
             ry, rz = xq[:, 1], xq[:, 2] - zc
             r = np.hypot(ry, rz)
-            out = (r > R - h / 4) & (xq[:, 0] > -t) & (xq[:, 0] < x_p - t / 2)
+            out = (r > R_f + cfg.seal_margin * h) & (xq[:, 0] > -t) & (xq[:, 0] < x_p - t / 2)
             if out.any():
                 ny, nz = ry[out] / r[out], rz[out] / r[out]
                 vr = vq[out, 1] * ny + vq[out, 2] * nz
                 vq[out, 1] -= np.maximum(vr, 0) * ny
                 vq[out, 2] -= np.maximum(vr, 0) * nz
-                xq[out, 1], xq[out, 2] = (R - h / 2) * ny, zc + (R - h / 2) * nz
+                xq[out, 1], xq[out, 2] = (R_f - h / 2) * ny, zc + (R_f - h / 2) * nz
                 s.particle_q.assign(xq)
                 s.particle_qd.assign(vq)
                 resealed += int(out.sum())
+                kf = np.round(np.arctan2(nz, ny) / (2 * math.pi / n_seg)).astype(int) % n_seg
+                fc = np.bincount(kf, minlength=n_seg)
+                seal_facets[0] += fc
+                if phase == "excavate":
+                    seal_facets[1] += fc
+                    kx = np.clip(np.searchsorted(seal_x_edges, xq[out, 0]) - 1, 0, seal_fx.shape[1] - 1)
+                    np.add.at(seal_fx, (kf, kx), 1)
 
         imp, pos, cid = solver.collect_collider_impulses(s)
         imp, pos, cid = imp.numpy(), pos.numpy(), cid.numpy()
@@ -537,7 +625,11 @@ def run(cfg: ChamberConfig) -> tuple[dict, dict]:
         zb = pos[on, 2] - zc
         fx = -F[on, 0]  # F is along -x where the soil presses on the bulkhead
         p_band = np.array([fx[(zb >= lo) & (zb < hi)].sum() for lo, hi in zip(edges[:-1], edges[1:])]) / band_area
-        grad = -float(np.polyfit(band_z, p_band, 1)[0])  # pressure rises downwards
+        grad_band = -float(np.polyfit(band_z, p_band, 1)[0])  # pressure rises downwards
+        on_r = bid == bulkhead  # every bulkhead contact, so the rows add up to the thrust; leaving out the points beyond
+        # the shell radius took force out unevenly by row (0.12 m read 14.90 for 14.67, same seed)
+        p_row = np.histogram(pos[on_r, 2] - zc, row_e, weights=-F[on_r, 0])[0][row_fit] / row_area[row_fit]
+        grad = -float(np.polyfit(row_z[row_fit], p_row, 1)[0])
         if cfg.contact_rows:
             ph_c = ["pressurise", "hold", "excavate", "stop"].index(phase)
             # Newton's collider forces sit on two lattices: cell centres (z = (k + 1/2) voxel) and vertices (z = k voxel);
@@ -601,11 +693,40 @@ def run(cfg: ChamberConfig) -> tuple[dict, dict]:
             core = in_ch & (xq_[:, 0] > 2 * dx) & (rr_ < R - 2 * dx)
             g_ch = -float(np.polyfit(xq_[in_ch, 2], p_part[in_ch], 1)[0]) if in_ch.sum() > 100 else np.nan
             g_core = -float(np.polyfit(xq_[core, 2], p_part[core], 1)[0]) if core.sum() > 100 else np.nan
+            # diagnostic (20 Nov 2026): vertical gradient of the stress per unit of space (particle stress x mass over the
+            # paste density and the bin volume) in the two prisms R/4 < |y| < R/2, by slab along the axis from the bulkhead.
+            # The first slab (within a voxel of the bulkhead) reads high, as the first voxel off a wall did in the tank; the
+            # last is empty (nan) where the mixing arms start less than four voxels from the bulkhead.
+            g_slab = []
+            zb_ = np.linspace(-0.8 * R, 0.8 * R, 11)
+            for xa, xb in ((0.0, dx), (dx, 2 * dx), (2 * dx, 4 * dx), (4 * dx, x_ch - 0.6)):
+                if xb <= xa:
+                    g_slab.append(np.nan)
+                    continue
+                sl =a_ & (xq_[:, 0] >= xa) & (xq_[:, 0] < xb) & (np.abs(xq_[:, 1]) > R / 4) & (np.abs(xq_[:, 1]) < R / 2) & np.isfinite(p_part)
+                kz = np.digitize(xq_[sl, 2] - zc, zb_) - 1
+                okz = (kz >= 0) & (kz < 10)
+                ps_ = np.bincount(kz[okz], weights=(p_part[sl] * mass_p[sl])[okz], minlength=10) / (cfg.paste_density * (xb - xa) * R / 2 * (zb_[1] - zb_[0]))
+                g_slab.append(-float(np.polyfit((zb_[:-1] + zb_[1:]) / 2, ps_, 1)[0]) / 1e3 if okz.sum() > 50 else np.nan)
+            if phase == "excavate":
+                v0_ = mass_p / cfg.paste_density
+                sx_ = np.where(np.isfinite(sig[:, 0, 0]), sig[:, 0, 0], 0.0) * v0_
+                in_ = a_ & (rr_ < R)
+                bal["cut"] += np.histogram(xq_[in_, 0], bal_x, weights=sx_[in_])[0] / dx
+                ob_ = valid & (bid != bulkhead)
+                bal["other_x"] += np.histogram(pos[ob_, 0], bal_x, weights=F[ob_, 0])[0]
+                bh_ = bid == bulkhead
+                bal["thrust"] += -float(F[bh_, 0].sum())
+                bal["bh_row"] += np.histogram(pos[bh_, 2], bal_z, weights=-F[bh_, 0])[0]
+                for k_, (xa_, xb_) in enumerate(((dx, 2 * dx), (2 * dx, 4 * dx))):
+                    m_ = in_ & (xq_[:, 0] >= xa_) & (xq_[:, 0] < xb_)
+                    bal["paste_row"][k_] += np.histogram(xq_[m_, 2], bal_z, weights=sx_[m_])[0] / (xb_ - xa_)
+                bal["frames"] += 1
             stress_log.append((f * dt, p_band[axis_band] / 1e3, sb[axis_band] / 1e3, pb[axis_band] / 1e3, grad / 1e3, g_s / 1e3, p_all / 1e3, int(near.sum()), g_ch / 1e3, g_core / 1e3,
                                ["pressurise", "hold", "excavate", "stop"].index(phase),
                                # vertical balance: the paste's weight in the chamber and the vertical force it puts on each solid (N, down positive)
                                float(mass_p[a_ & (xq_[:, 0] > 0) & (rr_ < R)].sum()) * G,
-                               -float(F[bid == shell, 2].sum()), -float(F[bid == bulkhead, 2].sum()), -float(F[bid == piston, 2].sum()), -float(F[bid == cutter, 2].sum())))
+                               -float(F[bid == shell, 2].sum()), -float(F[bid == bulkhead, 2].sum()), -float(F[bid == piston, 2].sum()), -float(F[bid == cutter, 2].sum()), *g_slab))
             # profile by height in two prisms clear of the shell (R/4 < |y| < R/2, |z - zc| < 0.8 R, bulkhead to the
             # spokes): paste mass and mean stress per bin, summed over the frames of each phase. Fill = mass / (paste
             # density x bin volume); Newton's stress acts per unit of particle volume, so the stress the paste carries per
@@ -621,14 +742,14 @@ def run(cfg: ChamberConfig) -> tuple[dict, dict]:
             prof_x = x_ch - 0.1
         p_hist.append(float(p_band[axis_band]))
         log.append((f * dt, ["pressurise", "hold", "excavate", "stop"].index(phase), p_band[axis_band] / 1e3, grad / 1e3,
-                    rpm, thrust / 1e6, abs(torque) / 1e6, x_face + t / 2 - x_p, removed, p_piston / 1e3, f_cutter_x / 1e6, v_piston * 6e4))
+                    rpm, thrust / 1e6, abs(torque) / 1e6, x_face + t / 2 - x_p, removed, p_piston / 1e3, f_cutter_x / 1e6, v_piston * 6e4, grad_band / 1e3))
         t_phase += dt
 
     log = np.array(log)
     xq = s.particle_q.numpy()[(flags & active) != 0]
     esc_back = xq[:, 0] < -0.02
     esc_front = xq[:, 0] > x_p - t / 2 + 0.02
-    esc_side = (np.hypot(xq[:, 1], xq[:, 2] - zc) > R + 0.02) & ~esc_back & ~esc_front
+    esc_side = (np.hypot(xq[:, 1], xq[:, 2] - zc) > R_f + 0.02) & ~esc_back & ~esc_front
     escaped = int(np.sum(esc_back | esc_front | esc_side))
     # paste volume left in the chamber and slab against its volume: a pressure drop with no outflow means lost volume
     vol_now = area * (x_p - t / 2)
@@ -701,6 +822,7 @@ def run(cfg: ChamberConfig) -> tuple[dict, dict]:
         "p_axis_excavate_band_kPa": [round(float(np.percentile(ex[:, 2], 5)), 1), round(float(np.percentile(ex[:, 2], 95)), 1)] if len(ex) else None,
         "gradient_excavate_kPa_per_m": round(float(ex[:, 3].mean()), 2) if len(ex) else None,
         "gradient_stop_kPa_per_m": round(float(stop[:, 3].mean()), 2) if len(stop) else None,
+        "gradient_bands_hold_excavate_kPa_per_m": [round(float(hold[:, 12].mean()), 2) if len(hold) else None, round(float(ex[:, 12].mean()), 2) if len(ex) else None],
         "screw_rpm_excavate": round(float(ex[:, 4].mean()), 2) if len(ex) else None,
         "screw_rpm_feedforward": round(screw.rpm_for_flow(area * v_adv), 2),
         "bulkhead_thrust_MN_excavate": round(float(ex[:, 5].mean()), 2) if len(ex) else None,
@@ -719,7 +841,7 @@ def run(cfg: ChamberConfig) -> tuple[dict, dict]:
         "particles_per_m3_start_end": [round(len(pts) / (area * x_face)), round((n_active - escaped) / vol_now)],
         "ms_per_frame": round(float(np.mean(times[5:]) * 1000), 2),
     }
-    return res, {"log": log, "q_end": s.particle_q.numpy(), "active": (flags & active) != 0, "x_cutter": x_ch, "zc": zc, "vb": np.array(vb_log), "stress": np.array(stress_log), "sub": np.array(sub_log), "sub_bad": sub_bad, "sub_ext": sub_ext, "vrp": vrp_log, "sub_repaired": sub_repaired, "contact_rows": {"sums": crow, "frames": cframes, "snap": csnap, "voxel": dx, "zc": zc, "R": R, "y_min": y_min, "edges": edges, "band_z": band_z, "band_area": band_area} if cfg.contact_rows else None,
+    return res, {"log": log, "q_end": s.particle_q.numpy(), "active": (flags & active) != 0, "x_cutter": x_ch, "zc": zc, "vb": np.array(vb_log), "stress": np.array(stress_log), "balance": {k: (v.tolist() if isinstance(v, np.ndarray) else v) for k, v in bal.items()} if cfg.stress_log else None, "sub": np.array(sub_log), "sub_bad": sub_bad, "sub_ext": sub_ext, "vrp": vrp_log, "sub_repaired": sub_repaired, "vb_regions": vb_reg_acc, "seal_facets": seal_facets, "seal_fx": {"counts": seal_fx.tolist(), "x_edges": seal_x_edges.tolist(), "x_cutter": x_ch, "x_face": x_face, "sink_hi": sink_hi.tolist()}, "contact_rows": {"sums": crow, "frames": cframes, "snap": csnap, "voxel": dx, "zc": zc, "R": R, "y_min": y_min, "edges": edges, "band_z": band_z, "band_area": band_area} if cfg.contact_rows else None,
                  "profile": {"sums": prof, "z_over_R": (np.arange(n_prof) + 0.5) * 1.6 / n_prof - 0.8, "bin_volume_m3": prof_x * (R / 2) * (1.6 * R / n_prof), "paste_density": cfg.paste_density}}
 
 
