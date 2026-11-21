@@ -150,7 +150,10 @@ class ChamberConfig:
     # volume <= 0 or not finite, velocity not finite) and extreme ones (J outside 0.1-10), and the fastest speed; every 15
     # frames, where the extreme and fast (> 15 m/s) ones are. When one is
     # invalid: save it and its neighbours (2 voxels) before and after that step, then reset it as substep_repair does.
-    substep_guard: bool = False
+    # On by default since 21 Nov 2026: a numerical safeguard, not physics. Extreme particles collect in the corner of the
+    # ground face and the shell once the face passes x ~ 1.26 m (cause not found); one of them going invalid most likely
+    # lost a whole 0.10 m chamber on 20 Nov. The result reports how many particles were reset
+    substep_guard: bool = True
     # where and when the analytical screw takes paste from its inlet. "centre" (default since 16 Nov 2026): the particles
     # nearest the middle of the inlet. "wall" (before): those deepest in the casing, against the bulkhead; emptying that
     # corner drew jets of paste into it (up to 235 m/s against under 4 m/s elsewhere), and a particle crushed there turned

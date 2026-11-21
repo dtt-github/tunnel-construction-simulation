@@ -12,7 +12,7 @@
   - **Screw ([17 Nov 2026](#screw-speed-the-controllers-swing-and-the-screw-volume-17-nov-2026)):** the screw speed scattered (8–14 rpm) because the pressure controller swings with a period of 40–50 s, longer than a 20 s excavation. Read by volume over the whole excavation, less the paste's elastic swing, the screw removes the displaced volume times the paste's fill (1.06–1.11) within 2 % at every voxel and seed.
   - **Watertight shell ([19 Nov 2026](#the-shell-leak-a-watertight-tube-18-and-19-nov-2026)):** the paste leaked into the shell because Newton merges a body's overlapping shapes into one mesh and mis-signs grid nodes behind buried faces. The shell is now one tube mesh: resets fell from 0.2–14 M to about 10 thousand per run, and the gradient no longer depends on where the wall falls on the grid.
   - **Gradient at seven voxels ([21 Nov 2026](#the-bulkhead-gradient-at-seven-voxels-19-to-21-nov-2026)):** read in rows across the full section, the bulkhead gradient in excavation is 14.53 ± 0.18 kPa/m at seven voxels from 0.15 m to 0.08 m, with no trend. It is within 3 % of the paste's weight at its fill and inside Botlek's 10–20 kPa/m. A force balance in the chamber matched it to the paste's own stress. The bands had read 0.12 m 0.9 kPa/m high.
-  - **Open:** 0.10 m read about 2 kPa/m low in 100 s runs before the tube shell, and its controller swing does not die down. 0.25 m does not hold. The pressure band is narrower than on a machine. A sudden loss of the whole chamber came back in one run on 20 Nov. The torque is the paste's only.
+  - **Open:** 0.10 m read about 2 kPa/m low in 100 s runs before the tube shell, and its controller swing does not die down. 0.25 m does not hold. The pressure band is narrower than on a machine. A sudden loss of the whole chamber came back in one run on 20 Nov. It starts from extreme particles in the corner of the ground face and the shell; since 21 Nov a check after every solver step resets the particle that fails, and the chamber holds ([21 Nov](#the-bulkhead-gradient-at-seven-voxels-19-to-21-nov-2026)). The torque is the paste's only.
   - The runs before 8 Nov, below, used the Phase 0 paste and no correction. They stand as the record of the loss.
   - **Correction (7 Nov 2026):** from 6 Nov the docs, the v1.0.0 release notes and our comment on [newton-physics/newton#5180](https://github.com/newton-physics/newton/issues/5180) said that under GIMP the chamber keeps 162 of 207 kPa (172 of 216 before the scaling fix), "a fifth lost". Those runs excavated for 4 s only. Over the scene's 20 s excavation the pressure falls to 51 kPa.
 - **Run on:** 5 Nov 2026; GIMP and 20 s diagnosis runs 7 Nov 2026; volume balance and sourced paste 8–9 Nov 2026; cause, screw step, thrust and gradient 13–14 Nov 2026; substeps and the screw inlet 15–16 Nov 2026; bulkhead reading and four voxels 16 Nov 2026; screw volume, step and thrust 17 Nov 2026; shell leak and the tube shell 18–19 Nov 2026; gradient at seven voxels, diagnostic tank and force balance 19–21 Nov 2026
@@ -689,6 +689,23 @@ Seven runs with the guard (records in `server/diagnostics/out_box`, `gd_*`). The
   - It had at most 7 extreme particles at a time, against 17–47.
 - **Open:** what fixes the face position at about 1.26 m. Neither the shell's end, nor the cutterhead gap alone, nor the face's place on the grid explains it.
 
+**Closed with the guard on by default (21 Nov).** Since the cause of the corner particles is not found, `substep_guard` is now on by default. It is a numerical safeguard, not physics, and every result reports how many particles it reset (`substep_guard.particles_reset`). The lost set-up (0.10 m, seed 0, the same logs) was run three more times with it:
+
+| Repeat | Onset (face) | Steps with extreme particles | Fastest (m/s) | Particles reset | Axis pressure in excavation | Gradient |
+|---|---|---|---|---|---|---|
+| 1 | 1.2608 m | 3247 | 193 | 0 | 202.4 kPa | 14.58 kPa/m |
+| 2 | 1.2605 m | 3162 | 14 | 0 | 202.4 kPa | 14.56 kPa/m |
+| 3 | 1.2603 m | 3120 | 369 | 1 | 202.3 kPa | 14.58 kPa/m |
+
+- **Repeat 3 caught the failure.** It happened 17.7 s into excavation, with the face at x = 1.2557 m.
+  - One particle went invalid: its J was 1.4 × 10¹⁰ before the step and negative after.
+  - It was one of the last particles placed, so it started beside the ground face. By then it was 0.35 m back along the shell, at x = 1.03 m, moving at 17 m/s.
+  - Its 58 neighbours within 2 voxels stayed valid through the step. Six of them were extreme too, with J down to 0.0007 before the step and 0.00015 after.
+  - The guard reset it, and the chamber held. Pressure and gradient match the repeats that needed no reset.
+- **The failure path, as far as the guard shows it:** an extreme particle forms in the corner, is carried along the shell, and goes invalid. Without the guard, one such particle most likely lost the whole chamber on 20 Nov; this fits, but is not shown for that run. Here it came once in three repeats.
+- **Cost:** none to measure. Frame times here are set by the thermal pauses (686–836 ms per frame, against 719–818 in the trace runs). Peaks were 79–81 °C. The node was shared with another CPU job.
+- **Known limit:** the corner particles remain. They carry no measurable error in pressure or gradient (above), but a run is sound only while the reset count stays small. The result reports it.
+
 ## Where this leaves WP4
 
 - The chamber scene, the pressure controller, a volume correction and the open validation data are in place. The scene's defaults are:
@@ -697,7 +714,8 @@ Seven runs with the guard (records in `server/diagnostics/out_box`, `gd_*`). The
   - 4 solver steps of 50 iterations per frame (since 15 Nov 2026; before, 1 step of 100);
   - the screw taking paste from the middle of its inlet (since 16 Nov 2026);
   - the shell as one watertight tube mesh (since 19 Nov 2026);
-  - the gradient read in rows across the full section (since 20 Nov 2026).
+  - the gradient read in rows across the full section (since 20 Nov 2026);
+  - a check after every solver step that resets an invalid particle (since 21 Nov 2026; a numerical safeguard, reported in every result).
 - **Checked (16–17 Nov 2026):** the screw removes the displaced volume times the paste's fill, within 2 % at four voxels ([17 Nov](#screw-speed-the-controllers-swing-and-the-screw-volume-17-nov-2026)). With these defaults the set point holds through excavation and the stop at 0.15 m, 0.12 m and 0.10 m, in three seeds of three at each voxel ([above](#solver-substeps-and-a-collapse-at-the-screw-inlet-15-and-16-nov-2026)). The vertical force balance closes. The bulkhead contact gradient, read with bands on the grid, is 12.9–15.2 kPa/m at four voxels from 0.15 m to 0.08 m, inside Botlek's 10–20 ([16 Nov](#the-bulkhead-reading-and-the-gradient-at-four-voxels-16-nov-2026)).
 - **Checked (19–21 Nov 2026):** with the tube shell and the full-section reading, the gradient in excavation is 14.53 ± 0.18 kPa/m at seven voxels from 0.15 m to 0.08 m, with no trend and repeats within 0.07 kPa/m. The bulkhead and the paste beside it agree in a force balance ([21 Nov](#the-bulkhead-gradient-at-seven-voxels-19-to-21-nov-2026)). This meets the gradient check against Botlek for the excavation phase.
 - **WP4 outputs produced:** bulkhead pressure in bands, its gradient, mixing torque, the response to a screw-speed step, and a shove under thrust.
@@ -706,7 +724,7 @@ Seven runs with the guard (records in `server/diagnostics/out_box`, `gd_*`). The
   - the 0.10 m gradient over 100 s, about 2 kPa/m below 0.15 m and 0.12 m when settled (13.05 against 15.1 and 15.6 kPa/m over the last 50 s), from runs before the tube shell and the row reading; not rerun. Also its undamped controller swing;
   - controller gains from a source (assumed now; a 20 s excavation does not settle);
   - why the bands read 0.12 m high (the screw strip's edge is likely, not shown);
-  - the sudden loss of a whole chamber, seen once on 20 Nov;
+  - why extreme particles form in the corner of the ground face and the shell. The sudden loss they cause (once on 20 Nov) is stopped by the guard since 21 Nov;
   - the 0.15 m results recorded before 16 Nov ran 11–13 % above the set point (the step and thrust runs are repeated, 17 Nov);
   - the screw step at 8–14 % above the net-flow prediction in 90 s runs (within 4 % in 20 s runs);
   - deleting paste that escapes the chamber;
