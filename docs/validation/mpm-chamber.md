@@ -645,7 +645,49 @@ The seven voxels were rerun with this reading (seed 0; records `ch_rg_v008` to `
 - **It is inside Botlek's 10–20 kPa/m,** within 3 % of the paste's weight at its fill (14.1–14.4) and within 0.6 kPa/m of the paste 2–4 voxels out.
 - **The paste 1–2 voxels out reads up to 15.6 kPa/m at 0.15 m.** That is the first voxel's excess, also seen in the tank.
 
-**A sudden loss came back once.** One 0.10 m run (seed 0, the force-balance logging on, otherwise the defaults) lost its whole chamber 20.35 s into excavation: every particle turned invalid within one frame. An identical earlier run and seed 1 held. Runs on the GPU do not repeat bit for bit, so the loss fixed on [16 Nov](#solver-substeps-and-a-collapse-at-the-screw-inlet-15-and-16-nov-2026) is rarer, not gone. Not yet traced.
+**A sudden loss came back once.** One 0.10 m run (seed 0, the force-balance logging on, otherwise the defaults) lost its whole chamber 16.1 s into excavation (20.35 s into the run). An identical earlier run and seed 1 held. Runs on the GPU do not repeat bit for bit, so the loss fixed on [16 Nov](#solver-substeps-and-a-collapse-at-the-screw-inlet-15-and-16-nov-2026) is rarer, not gone.
+
+The per-frame logs of that run (`stress_log`, the balance's log) show:
+- **The chamber was healthy until the last frame.** No particle was invalid at any frame of the excavation. The balance's largest correction per frame stayed at its usual size (median 0.006 in ln J, at most 0.047). The axis pressure was 198–208 kPa, the screw 15–17 rpm, and the torque and cutterhead forces were steady.
+- **In the frame that ended at 20.35 s**:
+  - the largest correction rose to 0.036, in the region at the invert, just off the centreline, in the third of the chamber nearest the ground face (x 0.84–1.26 m, in front of the cutterhead's face at 0.75 m);
+  - the shell's vertical force fell from 734 to 717 kN;
+  - the pressure on the ground face fell from 206.9 to 205.6 kPa.
+- **One frame later 427,197 of 427,221 particles were invalid.** The spread took at most four solver steps.
+
+So the trigger was local. Unlike 16 Nov, it was not at the screw inlet, and it gave no warning a frame earlier. These logs cannot say which particle failed first: that needs the check after each solver step (`substep_check`), which was off.
+
+**Traced with a check on the GPU (21 Nov, `ChamberConfig.substep_guard`).** After every solver step a Warp kernel counts invalid and extreme particles (J outside 0.1–10) and the fastest speed. It reads back three numbers, and every quarter second it saves where the extreme and fast particles are. On an invalid particle it saves that particle and its neighbours before and after the step, then resets it as `substep_repair` does. A test with one particle broken on purpose was caught, saved and reset in the same step, and the run went on.
+
+Seven runs with the guard (records in `server/diagnostics/out_box`, `gd_*`). The onset is the first solver step with an extreme particle. In excavation the face moves 20 mm, from x = 1.273 m to 1.253 m in the standard runs.
+
+| Run | Face position at onset | Solver steps with extreme particles | Fastest (m/s) | Invalid |
+|---|---|---|---|---|
+| 0.10 m, seed 0 | x = 1.2605 m, 17.1 s into the run | 3158 | 56 | 0 |
+| 0.10 m, seed 1 | 1.2607 m, 16.9 s | 3212 | 89 | 0 |
+| 0.10 m, seed 2 | 1.2619 m, 15.7 s | 2882 | 13 | 0 |
+| 0.12 m, seed 0 | 1.2634 m, 15.9 s | 3463 | 11 | 0 |
+| 0.10 m, slab 0.65 m (face 5 cm further out) | not reached (face 1.323 → 1.303 m) | 1 | 17 | 0 |
+| 0.10 m, seed 0, cutterhead 1 cm nearer the face (21 Nov) | 1.2644 m, 14.9 s | 3009 | 11 | 0 |
+| 0.10 m, seed 0, shell tube's end 10 cm nearer (21 Nov) | 1.2599 m, 17.7 s | 3020 | 48 | 0 |
+
+- **The extreme particles sit in the corner of the ground face and the shell:**
+  - within about 4 cm of the face and 4–40 cm of the shell;
+  - in clusters at a few angles around the circumference;
+  - with J from 0.007 to 7 × 10⁴;
+  - a few inside the ground piston, where it overlaps the shell.
+  Once they appear they stay to the end of the run. The lost run's last warning sign was in the same corner, at the invert.
+- **They appear when the ground face reaches x ≈ 1.26 m, at both voxels.** The face then stands about 0.51 m in front of the cutterhead's face and 0.64 m from the end of the shell tube. With the slab 5 cm longer the face never got there, and the run had extreme particles in one solver step only.
+- **Not a sign error:** an offline check of the tube and the piston, with Newton's rule (nearest collider, sign from the averaged normal), finds no mis-signed node near that corner at any face position.
+- **None of the seven runs had an invalid particle,** so the guard reset nothing. The lost run probably failed from one of these corner particles. That makes it a rare event among many runs that carry them; this is likely, not shown.
+- **Not the shell tube's end (21 Nov, `shell_end_shift = -0.10`):**
+  - With the end 10 cm nearer, the onset stays at 1.2599 m, within 1 mm of the three seeds.
+  - The slab 0.65 m run agrees: its face passed the same distance from the end, 0.64 m, with no onset.
+- **Not the cutterhead gap alone (21 Nov, `cutter_shift = 0.01`):**
+  - If the gap set it off, moving the cutterhead 1 cm toward the face would move the onset 1 cm, to about 1.270 m. It moved 3 mm, to 1.2644 m, from 1.2605–1.2619 m in the three seeds. That is one seed; at most a small part of the shift can come from the gap.
+  - This run started excavation with the face 1.7 mm further out (1.2750 m), because the chamber between the moved cutterhead and the face is smaller. Its onset came 10.6 mm into the advance, against 11.4–12.8 mm in the seeds.
+  - It had at most 7 extreme particles at a time, against 17–47.
+- **Open:** what fixes the face position at about 1.26 m. Neither the shell's end, nor the cutterhead gap alone, nor the face's place on the grid explains it.
 
 ## Where this leaves WP4
 

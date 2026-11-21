@@ -104,6 +104,10 @@ class ChamberConfig:
     # the plates' buried side faces then sign about a quarter of the grid nodes inside the wall as outside (offline check),
     # and paste is let into the wall where those nodes sit just behind the face
     shell_mesh: int = 256
+    # sudden-loss trace only (21 Nov 2026): move the shell tube's far end (normally slab + 0.5 m past the chamber) or the
+    # cutterhead along the axis by this many metres, everything else unchanged
+    shell_end_shift: float = 0.0
+    cutter_shift: float = 0.0
     # paste on steel (shell, bulkhead, piston): 0.3, within conditioned soil on steel by inclined plate, 0.31-0.58
     # (Applied Sciences 10 (2020) 3300, doi:10.3390/app10093300), and kaolin on steel, 0.33 (Henke & Wiesenthal, WCCM
     # 2024); < 0 keeps the Phase 0 values 0.3 / 0.3 / 0.5
@@ -142,6 +146,11 @@ class ChamberConfig:
     substeps: int = 4
     substep_check: bool = False  # log invalid particles and speeds after every solver step
     substep_repair: bool = False  # reset invalid particles after every solver step, not once per frame
+    # the same check on the GPU, at almost no cost (21 Nov 2026): after every solver step, count invalid particles (elastic
+    # volume <= 0 or not finite, velocity not finite) and extreme ones (J outside 0.1-10), and the fastest speed; every 15
+    # frames, where the extreme and fast (> 15 m/s) ones are. When one is
+    # invalid: save it and its neighbours (2 voxels) before and after that step, then reset it as substep_repair does.
+    substep_guard: bool = False
     # where and when the analytical screw takes paste from its inlet. "centre" (default since 16 Nov 2026): the particles
     # nearest the middle of the inlet. "wall" (before): those deepest in the casing, against the bulkhead; emptying that
     # corner drew jets of paste into it (up to 235 m/s against under 4 m/s elsewhere), and a particle crushed there turned
@@ -195,6 +204,43 @@ def _tube_mesh(R, zc, t, n, x0, x1):
     return V.astype(np.float32), T.astype(np.int32)
 
 
+_GUARD_KERNEL = None
+
+
+def _guard_kernel():
+    """Warp kernel for ChamberConfig.substep_guard, built once (warp is imported lazily here, as in the rest of the scene)."""
+    global _GUARD_KERNEL
+    if _GUARD_KERNEL is None:
+        import warp as wp
+
+        @wp.kernel
+        def guard(fe: wp.array(dtype=wp.mat33), qd: wp.array(dtype=wp.vec3), flags: wp.array(dtype=wp.int32), active: wp.int32,
+                  j_lo: float, j_hi: float, v_fast: float, out: wp.array(dtype=wp.int32), idx: wp.array(dtype=wp.int32),
+                  vmax: wp.array(dtype=float), odd: wp.array(dtype=wp.int32)):
+            i = wp.tid()
+            if (flags[i] & active) == 0:
+                return
+            j = wp.determinant(fe[i])
+            v = qd[i]
+            ok_v = wp.isfinite(v)
+            if (not wp.isfinite(j)) or j <= 0.0 or (not ok_v):
+                k = wp.atomic_add(out, 0, 1)
+                if k < idx.shape[0]:
+                    idx[k] = i
+            else:
+                if j < j_lo or j > j_hi:
+                    wp.atomic_add(out, 1, 1)
+                if j < j_lo or j > j_hi or wp.length(v) > v_fast:  # extreme or fast: keep the index, to see where
+                    k2 = wp.atomic_add(out, 2, 1)
+                    if k2 < odd.shape[0]:
+                        odd[k2] = i
+            if ok_v:
+                wp.atomic_max(vmax, 0, wp.length(v))
+
+        _GUARD_KERNEL = guard
+    return _GUARD_KERNEL
+
+
 def _rot_x_plate(c, th):
     import warp as wp
 
@@ -232,7 +278,7 @@ def run(cfg: ChamberConfig) -> tuple[dict, dict]:
     b = newton.ModelBuilder()
     shell = b.add_body(xform=wp.transform_identity(), mass=1.0, is_kinematic=True, label="shell")
     n_seg = cfg.shell_facets
-    x0, x1 = -t, L + cfg.slab + 0.5
+    x0, x1 = -t, L + cfg.slab + 0.5 + cfg.shell_end_shift
     t_sh = cfg.shell_voxels * dx if cfg.shell_voxels > 0 else t
     if cfg.shell_mesh > 0:
         V_sh, T_sh = _tube_mesh(R_f, zc, t_sh, cfg.shell_mesh, x0, x1)
@@ -243,7 +289,7 @@ def run(cfg: ChamberConfig) -> tuple[dict, dict]:
                         hx=(x1 - x0) / 2, hy=1.08 * R_f * math.tan(math.pi / n_seg), hz=t_sh / 2)
     bulkhead = b.add_body(xform=wp.transform_identity(), mass=1.0, is_kinematic=True, label="bulkhead")
     add_walls(b, bulkhead, [((-t / 2, 0.0, zc), (t / 2, R + t, R + t))])
-    x_ch = L - 0.15
+    x_ch = L - 0.15 + cfg.cutter_shift
     cutter = b.add_body(xform=wp.transform(wp.vec3(x_ch, 0.0, zc), wp.quat_identity()), mass=1.0, is_kinematic=True, label="cutterhead")
     r0, r1 = 0.4, R - 0.08
     for k in range(6):
@@ -343,6 +389,10 @@ def run(cfg: ChamberConfig) -> tuple[dict, dict]:
     sub_ext: list = []
     vrp_log: list = []
     sub_repaired = 0
+    guard_log: list = []  # substep_guard: per solver step (t, step, invalid, extreme, fastest m/s)
+    guard_events: list = []  # substep_guard: each step with an invalid particle, the particles and their neighbours
+    guard_buf = None
+    guard_odd: list = []  # substep_guard: every 15 frames, the extreme (J outside 0.1-10) and fast (> 15 m/s) particles
     vb_repaired = 0
     stress_log: list = []
     # diagnostic (20 Nov 2026), with stress_log: the bulkhead's axial force against the paste's own axial stress, summed
@@ -463,6 +513,55 @@ def run(cfg: ChamberConfig) -> tuple[dict, dict]:
             if cfg.screw_per_substep:
                 owed = take_from_inlet(owed + screw.discharge(rpm) * dt / cfg.substeps / v_particle)
             solver.step(s, s, contacts=None, control=None, dt=dt / cfg.substeps)
+            if cfg.substep_guard:
+                if guard_buf is None:
+                    n_all = s.particle_q.shape[0]
+                    guard_buf = {"out": wp.zeros(3, dtype=wp.int32), "idx": wp.zeros(64, dtype=wp.int32), "vmax": wp.zeros(1, dtype=float), "odd": wp.zeros(256, dtype=wp.int32),
+                                 "q": wp.clone(s.particle_q), "qd": wp.clone(s.particle_qd), "fe": wp.clone(s.mpm.particle_elastic_strain), "n": n_all}
+                gb = guard_buf
+                gb["out"].zero_()
+                gb["vmax"].zero_()
+                wp.launch(_guard_kernel(), dim=gb["n"], inputs=[s.mpm.particle_elastic_strain, s.particle_qd, pm.particle_flags, active,
+                                                                0.1, 10.0, 15.0, gb["out"], gb["idx"], gb["vmax"], gb["odd"]])
+                o_ = gb["out"].numpy()
+                guard_log.append((f * dt, k_sub, int(o_[0]), int(o_[1]), float(gb["vmax"].numpy()[0]), int(o_[2])))
+                if o_[2] > 0 and k_sub == cfg.substeps - 1 and f % 15 == 0 and len(guard_odd) < 400:  # where the extreme and fast ones are
+                    io_ = gb["odd"].numpy()[:min(int(o_[2]), 256)]
+                    with np.errstate(all="ignore"):
+                        jo_ = np.linalg.det(s.mpm.particle_elastic_strain.numpy()[io_])
+                    guard_odd.append({"t": f * dt, "phase": phase, "n": int(o_[2]), "x_ground": x_p - t / 2, "idx": io_.tolist(), "q": s.particle_q.numpy()[io_].round(3).tolist(),
+                                      "v": s.particle_qd.numpy()[io_].round(2).tolist(), "J": np.nan_to_num(jo_, nan=-1.0).round(4).tolist()})
+                if o_[0] > 0:
+                    ib = gb["idx"].numpy()[:min(int(o_[0]), 64)]
+                    q1, qd1, fe1 = s.particle_q.numpy(), s.particle_qd.numpy(), s.mpm.particle_elastic_strain.numpy()
+                    q0, qd0, fe0 = gb["q"].numpy(), gb["qd"].numpy(), gb["fe"].numpy()
+                    act_ = (flags & active) != 0
+                    if len(guard_events) < 20:
+                        with np.errstate(all="ignore"):
+                            near_ = act_ & (np.min(np.linalg.norm(q0[:, None, :] - q0[ib[:8]][None], axis=2), axis=1) < 2 * dx)
+                            j0, j1 = np.linalg.det(fe0[near_]), np.linalg.det(fe1[near_])
+                        guard_events.append({"t": f * dt, "step": k_sub, "phase": phase, "invalid": int(o_[0]), "extreme": int(o_[1]),
+                                             "first": ib[:8].tolist(), "x_cutter": x_ch, "x_ground": x_p - t / 2, "screw_rpm": rpm,
+                                             "near": np.nonzero(near_)[0].tolist(), "q_before": q0[near_].round(4).tolist(), "q_after": np.nan_to_num(q1[near_], nan=1e9).round(4).tolist(),
+                                             "v_before": qd0[near_].round(3).tolist(), "v_after": np.nan_to_num(qd1[near_], nan=1e9).round(3).tolist(),
+                                             "J_before": np.nan_to_num(j0, nan=-1.0).round(5).tolist(), "J_after": np.nan_to_num(j1, nan=-1.0).round(5).tolist()})
+                    # reset, as substep_repair: the invalid particles to the mean elastic volume of the rest, at rest
+                    with np.errstate(all="ignore"):
+                        dj1 = np.linalg.det(fe1)
+                    bad_fe = act_ & ~(np.isfinite(dj1) & (dj1 > 0))
+                    bad_v = act_ & ~np.isfinite(qd1).all(axis=1)
+                    good = act_ & ~bad_fe
+                    fe1[bad_fe] = math.exp(float(np.log(dj1[good]).mean()) / 3.0) * np.eye(3, dtype=np.float32)
+                    qd1[bad_v] = 0.0
+                    if bad_v.any():  # a particle with no finite velocity has no finite position either: put it back where it was
+                        q1[bad_v] = q0[bad_v]
+                        s.particle_q.assign(q1)
+                    s.mpm.particle_elastic_strain.assign(fe1)
+                    s.particle_qd.assign(qd1)
+                    sub_repaired += int(bad_fe.sum()) + int(bad_v.sum())
+                wp.copy(gb["q"], s.particle_q)
+                wp.copy(gb["qd"], s.particle_qd)
+                wp.copy(gb["fe"], s.mpm.particle_elastic_strain)
             if cfg.substep_check or cfg.substep_repair:  # diagnosis of a sudden collapse (16 Nov 2026)
                 fe_ = s.mpm.particle_elastic_strain.numpy()
                 qd_ = s.particle_qd.numpy()
@@ -837,11 +936,13 @@ def run(cfg: ChamberConfig) -> tuple[dict, dict]:
         "volume_balance_repaired": vb_repaired,
         "volume_correction_mismatch_mean_rms_excavate": [round(float(np.mean([r[k] for r in vc_log if r[0]])), 5) for k in (1, 2)] if vc is not None and any(r[0] for r in vc_log) else None,
         "particle_reseals": resealed,
+        "substep_guard": {"steps_with_invalid": int(sum(1 for g in guard_log if g[2] > 0)), "particles_reset": sub_repaired,
+                          "steps_with_extreme": int(sum(1 for g in guard_log if g[3] > 0)), "fastest_m_s": round(max((g[4] for g in guard_log), default=0.0), 2)} if cfg.substep_guard else None,
         "escaped_back_front_side": [int(esc_back.sum()), int(esc_front.sum()), int(esc_side.sum())],
         "particles_per_m3_start_end": [round(len(pts) / (area * x_face)), round((n_active - escaped) / vol_now)],
         "ms_per_frame": round(float(np.mean(times[5:]) * 1000), 2),
     }
-    return res, {"log": log, "q_end": s.particle_q.numpy(), "active": (flags & active) != 0, "x_cutter": x_ch, "zc": zc, "vb": np.array(vb_log), "stress": np.array(stress_log), "balance": {k: (v.tolist() if isinstance(v, np.ndarray) else v) for k, v in bal.items()} if cfg.stress_log else None, "sub": np.array(sub_log), "sub_bad": sub_bad, "sub_ext": sub_ext, "vrp": vrp_log, "sub_repaired": sub_repaired, "vb_regions": vb_reg_acc, "seal_facets": seal_facets, "seal_fx": {"counts": seal_fx.tolist(), "x_edges": seal_x_edges.tolist(), "x_cutter": x_ch, "x_face": x_face, "sink_hi": sink_hi.tolist()}, "contact_rows": {"sums": crow, "frames": cframes, "snap": csnap, "voxel": dx, "zc": zc, "R": R, "y_min": y_min, "edges": edges, "band_z": band_z, "band_area": band_area} if cfg.contact_rows else None,
+    return res, {"log": log, "q_end": s.particle_q.numpy(), "active": (flags & active) != 0, "x_cutter": x_ch, "zc": zc, "vb": np.array(vb_log), "stress": np.array(stress_log), "balance": {k: (v.tolist() if isinstance(v, np.ndarray) else v) for k, v in bal.items()} if cfg.stress_log else None, "sub": np.array(sub_log), "sub_bad": sub_bad, "sub_ext": sub_ext, "vrp": vrp_log, "sub_repaired": sub_repaired, "guard": {"log": guard_log, "events": guard_events, "odd": guard_odd} if cfg.substep_guard else None, "vb_regions": vb_reg_acc, "seal_facets": seal_facets, "seal_fx": {"counts": seal_fx.tolist(), "x_edges": seal_x_edges.tolist(), "x_cutter": x_ch, "x_face": x_face, "sink_hi": sink_hi.tolist()}, "contact_rows": {"sums": crow, "frames": cframes, "snap": csnap, "voxel": dx, "zc": zc, "R": R, "y_min": y_min, "edges": edges, "band_z": band_z, "band_area": band_area} if cfg.contact_rows else None,
                  "profile": {"sums": prof, "z_over_R": (np.arange(n_prof) + 0.5) * 1.6 / n_prof - 0.8, "bin_volume_m3": prof_x * (R / 2) * (1.6 * R / n_prof), "paste_density": cfg.paste_density}}
 
 
