@@ -12,10 +12,10 @@
   - **Screw ([17 Nov 2026](#screw-speed-the-controllers-swing-and-the-screw-volume-17-nov-2026)):** the screw speed scattered (8–14 rpm) because the pressure controller swings with a period of 40–50 s, longer than a 20 s excavation. Read by volume over the whole excavation, less the paste's elastic swing, the screw removes the displaced volume times the paste's fill (1.06–1.11) within 2 % at every voxel and seed.
   - **Watertight shell ([19 Nov 2026](#the-shell-leak-a-watertight-tube-18-and-19-nov-2026)):** the paste leaked into the shell because Newton merges a body's overlapping shapes into one mesh and mis-signs grid nodes behind buried faces. The shell is now one tube mesh: resets fell from 0.2–14 M to about 10 thousand per run, and the gradient no longer depends on where the wall falls on the grid.
   - **Gradient at seven voxels ([21 Nov 2026](#the-bulkhead-gradient-at-seven-voxels-19-to-21-nov-2026)):** read in rows across the full section, the bulkhead gradient in excavation is 14.53 ± 0.18 kPa/m at seven voxels from 0.15 m to 0.08 m, with no trend. It is within 3 % of the paste's weight at its fill and inside Botlek's 10–20 kPa/m. A force balance in the chamber matched it to the paste's own stress. The bands had read 0.12 m 0.9 kPa/m high.
-  - **Open:** 0.10 m read about 2 kPa/m low in 100 s runs before the tube shell, and its controller swing does not die down. 0.25 m does not hold. The pressure band is narrower than on a machine. A sudden loss of the whole chamber came back in one run on 20 Nov. It starts from extreme particles in the corner of the ground face and the shell; since 21 Nov a check after every solver step resets the particle that fails, and the chamber holds ([21 Nov](#the-bulkhead-gradient-at-seven-voxels-19-to-21-nov-2026)). The torque is the paste's only.
+  - **Open:** 0.10 m read about 2 kPa/m low in 100 s runs before the tube shell, and its controller swing does not die down. 0.25 m does not hold. The pressure band is narrower than on a machine. A sudden loss of the whole chamber came back in one run on 20 Nov. It starts from extreme particles in the corner of the ground face and the shell; since 21 Nov a check after every solver step resets the particle that fails, and the chamber holds ([21 Nov](#the-bulkhead-gradient-at-seven-voxels-19-to-21-nov-2026)). The gradient does not fall at a stop as Botlek's does; the paper's causes, drainage and foam, are not in the model ([21 Nov](#the-gradient-at-the-stop-21-nov-2026)). The torque is the paste's only.
   - The runs before 8 Nov, below, used the Phase 0 paste and no correction. They stand as the record of the loss.
   - **Correction (7 Nov 2026):** from 6 Nov the docs, the v1.0.0 release notes and our comment on [newton-physics/newton#5180](https://github.com/newton-physics/newton/issues/5180) said that under GIMP the chamber keeps 162 of 207 kPa (172 of 216 before the scaling fix), "a fifth lost". Those runs excavated for 4 s only. Over the scene's 20 s excavation the pressure falls to 51 kPa.
-- **Run on:** 5 Nov 2026; GIMP and 20 s diagnosis runs 7 Nov 2026; volume balance and sourced paste 8–9 Nov 2026; cause, screw step, thrust and gradient 13–14 Nov 2026; substeps and the screw inlet 15–16 Nov 2026; bulkhead reading and four voxels 16 Nov 2026; screw volume, step and thrust 17 Nov 2026; shell leak and the tube shell 18–19 Nov 2026; gradient at seven voxels, diagnostic tank and force balance 19–21 Nov 2026
+- **Run on:** 5 Nov 2026; GIMP and 20 s diagnosis runs 7 Nov 2026; volume balance and sourced paste 8–9 Nov 2026; cause, screw step, thrust and gradient 13–14 Nov 2026; substeps and the screw inlet 15–16 Nov 2026; bulkhead reading and four voxels 16 Nov 2026; screw volume, step and thrust 17 Nov 2026; shell leak and the tube shell 18–19 Nov 2026; gradient at seven voxels, diagnostic tank and force balance 19–21 Nov 2026; sudden-loss trace and the stop gradient 21 Nov 2026
 
 ## Set-up
 
@@ -706,6 +706,35 @@ Seven runs with the guard (records in `server/diagnostics/out_box`, `gd_*`). The
 - **Cost:** none to measure. Frame times here are set by the thermal pauses (686–836 ms per frame, against 719–818 in the trace runs). Peaks were 79–81 °C. The node was shared with another CPU job.
 - **Known limit:** the corner particles remain. They carry no measurable error in pressure or gradient (above), but a run is sound only while the reset count stays small. The result reports it.
 
+## The gradient at the stop (21 Nov 2026)
+
+**Check:** at Botlek the vertical gradient is high while excavating and falls when excavation stops or a ring is built, sometimes below 10 kPa/m ([Data](#data-bezuijen-talmon-joustra--grote-2005)).
+
+**Runs:** the eleven runs made with the current reading (full-section rows, every bulkhead contact):
+- 0.10 m, nine runs: three seeds, the five trace runs and the three repeats;
+- 0.12 m and 0.15 m, one run each.
+
+Each has a 3 s standstill before the 20 s excavation and a 6 s stop after it; records `ch_gd_*`, `ch_gc_*` and `ch_rg_v015_check` in `server/results/`.
+
+| Phase | Gradient (kPa/m), mean ± sd of 11 runs |
+|---|---|
+| Standstill before excavation | 13.39 ± 0.17 |
+| Excavation | 14.64 ± 0.12 |
+| Stop after excavation | **14.76 ± 0.18** |
+
+- **The gradient does not fall at the stop.** It stays at the excavation value or above it, by −0.14 to +0.33 kPa/m (+0.12 on average).
+  - It has settled: in every run the two halves of the stop agree within 0.1 kPa/m.
+  - It sits at the paste's weight at its fill, about 14.4 kPa/m, and inside Botlek's 10–20.
+- **Why the model cannot show the fall:** Bezuijen et al. (2005, sections 2 and 3.1) give three causes, and none is in the model:
+  - groundwater flows from the chamber into the ground, driven by the excess pore pressure, and is replaced by foam of about 90 % air;
+  - foam is injected during ring building;
+  - the muck arches more once excavation stops.
+
+  The model's paste is a single undrained material at constant density. It has no pore water, no foam added at a stop, and no change of strength at rest.
+- **The model was not tuned to produce the fall.** That would need drainage and foam injection in the scene: a matter for calibration (Phase 3), not WP4. The stop check is met only in part: the level is inside Botlek's range, but the fall is not reproduced.
+- **Before excavation the gradient is lower, 13.4 against 14.6.** Something lowers the gradient at that standstill but not at the stop; this is not shown. The paper's adhesion term is a candidate: the muck's shear strength at the steel faces shifts the gradient by up to 2τ/L (about 12 kPa/m at 5 kPa over the 0.8 m chamber). Its sign depends on the direction of flow.
+- **Correction to the committed records `ch_rg_v010`–`v015`:** their excavation gradient was recomputed with every contact on 21 Nov. Their hold and stop gradients were not: they still use the reading that left out contacts beyond the shell radius. They are not used here.
+
 ## Where this leaves WP4
 
 - The chamber scene, the pressure controller, a volume correction and the open validation data are in place. The scene's defaults are:
@@ -717,7 +746,7 @@ Seven runs with the guard (records in `server/diagnostics/out_box`, `gd_*`). The
   - the gradient read in rows across the full section (since 20 Nov 2026);
   - a check after every solver step that resets an invalid particle (since 21 Nov 2026; a numerical safeguard, reported in every result).
 - **Checked (16–17 Nov 2026):** the screw removes the displaced volume times the paste's fill, within 2 % at four voxels ([17 Nov](#screw-speed-the-controllers-swing-and-the-screw-volume-17-nov-2026)). With these defaults the set point holds through excavation and the stop at 0.15 m, 0.12 m and 0.10 m, in three seeds of three at each voxel ([above](#solver-substeps-and-a-collapse-at-the-screw-inlet-15-and-16-nov-2026)). The vertical force balance closes. The bulkhead contact gradient, read with bands on the grid, is 12.9–15.2 kPa/m at four voxels from 0.15 m to 0.08 m, inside Botlek's 10–20 ([16 Nov](#the-bulkhead-reading-and-the-gradient-at-four-voxels-16-nov-2026)).
-- **Checked (19–21 Nov 2026):** with the tube shell and the full-section reading, the gradient in excavation is 14.53 ± 0.18 kPa/m at seven voxels from 0.15 m to 0.08 m, with no trend and repeats within 0.07 kPa/m. The bulkhead and the paste beside it agree in a force balance ([21 Nov](#the-bulkhead-gradient-at-seven-voxels-19-to-21-nov-2026)). This meets the gradient check against Botlek for the excavation phase.
+- **Checked (19–21 Nov 2026):** with the tube shell and the full-section reading, the gradient in excavation is 14.53 ± 0.18 kPa/m at seven voxels from 0.15 m to 0.08 m, with no trend and repeats within 0.07 kPa/m. The bulkhead and the paste beside it agree in a force balance ([21 Nov](#the-bulkhead-gradient-at-seven-voxels-19-to-21-nov-2026)). This meets the gradient check against Botlek for the excavation phase. At the stop the gradient stays at 14.76 ± 0.18 kPa/m in eleven runs, inside Botlek's range, but it does not fall as Botlek's does: the causes the paper gives, drainage and foam, are not in the model ([21 Nov](#the-gradient-at-the-stop-21-nov-2026)).
 - **WP4 outputs produced:** bulkhead pressure in bands, its gradient, mixing torque, the response to a screw-speed step, and a shove under thrust.
 - **Gradient (15 Nov 2026):** multiplied by the fill, the paste's stress gradient in the interior is about 15 kPa/m during excavation at both 0.15 m and 0.12 m; the paste there is about a tenth denser than nominal.
 - **Not done:**
@@ -728,5 +757,6 @@ Seven runs with the guard (records in `server/diagnostics/out_box`, `gd_*`). The
   - the 0.15 m results recorded before 16 Nov ran 11–13 % above the set point (the step and thrust runs are repeated, 17 Nov);
   - the screw step at 8–14 % above the net-flow prediction in 90 s runs (within 4 % in 20 s runs);
   - deleting paste that escapes the chamber;
-  - the stop gradient, the band against a field record, the stray particles still sealed, torque with the face, shield friction in the thrust, a field record for the screw step.
+  - the fall of the gradient at a stop: the level is inside Botlek's range, but the fall needs drainage and foam, which the model does not have ([21 Nov](#the-gradient-at-the-stop-21-nov-2026));
+  - the band against a field record, the stray particles still sealed, torque with the face, shield friction in the thrust, a field record for the screw step.
 - Nothing from the MPM chamber is used on the console yet.
