@@ -12,7 +12,7 @@ Every model exists twice: a Python reference in [`models/py/tunnelsim_models/`](
 | [Face support pressure](#face-support-pressure) | `face_support.py` | `face_support.js` | Hand-checked; seepage not yet modelled |
 | [EPB chamber and screw conveyor](#epb-chamber-and-screw-conveyor) | `epb_chamber.py` | `epb_chamber.js` | Hand-checked; screw pressure profile calibrated on the Botlek screw gauges ([validation](validation/epb-screw-botlek.md)) |
 | [Slurry shield (Mixshield)](#slurry-shield-mixshield) | `slurry.py` | `slurry.js` | Reproduces the DAUB worked example; air cushion is this project's derivation |
-| [Thrust and torque](#thrust-and-torque) | `thrust_torque.py` | `thrust_torque.js` | Shield and rim friction fitted on open field data; thrust within about ±25 % on three EPB projects, torque high in conditioned clays ([validation](validation/epb-open-data.md)) |
+| [Thrust and torque](#thrust-and-torque) | `thrust_torque.py` | `thrust_torque.js` | Shield and rim friction fitted on open field data; thrust within about ±25 % on three EPB projects and 1.0–1.9× high in London Clay, torque high in conditioned clays ([validation](validation/epb-open-data.md)) |
 | [Hard-rock drive](#hard-rock-drive) | `hard_rock.py` | `hard_rock.js` | Reproduces Farrokh's worked example within 3 %; support curve digitised |
 | [Ground response and squeezing](#ground-response-and-squeezing) | `ground_response.py` | `ground_response.js` | Reproduces Hoek's and Hoek & Marinos's worked examples; consistent with measured convergence in an Albanian flysch tunnel ([validation](validation/sem-convergence.md)); shield friction a screening estimate |
 | [SEM / NATM sprayed concrete lining](#sem--natm-sprayed-concrete-lining) | `sem.py` | `sem.js` | Checked against Brenner shotcrete data and Oreste's trends; Sulem parameters from one site |
@@ -251,6 +251,7 @@ Checked on two other projects:
 - **Mashhad Line 3:** at 1.3 bar, thrust comes out at 0.89× and torque at 1.06× the measured values.
 - **Sofia Line 3, 14 means:** thrust 1.02× with groundwater, 1.28× dry. Torque with friction alone is 2.7× over in foam-conditioned clays and sands; with the face, back and arm shear capped at the paste's shear strength (`tau_paste` 2 kPa, [Bezuijen et al. 2005](https://www.issmge.org/uploads/publications/6/11/2005_023.pdf), not fitted) it is 0.98–1.14×. Paste shear is used only in fine-grained conditioned ground; Changsha and Mashhad keep friction (this split is the project's reading of the data).
 - **Low face pressure in dense, dry ground:** about 2× over.
+- **London Clay (22 Nov 2026):** thrust 1.0–1.9× two open records (Crossrail western running tunnels, CTRL Dagenham), the excess in the shield friction; not fitted ([validation](validation/epb-open-data.md#london-clay-two-thrust-records-22-nov-2026)).
 - **Ring-to-ring scatter:** not reproduced.
 
 ## Hard-rock drive

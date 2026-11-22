@@ -2,7 +2,7 @@
 
 - **Script:** [`models/py/validation/epb_open_data.py`](../../models/py/validation/epb_open_data.py). It downloads the two datasets on first run into a local cache that is not committed, then prints every table below.
 - **Models:** [thrust and torque](../MODELS.md#thrust-and-torque)
-- **Run on:** 5 Nov 2026
+- **Run on:** 5 Nov 2026; London Clay records 22 Nov 2026 (the model run by hand at the records' conditions, not by the script)
 
 ## Summary
 
@@ -24,6 +24,7 @@ Each cell is the median of predicted ÷ measured. The range in brackets is the i
 - **Torque:** within about ±10 % at Changsha and at Mashhad's 1.3 bar points. With friction × pressure on the face and in the chamber, Sofia's foam-conditioned clays and sands are 2.7× over. **Changed 6 Nov 2026:** in conditioned fine-grained ground the face, back and arm shear is capped at the paste's shear strength, 2 kPa from the laboratory range of [Bezuijen et al. 2005](https://www.issmge.org/uploads/publications/6/11/2005_023.pdf) (not fitted to Sofia). Sofia's torque is then 0.98–1.14× (see [paste shear](#torque-in-conditioned-ground-paste-shear)). Changsha and Mashhad keep friction.
 - **Low face pressure:** at Mashhad's 0.27 bar points in dry, dense ground, both thrust and torque stay about 2× over. A plausible cause is that the ground arches, so the shield does not carry the full overburden stress the model assumes.
 - **Ring-to-ring scatter:** not reproduced. The correlation is about 0.1 at Changsha.
+- **London Clay (added 22 Nov 2026):** against two open records, Crossrail and CTRL, the thrust is 1.0–1.9× the measured, the excess in the shield friction ([London Clay](#london-clay-two-thrust-records-22-nov-2026)). Not fitted.
 
 ## Data
 
@@ -132,6 +133,28 @@ The Changsha and Guangzhou–Foshan datasets are published under CC BY 4.0; cred
   The measured torque lies between the two: friction over-predicts, paste shear under-predicts by about 30 %. It neither confirms nor rules out the 2 kPa value; it shows the soft-ground torque is well below friction × pressure.
 - Guangzhou–Foshan's working torque of 15–35 % of installed is consistent: in the EPB demo's London Clay and Lambeth Group, torque falls from about 56 % of installed (friction) to about 25–36 % (paste).
 
+## London Clay: two thrust records (22 Nov 2026)
+
+An independent check of the shield friction in stiff overconsolidated clay. Neither record was used for a fit, and nothing was changed after it.
+
+| Record | Ground and geometry | Face pressure | Measured thrust | Source |
+|---|---|---|---|---|
+| Crossrail western running tunnels, under the Victoria and Bakerloo lines (Regent Street), eastbound, 63 rings | London Clay; D 7.08 m; shield 11 m (Hyde Park, same machines); axis about 31–36 m, from the Bakerloo crowns at about 24 m and the Victoria northbound crown at about 20 m, with 3.3–5.2 m clearance below them (tube diameters assumed, 3.8–4.1 m) | 1.6–1.95 bar | 17.9 MN mean; limit 20 MN; jacks' maximum 58.5 MN | Araque et al. (2014), [Crossrail Learning Legacy](https://learninglegacy.crossrail.co.uk/documents/crossrail-western-running-tunnels-crossing-of-london-underground-victoria-line-and-bakerloo-line-assets/); shield: Wan et al. (2017), [doi:10.1680/jgeot.16.P.099](https://doi.org/10.1680/jgeot.16.P.099), CC BY 4.0 |
+| CTRL, Dagenham, up-line and down-line | London Clay with thinner cover; D 8.16 m; axis 18.9 m; shield length not found (9–12 m assumed); water table 2–7 m below ground (assumed) | 200 / 150 kPa | 16 / 18 MN; 5.54 / 10.15 MN after the face force | Standing & Selemetas (2013), [doi:10.1680/geot.12.P.154](https://doi.org/10.1680/geot.12.P.154); thrust from the discussion, Standing, Selemetas & Shirlaw (2014), [doi:10.1680/geot.13.D.04](https://doi.org/10.1680/geot.13.D.04). Paywalled: only these numbers are quoted |
+
+The model is run with the London Clay unit weight of the London scenario (19.8 kN/m³), K0 from 1.0 to 1.5, and the EPB demo's assumed tools (1 MN), tail seal (0.5 MN), shield weight (4 MN) and backup (6 MN at 0.1):
+
+| Record | Model (MN) | Model ÷ measured | Thrust after the face force, model ÷ measured |
+|---|---|---|---|
+| Crossrail, eastbound | 24.6–32.5 | 1.4–1.8 | 1.6–2.4 |
+| CTRL up-line | 21.3–30.0 | 1.3–1.9 | 2.0–3.5 |
+| CTRL down-line | 18.7–27.4 | 1.0–1.5 | 1.1–1.9 |
+
+- **The thrust is high in London Clay**, by 1.0–1.9×, and the excess is in the shield friction: the face force is pressure × area in both.
+- **The field scatters:** the two CTRL lines, in the same ground, differ by about 2× in the thrust left after the face force.
+- **Likely causes, not shown:** with an overcut and a tapered shield, stiff clay does not press on the whole shield (the contact the model takes as 1), and K0 = 1.5 raises the normal stress.
+- **Caveats:** one mean per Crossrail record and two values for CTRL; the Crossrail depth is inferred, and the CTRL shield length and water table are assumed.
+
 ## Consequences for the demos
 
 - **New defaults in the model:** shield 0.17 and rim 0.07, in Python and JavaScript. The EPB demo uses them directly. The Mixshield demo keeps its lower face and chamber friction for the slurry and takes the new rim value.
@@ -139,4 +162,5 @@ The Changsha and Guangzhou–Foshan datasets are published under CC BY 4.0; cred
 - **Still open:**
   - torque in conditioned clays (lower face and chamber friction);
   - shield stress at low face pressure in dense ground (arching);
+  - shield friction in stiff clay: 1.0–1.9× high on two London Clay records ([22 Nov 2026](#london-clay-two-thrust-records-22-nov-2026)). The EPB demo runs in this ground, so its thrust bar is likely high;
   - a dataset with published site parameters for each ring.
