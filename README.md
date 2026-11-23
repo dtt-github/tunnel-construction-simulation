@@ -48,7 +48,7 @@ Tunnelling simulators today are either closed training products or research code
 |---|---|
 | **Model library** (Python + JavaScript, shared test vectors) | 14 models: CSM disc cutter, Hoek–Brown, settlement (troughs, longitudinal profile, method presets, twin tunnels, Burland), face support (wedge-silo + DAUB window), EPB chamber and screw, slurry shield, thrust and torque, hard-rock drive, ground response and squeezing, SEM sprayed concrete, ground scenarios, segment lining, drill & blast, utilisation and downtime. [Details →](docs/MODELS.md) |
 | **Machine class presets** | Six classes (urban EPB, Mixshield, double shield, main beam, SEM, drill & blast). Every field carries its source and a verified flag. [Presets →](models/presets/machine-classes.json) |
-| **GPU physics (Phase 0 and 2)** | NVIDIA Newton implicit MPM on a DGX Spark: benchmarks, particle streaming, record and replay ([Phase 0 results](phase0/RESULTS.md)); element tests and a dry-sand face checked against published tests, and one recorded sand face in the EPB demo. The clay tunnel matches Kimura & Mair within 11 % in plane strain and at 0.80–1.00 in 3D headings since 7 Nov 2026 (after Release 1); the EPB chamber loses most of its pressure while the cutterhead turns (207 → 51 kPa over 20 s), so it stays blocked ([MPM clay](docs/validation/mpm-clay.md), [MPM chamber](docs/validation/mpm-chamber.md)) |
+| **GPU physics (Phase 0 and 2)** | NVIDIA Newton implicit MPM on a DGX Spark: benchmarks, particle streaming, record and replay ([Phase 0 results](phase0/RESULTS.md)); element tests and a dry-sand face checked against published tests, and one recorded sand face in the EPB demo. The clay tunnel matches Kimura & Mair within 11 % in plane strain and at 0.80–1.00 in 3D headings since 7 Nov 2026 (after Release 1); the EPB chamber holds its set point with a volume correction and a sourced paste since 9 Nov 2026, with the gradient in Botlek's range but not yet converged ([MPM clay](docs/validation/mpm-clay.md), [MPM chamber](docs/validation/mpm-chamber.md)) |
 | **Browser client** | Six method demos and the [replay viewer](https://dtt-github.github.io/tunnel-construction-simulation/phase0/replays/) live; see the table above |
 | **Validation** | Each demo checked against published project data, every check labelled independent, calibrated or bracket, with its open gaps: [validation report](docs/validation/REPORT.md). Release audit of sources, labels and licences: [audit](docs/RELEASE-AUDIT.md) |
 
@@ -112,7 +112,7 @@ npm run test:py
    - D: SEM/NATM (heading live; final lining after Release 1)
    - E: drill & blast (demo live)
 4. **Release 1 (v1.0.0, 6 Nov 2026):** the six browser demos, each checked against open published data, plus a recorded GPU sand face. [Changelog](CHANGELOG.md).
-5. **Phase 2:** GPU ground physics coupled to the machine. Sand face done; clay tunnel checked against the centrifuge tests (WP3, in progress); EPB chamber open.
+5. **Phase 2:** GPU ground physics coupled to the machine. Sand face done; clay tunnel checked against the centrifuge tests (WP3, in progress); EPB chamber holds its pressure with a volume correction (WP4, in progress).
 6. **Phase 3:** further methods.
 7. **Phase 4:** validation against case histories (the validation report is kept up to date with every check).
 8. **Phase 5:** training and research tools.

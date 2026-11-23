@@ -48,6 +48,9 @@ class FaceSandConfig:
     servo_max_rate_over_d: float = 0.01
     duration: float = 5.0  # s of control after settling (up to 0.05 D at the fastest rate)
     steel_friction: float = 0.3
+    # soil box: half width from the symmetry plane to the frictionless side wall, and length ahead of the face, / D
+    half_width_over_d: float = 1.5
+    front_over_d: float = 2.5
     fps: float = 60.0
     settle: int = 60
     iterations: int = 50
@@ -86,7 +89,7 @@ class Face:
         zc = R + 0.75 * D
         zs = zc + R + cfg.cover * D
         lu = cfg.unlined_over_d * D  # unlined length: the face is at x = lu, the tube ends at x = 0
-        x_back, x_front, half_w = 0.75 * D, lu + 2.5 * D, 1.5 * D
+        x_back, x_front, half_w = 0.75 * D, lu + cfg.front_over_d * D, cfg.half_width_over_d * D
         t = max(0.025 * D, dx)  # walls at least one voxel thick (Phase 0)
 
         b = newton.ModelBuilder()
@@ -236,7 +239,12 @@ def run(cfg: FaceSandConfig, soil: Soil) -> tuple[dict, dict]:
             k = (f - cfg.settle) // n_hold
             hold = log[-n_hold:]
             speed = float(hold[-1][0] - log[-int(cfg.fps)][0]) / D  # D per second over the last second of the hold
-            steps.append({"target_kPa": round(targets[k], 2), "support_kPa": round(float(np.mean([face.support(e) for e in hold[-6:]])) / 1e3, 2),
+            q = s.particle_q.numpy()  # surface settlement near the symmetry plane since control started
+            surf = (ref[:, 2] > zs - 1.5 * h) & (ref[:, 1] < 0.25 * D)
+            sv = ref[surf, 2] - q[surf, 2]
+            i_s = int(np.argmax(sv))
+            steps.append({"settlement_over_D": round(float(sv[i_s]) / D, 5), "settlement_ahead_of_face_over_D": round(float(ref[surf, 0][i_s]) / D, 2),
+                          "target_kPa": round(targets[k], 2), "support_kPa": round(float(np.mean([face.support(e) for e in hold[-6:]])) / 1e3, 2),
                           "face_over_D": round(float(delta) / D, 4), "speed_D_per_s": round(speed, 5),
                           "at_rest": bool(speed <= cfg.at_rest_over_d and delta < cfg.max_over_d * D)})
             if not steps[-1]["at_rest"]:
