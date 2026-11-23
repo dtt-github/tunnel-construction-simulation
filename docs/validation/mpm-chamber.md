@@ -12,10 +12,10 @@
   - **Screw ([17 Nov 2026](#screw-speed-the-controllers-swing-and-the-screw-volume-17-nov-2026)):** the screw speed scattered (8–14 rpm) because the pressure controller swings with a period of 40–50 s, longer than a 20 s excavation. Read by volume over the whole excavation, less the paste's elastic swing, the screw removes the displaced volume times the paste's fill (1.06–1.11) within 2 % at every voxel and seed.
   - **Watertight shell ([19 Nov 2026](#the-shell-leak-a-watertight-tube-18-and-19-nov-2026)):** the paste leaked into the shell because Newton merges a body's overlapping shapes into one mesh and mis-signs grid nodes behind buried faces. The shell is now one tube mesh: resets fell from 0.2–14 M to about 10 thousand per run, and the gradient no longer depends on where the wall falls on the grid.
   - **Gradient at seven voxels ([21 Nov 2026](#the-bulkhead-gradient-at-seven-voxels-19-to-21-nov-2026)):** read in rows across the full section, the bulkhead gradient in excavation is 14.53 ± 0.18 kPa/m at seven voxels from 0.15 m to 0.08 m, with no trend. It is within 3 % of the paste's weight at its fill and inside Botlek's 10–20 kPa/m. A force balance in the chamber matched it to the paste's own stress. The bands had read 0.12 m 0.9 kPa/m high.
-  - **Open:** 0.10 m read about 2 kPa/m low in 100 s runs before the tube shell, and its controller swing does not die down. 0.25 m does not hold. The pressure band at a gauge is 1.3–2.5 times narrower than Botlek's ([21 Nov](#the-pressure-band-at-one-gauge-21-nov-2026)). A sudden loss of the whole chamber came back in one run on 20 Nov. It starts from extreme particles in the corner of the ground face and the shell; since 21 Nov a check after every solver step resets the particle that fails, and the chamber holds ([21 Nov](#the-bulkhead-gradient-at-seven-voxels-19-to-21-nov-2026)). The gradient does not fall at a stop as Botlek's does; the paper's causes, drainage and foam, are not in the model ([21 Nov](#the-gradient-at-the-stop-21-nov-2026)). The MPM's torque is the paste's only and falls with the voxel without converging (0.37 MNm at 0.06 m); with the demo's rim, tools and seals the total is 23–37 % of installed ([22 Nov](#torque-with-the-face-cutting-21-and-22-nov-2026)). The thrust's shield friction is analytical; in London Clay the total is 1.0–1.9× two open records ([22 Nov](#shield-friction-in-the-thrust-22-nov-2026)).
+  - **Open:** 0.25 m does not hold. (Closed on 22–23 Nov: with the tube shell the 0.10 m gradient matches 0.15 m over 60 and 150 s, and its swing dies down; the 90 s step's excess was the paste's own trend ([23 Nov](#open-limits-22-and-23-nov-2026)).) The pressure band at a gauge is 1.3–2.5 times narrower than Botlek's ([21 Nov](#the-pressure-band-at-one-gauge-21-nov-2026)). A sudden loss of the whole chamber came back in one run on 20 Nov. It starts from extreme particles in the corner of the ground face and the shell; since 21 Nov a check after every solver step resets the particle that fails, and the chamber holds ([21 Nov](#the-bulkhead-gradient-at-seven-voxels-19-to-21-nov-2026)). The gradient does not fall at a stop as Botlek's does; the paper's causes, drainage and foam, are not in the model ([21 Nov](#the-gradient-at-the-stop-21-nov-2026)). The MPM's torque is the paste's only and is not converged: it falls with the voxel (0.37 MNm at 0.06 m) and rises with the particles per cell (+25–48 % at 3 per cell). With the demo's rim, tools and seals the total is 23–37 % of installed if the 2-per-cell series bounds it, 25–42 % from the measured torques ([22 Nov](#torque-with-the-face-cutting-21-and-22-nov-2026), [23 Nov](#paste-torque-against-particle-count)). The thrust's shield friction is analytical; in London Clay the total is 1.0–1.9× two open records ([22 Nov](#shield-friction-in-the-thrust-22-nov-2026)).
   - The runs before 8 Nov, below, used the Phase 0 paste and no correction. They stand as the record of the loss.
   - **Correction (7 Nov 2026):** from 6 Nov the docs, the v1.0.0 release notes and our comment on [newton-physics/newton#5180](https://github.com/newton-physics/newton/issues/5180) said that under GIMP the chamber keeps 162 of 207 kPa (172 of 216 before the scaling fix), "a fifth lost". Those runs excavated for 4 s only. Over the scene's 20 s excavation the pressure falls to 51 kPa.
-- **Run on:** 5 Nov 2026; GIMP and 20 s diagnosis runs 7 Nov 2026; volume balance and sourced paste 8–9 Nov 2026; cause, screw step, thrust and gradient 13–14 Nov 2026; substeps and the screw inlet 15–16 Nov 2026; bulkhead reading and four voxels 16 Nov 2026; screw volume, step and thrust 17 Nov 2026; shell leak and the tube shell 18–19 Nov 2026; gradient at seven voxels, diagnostic tank and force balance 19–21 Nov 2026; sudden-loss trace, the stop gradient and the band at one gauge 21 Nov 2026; torque at 0.07 and 0.06 m and shield friction 22 Nov 2026
+- **Run on:** 5 Nov 2026; GIMP and 20 s diagnosis runs 7 Nov 2026; volume balance and sourced paste 8–9 Nov 2026; cause, screw step, thrust and gradient 13–14 Nov 2026; substeps and the screw inlet 15–16 Nov 2026; bulkhead reading and four voxels 16 Nov 2026; screw volume, step and thrust 17 Nov 2026; shell leak and the tube shell 18–19 Nov 2026; gradient at seven voxels, diagnostic tank and force balance 19–21 Nov 2026; sudden-loss trace, the stop gradient and the band at one gauge 21 Nov 2026; torque at 0.07 and 0.06 m and shield friction 22 Nov 2026; open limits 22–23 Nov 2026
 
 ## Set-up
 
@@ -173,7 +173,7 @@ Undrained strength across the sourced range (0.15 m, 50 iterations, balance from
 ### Open
 
 - **Pressure band:** ±4–5 kPa against DAUB's ±30 kPa. The scene has no ring builds, screw surges or ground entering at the face, so a narrow band is expected, but it is not yet checked against a field record. (Checked at a gauge on 21 Nov: [1.3–2.5 times narrower than Botlek's](#the-pressure-band-at-one-gauge-21-nov-2026).)
-- **Torque:** the scene cuts no ground; it stirs the paste. 0.4–0.5 MNm agrees with a hand estimate (cu × both faces of the cutterhead × mean lever arm, about 0.9 MNm). Comparing with the installed 9.8 MNm needs the face-cutting torque of the demo's torque model added. (Done on 22 Nov: [23–37 % of installed](#torque-with-the-face-cutting-21-and-22-nov-2026); the paste torque falls with the voxel and is not converged.)
+- **Torque:** the scene cuts no ground; it stirs the paste. 0.4–0.5 MNm agrees with a hand estimate (cu × both faces of the cutterhead × mean lever arm, about 0.9 MNm). Comparing with the installed 9.8 MNm needs the face-cutting torque of the demo's torque model added. (Done on 22 Nov: [23–37 % of installed](#torque-with-the-face-cutting-21-and-22-nov-2026); the paste torque falls with the voxel and is not converged; on 23 Nov it [rose with the particle count](#paste-torque-against-particle-count).)
 - **Gradient at a stop:** Botlek's falls; ours does not. (Identical runs differ by about 2 kPa/m at the stop, see [13–14 Nov](#gradient-readings-refinement-and-a-vertical-force-balance).)
 - **Leak:** the runs seal the shell. Without it, the paste pushes into the 0.5 m shell wall.
 - **The correction is ours, not Newton's.** It sets the volume by region and leaves the solver's local deviations. Whether Newton can conserve volume around a moving solid itself is open on newton#5180.
@@ -486,7 +486,7 @@ The screw speed needed to hold the set point read 13.6 / 10.1 / 8.0 / 13.8 rpm a
 **The controller has not settled in a 20 s excavation.**
 - Its gains (kp 0.2 rpm/kPa, ki 0.05 rpm/(kPa·s), assumed) and the chamber's stiffness (bulk modulus over paste volume, about 0.22 kPa/s per rpm; the step tests measured the same) give a loop with a period of about 60 s and a damping ratio of about 0.2.
 - Each voxel starts excavation at a different pressure after the hold (218 / 210 / 205 / 210 kPa at 0.15 / 0.12 / 0.10 / 0.08 m). The reported speed is the mean of the second half of the excavation, a different point of the swing at each voxel.
-- **Runs with a 100 s excavation** (seed 0; records `ch_lx_v015`, `_v012`, `_v010`, with 10 s means in `by_10_s_excavate`): the screw speed swings with a period of 40–50 s. The swing dies down at 0.15 m and 0.12 m but not at 0.10 m, where it is still ±2.5 rpm after 100 s (why the damping is lower there is not shown).
+- **Runs with a 100 s excavation** (seed 0; records `ch_lx_v015`, `_v012`, `_v010`, with 10 s means in `by_10_s_excavate`): the screw speed swings with a period of 40–50 s. The swing dies down at 0.15 m and 0.12 m but not at 0.10 m, where it is still ±2.5 rpm after 100 s (why the damping is lower there is not shown). (With the tube shell it dies down at 0.10 m too, [23 Nov](#the-controllers-swing-over-150-s).)
 
 | Screw (rpm) | 0–10 s | 10–20 | 20–30 | 30–40 | 40–50 | 50–60 | 60–70 | 70–80 | 80–90 | 90–100 | Mean |
 |---|---|---|---|---|---|---|---|---|---|---|---|
@@ -533,7 +533,7 @@ The step and thrust runs were repeated at 0.15 m with the fixed bulkhead reading
 | `ch_st_up` (same) | 13.4 → 22 | −2.56 | −2.00 (128 %) | −2.37 | 1.08 |
 
 - **The asymmetry is explained:** both directions agree within 6–7 % in each pair. It was the prediction's assumption, not the chamber.
-- **The 90 s runs read 8–14 % above the net-flow prediction, the 20 s runs within 4 %.** In the 90 s stopped-screw run the pressure climbs from 208 to 282 kPa over the 30 s after the step and the fit runs over all of it; whether the curvature explains the excess is not checked.
+- **The 90 s runs read 8–14 % above the net-flow prediction, the 20 s runs within 4 %.** In the 90 s stopped-screw run the pressure climbs from 208 to 282 kPa over the 30 s after the step and the fit runs over all of it; whether the curvature explains the excess is not checked. (23 Nov: it is the paste's own trend, there without a step too; against a run without a step the step's effect is 0.99–1.05 of the prediction, [repeat](#the-screw-step-the-excess-is-the-pastes-own-trend).)
 - **At 0.15 m the controller still swings at 60 s:** the screw was at 13.4 rpm when the step came, so "+10 rpm" reached the 22 rpm cap again. The prediction uses the actual speeds.
 - **The 13 Nov results (77–80 %, one solver step) used the same prediction** from the speed before the step. They are not recomputed: those runs did not log the particle count.
 - Still checked against the analytical chamber model only; no open record of a screw step on a machine has been found.
@@ -617,7 +617,7 @@ So the leak was not driven by pressure, and it came back wherever a plate landed
 - **Read across the full section, the bulkhead reads the paste at both voxels:**
   - within 0.3 kPa/m in gradient;
   - within 1.3–1.7 % in total force.
-- **So the step is in the bands, not in the paste or in what Newton reports on the bulkhead.** The bands leave out the strip round the screw inlet (|y| < 0.75 m, the screw's radius plus 0.3 m). A likely cause, not shown: the edge of that strip catches the lattices of contact points unevenly at some voxels, as fixed band edges did in height before 16 Nov.
+- **So the step is in the bands, not in the paste or in what Newton reports on the bulkhead.** The bands leave out the strip round the screw inlet (|y| < 0.75 m, the screw's radius plus 0.3 m). A likely cause, not shown: the edge of that strip catches the lattices of contact points unevenly at some voxels, as fixed band edges did in height before 16 Nov. (Shown on 23 Nov: [the strip's edge](#why-the-bands-read-012-m-high).)
 
 **The reported gradient now uses full-section rows (since 20 Nov):**
 - rows one voxel high, edges a quarter voxel below the vertex rows;
@@ -786,7 +786,7 @@ So the check is met in part: the model's band at a gauge is of the right order b
 - **The limit is not pinned.** A straight line through the points gives 0.13–0.15 MNm at zero voxel (all nine points, or the last five). Fits of a power of the voxel have uncertainties larger than their values.
 - **It also drifts within a run.** At 0.07 m and 0.06 m the four quarters of the excavation read 0.474 / 0.421 / 0.403 / 0.396 and 0.448 / 0.395 / 0.375 / 0.365 MNm. The second half, used above, still falls 2–3 % between its quarters.
 - **Likely cause, not shown:** an undrained paste is close to incompressible, and a coarse grid stiffens such a material, so the force to shear it falls as the grid is refined. The pressure, the gradient (14.9 and 15.5 kPa/m) and the guard were as in the rest of the series.
-- **So the MPM paste torque is an upper bound, at most 0.37 MNm,** with the converged value perhaps well below it. It sits below a hand estimate of 0.47–0.59 MNm (cu 5 kPa on the faces of the spokes and arms, plus their bearing with Nc 9–12), which assumes the paste fails on the faces of the tools.
+- **So the MPM paste torque is an upper bound, at most 0.37 MNm,** with the converged value perhaps well below it. (23 Nov: more particles per cell raise it, so this holds only if the cause is the grid's stiffening; [particle count](#paste-torque-against-particle-count).) It sits below a hand estimate of 0.47–0.59 MNm (cu 5 kPa on the faces of the spokes and arms, plus their bearing with Nc 9–12), which assumes the paste fails on the faces of the tools.
 
 **The parts the scene does not have,** from the demo's torque model (`cutterhead_torque` in [`thrust_torque.py`](../../models/py/tunnelsim_models/thrust_torque.py); the [EPB demo](../../web/epb/main.js) inputs: opening 0.401, cutting tools, 300 kNm for the seals, and the face, back and arms at the paste's 2 kPa shear in conditioned clay ([validation](epb-open-data.md#torque-in-conditioned-ground-paste-shear))), at 200 kPa along the Crossrail drive:
 
@@ -839,6 +839,109 @@ All are below the jacks' maximum of 58.5 MN ([Araque et al. 2014](https://learni
 
 So the check is met with a stated limit: the thrust is assembled from the MPM's face force and the analytical shield friction, and in London Clay that friction makes the total 1.0–1.9× the two open records.
 
+## Open limits (22 and 23 Nov 2026)
+
+Runs on the limits left open on 22 Nov. All use the tube shell, the step check and seed 0; records in `server/results`, `ch_ns_*`, `ch_st2_*`, `ch_sw_*`, `ch_bc_*`, `ch_bs_*` and `ch_tp_*`.
+
+### The 0.10 m gradient over a long excavation
+
+The 0.10 m chamber read about 2 kPa/m low over 100 s before the tube shell and the row reading ([17 Nov](#screw-speed-the-controllers-swing-and-the-screw-volume-17-nov-2026)). With both:
+
+| Run | Excavation | 0.15 m | 0.10 m |
+|---|---|---|---|
+| `ch_gg_v015`, `ch_gg_v010` | 60 s, last 30 s | 15.23 kPa/m | 15.30 kPa/m |
+| `ch_sw_v015`, `ch_sw_v010` | 150 s, whole | 15.71 kPa/m | 15.58 kPa/m |
+
+- **The 0.10 m gradient is no longer low.** It is within 0.13 kPa/m of 0.15 m in both.
+- **It rises through a run at both voxels,** by about 1 kPa/m over 150 s (14.3–14.5 in the first 15 s, 15.5 in the last). Read over 20 s, as in the seven-voxel series, it is 14.5 kPa/m.
+
+### The controller's swing over 150 s
+
+Screw speed, mean over each 15 s of the excavation (`by_15_s_excavate`):
+
+| Seconds | 0–15 | 15–30 | 30–45 | 45–60 | 60–75 | 75–90 | 90–105 | 105–120 | 120–135 | 135–150 |
+|---|---|---|---|---|---|---|---|---|---|---|
+| 0.15 m (rpm) | 14.8 | 11.6 | 7.7 | 10.4 | 12.5 | 10.7 | 9.7 | 10.1 | 11.9 | 13.1 |
+| 0.10 m (rpm) | 14.8 | 13.9 | 8.2 | 8.8 | 11.8 | 11.4 | 10.2 | 12.0 | 11.2 | 9.3 |
+
+- **The swing dies down at 0.10 m too:** the first cycle spans 8.2–14.8 rpm, the second about 9.3–12.0. On 17 Nov, before the tube shell, it was still ±2.5 rpm after 100 s.
+- **It has not settled by 150 s** at either voxel. The period is about 60 s, as the 60 s the loop's gains give ([17 Nov](#screw-speed-the-controllers-swing-and-the-screw-volume-17-nov-2026)).
+- **The pressure stays within 193–207 kPa** (15 s means) through all of it.
+- **Over 150 s the screw speed averages 11.1 and 10.8 rpm,** and the screw removes the displaced volume times 1.088 and 1.085 less the elastic swing, the fill again.
+
+### The screw step: the excess is the paste's own trend
+
+The 90 s step runs read 8–14 % above the net-flow prediction ([17 Nov](#screw-step-and-thrust-on-a-settled-chamber-17-nov-2026)). Repeated with the tube shell (`ch_st2_stop`, `ch_st2_up`): 1.14 and 1.08 times again. The 150 s run `ch_sw_v015` is the same run without a step, so the step's own effect is the difference between the two:
+
+| Window after the step | Stopped: measured − no step | Predicted | Ratio | Sped up: measured − no step | Predicted | Ratio |
+|---|---|---|---|---|---|---|
+| 0–5 s | +2.93 kPa/s | +2.86 | 1.02 | −2.52 kPa/s | −2.21 | 1.14 |
+| 0–10 s | +3.00 | +2.89 | 1.04 | −2.31 | −2.18 | 1.06 |
+| 0–30 s | +2.80 | +2.67 | 1.05 | −2.38 | −2.40 | 0.99 |
+
+The prediction is the chamber's stiffness (0.230 kPa/s per rpm, the bulk modulus over the paste volume at the paste's density) times the difference in screw speed between the two runs over the same window.
+
+- **The step's effect is 0.99–1.05 of the prediction over 30 s,** in both directions.
+- **The excess was there without a step:** in the run without one the pressure rose 2.0 kPa/s over the 10 s after 60 s, with the screw faster than the advance needs. That is the paste's elastic swing under way, which the net-flow prediction leaves out. In the first 5 s it also made the stopped screw look fast (+4.96 kPa/s) and the faster one slow (−0.49).
+- Still checked against the analytical chamber model only; no open record of a screw step on a machine has been found.
+
+### The shell seal
+
+`seal_shell` puts a particle that has crossed the tube shell back inside. Without it (`ch_ns_v015`), against the same run with it (`ch_bc_v015`), 0.15 m, 20 s:
+
+| | Seal on | Seal off |
+|---|---|---|
+| Particles escaped through the side | 1 | 76 |
+| Escaped in all | 141 | 231 |
+| Axis pressure in excavation | 198.5 kPa | 198.3 kPa |
+| Gradient | 14.66 kPa/m | 14.81 kPa/m |
+
+- **The seal stops the side leak and moves the readings by little** (0.2 kPa, 0.15 kPa/m). It stays on.
+- **Most escaped paste leaves at the front,** past the ground face, and the count grows: 141 in 20 s, 166 in 60 s, 939 in 150 s at 0.15 m; 1,470 in 150 s at 0.10 m (of 130,112 and 434,812 particles).
+- **An escaped particle can fail:** in `ch_sw_v010` one, about 9 km from the chamber, became invalid at 151 s and the guard reset it every solver step to the end (2,172 steps). The chamber's pressure was not affected. Deleting escaped paste would remove this; it is not done.
+
+### Why the bands read 0.12 m high
+
+The bands leave out the strip |y| < 0.75 m round the screw inlet, and at 0.12 m they read about 0.9 kPa/m above 0.10 m ([21 Nov](#the-bulkhead-gradient-at-seven-voxels-19-to-21-nov-2026)). A new option, `band_check` (off by default), reads both every frame with the strip left out at five half-widths: none, the screw's radius (0.45 m), the bands' 0.75 m, 1.05 m and 1.35 m. A second option, `band_check_snap`, rounds each half-width to whole voxels. Gradient in excavation, kPa/m (`ch_bc_v012`, `ch_bs_v012`, `ch_bc_v015`; 20 s):
+
+| Strip half-width | none | screw | bands' | + 0.3 m | + 0.6 m |
+|---|---|---|---|---|---|
+| 0.12 m, as set (0, 0.45, 0.75, 1.05, 1.35 m): bands | 14.64 | 14.64 | 15.08 | 14.85 | 15.79 |
+| 0.12 m, as set: rows | 14.64 | 14.68 | 15.00 | 14.94 | 15.54 |
+| 0.12 m, on grid lines (0, 0.48, 0.72, 1.08, 1.32 m): bands | 14.61 | 14.62 | 14.70 | 14.90 | 15.09 |
+| 0.12 m, on grid lines: rows | 14.62 | 14.67 | 14.74 | 14.91 | 15.14 |
+| 0.15 m (all on grid lines): bands | 14.40 | 14.60 | 14.37 | 14.80 | 14.52 |
+| 0.15 m: rows | 14.56 | 14.66 | 14.48 | 14.77 | 14.69 |
+
+- **The band arithmetic is not the cause:** with no strip, bands and rows agree (14.64 and 14.64); with the same strip they agree within 0.25 kPa/m.
+- **The strip's edge is:** at 0.12 m the half-widths as set fall a quarter voxel off the grid lines (6.25 and 11.25 voxels for 0.75 and 1.35 m), and leaving them out adds 0.44 and 1.15 kPa/m. On the grid lines the same strips add 0.09 and 0.48. At 0.15 m every half-width is a whole number of voxels and there is no trend. So it is the same effect as the band edges in height before 16 Nov: an edge between grid lines catches Newton's two lattices of contact points unevenly. Tested at 0.12 m and 0.15 m only; the other voxels' band readings are not rerun.
+- **What is left is small:** on grid lines the gradient rises by up to 0.5 kPa/m as more of the width round the screw is left out. Whether that is the paste or the grid is not separated.
+- **The reported gradient is unaffected:** it uses full-section rows with no strip. The controller uses the axis band's pressure, which these runs read within about 3 kPa at every strip. The bands' strip is not moved to the grid here: it would change the controlled pressure, and every earlier band result with it.
+- Checks: the bands with the bands' strip as set equal the run's band gradient (15.08, 14.37 kPa/m), and the rows with no strip its reported gradient (14.64, 14.56).
+
+### Paste torque against particle count
+
+The paste torque fell with the voxel at 2 particles per cell per axis ([22 Nov](#torque-with-the-face-cutting-21-and-22-nov-2026)). With 3 per cell (`ch_tp_*`; 20 s, against runs with 2 at the same voxel):
+
+| Voxel | 2 per cell | 3 per cell | Change |
+|---|---|---|---|
+| 0.15 m | 0.687 MNm (`ch_bc_v015`) | 0.860 MNm | +25 % |
+| 0.10 m | 0.513 MNm (`ch_rg_v010`); 0.541 over the first 20 s of `ch_gg_v010` | 0.760 MNm | +40–48 % |
+
+- **More particles raise the torque on the same grid,** and a finer grid lowers it with the same particles: 0.15 m at 3 per cell and 0.10 m at 2 per cell both have 434,812 particles and read 0.860 and 0.513 MNm.
+- **At 3 per cell the grid matters less:** 0.15 → 0.10 m lowers the torque by 12 %, against 25 % at 2 per cell.
+- **1 per cell cannot be run:** every particle's deformation degenerates in the first frames.
+- **This fits volumetric locking, not shown:** a near-incompressible paste stiffens when the grid has few degrees of freedom for the particles that constrain it. More particles per cell stiffen it more; a finer grid, less. If that is the cause, the 2-per-cell series is the less stiffened one, and its finest value (0.37 MNm) stays an upper bound. If not, the paste torque is only known to lie in the measured 0.37–0.86 MNm.
+- **The cutterhead total both ways,** with the demo's rim, tools and seals ([above](#torque-with-the-face-cutting-21-and-22-nov-2026)):
+  - paste 0.13–0.37 MNm (locking): 2.2–3.6 MNm, 23–37 % of installed;
+  - paste 0.37–0.86 MNm (measured): 2.5–4.1 MNm, 25–42 % of installed; London Clay 25–32 %, Lambeth Group 34–42 %.
+- **Against the field's 15–35 %:** the first is inside it. The second overlaps it; its top, Lambeth Group with the most-stiffened paste, is above it. Nothing was tuned.
+- **The gradient reads about 0.4 kPa/m lower at 3 per cell** (14.26 and 13.96 kPa/m); the pressure is unchanged.
+
+### Runs
+
+The node was shared with another project's jobs. The thermal guard ended a run at 86–88 °C six times, each time while our run was already paused at 78 °C, and the runs were retried. Every finished run peaked at 78–83 °C.
+
 ## Where this leaves WP4
 
 - The chamber scene, the pressure controller, a volume correction and the open validation data are in place. The scene's defaults are:
@@ -850,20 +953,17 @@ So the check is met with a stated limit: the thrust is assembled from the MPM's 
   - the gradient read in rows across the full section (since 20 Nov 2026);
   - a check after every solver step that resets an invalid particle (since 21 Nov 2026; a numerical safeguard, reported in every result).
 - **Checked (16–17 Nov 2026):** the screw removes the displaced volume times the paste's fill, within 2 % at four voxels ([17 Nov](#screw-speed-the-controllers-swing-and-the-screw-volume-17-nov-2026)). With these defaults the set point holds through excavation and the stop at 0.15 m, 0.12 m and 0.10 m, in three seeds of three at each voxel ([above](#solver-substeps-and-a-collapse-at-the-screw-inlet-15-and-16-nov-2026)). The vertical force balance closes. The bulkhead contact gradient, read with bands on the grid, is 12.9–15.2 kPa/m at four voxels from 0.15 m to 0.08 m, inside Botlek's 10–20 ([16 Nov](#the-bulkhead-reading-and-the-gradient-at-four-voxels-16-nov-2026)).
-- **Checked (19–21 Nov 2026):** with the tube shell and the full-section reading, the gradient in excavation is 14.53 ± 0.18 kPa/m at seven voxels from 0.15 m to 0.08 m, with no trend and repeats within 0.07 kPa/m. The bulkhead and the paste beside it agree in a force balance ([21 Nov](#the-bulkhead-gradient-at-seven-voxels-19-to-21-nov-2026)). This meets the gradient check against Botlek for the excavation phase. At the stop the gradient stays at 14.76 ± 0.18 kPa/m in eleven runs, inside Botlek's range, but it does not fall as Botlek's does: the causes the paper gives, drainage and foam, are not in the model ([21 Nov](#the-gradient-at-the-stop-21-nov-2026)). At a gauge-sized patch near Botlek's PC E5 the pressure band is 6–9 kPa (sd) against 11.6–15.2 kPa in the field: averaging over the axis band explains little, and the sources of a wider band at a real face are not in the scene ([21 Nov](#the-pressure-band-at-one-gauge-21-nov-2026)). With the demo's rim, tools and seals added to the MPM's paste torque, the cutterhead total is 2.2–3.6 MNm, 23–37 % of installed, inside the 15–35 % worked at Guangzhou–Foshan; the paste torque itself falls with the voxel and is not converged ([22 Nov](#torque-with-the-face-cutting-21-and-22-nov-2026)). The MPM's face force is pressure × area within 0.5 %; with the analytical shield friction, tail seal and backup added, the thrust in London Clay is 1.0–1.9× two open records, the excess in the shield friction ([22 Nov](#shield-friction-in-the-thrust-22-nov-2026)).
+- **Checked (19–21 Nov 2026):** with the tube shell and the full-section reading, the gradient in excavation is 14.53 ± 0.18 kPa/m at seven voxels from 0.15 m to 0.08 m, with no trend and repeats within 0.07 kPa/m. The bulkhead and the paste beside it agree in a force balance ([21 Nov](#the-bulkhead-gradient-at-seven-voxels-19-to-21-nov-2026)). This meets the gradient check against Botlek for the excavation phase. At the stop the gradient stays at 14.76 ± 0.18 kPa/m in eleven runs, inside Botlek's range, but it does not fall as Botlek's does: the causes the paper gives, drainage and foam, are not in the model ([21 Nov](#the-gradient-at-the-stop-21-nov-2026)). At a gauge-sized patch near Botlek's PC E5 the pressure band is 6–9 kPa (sd) against 11.6–15.2 kPa in the field: averaging over the axis band explains little, and the sources of a wider band at a real face are not in the scene ([21 Nov](#the-pressure-band-at-one-gauge-21-nov-2026)). With the demo's rim, tools and seals added to the MPM's paste torque, the cutterhead total is 2.2–3.6 MNm, 23–37 % of installed, inside the 15–35 % worked at Guangzhou–Foshan; the paste torque itself falls with the voxel and is not converged ([22 Nov](#torque-with-the-face-cutting-21-and-22-nov-2026)). It also rises with the particles per cell; taken as measured (0.37–0.86 MNm) the total is 25–42 %, its top above the field's range ([23 Nov](#paste-torque-against-particle-count)). The MPM's face force is pressure × area within 0.5 %; with the analytical shield friction, tail seal and backup added, the thrust in London Clay is 1.0–1.9× two open records, the excess in the shield friction ([22 Nov](#shield-friction-in-the-thrust-22-nov-2026)).
 - **WP4 outputs produced:** bulkhead pressure in bands, its gradient, mixing torque, the response to a screw-speed step, and a shove under thrust.
 - **Gradient (15 Nov 2026):** multiplied by the fill, the paste's stress gradient in the interior is about 15 kPa/m during excavation at both 0.15 m and 0.12 m; the paste there is about a tenth denser than nominal.
 - **Not done:**
-  - the 0.10 m gradient over 100 s, about 2 kPa/m below 0.15 m and 0.12 m when settled (13.05 against 15.1 and 15.6 kPa/m over the last 50 s), from runs before the tube shell and the row reading; not rerun. Also its undamped controller swing;
-  - controller gains from a source (assumed now; a 20 s excavation does not settle);
-  - why the bands read 0.12 m high (the screw strip's edge is likely, not shown);
+  - controller gains from a source (assumed now; the swing dies down but has not settled after 150 s, [23 Nov](#the-controllers-swing-over-150-s));
   - why extreme particles form in the corner of the ground face and the shell. The sudden loss they cause (once on 20 Nov) is stopped by the guard since 21 Nov;
   - the 0.15 m results recorded before 16 Nov ran 11–13 % above the set point (the step and thrust runs are repeated, 17 Nov);
-  - the screw step at 8–14 % above the net-flow prediction in 90 s runs (within 4 % in 20 s runs);
-  - deleting paste that escapes the chamber;
+  - deleting paste that escapes the chamber: it grows to 0.3–0.7 % of the particles in 150 s, and one escaped particle failed far from the chamber ([23 Nov](#the-shell-seal));
   - the fall of the gradient at a stop: the level is inside Botlek's range, but the fall needs drainage and foam, which the model does not have ([21 Nov](#the-gradient-at-the-stop-21-nov-2026));
   - the sources of a wider band (ground, water and foam at the face, ring building): at a gauge the band is 1.3–2.5 times narrower than Botlek's ([21 Nov](#the-pressure-band-at-one-gauge-21-nov-2026));
-  - a converged paste torque: it falls from 0.69 MNm at 0.15 m to 0.37 MNm at 0.06 m and has not levelled off ([22 Nov](#torque-with-the-face-cutting-21-and-22-nov-2026));
+  - a converged paste torque: it falls from 0.69 MNm at 0.15 m to 0.37 MNm at 0.06 m and has not levelled off ([22 Nov](#torque-with-the-face-cutting-21-and-22-nov-2026)), and rises 25–48 % with 3 particles per cell ([23 Nov](#paste-torque-against-particle-count));
   - shield friction in stiff clay: the analytical model is 1.0–1.9× two open London Clay records, not fitted ([22 Nov](#shield-friction-in-the-thrust-22-nov-2026));
   - the stray particles still sealed, a field record for the screw step.
 - Nothing from the MPM chamber is used on the console yet.

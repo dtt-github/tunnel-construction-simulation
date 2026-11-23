@@ -126,6 +126,13 @@ class ChamberConfig:
     # as Botlek's E1 (top), E3 (axis, to the side) and E5 (low, beside the screw) in Bezuijen et al. (2005), Figs 3 and 7,
     # scaled to this radius (approximate); for comparing the pressure band with one gauge (21 Nov 2026)
     gauge_log: bool = False
+    # band diagnosis (22 Nov 2026): every frame, the bulkhead gradient read in the height bands and in rows, each with the
+    # strip |y| < y left out for y = 0, the screw's radius, the bands' strip (radius + 0.3 m), + 0.6 m and + 0.9 m, and
+    # the axis band's pressure; for why the bands read 0.12 m high
+    band_check: bool = False
+    # with band_check, each strip half-width rounded to a whole number of voxels (23 Nov 2026): at 0.15 m the widths fall
+    # on grid lines already, at 0.12 m none does; tells a grid effect at the strip's edge from a paste effect
+    band_check_snap: bool = False
     # alignment test (16 Nov 2026): raise the whole machine by this much (m), moving its axis relative to the solver grid
     z_shift: float = 0.0
     # balance diagnosis (18 Nov 2026): per region of the balance, over the excavation, the correction it takes each frame
@@ -370,6 +377,18 @@ def run(cfg: ChamberConfig) -> tuple[dict, dict]:
     row_ok = row_area > 0
     row_z = np.where(row_ok, np.array([np.trapezoid(chord_full * zz * ((zz >= lo) & (zz < hi)), zz) for lo, hi in zip(row_e[:-1], row_e[1:])]) / np.where(row_ok, row_area, 1.0), 0.0)
     row_fit = row_ok & (np.abs(row_z) < 0.8 * R)
+    bc_y, bc_geo, bc_hist = [0.0, a_s, a_s + 0.3, a_s + 0.6, a_s + 0.9], [], []
+    if cfg.band_check_snap:
+        bc_y = [float(np.round(y / dx) * dx) for y in bc_y]
+    if cfg.band_check:
+        for yc in bc_y:
+            ch_y = 2 * np.maximum(np.sqrt(np.maximum(R**2 - zz**2, 0)) - yc, 0)
+            geo = []
+            for e in (edges, row_e):
+                ar = np.array([np.trapezoid(ch_y * ((zz >= lo) & (zz < hi)), zz) for lo, hi in zip(e[:-1], e[1:])])
+                zm = np.array([np.trapezoid(ch_y * zz * ((zz >= lo) & (zz < hi)), zz) for lo, hi in zip(e[:-1], e[1:])])
+                geo += [ar, np.where(ar > 0, zm / np.where(ar > 0, ar, 1.0), 0.0)]
+            bc_geo.append(geo)
 
     dt = 1.0 / cfg.fps
     w_c = cfg.cutter_rpm * 2 * math.pi / 60
@@ -743,6 +762,18 @@ def run(cfg: ChamberConfig) -> tuple[dict, dict]:
         # the shell radius took force out unevenly by row (0.12 m read 14.90 for 14.67, same seed)
         p_row = np.histogram(pos[on_r, 2] - zc, row_e, weights=-F[on_r, 0])[0][row_fit] / row_area[row_fit]
         grad = -float(np.polyfit(row_z[row_fit], p_row, 1)[0])
+        if cfg.band_check:
+            yb_, zb_, fb_ = np.abs(pos[on_r, 1]), pos[on_r, 2] - zc, -F[on_r, 0]
+            in_r = np.hypot(yb_, zb_) < R
+            bc_row = [f * dt, ["pressurise", "hold", "excavate", "stop"].index(phase)]
+            for yc, (b_ar, b_z, r_ar, r_z) in zip(bc_y, bc_geo):
+                mr = yb_ > yc if yc > 0 else np.ones(len(yb_), bool)  # y = 0 keeps every contact, as the rows do
+                mb = mr & in_r
+                pb_ = np.array([fb_[mb & (zb_ >= lo) & (zb_ < hi)].sum() for lo, hi in zip(edges[:-1], edges[1:])]) / b_ar
+                fit = row_fit & (r_ar > 0)
+                pr_ = np.histogram(zb_[mr], row_e, weights=fb_[mr])[0][fit] / r_ar[fit]
+                bc_row += [-float(np.polyfit(b_z, pb_, 1)[0]) / 1e3, -float(np.polyfit(r_z[fit], pr_, 1)[0]) / 1e3, float(pb_[axis_band]) / 1e3]
+            bc_hist.append(bc_row)
         if cfg.gauge_log:
             yb_, zb_, fb_ = pos[on_r, 1], pos[on_r, 2] - zc, -F[on_r, 0]
             gauge_hist.append([f * dt, ["pressurise", "hold", "excavate", "stop"].index(phase)]
@@ -960,7 +991,7 @@ def run(cfg: ChamberConfig) -> tuple[dict, dict]:
         "particles_per_m3_start_end": [round(len(pts) / (area * x_face)), round((n_active - escaped) / vol_now)],
         "ms_per_frame": round(float(np.mean(times[5:]) * 1000), 2),
     }
-    return res, {"log": log, "q_end": s.particle_q.numpy(), "active": (flags & active) != 0, "x_cutter": x_ch, "zc": zc, "vb": np.array(vb_log), "stress": np.array(stress_log), "balance": {k: (v.tolist() if isinstance(v, np.ndarray) else v) for k, v in bal.items()} if cfg.stress_log else None, "sub": np.array(sub_log), "sub_bad": sub_bad, "sub_ext": sub_ext, "vrp": vrp_log, "sub_repaired": sub_repaired, "guard": {"log": guard_log, "events": guard_events, "odd": guard_odd} if cfg.substep_guard else None, "vb_regions": vb_reg_acc, "seal_facets": seal_facets, "seal_fx": {"counts": seal_fx.tolist(), "x_edges": seal_x_edges.tolist(), "x_cutter": x_ch, "x_face": x_face, "sink_hi": sink_hi.tolist()}, "gauges": {"names": [g[0] for g in gauges], "yz": [g[1:] for g in gauges], "sides": list(gauge_sides), "boxes": gauge_box, "zc": zc, "log": gauge_hist} if cfg.gauge_log else None, "contact_rows": {"sums": crow, "frames": cframes, "snap": csnap, "voxel": dx, "zc": zc, "R": R, "y_min": y_min, "edges": edges, "band_z": band_z, "band_area": band_area} if cfg.contact_rows else None,
+    return res, {"log": log, "q_end": s.particle_q.numpy(), "active": (flags & active) != 0, "x_cutter": x_ch, "zc": zc, "vb": np.array(vb_log), "stress": np.array(stress_log), "balance": {k: (v.tolist() if isinstance(v, np.ndarray) else v) for k, v in bal.items()} if cfg.stress_log else None, "sub": np.array(sub_log), "sub_bad": sub_bad, "sub_ext": sub_ext, "vrp": vrp_log, "sub_repaired": sub_repaired, "guard": {"log": guard_log, "events": guard_events, "odd": guard_odd} if cfg.substep_guard else None, "vb_regions": vb_reg_acc, "seal_facets": seal_facets, "seal_fx": {"counts": seal_fx.tolist(), "x_edges": seal_x_edges.tolist(), "x_cutter": x_ch, "x_face": x_face, "sink_hi": sink_hi.tolist()}, "band_check": {"y": bc_y, "columns": "t, phase, then per y: band gradient kPa/m, row gradient kPa/m, axis band kPa", "log": bc_hist} if cfg.band_check else None, "gauges": {"names": [g[0] for g in gauges], "yz": [g[1:] for g in gauges], "sides": list(gauge_sides), "boxes": gauge_box, "zc": zc, "log": gauge_hist} if cfg.gauge_log else None, "contact_rows": {"sums": crow, "frames": cframes, "snap": csnap, "voxel": dx, "zc": zc, "R": R, "y_min": y_min, "edges": edges, "band_z": band_z, "band_area": band_area} if cfg.contact_rows else None,
                  "profile": {"sums": prof, "z_over_R": (np.arange(n_prof) + 0.5) * 1.6 / n_prof - 0.8, "bin_volume_m3": prof_x * (R / 2) * (1.6 * R / n_prof), "paste_density": cfg.paste_density}}
 
 
